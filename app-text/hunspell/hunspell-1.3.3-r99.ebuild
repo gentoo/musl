@@ -18,7 +18,7 @@ KEYWORDS="~alpha ~amd64 arm hppa ~ia64 ~mips ~ppc ~ppc64 ~sh ~sparc ~x86 ~amd64-
 
 RDEPEND="
 	ncurses? ( sys-libs/ncurses )
-	readline? ( sys-libs/readline )"
+	readline? ( sys-libs/readline:= )"
 DEPEND="${RDEPEND}
 	sys-devel/gettext"
 
