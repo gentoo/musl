@@ -1,0 +1,30 @@
+Make x509 apply after openssh-5.9_p1-sshd-gssapi-multihomed.patch and remove
+redundant README.x509v3 directory.
+
+--- openssh-6.4p1+x509-7.7.diff.orig	2013-11-09 14:51:13.400696545 -0800
++++ openssh-6.4p1+x509-7.7.diff	2013-11-09 14:51:05.798786189 -0800
+@@ -6809,9 +6809,9 @@
+  
+ -$OpenBSD: README.dns,v 1.2 2003/10/14 19:43:23 jakob Exp $
+ +$OpenBSD$
+-diff -ruN openssh-6.4p1/README.x509v3/README.x509v3 openssh-6.4p1+x509-7.7/README.x509v3/README.x509v3
+---- openssh-6.4p1/README.x509v3/README.x509v3	1970-01-01 02:00:00.000000000 +0200
+-+++ openssh-6.4p1+x509-7.7/README.x509v3/README.x509v3	2013-05-17 18:50:02.156263192 +0300
++diff -ruN openssh-6.4p1/README.x509v3 openssh-6.4p1+x509-7.7/README.x509v3
++--- openssh-6.4p1/README.x509v3	1970-01-01 02:00:00.000000000 +0200
+++++ openssh-6.4p1+x509-7.7/README.x509v3	2013-05-17 18:50:02.156263192 +0300
+ @@ -0,0 +1,615 @@
+ +                                                          Roumen Petrov
+ +                                                        Sofia, Bulgaria
+@@ -14793,10 +14793,9 @@
+  .It Cm ChallengeResponseAuthentication
+  Specifies whether challenge-response authentication is allowed (e.g. via
+  PAM or though authentication styles supported in
+-@@ -490,6 +567,16 @@
++@@ -490,5 +567,15 @@
+  The default is
+  .Dq yes .
+- Note that this option applies to protocol version 2 only.
+ +.It Cm HostbasedAlgorithms
+ +Specifies the protocol version 2 algorithms used in
+ +.Dq hostbased

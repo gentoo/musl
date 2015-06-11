@@ -1,0 +1,37 @@
+diff -Naur webkitgtk-2.2.6.orig/Source/WTF/wtf/Assertions.cpp webkitgtk-2.2.6/Source/WTF/wtf/Assertions.cpp
+--- webkitgtk-2.2.6.orig/Source/WTF/wtf/Assertions.cpp	2014-03-19 03:53:02.000000000 -0400
++++ webkitgtk-2.2.6/Source/WTF/wtf/Assertions.cpp	2014-06-18 08:33:19.280216672 -0400
+@@ -64,12 +64,6 @@
+ #include <windows.h>
+ #endif
+ 
+-#if OS(DARWIN) || (OS(LINUX) && !defined(__UCLIBC__))
+-#include <cxxabi.h>
+-#include <dlfcn.h>
+-#include <execinfo.h>
+-#endif
+-
+ #if PLATFORM(BLACKBERRY)
+ #include <BlackBerryPlatformLog.h>
+ #endif
+@@ -242,9 +236,7 @@
+ 
+ void WTFGetBacktrace(void** stack, int* size)
+ {
+-#if OS(DARWIN) || (OS(LINUX) && !defined(__UCLIBC__))
+-    *size = backtrace(stack, *size);
+-#elif OS(WINDOWS) && !OS(WINCE)
++#if OS(WINDOWS) && !OS(WINCE)
+     // The CaptureStackBackTrace function is available in XP, but it is not defined
+     // in the Windows Server 2003 R2 Platform SDK. So, we'll grab the function
+     // through GetProcAddress.
+@@ -278,9 +270,6 @@
+ 
+ #if OS(DARWIN) || OS(LINUX)
+ #  if PLATFORM(QT) || PLATFORM(GTK)
+-#    if defined(__GLIBC__) && !defined(__UCLIBC__)
+-#      define WTF_USE_BACKTRACE_SYMBOLS 1
+-#    endif
+ #  else
+ #    define WTF_USE_DLADDR 1
+ #  endif

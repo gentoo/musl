@@ -1,0 +1,12 @@
+diff -Naur shadow-4.1.5.1.orig/libmisc/rlogin.c shadow-4.1.5.1/libmisc/rlogin.c
+--- shadow-4.1.5.1.orig/libmisc/rlogin.c	2009-07-12 22:24:45.000000000 +0000
++++ shadow-4.1.5.1/libmisc/rlogin.c	2013-07-06 11:01:09.415878105 +0000
+@@ -187,7 +187,7 @@
+ 	 * go fix the #define in config.h.
+ 	 */
+ 
+-#ifndef	RUSEROK
++#if RUSEROK == 0
+ 	return 0;
+ #else
+ 	return ruserok (remote_host, pwd->pw_uid == 0,

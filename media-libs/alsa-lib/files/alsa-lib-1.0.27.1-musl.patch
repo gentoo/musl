@@ -1,0 +1,24 @@
+diff -ur a/alsa-lib-1.0.27.1/configure.in b/alsa-lib-1.0.27.1/configure.in
+--- a/alsa-lib-1.0.27.1/configure.in	2013-05-21 08:48:28.000000000 +0000
++++ b/alsa-lib-1.0.27.1/configure.in	2014-02-16 21:04:29.833236371 +0000
+@@ -64,7 +64,7 @@
+ 
+ dnl Checks for library functions.
+ AC_PROG_GCC_TRADITIONAL
+-AC_CHECK_FUNC([hsearch_r], [HAVE_HSEARCH_R=yes])
++AC_CHECK_FUNC([hsearch], [HAVE_HSEARCH_R=yes])
+ AM_CONDITIONAL([ALSA_HSEARCH_R], [test "x$HAVE_HSEARCH_R" != xyes])
+ AC_CHECK_FUNCS([uselocale])
+ 
+diff -ur a/alsa-lib-1.0.27.1/include/global.h b/alsa-lib-1.0.27.1/include/global.h
+--- a/alsa-lib-1.0.27.1/include/global.h	2013-05-21 08:48:28.000000000 +0000
++++ b/alsa-lib-1.0.27.1/include/global.h	2014-02-16 20:08:10.954478169 +0000
+@@ -133,7 +133,7 @@
+ 
+ int snd_user_file(const char *file, char **result);
+ 
+-#if !defined(_POSIX_C_SOURCE) && !defined(_POSIX_SOURCE)
++#if 0
+ struct timeval {
+ 	time_t		tv_sec;		/* seconds */
+ 	long		tv_usec;	/* microseconds */

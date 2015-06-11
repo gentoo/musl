@@ -1,0 +1,21 @@
+--- a/luatex-beta-0.70.1/source/texk/web2c/luatexdir/lua51/lcoco.c
++++ b/luatex-beta-0.70.1/source/texk/web2c/luatexdir/lua51/lcoco.c
+@@ -340,14 +340,14 @@
+ 
+ #elif defined(__arm__) || defined(__ARM__)
+ 
+-#if __GLIBC__ == 2 || defined(__UCLIBC__)	/* arm-linux-glibc2 */
++#if 1
+ #ifndef __JMP_BUF_SP
+ #define __JMP_BUF_SP	((sizeof(__jmp_buf)/sizeof(int))-2)
+ #endif
+ #define COCO_PATCHCTX(coco, buf, func, stack, a0) \
+-  buf->__jmpbuf[__JMP_BUF_SP+1] = (int)(func); /* pc */ \
+-  buf->__jmpbuf[__JMP_BUF_SP] = (int)(stack); /* sp */ \
+-  buf->__jmpbuf[__JMP_BUF_SP-1] = 0; /* fp */ \
++  ((__jmp_buf *)buf)[__JMP_BUF_SP+1] = (int)(func); /* pc */ \
++  ((__jmp_buf *)buf)[__JMP_BUF_SP] = (int)(stack); /* sp */ \
++  ((__jmp_buf *)buf)[__JMP_BUF_SP-1] = 0; /* fp */ \
+   stack[0] = (size_t)(a0);
+ #define COCO_STACKADJUST	2
+ #define COCO_MAIN_PARAM		int _a, int _b, int _c, int _d, lua_State *L

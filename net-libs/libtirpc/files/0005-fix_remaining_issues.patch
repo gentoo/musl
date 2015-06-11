@@ -1,0 +1,14 @@
+--- ./tirpc/rpc/rpcent.h	2014-11-21 21:33:50.421928818 +0000
++++ ./tirpc/rpc/rpcent.h	2014-11-21 21:35:05.140928818 +0000
+@@ -64,6 +64,10 @@ extern struct rpcent *getrpcbynumber(int
+ extern struct rpcent *getrpcent(void);
+ #endif
+ 
++#ifndef __GLIBC__
++#define __THROW
++#endif
++
+ extern void setrpcent(int) __THROW;
+ extern void endrpcent(void) __THROW;
+ #ifdef __GLIBC__
+ 

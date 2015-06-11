@@ -1,0 +1,10 @@
+--- a/ffmpeg-1.2.6/libavutil/error.c
++++ b/ffmpeg-1.2.6/libavutil/error.c
+@@ -17,6 +17,7 @@
+  */
+ 
+ #undef _GNU_SOURCE
++#define _POSIX_SOURCE
+ #include "avutil.h"
+ #include "avstring.h"
+ #include "common.h"

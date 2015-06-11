@@ -1,0 +1,10 @@
+--- a/crda-1.1.2/reglib.c
++++ b/crda-1.1.2/reglib.c
+@@ -1,6 +1,7 @@
+ #include <errno.h>
+ #include <stdio.h>
+ #include <arpa/inet.h>
++#include <limits.h>
+ #include <sys/types.h>
+ #include <dirent.h>
+ #include "reglib.h"

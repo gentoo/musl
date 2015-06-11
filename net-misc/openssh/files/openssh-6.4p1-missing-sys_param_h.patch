@@ -1,0 +1,67 @@
+diff -Naur openssh-6.4p1.orig/channels.c openssh-6.4p1/channels.c
+--- openssh-6.4p1.orig/channels.c	2014-01-22 17:14:19.508612783 +0000
++++ openssh-6.4p1/channels.c	2014-01-22 17:18:18.176626129 +0000
+@@ -61,6 +61,7 @@
+ #include <termios.h>
+ #include <unistd.h>
+ #include <stdarg.h>
++#include <sys/param.h>
+ 
+ #include "openbsd-compat/sys-queue.h"
+ #include "xmalloc.h"
+diff -Naur openssh-6.4p1.orig/loginrec.c openssh-6.4p1/loginrec.c
+--- openssh-6.4p1.orig/loginrec.c	2013-06-01 22:07:32.000000000 +0000
++++ openssh-6.4p1/loginrec.c	2014-01-22 17:30:57.322668577 +0000
+@@ -162,6 +162,7 @@
+ #include <stdarg.h>
+ #include <string.h>
+ #include <time.h>
++#include <sys/time.h>
+ #include <unistd.h>
+ 
+ #include "xmalloc.h"
+diff -Naur openssh-6.4p1.orig/sshconnect.c openssh-6.4p1/sshconnect.c
+--- openssh-6.4p1.orig/sshconnect.c	2014-01-22 17:16:53.809621411 +0000
++++ openssh-6.4p1/sshconnect.c	2014-01-22 17:17:19.535622850 +0000
+@@ -40,6 +40,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <sys/param.h>
+ 
+ #include "xmalloc.h"
+ #include "key.h"
+diff -Naur openssh-6.4p1.orig/sshd.c openssh-6.4p1/sshd.c
+--- openssh-6.4p1.orig/sshd.c	2014-01-22 17:14:19.517612784 +0000
++++ openssh-6.4p1/sshd.c	2014-01-22 17:18:54.560628163 +0000
+@@ -83,6 +83,8 @@
+ #include <prot.h>
+ #endif
+ 
++#include <sys/param.h>
++
+ #include "xmalloc.h"
+ #include "ssh.h"
+ #include "ssh1.h"
+diff -Naur openssh-6.4p1.orig/ssh-keyscan.c openssh-6.4p1/ssh-keyscan.c
+--- openssh-6.4p1.orig/ssh-keyscan.c	2013-06-01 21:31:19.000000000 +0000
++++ openssh-6.4p1/ssh-keyscan.c	2014-01-22 17:59:37.756764777 +0000
+@@ -29,6 +29,7 @@
+ #include <signal.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <sys/param.h>
+ 
+ #include "xmalloc.h"
+ #include "ssh.h"
+diff -Naur openssh-6.4p1.orig/ssh-pkcs11-helper.c openssh-6.4p1/ssh-pkcs11-helper.c
+--- openssh-6.4p1.orig/ssh-pkcs11-helper.c	2013-06-01 21:31:19.000000000 +0000
++++ openssh-6.4p1/ssh-pkcs11-helper.c	2014-01-22 18:00:04.653766281 +0000
+@@ -28,6 +28,7 @@
+ #include <string.h>
+ #include <unistd.h>
+ #include <errno.h>
++#include <sys/param.h>
+ 
+ #include "xmalloc.h"
+ #include "buffer.h"

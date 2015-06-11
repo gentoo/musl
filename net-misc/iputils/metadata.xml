@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <herd>base-system</herd>
+  <use>
+    <flag name="SECURITY_HAZARD">Allow non-root users to flood (ping -f). This is generally a very bad idea.</flag>
+  </use>
+  <upstream>
+    <remote-id type="cpe">cpe:/a:skbuff:iputils</remote-id>
+  </upstream>
+</pkgmetadata>

@@ -1,0 +1,24 @@
+diff -Naur talloc-2.1.0.orig/lib/replace/wscript talloc-2.1.0/lib/replace/wscript
+--- talloc-2.1.0.orig/lib/replace/wscript	2013-09-08 12:24:14.000000000 +0000
++++ talloc-2.1.0/lib/replace/wscript	2014-02-22 19:46:36.033471201 +0000
+@@ -272,20 +272,6 @@
+ 
+     #Some OS (ie. freebsd) return EINVAL if the convertion could not be done, it's not what we expect
+     #Let's detect those cases
+-    if conf.CONFIG_SET('HAVE_STRTOLL'):
+-        conf.CHECK_CODE('''
+-                        long long nb = strtoll("Text", NULL, 0);
+-                        if (errno == EINVAL) {
+-                            return 0;
+-                        } else {
+-                            return 1;
+-                        }
+-                        ''',
+-                        msg="Checking correct behavior of strtoll",
+-                        headers = 'errno.h',
+-                        execute = True,
+-                        define = 'HAVE_BSD_STRTOLL',
+-                        )
+     conf.CHECK_FUNCS('if_nametoindex strerror_r')
+     conf.CHECK_FUNCS('getdirentries getdents syslog')
+     conf.CHECK_FUNCS('gai_strerror get_current_dir_name')

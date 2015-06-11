@@ -1,0 +1,11 @@
+diff -Naur lsof_4.85.orig/lsof_4.85_src/lsof.h lsof_4.85/lsof_4.85_src/lsof.h
+--- lsof_4.85.orig/lsof_4.85_src/lsof.h	2011-09-07 19:14:10.000000000 +0000
++++ lsof_4.85/lsof_4.85_src/lsof.h	2014-02-21 19:31:43.322452780 +0000
+@@ -53,6 +53,7 @@
+ #include <locale.h>
+ # endif	/* defined(HASSETLOCALE) */
+ 
++#include <netinet/tcp.h>
+ #include <netdb.h>
+ #include <pwd.h>
+ #include <stdio.h>

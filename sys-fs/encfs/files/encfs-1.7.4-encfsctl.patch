@@ -1,0 +1,10 @@
+--- a/encfs-1.7.4/encfs/encfsctl.cpp
++++ b/encfs-1.7.4/encfs/encfsctl.cpp
+@@ -38,6 +38,7 @@
+ #include <getopt.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#include <limits.h>
+ #include <fcntl.h>
+ #ifdef __FreeBSD__
+ #include <libintl.h>

@@ -1,0 +1,12 @@
+diff -Naur sandbox-2.6.orig/scripts/gen_symbol_version_map.awk sandbox-2.6/scripts/gen_symbol_version_map.awk
+--- sandbox-2.6.orig/scripts/gen_symbol_version_map.awk	2009-02-20 06:29:29.000000000 +0000
++++ sandbox-2.6/scripts/gen_symbol_version_map.awk	2015-06-08 19:29:55.727290000 +0000
+@@ -14,7 +14,7 @@
+ 
+ 	# Only check FUNCtion symbols which are not LOCAL, or
+ 	# do not have DEFAULT visibility
+-	if ($4 != "FUNC" || $5 == "LOCAL" || $6 != "DEFAULT")
++	if ($4 != "FUNC" || $5 == "LOCAL" || ($6 != "DEFAULT" && $6 != "PROTECTED"))
+ 		next;
+ 
+ 	for (x in SYMBOLS) {

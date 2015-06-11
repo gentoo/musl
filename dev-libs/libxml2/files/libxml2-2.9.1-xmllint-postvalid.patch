@@ -1,0 +1,32 @@
+From 7c3c663e4f844aaecbb0cfc29567fe2ee9506fc4 Mon Sep 17 00:00:00 2001
+From: Alexandre Rostovtsev <tetromino@gentoo.org>
+Date: Fri, 16 May 2014 22:46:00 -0400
+Subject: [PATCH] xmllint: a posteriori validation needs to load exernal
+ entities
+
+For https://bugzilla.gnome.org/show_bug.cgi?id=730290
+---
+ xmllint.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/xmllint.c b/xmllint.c
+index 9d46ac5..b142b3b 100644
+--- a/xmllint.c
++++ b/xmllint.c
+@@ -3530,7 +3530,12 @@ main(int argc, char **argv) {
+ 	xmlLoadExtDtdDefaultValue |= XML_COMPLETE_ATTRS;
+     if (noent != 0) xmlSubstituteEntitiesDefault(1);
+ #ifdef LIBXML_VALID_ENABLED
+-    if (valid != 0) xmlDoValidityCheckingDefaultValue = 1;
++    /* If we will validate only a posteriori, ensure that entities get loaded,
++     * but suppress validation messages during initial parsing */
++    if (postvalid != 0 && valid == 0)
++	options |= XML_PARSE_DTDVALID | XML_PARSE_NOERROR | XML_PARSE_NOWARNING;
++    else if (valid != 0)
++	xmlDoValidityCheckingDefaultValue = 1;
+ #endif /* LIBXML_VALID_ENABLED */
+     if ((htmlout) && (!nowrap)) {
+ 	xmlGenericError(xmlGenericErrorContext,
+-- 
+1.9.3
+

@@ -1,0 +1,44 @@
+diff -ur ppp-2.4.7.orig/pppd/plugins/dhcp/clientpacket.c ppp-2.4.7/pppd/plugins/dhcp/clientpacket.c
+--- ppp-2.4.7.orig/pppd/plugins/dhcp/clientpacket.c	2002-08-31 12:19:20.000000000 +0000
++++ ppp-2.4.7/pppd/plugins/dhcp/clientpacket.c	2015-05-20 13:24:41.299978928 +0000
+@@ -205,9 +205,9 @@
+ 	
+ 	/* Make sure its the right packet for us, and that it passes sanity checks */
+ 	if (packet.ip.protocol != IPPROTO_UDP || packet.ip.version != IPVERSION ||
+-	    packet.ip.ihl != sizeof(packet.ip) >> 2 || packet.udp.dest != htons(CLIENT_PORT) ||
++	    packet.ip.ihl != sizeof(packet.ip) >> 2 || packet.udp.uh_dport != htons(CLIENT_PORT) ||
+ 	    bytes > (int) sizeof(struct udp_dhcp_packet) ||
+-	    ntohs(packet.udp.len) != (short) (bytes - sizeof(packet.ip))) {
++	    ntohs(packet.udp.uh_ulen) != (short) (bytes - sizeof(packet.ip))) {
+ 	    	DEBUG(LOG_INFO, "unrelated/bogus packet");
+ 	    	return -1;
+ 	}
+@@ -223,14 +223,14 @@
+ 	/* verify the UDP checksum by replacing the header with a psuedo header */
+ 	source = packet.ip.saddr;
+ 	dest = packet.ip.daddr;
+-	check = packet.udp.check;
+-	packet.udp.check = 0;
++	check = packet.udp.uh_sum;
++	packet.udp.uh_sum = 0;
+ 	memset(&packet.ip, 0, sizeof(packet.ip));
+ 
+ 	packet.ip.protocol = IPPROTO_UDP;
+ 	packet.ip.saddr = source;
+ 	packet.ip.daddr = dest;
+-	packet.ip.tot_len = packet.udp.len; /* cheat on the psuedo-header */
++	packet.ip.tot_len = packet.udp.uh_ulen; /* cheat on the psuedo-header */
+ 	if (check && check != checksum(&packet, bytes)) {
+ 		DEBUG(LOG_ERR, "packet with bad UDP checksum received, ignoring");
+ 		return -1;
+diff -ur ppp-2.4.7.orig/pppd/plugins/dhcp/dhcpd.h ppp-2.4.7/pppd/plugins/dhcp/dhcpd.h
+--- ppp-2.4.7.orig/pppd/plugins/dhcp/dhcpd.h	2002-08-31 11:52:31.000000000 +0000
++++ ppp-2.4.7/pppd/plugins/dhcp/dhcpd.h	2015-05-20 13:24:10.999978974 +0000
+@@ -4,6 +4,7 @@
+ 
+ #include <netinet/ip.h>
+ #include <netinet/udp.h>
++#include <sys/types.h>
+ 
+ #include "leases.h"
+ 

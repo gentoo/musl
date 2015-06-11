@@ -1,0 +1,31 @@
+diff -ur a/xorg-server-1.14.3/hw/xfree86/os-support/xf86_OSlib.h b/xorg-server-1.14.3/hw/xfree86/os-support/xf86_OSlib.h
+--- a/xorg-server-1.14.3/hw/xfree86/os-support/xf86_OSlib.h
++++ b/xorg-server-1.14.3/hw/xfree86/os-support/xf86_OSlib.h
+@@ -179,7 +179,7 @@
+ #include <assert.h>
+ 
+ #ifdef __linux__
+-#include <termio.h>
++#include <termios.h>
+ #else                           /* __GLIBC__ */
+ #include <termios.h>
+ #endif
+diff -ur a/xorg-server-1.14.3/os/access.c b/xorg-server-1.14.3/os/access.c
+--- a/xorg-server-1.14.3/os/access.c
++++ b/xorg-server-1.14.3/os/access.c
+@@ -89,6 +89,7 @@
+ #define XSERV_t
+ #define TRANS_SERVER
+ #define TRANS_REOPEN
++#define _GNU_SOURCE
+ #include <X11/Xtrans/Xtrans.h>
+ #include <X11/Xauth.h>
+ #include <X11/X.h>
+@@ -98,6 +99,7 @@
+ #include <errno.h>
+ #include <sys/types.h>
+ #ifndef WIN32
++#define _GNU_SOURCE
+ #include <sys/socket.h>
+ #include <sys/ioctl.h>
+ #include <ctype.h>

@@ -1,0 +1,64 @@
+diff -aur a/procps-ng-3.3.9/lib/nsutils.c b/procps-ng-3.3.9/lib/nsutils.c
+--- a/procps-ng-3.3.9/lib/nsutils.c
++++ b/procps-ng-3.3.9/lib/nsutils.c
+@@ -1,5 +1,4 @@
+ #include <errno.h>
+-#include <error.h>
+ #include <stdio_ext.h>
+ #include <stdlib.h>
+ #include <sys/types.h>
+diff -aur a/procps-ng-3.3.9/ps/display.c b/procps-ng-3.3.9/ps/display.c
+--- a/procps-ng-3.3.9/ps/display.c
++++ b/procps-ng-3.3.9/ps/display.c
+@@ -25,7 +25,12 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++
++#if HAVE_ERROR_H
+ #include <error.h>
++#else
++#include <err.h>
++#endif
+ 
+ #include <sys/sysmacros.h>
+ #include <sys/types.h>
+@@ -63,7 +68,11 @@
+     case SIGUSR2:
+       exit(EXIT_FAILURE);
+     default:
++#if HAVE_ERROR_H
+       error_at_line(0, 0, __FILE__, __LINE__, "%s", _("please report this bug"));
++#else
++      err(1, "%s:%d: %s", __FILE__, __LINE__, _("please report this bug"));
++#endif
+       signal(signo, SIG_DFL);  /* allow core file creation */
+       kill(getpid(), signo);
+   }
+diff -aur a/procps-ng-3.3.9/ps/global.c b/procps-ng-3.3.9/ps/global.c
+--- a/procps-ng-3.3.9/ps/global.c
++++ b/procps-ng-3.3.9/ps/global.c
+@@ -25,7 +25,12 @@
+ #include <string.h>
+ #include <termios.h>
+ #include <unistd.h>
++
++#if HAVE_ERROR_H
+ #include <error.h>
++#else
++#include <err.h>
++#endif
+ 
+ #include <sys/ioctl.h>
+ #include <sys/stat.h>
+@@ -522,6 +527,10 @@
+ 		     unsigned int linenum,
+ 		     const char *message)
+ {
++#if HAVE_ERROR_H
+   error_at_line(0, 0, filename, linenum, "%s", message);
++#else
++  err(1, "%s:%d: %s", filename, linenum, message);
++#endif
+   exit(EXIT_FAILURE);
+ }

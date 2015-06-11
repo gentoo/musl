@@ -1,0 +1,14 @@
+diff -Naur util-linux-2.25.orig/sys-utils/switch_root.c util-linux-2.25/sys-utils/switch_root.c
+--- util-linux-2.25.orig/sys-utils/switch_root.c	2014-08-13 15:08:15.632801343 +0000
++++ util-linux-2.25/sys-utils/switch_root.c	2014-08-13 15:09:19.617801087 +0000
+@@ -181,8 +181,8 @@
+ 		if (pid <= 0) {
+ 			struct statfs stfs;
+ 			if (fstatfs(cfd, &stfs) == 0 &&
+-			    (stfs.f_type == (__SWORD_TYPE)STATFS_RAMFS_MAGIC ||
+-			     stfs.f_type == (__SWORD_TYPE)STATFS_TMPFS_MAGIC))
++			    (stfs.f_type == STATFS_RAMFS_MAGIC ||
++			     stfs.f_type == STATFS_TMPFS_MAGIC))
+ 				recursiveRemove(cfd);
+ 			else
+ 				warn(_("old root filesystem is not an initramfs"));

@@ -1,0 +1,81 @@
+diff -Naur iproute2-3.8.0.orig/misc/arpd.c iproute2-3.8.0/misc/arpd.c
+--- iproute2-3.8.0.orig/misc/arpd.c	2013-02-21 16:41:20.000000000 +0000
++++ iproute2-3.8.0/misc/arpd.c	2015-01-17 12:23:52.251980551 +0000
+@@ -18,7 +18,7 @@
+ #include <netdb.h>
+ #include <db_185.h>
+ #include <sys/ioctl.h>
+-#include <sys/poll.h>
++#include <poll.h>
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <sys/uio.h>
+diff -Naur iproute2-3.8.0.orig/misc/ifstat.c iproute2-3.8.0/misc/ifstat.c
+--- iproute2-3.8.0.orig/misc/ifstat.c	2013-02-21 16:41:20.000000000 +0000
++++ iproute2-3.8.0/misc/ifstat.c	2015-01-17 12:23:42.795640740 +0000
+@@ -21,7 +21,7 @@
+ #include <sys/file.h>
+ #include <sys/socket.h>
+ #include <sys/un.h>
+-#include <sys/poll.h>
++#include <poll.h>
+ #include <sys/wait.h>
+ #include <sys/stat.h>
+ #include <signal.h>
+diff -Naur iproute2-3.8.0.orig/misc/lnstat.h iproute2-3.8.0/misc/lnstat.h
+--- iproute2-3.8.0.orig/misc/lnstat.h	2013-02-21 16:41:20.000000000 +0000
++++ iproute2-3.8.0/misc/lnstat.h	2015-01-17 12:33:50.391207710 +0000
+@@ -2,6 +2,7 @@
+ #define _LNSTAT_H
+ 
+ #include <limits.h>
++#include <sys/time.h>
+ 
+ #define LNSTAT_VERSION "0.02 041002"
+ 
+diff -Naur iproute2-3.8.0.orig/misc/nstat.c iproute2-3.8.0/misc/nstat.c
+--- iproute2-3.8.0.orig/misc/nstat.c	2013-02-21 16:41:20.000000000 +0000
++++ iproute2-3.8.0/misc/nstat.c	2015-01-17 12:23:27.683097666 +0000
+@@ -21,7 +21,7 @@
+ #include <sys/file.h>
+ #include <sys/socket.h>
+ #include <sys/un.h>
+-#include <sys/poll.h>
++#include <poll.h>
+ #include <sys/wait.h>
+ #include <sys/stat.h>
+ #include <signal.h>
+diff -Naur iproute2-3.8.0.orig/misc/rtacct.c iproute2-3.8.0/misc/rtacct.c
+--- iproute2-3.8.0.orig/misc/rtacct.c	2013-02-21 16:41:20.000000000 +0000
++++ iproute2-3.8.0/misc/rtacct.c	2015-01-17 12:23:35.340372834 +0000
+@@ -22,7 +22,7 @@
+ #include <sys/file.h>
+ #include <sys/socket.h>
+ #include <sys/un.h>
+-#include <sys/poll.h>
++#include <poll.h>
+ #include <sys/wait.h>
+ #include <sys/stat.h>
+ #include <sys/mman.h>
+diff -Naur iproute2-3.8.0.orig/tc/tc_stab.c iproute2-3.8.0/tc/tc_stab.c
+--- iproute2-3.8.0.orig/tc/tc_stab.c	2015-01-17 12:19:44.001058119 +0000
++++ iproute2-3.8.0/tc/tc_stab.c	2015-01-17 12:22:35.692229262 +0000
+@@ -21,6 +21,7 @@
+ #include <arpa/inet.h>
+ #include <string.h>
+ #include <malloc.h>
++#include <sys/param.h>
+ 
+ #include "utils.h"
+ #include "tc_util.h"
+diff -Naur iproute2-3.8.0.orig/tc/tc_util.c iproute2-3.8.0/tc/tc_util.c
+--- iproute2-3.8.0.orig/tc/tc_util.c	2013-02-21 16:41:20.000000000 +0000
++++ iproute2-3.8.0/tc/tc_util.c	2015-01-17 12:21:57.785866923 +0000
+@@ -20,6 +20,7 @@
+ #include <arpa/inet.h>
+ #include <string.h>
+ #include <math.h>
++#include <sys/param.h>
+ 
+ #include "utils.h"
+ #include "tc_util.h"

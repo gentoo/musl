@@ -1,0 +1,11 @@
+diff -Naur libcap-ng-0.7.3.orig/utils/proc-llist.c libcap-ng-0.7.3/utils/proc-llist.c
+--- libcap-ng-0.7.3.orig/utils/proc-llist.c	2012-11-09 19:59:13.000000000 +0000
++++ libcap-ng-0.7.3/utils/proc-llist.c	2014-02-22 15:58:17.933566760 +0000
+@@ -24,6 +24,7 @@
+ #include "config.h"
+ #include <stdlib.h>
+ #include <string.h>
++#include <unistd.h>
+ #include "proc-llist.h"
+ 
+ void list_create(llist *l)

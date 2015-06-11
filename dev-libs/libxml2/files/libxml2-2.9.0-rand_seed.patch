@@ -1,0 +1,31 @@
+From e7715a5963afebfb027120db6914926ec9a7373d Mon Sep 17 00:00:00 2001
+From: Wouter Van Rooy <rooywo@vasco.com>
+Date: Fri, 14 Sep 2012 14:39:42 +0800
+Subject: [PATCH] rand_seed should be static in dict.c
+
+For https://bugzilla.gnome.org/show_bug.cgi?id=683933
+rand_seed should be a static variable in dict.c
+
+We ran into a problem with another library that exports rand_seed as a
+function. Combined with 2.7.8 this was not a problem but later versions
+have this problem.
+---
+ dict.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/dict.c b/dict.c
+index 9935a25..164c7f2 100644
+--- a/dict.c
++++ b/dict.c
+@@ -143,7 +143,7 @@ static int xmlDictInitialized = 0;
+ /*
+  * Internal data for random function, protected by xmlDictMutex
+  */
+-unsigned int rand_seed = 0;
++static unsigned int rand_seed = 0;
+ #endif
+ #endif
+ 
+-- 
+1.8.0
+

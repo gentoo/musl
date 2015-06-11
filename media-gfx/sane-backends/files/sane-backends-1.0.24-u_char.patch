@@ -1,0 +1,11 @@
+diff -ur a/sane-backends-1.0.24/include/sane/sanei_udp.h b/sane-backends-1.0.24/include/sane/sanei_udp.h
+--- a/sane-backends-1.0.24/include/sane/sanei_udp.h
++++ b/sane-backends-1.0.24/include/sane/sanei_udp.h
+@@ -27,6 +27,7 @@
+ #include <netinet/in.h>
+ #include <netdb.h>
+ #endif
++#include <sys/types.h>
+ 
+ extern SANE_Status sanei_udp_open(const char *host, int port, int *fdp);
+ extern SANE_Status sanei_udp_open_broadcast(int *fdp);

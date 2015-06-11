@@ -1,0 +1,11 @@
+diff -Nuar ruby-1.9.3-p484.orig/io.c ruby-1.9.3-p484/io.c
+--- ruby-1.9.3-p484.orig/io.c	2013-10-31 14:03:20.000000000 +0000
++++ ruby-1.9.3-p484/io.c	2014-02-23 13:43:42.508302443 +0000
+@@ -17,6 +17,7 @@
+ #include "internal.h"
+ #include <ctype.h>
+ #include <errno.h>
++#include <asm/ioctl.h>
+ 
+ #define free(x) xfree(x)
+ 

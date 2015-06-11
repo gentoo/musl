@@ -1,0 +1,18 @@
+diff -Naur m4-1.4.16.orig/lib/freadahead.c m4-1.4.16/lib/freadahead.c
+--- m4-1.4.16.orig/lib/freadahead.c	2011-03-01 16:39:27.000000000 +0000
++++ m4-1.4.16/lib/freadahead.c	2013-07-06 03:37:11.809388632 +0000
+@@ -25,6 +25,7 @@
+ size_t
+ freadahead (FILE *fp)
+ {
++#if 0
+ #if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+   if (fp->_IO_write_ptr > fp->_IO_write_base)
+     return 0;
+@@ -82,4 +83,6 @@
+ #else
+  #error "Please port gnulib freadahead.c to your platform! Look at the definition of fflush, fread, ungetc on your system, then report this to bug-gnulib."
+ #endif
++#endif
++  return 0;
+ }

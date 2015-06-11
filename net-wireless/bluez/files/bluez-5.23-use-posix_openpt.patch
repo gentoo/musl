@@ -1,0 +1,20 @@
+diff -Naur bluez-5.23.orig/emulator/serial.c bluez-5.23/emulator/serial.c
+--- bluez-5.23.orig/emulator/serial.c	2014-08-06 17:25:36.000000000 +0000
++++ bluez-5.23/emulator/serial.c	2014-10-04 13:02:38.081336391 +0000
+@@ -32,6 +32,7 @@
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <fcntl.h>
+ #include <sys/param.h>
+ #include <sys/epoll.h>
+ 
+@@ -159,7 +160,7 @@
+ {
+ 	enum btdev_type uninitialized_var(type);
+ 
+-	serial->fd = getpt();
++	serial->fd = posix_openpt(O_RDWR | O_NOCTTY);
+ 	if (serial->fd < 0) {
+ 		perror("Failed to get master pseudo terminal");
+ 		return;

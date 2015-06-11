@@ -1,0 +1,15 @@
+--- src/database.c	2015-01-10 13:17:11.253148769 +0000
++++ src/database.c	2015-01-10 13:18:45.491148769 +0000
+@@ -38,6 +38,12 @@
+ #include <sys/stat.h>
+ #include <sys/types.h>
+ #include <unistd.h>
++#if ! defined(__GLIBC__) && ! defined(__UCLIBC__)
++#include <limits.h>
++ 
++/* match gnu to posix */
++#define MAXNAMLEN NAME_MAX
++#endif
+ 
+ #ifdef WITH_INOTIFY
+ # include <sys/inotify.h>

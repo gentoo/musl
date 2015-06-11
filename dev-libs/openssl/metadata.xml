@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+<herd>base-system</herd>
+<use>
+ <flag name='bindist'>Disable EC/RC5 algorithms (as they seem to be patented)</flag>
+ <flag name='rfc3779'>Enable support for RFC 3779 (X.509 Extensions for IP Addresses and AS Identifiers)</flag>
+ <flag name='tls-heartbeat'>Enable the Heartbeat Extension in TLS and DTLS</flag>
+</use>
+<upstream>
+ <remote-id type="cpe">cpe:/a:openssl:openssl</remote-id>
+</upstream>
+</pkgmetadata>

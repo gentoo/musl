@@ -1,0 +1,30 @@
+adapted from a patch from sabotage linux
+diff -ru a/util-linux-2.24.1/libfdisk/src/sun.c b/util-linux-2.24.1/libfdisk/src/sun.c
+--- a/util-linux-2.24.1/libfdisk/src/sun.c
++++ b/util-linux-2.24.1/libfdisk/src/sun.c
+@@ -361,9 +361,11 @@
+ 	}
+ }
+ 
+-static int verify_sun_cmp(int *a, int *b, void *data)
++static void* cmp_data;
++static int verify_sun_cmp(const void *pa, const void *pb)
+ {
+-    unsigned int *verify_sun_starts = (unsigned int *) data;
++    const int *a = pa, *b = pb;
++    unsigned int *verify_sun_starts = (unsigned int *) cmp_data;
+ 
+     if (*a == -1)
+ 	    return 1;
+@@ -427,9 +429,8 @@
+         else
+             array[i] = -1;
+     }
+-    qsort_r(array,ARRAY_SIZE(array),sizeof(array[0]),
+-	  (int (*)(const void *,const void *,void *)) verify_sun_cmp,
+-	  verify_sun_starts);
++    cmp_data = verify_sun_starts;
++    qsort(array,ARRAY_SIZE(array),sizeof(array[0]), verify_sun_cmp);
+ 
+     if (array[0] == -1) {
+ 	fdisk_info(cxt, _("No partitions defined."));

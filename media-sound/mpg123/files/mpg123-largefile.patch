@@ -1,0 +1,10 @@
+--- a/mpg123-1.15.4/src/libmpg123/mpg123.h.in
++++ b/mpg123-1.15.4/src/libmpg123/mpg123.h.in
+@@ -53,6 +53,7 @@
+ 	Now, the renaming of large file aware functions.
+ 	By default, it appends underscore _FILE_OFFSET_BITS (so, mpg123_seek_64 for mpg123_seek), if _FILE_OFFSET_BITS is defined. You can force a different suffix via MPG123_LARGESUFFIX (that must include the underscore), or you can just disable the whole mess by defining MPG123_NO_LARGENAME.
+ */
++#define MPG123_NO_LARGENAME
+ #if (!defined MPG123_NO_LARGENAME) && ((defined _FILE_OFFSET_BITS) || (defined MPG123_LARGESUFFIX))
+ 
+ /* Need some trickery to concatenate the value(s) of the given macro(s). */

@@ -1,0 +1,67 @@
+adapted from llvm-alpine-linux.patch from Alpine
+
+diff -ru llvm-3.5.0.src.orig/include/llvm/ADT/Triple.h llvm-3.5.0.src/include/llvm/ADT/Triple.h
+--- include/llvm/ADT/Triple.h	2014-07-18 17:28:19.000000000 -0300
++++ include/llvm/ADT/Triple.h	2014-11-12 14:44:41.738448045 -0200
+@@ -149,6 +149,10 @@
+     EABIHF,
+     Android,
+ 
++    Musl,
++    MuslEABI,
++    MuslEABIHF,
++
+     MSVC,
+     Itanium,
+     Cygnus,
+Only in llvm-3.5.0.src/include/llvm/ADT: Triple.h.orig
+diff -ru llvm-3.5.0.src.orig/lib/Support/Triple.cpp llvm-3.5.0.src/lib/Support/Triple.cpp
+--- lib/Support/Triple.cpp	2014-07-18 17:28:19.000000000 -0300
++++ lib/Support/Triple.cpp	2014-11-12 14:47:06.565122146 -0200
+@@ -168,6 +168,9 @@
+   case CODE16: return "code16";
+   case EABI: return "eabi";
+   case EABIHF: return "eabihf";
++  case Musl: return "musl";
++  case MuslEABI: return "musleabi";
++  case MuslEABIHF: return "musleabihf";
+   case Android: return "android";
+   case MSVC: return "msvc";
+   case Itanium: return "itanium";
+@@ -344,6 +347,9 @@
+     .StartsWith("gnux32", Triple::GNUX32)
+     .StartsWith("code16", Triple::CODE16)
+     .StartsWith("gnu", Triple::GNU)
++    .StartsWith("musl", Triple::Musl)
++    .StartsWith("musleabi", Triple::MuslEABI)
++    .StartsWith("musleabihf", Triple::MuslEABIHF)
+     .StartsWith("android", Triple::Android)
+     .StartsWith("msvc", Triple::MSVC)
+     .StartsWith("itanium", Triple::Itanium)
+Only in llvm-3.5.0.src/lib/Support: Triple.cpp.orig
+diff -ru llvm-3.5.0.src.orig/lib/Target/ARM/ARMSubtarget.cpp llvm-3.5.0.src/lib/Target/ARM/ARMSubtarget.cpp
+--- lib/Target/ARM/ARMSubtarget.cpp	2014-07-16 23:13:31.000000000 -0300
++++ lib/Target/ARM/ARMSubtarget.cpp	2014-11-12 14:50:40.025133104 -0200
+@@ -273,6 +273,8 @@
+     case Triple::EABIHF:
+     case Triple::GNUEABI:
+     case Triple::GNUEABIHF:
++    case Triple::MuslEABI:
++    case Triple::MuslEABIHF:
+       TargetABI = ARM_ABI_AAPCS;
+       break;
+     default:
+diff -ru llvm-3.5.0.src.orig/lib/Target/ARM/ARMSubtarget.h llvm-3.5.0.src/lib/Target/ARM/ARMSubtarget.h
+--- lib/Target/ARM/ARMSubtarget.h	2014-07-16 23:13:31.000000000 -0300
++++ lib/Target/ARM/ARMSubtarget.h	2014-11-12 14:53:36.571808822 -0200
+@@ -372,8 +372,10 @@
+   bool isTargetEHABICompatible() const {
+     return (TargetTriple.getEnvironment() == Triple::EABI ||
+             TargetTriple.getEnvironment() == Triple::GNUEABI ||
++            TargetTriple.getEnvironment() == Triple::MuslEABI ||
+             TargetTriple.getEnvironment() == Triple::EABIHF ||
+             TargetTriple.getEnvironment() == Triple::GNUEABIHF ||
++            TargetTriple.getEnvironment() == Triple::MuslEABIHF ||
+             TargetTriple.getEnvironment() == Triple::Android) &&
+            !isTargetDarwin() && !isTargetWindows();
+   }

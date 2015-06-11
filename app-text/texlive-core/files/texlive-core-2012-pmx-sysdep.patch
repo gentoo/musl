@@ -1,0 +1,11 @@
+--- a/texlive-20120701-source/utils/pmx/pmx-2.6.18/libf2c/sysdep1.h
++++ b/texlive-20120701-source/utils/pmx/pmx-2.6.18/libf2c/sysdep1.h
+@@ -10,7 +10,7 @@
+ 
+ #ifdef __linux__
+ #define USE_LARGEFILE
+-#define OFF_T __off64_t
++#define OFF_T off64_t
+ #endif
+ 
+ #ifdef _AIX43

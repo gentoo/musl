@@ -1,0 +1,6 @@
+This is the README only for the musl branch.  See the README in main branch
+for information about the entire overlay.
+
+This overlay/branch is to set up a profile for musl based system.
+
+See: http://www.etalabs.net/musl/

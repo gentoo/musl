@@ -1,0 +1,304 @@
+diff -ur a/iptables-1.4.20/extensions/libxt_conntrack.c b/iptables-1.4.20/extensions/libxt_conntrack.c
+--- a/iptables-1.4.20/extensions/libxt_conntrack.c
++++ b/iptables-1.4.20/extensions/libxt_conntrack.c
+@@ -786,7 +786,7 @@
+ 
+ static void
+ conntrack_dump_ports(const char *prefix, const char *opt,
+-		     u_int16_t port_low, u_int16_t port_high)
++		     uint16_t port_low, uint16_t port_high)
+ {
+ 	if (port_high == 0 || port_low == port_high)
+ 		printf(" %s%s %u", prefix, opt, port_low);
+diff -ur a/iptables-1.4.20/include/libipq/libipq.h b/iptables-1.4.20/include/libipq/libipq.h
+--- a/iptables-1.4.20/include/libipq/libipq.h
++++ b/iptables-1.4.20/include/libipq/libipq.h
+@@ -48,19 +48,19 @@
+ struct ipq_handle
+ {
+ 	int fd;
+-	u_int8_t blocking;
++	uint8_t blocking;
+ 	struct sockaddr_nl local;
+ 	struct sockaddr_nl peer;
+ };
+ 
+-struct ipq_handle *ipq_create_handle(u_int32_t flags, u_int32_t protocol);
++struct ipq_handle *ipq_create_handle(uint32_t flags, uint32_t protocol);
+ 
+ int ipq_destroy_handle(struct ipq_handle *h);
+ 
+ ssize_t ipq_read(const struct ipq_handle *h,
+                 unsigned char *buf, size_t len, int timeout);
+ 
+-int ipq_set_mode(const struct ipq_handle *h, u_int8_t mode, size_t len);
++int ipq_set_mode(const struct ipq_handle *h, uint8_t mode, size_t len);
+ 
+ ipq_packet_msg_t *ipq_get_packet(const unsigned char *buf);
+ 
+diff -ur a/iptables-1.4.20/include/libiptc/ipt_kernel_headers.h b/iptables-1.4.20/include/libiptc/ipt_kernel_headers.h
+--- a/iptables-1.4.20/include/libiptc/ipt_kernel_headers.h
++++ b/iptables-1.4.20/include/libiptc/ipt_kernel_headers.h
+@@ -15,13 +15,12 @@
+ #include <sys/types.h>
+ #else /* libc5 */
+ #include <sys/socket.h>
+-#include <linux/ip.h>
+-#include <linux/in.h>
+-#include <linux/if.h>
++#include <netinet/ip.h>
++#include <netinet/in.h>
++#include <net/if.h>
+ #include <linux/icmp.h>
+ #include <linux/tcp.h>
+ #include <linux/udp.h>
+ #include <linux/types.h>
+-#include <linux/in6.h>
+ #endif
+ #endif
+diff -ur a/iptables-1.4.20/include/libiptc/libxtc.h b/iptables-1.4.20/include/libiptc/libxtc.h
+--- a/iptables-1.4.20/include/libiptc/libxtc.h
++++ b/iptables-1.4.20/include/libiptc/libxtc.h
+@@ -10,7 +10,7 @@
+ #endif
+ 
+ #ifndef XT_MIN_ALIGN
+-/* xt_entry has pointers and u_int64_t's in it, so if you align to
++/* xt_entry has pointers and uint64_t's in it, so if you align to
+    it, you'll also align to any crazy matches and targets someone
+    might write */
+ #define XT_MIN_ALIGN (__alignof__(struct xt_entry))
+diff -ur a/iptables-1.4.20/include/libipulog/libipulog.h b/iptables-1.4.20/include/libipulog/libipulog.h
+--- a/iptables-1.4.20/include/libipulog/libipulog.h	2013-08-06 15:48:43.000000000 +0000
++++ b/iptables-1.4.20/include/libipulog/libipulog.h	2014-02-09 09:32:45.058650377 +0000
+@@ -21,9 +21,9 @@
+ 
+ struct ipulog_handle;
+ 
+-u_int32_t ipulog_group2gmask(u_int32_t group);
++uint32_t ipulog_group2gmask(uint32_t group);
+ 
+-struct ipulog_handle *ipulog_create_handle(u_int32_t gmask);
++struct ipulog_handle *ipulog_create_handle(uint32_t gmask);
+ 
+ void ipulog_destroy_handle(struct ipulog_handle *h);
+ 
+diff -ur a/iptables-1.4.20/include/linux/netfilter_ipv4/ip_tables.h b/iptables-1.4.20/include/linux/netfilter_ipv4/ip_tables.h
+--- a/iptables-1.4.20/include/linux/netfilter_ipv4/ip_tables.h
++++ b/iptables-1.4.20/include/linux/netfilter_ipv4/ip_tables.h
+@@ -15,6 +15,7 @@
+ #ifndef _IPTABLES_H
+ #define _IPTABLES_H
+ 
++#include <stdint.h>
+ #include <linux/types.h>
+ 
+ #include <linux/netfilter_ipv4.h>
+@@ -73,12 +74,12 @@
+ 	unsigned char iniface_mask[IFNAMSIZ], outiface_mask[IFNAMSIZ];
+ 
+ 	/* Protocol, 0 = ANY */
+-	u_int16_t proto;
++	uint16_t proto;
+ 
+ 	/* Flags word */
+-	u_int8_t flags;
++	uint8_t flags;
+ 	/* Inverse flags */
+-	u_int8_t invflags;
++	uint8_t invflags;
+ };
+ 
+ /* Values for "flag" field in struct ipt_ip (general ip structure). */
+@@ -106,9 +107,9 @@
+ 	unsigned int nfcache;
+ 
+ 	/* Size of ipt_entry + matches */
+-	u_int16_t target_offset;
++	uint16_t target_offset;
+ 	/* Size of ipt_entry + matches + target */
+-	u_int16_t next_offset;
++	uint16_t next_offset;
+ 
+ 	/* Back pointer */
+ 	unsigned int comefrom;
+@@ -125,7 +126,7 @@
+  * Unlike BSD Linux inherits IP options so you don't have to use a raw
+  * socket for this. Instead we check rights in the calls.
+  *
+- * ATTENTION: check linux/in.h before adding new number here.
++ * ATTENTION: check netinet/in.h before adding new number here.
+  */
+ #define IPT_BASE_CTL		64
+ 
+@@ -141,9 +142,9 @@
+ 
+ /* ICMP matching stuff */
+ struct ipt_icmp {
+-	u_int8_t type;				/* type to match */
+-	u_int8_t code[2];			/* range of code */
+-	u_int8_t invflags;			/* Inverse flags */
++	uint8_t type;				/* type to match */
++	uint8_t code[2];			/* range of code */
++	uint8_t invflags;			/* Inverse flags */
+ };
+ 
+ /* Values for "inv" field for struct ipt_icmp. */
+diff -ur a/iptables-1.4.20/include/linux/netfilter_ipv6/ip6_tables.h b/iptables-1.4.20/include/linux/netfilter_ipv6/ip6_tables.h
+--- a/iptables-1.4.20/include/linux/netfilter_ipv6/ip6_tables.h
++++ b/iptables-1.4.20/include/linux/netfilter_ipv6/ip6_tables.h
+@@ -73,14 +73,14 @@
+ 	 *   MH do not match any packets.
+ 	 * - You also need to set IP6T_FLAGS_PROTO to "flags" to check protocol.
+ 	 */
+-	u_int16_t proto;
++	uint16_t proto;
+ 	/* TOS to match iff flags & IP6T_F_TOS */
+-	u_int8_t tos;
++	uint8_t tos;
+ 
+ 	/* Flags word */
+-	u_int8_t flags;
++	uint8_t flags;
+ 	/* Inverse flags */
+-	u_int8_t invflags;
++	uint8_t invflags;
+ };
+ 
+ /* Values for "flag" field in struct ip6t_ip6 (general ip6 structure). */
+@@ -110,9 +110,9 @@
+ 	unsigned int nfcache;
+ 
+ 	/* Size of ipt_entry + matches */
+-	u_int16_t target_offset;
++	uint16_t target_offset;
+ 	/* Size of ipt_entry + matches + target */
+-	u_int16_t next_offset;
++	uint16_t next_offset;
+ 
+ 	/* Back pointer */
+ 	unsigned int comefrom;
+@@ -162,7 +162,6 @@
+  * Unlike BSD Linux inherits IP options so you don't have to use
+  * a raw socket for this. Instead we check rights in the calls.
+  *
+- * ATTENTION: check linux/in6.h before adding new number here.
+  */
+ #define IP6T_BASE_CTL			64
+ 
+@@ -178,9 +177,9 @@
+ 
+ /* ICMP matching stuff */
+ struct ip6t_icmp {
+-	u_int8_t type;				/* type to match */
+-	u_int8_t code[2];			/* range of code */
+-	u_int8_t invflags;			/* Inverse flags */
++	uint8_t type;				/* type to match */
++	uint8_t code[2];			/* range of code */
++	uint8_t invflags;			/* Inverse flags */
+ };
+ 
+ /* Values for "inv" field for struct ipt_icmp. */
+diff -ur a/iptables-1.4.20/include/linux/netfilter_ipv6/ip6t_rt.h b/iptables-1.4.20/include/linux/netfilter_ipv6/ip6t_rt.h
+--- a/iptables-1.4.20/include/linux/netfilter_ipv6/ip6t_rt.h
++++ b/iptables-1.4.20/include/linux/netfilter_ipv6/ip6t_rt.h
+@@ -2,7 +2,6 @@
+ #define _IP6T_RT_H
+ 
+ #include <linux/types.h>
+-/*#include <linux/in6.h>*/
+ 
+ #define IP6T_RT_HOPS 16
+ 
+diff -ur a/iptables-1.4.20/include/xtables.h b/iptables-1.4.20/include/xtables.h
+--- a/iptables-1.4.20/include/xtables.h
++++ b/iptables-1.4.20/include/xtables.h
+@@ -220,12 +220,12 @@
+ 	const char *real_name;
+ 
+ 	/* Revision of match (0 by default). */
+-	u_int8_t revision;
++	uint8_t revision;
+ 
+ 	/* Extension flags */
+-	u_int8_t ext_flags;
++	uint8_t ext_flags;
+ 
+-	u_int16_t family;
++	uint16_t family;
+ 
+ 	/* Size of match data. */
+ 	size_t size;
+@@ -297,12 +297,12 @@
+ 	const char *real_name;
+ 
+ 	/* Revision of target (0 by default). */
+-	u_int8_t revision;
++	uint8_t revision;
+ 
+ 	/* Extension flags */
+-	u_int8_t ext_flags;
++	uint8_t ext_flags;
+ 
+-	u_int16_t family;
++	uint16_t family;
+ 
+ 
+ 	/* Size of target data. */
+@@ -373,7 +373,7 @@
+  */
+ struct xtables_pprot {
+ 	const char *name;
+-	u_int8_t num;
++	uint8_t num;
+ };
+ 
+ enum xtables_tryload {
+@@ -446,12 +446,12 @@
+ extern bool xtables_strtoui(const char *, char **, unsigned int *,
+ 	unsigned int, unsigned int);
+ extern int xtables_service_to_port(const char *name, const char *proto);
+-extern u_int16_t xtables_parse_port(const char *port, const char *proto);
++extern uint16_t xtables_parse_port(const char *port, const char *proto);
+ extern void
+ xtables_parse_interface(const char *arg, char *vianame, unsigned char *mask);
+ 
+ /* this is a special 64bit data type that is 8-byte aligned */
+-#define aligned_u64 u_int64_t __attribute__((aligned(8)))
++#define aligned_u64 uint64_t __attribute__((aligned(8)))
+ 
+ extern struct xtables_globals *xt_params;
+ #define xtables_error (xt_params->exit_err)
+@@ -514,7 +514,7 @@
+ #endif
+ 
+ extern const struct xtables_pprot xtables_chain_protos[];
+-extern u_int16_t xtables_parse_protocol(const char *s);
++extern uint16_t xtables_parse_protocol(const char *s);
+ 
+ /* kernel revision handling */
+ extern int kernel_version;
+diff -ur a/iptables-1.4.20/libipq/ipq_create_handle.3 b/iptables-1.4.20/libipq/ipq_create_handle.3
+--- a/iptables-1.4.20/libipq/ipq_create_handle.3
++++ b/iptables-1.4.20/libipq/ipq_create_handle.3
+@@ -24,7 +24,7 @@
+ .br
+ .B #include <libipq.h>
+ .sp
+-.BI "struct ipq_handle *ipq_create_handle(u_int32_t " flags ", u_int32_t " protocol ");"
++.BI "struct ipq_handle *ipq_create_handle(uint32_t " flags ", uint32_t " protocol ");"
+ .br
+ .BI "int ipq_destroy_handle(struct ipq_handle *" h );
+ .SH DESCRIPTION
+diff -ur a/iptables-1.4.20/libipq/ipq_set_mode.3 b/iptables-1.4.20/libipq/ipq_set_mode.3
+--- a/iptables-1.4.20/libipq/ipq_set_mode.3
++++ b/iptables-1.4.20/libipq/ipq_set_mode.3
+@@ -24,7 +24,7 @@
+ .br
+ .B #include <libipq.h>
+ .sp
+-.BI "int ipq_set_mode(const struct ipq_handle *" h ", u_int8_t " mode ", size_t " range );
++.BI "int ipq_set_mode(const struct ipq_handle *" h ", uint8_t " mode ", size_t " range );
+ .SH DESCRIPTION
+ The
+ .B ipq_set_mode

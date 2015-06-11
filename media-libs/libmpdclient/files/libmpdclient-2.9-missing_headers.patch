@@ -1,0 +1,20 @@
+--- a/libmpdclient-2.9/src/socket.c
++++ b/libmpdclient-2.9/src/socket.c
+@@ -36,6 +36,7 @@
+ #include <stdio.h>
+ #include <fcntl.h>
+ #include <unistd.h>
++#include <sys/select.h>
+ 
+ #ifdef WIN32
+ #  include <winsock2.h>
+--- a/libmpdclient-2.9/src/sync.c
++++ b/libmpdclient-2.9/src/sync.c
+@@ -35,6 +35,7 @@
+ #include <stdio.h>
+ #include <fcntl.h>
+ #include <unistd.h>
++#include <sys/select.h>
+ 
+ static bool
+ ignore_errno(int e)

@@ -1,0 +1,43 @@
+diff -ur a/gcc-4.8.3/gcc/config/rs6000/secureplt.h b/gcc-4.8.3/gcc/config/rs6000/secureplt.h
+--- a/gcc-4.8.3/gcc/config/rs6000/secureplt.h	2013-01-10 21:38:27.000000000 -0100
++++ b/gcc-4.8.3/gcc/config/rs6000/secureplt.h	2014-11-03 20:41:01.696584962 -0100
+@@ -18,3 +18,4 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #define CC1_SECURE_PLT_DEFAULT_SPEC "-msecure-plt"
++#define LINK_SECURE_PLT_DEFAULT_SPEC "--secure-plt"
+diff -ur a/gcc-4.8.3/gcc/config/rs6000/sysv4.h b/gcc-4.8.3/gcc/config/rs6000/sysv4.h
+--- a/gcc-4.8.3/gcc/config/rs6000/sysv4.h	2014-04-04 15:50:31.000000000 -0100
++++ b/gcc-4.8.3/gcc/config/rs6000/sysv4.h	2014-11-03 20:42:30.098479787 -0100
+@@ -585,7 +585,8 @@
+ 
+ /* Override the default target of the linker.  */
+ #define	LINK_TARGET_SPEC \
+-  ENDIAN_SELECT("", " --oformat elf32-powerpcle", "")
++  ENDIAN_SELECT("", " --oformat elf32-powerpcle", "") \
++  "%{!mbss-plt: %{!msecure-plt: %(link_secure_plt_default)}}"
+ 
+ /* Any specific OS flags.  */
+ #define LINK_OS_SPEC "\
+@@ -894,6 +895,7 @@
+   { "link_os_openbsd",		LINK_OS_OPENBSD_SPEC },			\
+   { "link_os_default",		LINK_OS_DEFAULT_SPEC },			\
+   { "cc1_secure_plt_default",	CC1_SECURE_PLT_DEFAULT_SPEC },		\
++  { "link_secure_plt_default",	LINK_SECURE_PLT_DEFAULT_SPEC },		\
+   { "cpp_os_ads",		CPP_OS_ADS_SPEC },			\
+   { "cpp_os_yellowknife",	CPP_OS_YELLOWKNIFE_SPEC },		\
+   { "cpp_os_mvme",		CPP_OS_MVME_SPEC },			\
+diff -ur a/gcc-4.8.3/gcc/config.gcc b/gcc-4.8.3/gcc/config.gcc
+--- a/gcc-4.8.3/gcc/config.gcc	2014-05-06 16:29:04.000000000 -0100
++++ b/gcc-4.8.3/gcc/config.gcc	2014-11-03 20:40:13.135192063 -0100
+@@ -2135,6 +2135,10 @@
+ 	    powerpc*-*-linux*paired*)
+ 		tm_file="${tm_file} rs6000/750cl.h" ;;
+ 	esac
++	case ${target} in
++	    *-linux*-musl*)
++		enable_secureplt=yes ;;
++	esac
+ 	if test x${enable_secureplt} = xyes; then
+ 		tm_file="rs6000/secureplt.h ${tm_file}"
+ 	fi

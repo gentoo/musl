@@ -1,0 +1,10 @@
+--- a/cifs-utils-6.1/mtab.c
++++ b/cifs-utils-6.1/mtab.c
+@@ -38,6 +38,7 @@
+ #include <mntent.h>
+ #include <stdlib.h>
+ #include <signal.h>
++#include <paths.h>
+ #include "mount.h"
+ #include "config.h"
+ 

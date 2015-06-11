@@ -1,0 +1,19 @@
+diff -Naur tcp_wrappers_7.6.orig/tcpd.h tcp_wrappers_7.6/tcpd.h
+--- tcp_wrappers_7.6.orig/tcpd.h	2013-07-06 02:14:23.070110799 +0000
++++ tcp_wrappers_7.6/tcpd.h	2013-07-06 02:14:56.184112650 +0000
+@@ -21,8 +21,6 @@
+ #include <netinet/in.h>
+ #include <stdio.h>
+ 
+-__BEGIN_DECLS
+-
+ /* Structure to describe one communications endpoint. */
+ 
+ #define STRING_LENGTH	128		/* hosts, users, processes */
+@@ -259,6 +257,4 @@
+ extern char *my_strtok();
+ #endif
+ 
+-__END_DECLS
+-
+ #endif /* tcpd.h */

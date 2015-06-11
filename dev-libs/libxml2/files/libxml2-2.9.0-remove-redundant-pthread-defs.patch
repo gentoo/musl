@@ -1,0 +1,19 @@
+diff -Naur libxml2-2.9.0.orig/threads.c libxml2-2.9.0/threads.c
+--- libxml2-2.9.0.orig/threads.c	2013-07-06 19:58:28.098680769 +0000
++++ libxml2-2.9.0/threads.c	2013-07-06 21:40:17.672022393 +0000
+@@ -47,6 +47,7 @@
+ #ifdef HAVE_PTHREAD_H
+ 
+ static int libxml_is_threaded = -1;
++#if 0
+ #ifdef __GNUC__
+ #ifdef linux
+ #if (__GNUC__ == 3 && __GNUC_MINOR__ >= 3) || (__GNUC__ > 3)
+@@ -90,6 +91,7 @@
+ #endif
+ #endif /* linux */
+ #endif /* __GNUC__ */
++#endif
+ #endif /* HAVE_PTHREAD_H */
+ 
+ /*

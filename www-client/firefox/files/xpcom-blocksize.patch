@@ -1,0 +1,22 @@
+# HG changeset patch
+# User Felix Janda <felix.janda@posteo.de>
+# Date 1424989496 -3600
+#      Thu Feb 26 23:24:56 2015 +0100
+# Node ID 6980ec675819ae01048026a1be510c64e069ffe3
+# Parent  490274146476bc459cc1a9ed9e0d3771a4fe7d57
+xpcom: Use dbtob instead of BLOCK_SIZE
+
+diff -r 490274146476 -r 6980ec675819 xpcom/io/nsLocalFileUnix.cpp
+--- a/xpcom/io/nsLocalFileUnix.cpp	Thu Feb 26 22:58:09 2015 +0100
++++ b/xpcom/io/nsLocalFileUnix.cpp	Thu Feb 26 23:24:56 2015 +0100
+@@ -1408,8 +1408,8 @@
+       && dq.dqb_bhardlimit) {
+     int64_t QuotaSpaceAvailable = 0;
+     // dqb_bhardlimit is count of BLOCK_SIZE blocks, dqb_curspace is bytes
+-    if ((BLOCK_SIZE * dq.dqb_bhardlimit) > dq.dqb_curspace)
+-      QuotaSpaceAvailable = int64_t(BLOCK_SIZE * dq.dqb_bhardlimit - dq.dqb_curspace);
++    if (dbtob(dq.dqb_bhardlimit) > dq.dqb_curspace)
++      QuotaSpaceAvailable = (dbtob(dq.dqb_bhardlimit) - dq.dqb_curspace);
+     if (QuotaSpaceAvailable < *aDiskSpaceAvailable) {
+       *aDiskSpaceAvailable = QuotaSpaceAvailable;
+     }

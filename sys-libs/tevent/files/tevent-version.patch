@@ -1,0 +1,27 @@
+--- a/pytevent.c
++++ b/pytevent.c
+@@ -761,4 +761,6 @@ void init_tevent(void)
+ 
+ 	Py_INCREF(&TeventFd_Type);
+ 	PyModule_AddObject(m, "Fd", (PyObject *)&TeventFd_Type);
++
++	PyModule_AddObject(m, "__version__", PyString_FromString(PACKAGE_VERSION));
+ }
+--- a/wscript
++++ b/wscript
+@@ -92,7 +92,14 @@
+                      'pytevent.c',
+                      deps='tevent',
+                      enabled=True,
+-                     realname='_tevent.so')
++                     realname='_tevent.so',
++                     cflags='-DPACKAGE_VERSION=\"%s\"' % VERSION)
++    # install out various python scripts for use by make test
++    bld.SAMBA_SCRIPT('tevent_python',
++                 pattern='tevent.py',
++                 installdir='python')
++
++    bld.INSTALL_WILDCARD('${PYTHONDIR}', 'tevent.py', flat=False)
+ 
+ 
+ def test(ctx):

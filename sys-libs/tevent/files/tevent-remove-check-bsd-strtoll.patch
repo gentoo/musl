@@ -1,0 +1,24 @@
+diff -Naur tevent-0.9.19.orig/lib/replace/wscript tevent-0.9.19/lib/replace/wscript
+--- tevent-0.9.19.orig/lib/replace/wscript	2013-06-04 14:21:30.000000000 +0000
++++ tevent-0.9.19/lib/replace/wscript	2014-02-23 12:01:19.733793736 +0000
+@@ -272,20 +272,6 @@
+ 
+     #Some OS (ie. freebsd) return EINVAL if the convertion could not be done, it's not what we expect
+     #Let's detect those cases
+-    if conf.CONFIG_SET('HAVE_STRTOLL'):
+-        conf.CHECK_CODE('''
+-                        long long nb = strtoll("Text", NULL, 0);
+-                        if (errno == EINVAL) {
+-                            return 0;
+-                        } else {
+-                            return 1;
+-                        }
+-                        ''',
+-                        msg="Checking correct behavior of strtoll",
+-                        headers = 'errno.h',
+-                        execute = True,
+-                        define = 'HAVE_BSD_STRTOLL',
+-                        )
+     conf.CHECK_FUNCS('if_nametoindex strerror_r')
+     conf.CHECK_FUNCS('getdirentries getdents syslog')
+     conf.CHECK_FUNCS('gai_strerror get_current_dir_name')

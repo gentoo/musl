@@ -1,0 +1,24 @@
+diff -Naur attr-2.4.46.orig/include/xattr.h attr-2.4.46/include/xattr.h
+--- attr-2.4.46.orig/include/xattr.h	2014-01-21 22:14:56.418790180 +0000
++++ attr-2.4.46/include/xattr.h	2014-01-21 22:14:19.626788123 +0000
+@@ -31,7 +31,11 @@
+ #define XATTR_REPLACE 0x2       /* set value, fail if attr does not exist */
+ 
+ 
++#ifdef __cpluplus
+ __BEGIN_DECLS
++#else
++#define __THROW
++#endif
+ 
+ extern int setxattr (const char *__path, const char *__name,
+ 		      const void *__value, size_t __size, int __flags) __THROW;
+@@ -58,6 +62,8 @@
+ extern int lremovexattr (const char *__path, const char *__name) __THROW;
+ extern int fremovexattr (int __filedes,   const char *__name) __THROW;
+ 
++#ifdef __cpluplus
+ __END_DECLS
++#endif
+ 
+ #endif	/* __XATTR_H__ */

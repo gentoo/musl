@@ -1,0 +1,17 @@
+Make it work with secure_plt
+diff -ru a/gmp-5.1.3/mpn/powerpc32/elf.m4 b/gmp-5.1.3/mpn/powerpc32/elf.m4
+--- a/gmp-5.1.3/mpn/powerpc32/elf.m4
++++ b/gmp-5.1.3/mpn/powerpc32/elf.m4
+@@ -41,8 +41,10 @@
+ m4_assert_numargs(2)
+ `ifdef(`PIC',`
+ 	mflr	r0
+-	bl	_GLOBAL_OFFSET_TABLE_@local-4
+-	mflr	$1
++	bcl 20, 31, 1f
++1:	mflr $1
++	addis $1, $1, (_GLOBAL_OFFSET_TABLE_-1b)@ha
++	addi $1, $1, (_GLOBAL_OFFSET_TABLE_-1b)@l
+ 	mtlr	r0
+ 	lwz	$1, $2@got($1)
+ ',`

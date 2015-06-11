@@ -1,0 +1,20 @@
+--- a/liblockfile-1.09/Makefile.in
++++ b/liblockfile-1.09/Makefile.in
+@@ -56,7 +56,7 @@
+ 		install -m 755 liblockfile.so \
+ 			$(ROOT)$(libdir)/liblockfile.so.$(VER)
+ 		ln -s liblockfile.so.$(VER) $(ROOT)$(libdir)/liblockfile.so
+-		if test "$(ROOT)" = ""; then @LDCONFIG@; fi
++		if test "$(ROOT)" = ""; then sh -c '@LDCONFIG@'; fi
+ 
+ install_common:
+ 		install -m 644 lockfile.h maillock.h $(ROOT)$(includedir)
+@@ -70,7 +70,7 @@
+ 
+ install_nfslib:	nfslib
+ 		install -m 755 nfslock.so.$(VER) $(ROOT)$(nfslockdir)
+-		if test "$(ROOT)" = ""; then @LDCONFIG@; fi
++		if test "$(ROOT)" = ""; then sh -c '@LDCONFIG@'; fi
+ 
+ clean:
+ 		rm -f *.a *.o *.so *.so.* dotlockfile

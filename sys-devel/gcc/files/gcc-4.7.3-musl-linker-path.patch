@@ -1,0 +1,61 @@
+diff -Naur gcc-4.7.3.orig/gcc/config/arm/linux-eabi.h gcc-4.7.3/gcc/config/arm/linux-eabi.h
+--- gcc-4.7.3.orig/gcc/config/arm/linux-eabi.h	2014-04-06 14:15:03.000000000 +0000
++++ gcc-4.7.3/gcc/config/arm/linux-eabi.h	2014-04-06 12:12:42.000000000 +0000
+@@ -69,8 +69,8 @@
+    GLIBC_DYNAMIC_LINKER_DEFAULT and TARGET_DEFAULT_FLOAT_ABI.  */
+ 
+ #undef  GLIBC_DYNAMIC_LINKER
+-#define GLIBC_DYNAMIC_LINKER_SOFT_FLOAT "/lib/ld-linux.so.3"
+-#define GLIBC_DYNAMIC_LINKER_HARD_FLOAT "/lib/ld-linux-armhf.so.3"
++#define GLIBC_DYNAMIC_LINKER_SOFT_FLOAT "/lib/ld-musl-arm.so.1"
++#define GLIBC_DYNAMIC_LINKER_HARD_FLOAT "/lib/ld-musl-armhf.so.1"
+ #define GLIBC_DYNAMIC_LINKER_DEFAULT GLIBC_DYNAMIC_LINKER_SOFT_FLOAT
+ 
+ #define GLIBC_DYNAMIC_LINKER \
+diff -Naur gcc-4.7.3.orig/gcc/config/i386/linux64.h gcc-4.7.3/gcc/config/i386/linux64.h
+--- gcc-4.7.3.orig/gcc/config/i386/linux64.h	2014-04-06 14:15:03.000000000 +0000
++++ gcc-4.7.3/gcc/config/i386/linux64.h	2014-04-06 12:12:42.000000000 +0000
+@@ -28,6 +28,6 @@
+ #define GNU_USER_LINK_EMULATION64 "elf_x86_64"
+ #define GNU_USER_LINK_EMULATIONX32 "elf32_x86_64"
+ 
+-#define GLIBC_DYNAMIC_LINKER32 "/lib/ld-linux.so.2"
+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld-linux-x86-64.so.2"
++#define GLIBC_DYNAMIC_LINKER32 "/lib/ld-musl-i386.so.1"
++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld-musl-x86_64.so.1"
+ #define GLIBC_DYNAMIC_LINKERX32 "/libx32/ld-linux-x32.so.2"
+diff -Naur gcc-4.7.3.orig/gcc/config/mips/linux.h gcc-4.7.3/gcc/config/mips/linux.h
+--- gcc-4.7.3.orig/gcc/config/mips/linux.h	2011-07-19 18:00:27.000000000 +0000
++++ gcc-4.7.3/gcc/config/mips/linux.h	2014-04-06 14:12:48.000000000 +0000
+@@ -18,4 +18,4 @@
+ along with GCC; see the file COPYING3.  If not see
+ <http://www.gnu.org/licenses/>.  */
+ 
+-#define GLIBC_DYNAMIC_LINKER "/lib/ld.so.1"
++#define GLIBC_DYNAMIC_LINKER "/lib/ld-musl-mipsel.so.1"
+diff -Naur gcc-4.7.3.orig/gcc/config/rs6000/linux64.h gcc-4.7.3/gcc/config/rs6000/linux64.h
+--- gcc-4.7.3/gcc/config/rs6000/linux64.h	2014-10-11 18:59:07.479279989 -0200
++++ gcc-4.7.3/gcc/config/rs6000/linux64.h	2014-10-11 18:59:45.777801191 -0200
+@@ -358,8 +358,8 @@
+ #undef	LINK_OS_DEFAULT_SPEC
+ #define LINK_OS_DEFAULT_SPEC "%(link_os_linux)"
+ 
+-#define GLIBC_DYNAMIC_LINKER32 "/lib/ld.so.1"
+-#define GLIBC_DYNAMIC_LINKER64 "/lib64/ld64.so.1"
++#define GLIBC_DYNAMIC_LINKER32 "/lib/ld-musl-powerpc.so.1"
++#define GLIBC_DYNAMIC_LINKER64 "/lib/ld-musl-powerpc64.so.1"
+ #define UCLIBC_DYNAMIC_LINKER32 "/lib/ld-uClibc.so.0"
+ #define UCLIBC_DYNAMIC_LINKER64 "/lib/ld64-uClibc.so.0"
+ #if DEFAULT_LIBC == LIBC_UCLIBC
+diff -Naur gcc-4.7.3/gcc/config/rs6000/sysv4.h gcc-4.7.3/gcc/config/rs6000/sysv4.h
+--- gcc-4.7.3/gcc/config/rs6000/sysv4.h	2014-10-11 19:00:03.079584889 -0200
++++ gcc-4.7.3/gcc/config/rs6000/sysv4.h	2014-10-11 19:00:28.476267387 -0200
+@@ -802,7 +802,7 @@
+ 
+ #define LINK_START_LINUX_SPEC ""
+ 
+-#define GLIBC_DYNAMIC_LINKER "/lib/ld.so.1"
++#define GLIBC_DYNAMIC_LINKER "/lib/ld-musl-powerpc.so.1"
+ #define UCLIBC_DYNAMIC_LINKER "/lib/ld-uClibc.so.0"
+ #if DEFAULT_LIBC == LIBC_UCLIBC
+ #define CHOOSE_DYNAMIC_LINKER(G, U) "%{mglibc:" G ";:" U "}"

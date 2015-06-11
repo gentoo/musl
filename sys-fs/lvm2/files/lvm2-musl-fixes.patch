@@ -1,0 +1,33 @@
+diff -uar LVM2.2.02.110-old/daemons/lvmetad/lvmetad-core.c LVM2.2.02.110/daemons/lvmetad/lvmetad-core.c
+--- LVM2.2.02.110-old/daemons/lvmetad/lvmetad-core.c	2015-05-14 21:37:01.226755157 +0000
++++ LVM2.2.02.110/daemons/lvmetad/lvmetad-core.c	2015-05-14 21:44:08.098585801 +0000
+@@ -124,7 +124,7 @@
+ 	if (!(vg = dm_hash_lookup(s->lock.vg, id))) {
+ 		if (!(vg = malloc(sizeof(pthread_mutex_t))) ||
+ 		    pthread_mutexattr_init(&rec) ||
+-		    pthread_mutexattr_settype(&rec, PTHREAD_MUTEX_RECURSIVE_NP) ||
++		    pthread_mutexattr_settype(&rec, PTHREAD_MUTEX_RECURSIVE) ||
+ 		    pthread_mutex_init(vg, &rec))
+ 			goto bad;
+ 		if (!dm_hash_insert(s->lock.vg, id, vg)) {
+@@ -1152,7 +1152,7 @@
+ 	ls->log = s->log;
+ 
+ 	pthread_mutexattr_init(&rec);
+-	pthread_mutexattr_settype(&rec, PTHREAD_MUTEX_RECURSIVE_NP);
++	pthread_mutexattr_settype(&rec, PTHREAD_MUTEX_RECURSIVE);
+ 	pthread_mutex_init(&ls->lock.pvid_to_pvmeta, &rec);
+ 	pthread_mutex_init(&ls->lock.vgid_to_metadata, &rec);
+ 	pthread_mutex_init(&ls->lock.pvid_to_vgid, NULL);
+Only in LVM2.2.02.110/lib/commands: toolcontext.c.orig
+diff -uar LVM2.2.02.110-old/libdaemon/server/daemon-server.c LVM2.2.02.110/libdaemon/server/daemon-server.c
+--- LVM2.2.02.110-old/libdaemon/server/daemon-server.c	2015-05-14 21:37:01.256755555 +0000
++++ LVM2.2.02.110/libdaemon/server/daemon-server.c	2015-05-14 21:37:51.108437752 +0000
+@@ -26,6 +26,7 @@
+ #include <sys/un.h>
+ #include <unistd.h>
+ #include <signal.h>
++#include <fcntl.h>
+ 
+ #include <syslog.h> /* FIXME. For the global closelog(). */
+ 

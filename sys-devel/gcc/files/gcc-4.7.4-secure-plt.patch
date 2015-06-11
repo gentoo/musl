@@ -1,0 +1,51 @@
+adapted from musl-cross gcc-patches
+diff -ur a/gcc/config.gcc b/gcc/config.gcc
+--- a/gcc/config.gcc	2013-10-03 02:52:23.000000000 -0200
++++ b/gcc/config.gcc	2015-05-03 22:05:10.855150177 -0200
+@@ -2091,6 +2091,10 @@
+ 	    powerpc*-*-linux*paired*)
+ 		tm_file="${tm_file} rs6000/750cl.h" ;;
+ 	esac
++	case ${target} in
++	 *-linux*-musl*)
++	enable_secureplt=yes ;;
++	esac
+ 	if test x${enable_secureplt} = xyes; then
+ 		tm_file="rs6000/secureplt.h ${tm_file}"
+ 	fi
+diff -r 6097333f2ab4 gcc/config/rs6000/secureplt.h
+--- a/gcc/config/rs6000/secureplt.h	Tue May 20 11:06:08 2014 -0400
++++ b/gcc/config/rs6000/secureplt.h	Tue May 20 11:06:11 2014 -0400
+@@ -18,3 +18,4 @@
+ <http://www.gnu.org/licenses/>.  */
+ 
+ #define CC1_SECURE_PLT_DEFAULT_SPEC "-msecure-plt"
++#define LINK_SECURE_PLT_DEFAULT_SPEC "--secure-plt"
+--- a/gcc/config/rs6000/sysv4.h	2012-04-30 19:39:01.000000000 -0200
++++ b/gcc/config/rs6000/sysv4.h	2014-10-21 10:24:03.631956578 -0200
+@@ -537,6 +537,9 @@
+     }						\
+   while (0)
+ #endif
++#ifndef LINK_SECURE_PLT_DEFAULT_SPEC
++#define LINK_SECURE_PLT_DEFAULT_SPEC ""
++#endif
+ 
+ #undef	ASM_SPEC
+ #define	ASM_SPEC "%(asm_cpu) \
+@@ -624,6 +627,7 @@
+ /* Override the default target of the linker.  */
+ #define	LINK_TARGET_SPEC "\
+ %{mlittle: --oformat elf32-powerpcle } %{mlittle-endian: --oformat elf32-powerpcle } \
++%{!mbss-plt: %{!msecure-plt: %(link_secure_plt_default)}} \
+ %{!mlittle: %{!mlittle-endian: %{!mbig: %{!mbig-endian: \
+     %{mcall-i960-old: --oformat elf32-powerpcle} \
+   }}}}"
+@@ -938,6 +942,7 @@
+   { "cc1_endian_little",	CC1_ENDIAN_LITTLE_SPEC },		\
+   { "cc1_endian_default",	CC1_ENDIAN_DEFAULT_SPEC },		\
+   { "cc1_secure_plt_default",	CC1_SECURE_PLT_DEFAULT_SPEC },		\
++  { "link_secure_plt_default",	LINK_SECURE_PLT_DEFAULT_SPEC },		\
+   { "cpp_os_ads",		CPP_OS_ADS_SPEC },			\
+   { "cpp_os_yellowknife",	CPP_OS_YELLOWKNIFE_SPEC },		\
+   { "cpp_os_mvme",		CPP_OS_MVME_SPEC },			\

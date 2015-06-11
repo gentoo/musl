@@ -1,0 +1,93 @@
+diff -Naur net-tools-1.60_p20120127084908.orig/lib/inet6_gr.c net-tools-1.60_p20120127084908/lib/inet6_gr.c
+--- net-tools-1.60_p20120127084908.orig/lib/inet6_gr.c	2012-01-27 08:49:08.000000000 +0000
++++ net-tools-1.60_p20120127084908/lib/inet6_gr.c	2014-01-21 19:18:50.557199377 +0000
+@@ -23,9 +23,6 @@
+ #include <string.h>
+ #include <stdio.h>
+ #include <unistd.h>
+-#ifndef __GLIBC__
+-#include <netinet6/ipv6_route.h>	/* glibc doesn't have this */
+-#endif
+ #include "version.h"
+ #include "net-support.h"
+ #include "pathnames.h"
+diff -Naur net-tools-1.60_p20120127084908.orig/lib/inet6_sr.c net-tools-1.60_p20120127084908/lib/inet6_sr.c
+--- net-tools-1.60_p20120127084908.orig/lib/inet6_sr.c	2012-01-27 08:49:08.000000000 +0000
++++ net-tools-1.60_p20120127084908/lib/inet6_sr.c	2014-01-21 19:19:23.307201208 +0000
+@@ -23,11 +23,7 @@
+ #include <string.h>
+ #include <stdio.h>
+ #include <unistd.h>
+-#ifdef __GLIBC__
+ #include <net/route.h>
+-#else
+-#include <netinet6/ipv6_route.h>	/* glibc does not have this */
+-#endif
+ #include "version.h"
+ #include "net-support.h"
+ #include "pathnames.h"
+diff -Naur net-tools-1.60_p20120127084908.orig/lib/inet_sr.c net-tools-1.60_p20120127084908/lib/inet_sr.c
+--- net-tools-1.60_p20120127084908.orig/lib/inet_sr.c	2012-01-27 08:49:08.000000000 +0000
++++ net-tools-1.60_p20120127084908/lib/inet_sr.c	2014-01-21 20:41:59.223478324 +0000
+@@ -26,6 +26,7 @@
+ #include <string.h>
+ #include <stdio.h>
+ #include <unistd.h>
++#include <asm-generic/param.h>
+ #include "version.h"
+ #include "net-support.h"
+ #include "pathnames.h"
+diff -Naur net-tools-1.60_p20120127084908.orig/lib/util-ank.c net-tools-1.60_p20120127084908/lib/util-ank.c
+--- net-tools-1.60_p20120127084908.orig/lib/util-ank.c	2012-01-27 08:49:08.000000000 +0000
++++ net-tools-1.60_p20120127084908/lib/util-ank.c	2014-01-21 20:42:56.876481548 +0000
+@@ -25,6 +25,7 @@
+ #include <netdb.h>
+ #include <arpa/inet.h>
+ #include <resolv.h>
++#include <limits.h>
+ 
+ #include "intl.h"
+ #include "util-ank.h"
+diff -Naur net-tools-1.60_p20120127084908.orig/mii-tool.c net-tools-1.60_p20120127084908/mii-tool.c
+--- net-tools-1.60_p20120127084908.orig/mii-tool.c	2012-01-27 08:49:08.000000000 +0000
++++ net-tools-1.60_p20120127084908/mii-tool.c	2014-01-21 20:54:31.563520392 +0000
+@@ -47,10 +47,6 @@
+ #include <net/if.h>
+ #include <linux/sockios.h>
+ 
+-#ifndef __GLIBC__
+-#include <linux/if_arp.h>
+-#include <linux/if_ether.h>
+-#endif
+ #include <linux/mii.h>
+ #include <linux/sockios.h>
+ #include "version.h"
+diff -Naur net-tools-1.60_p20120127084908.orig/netstat.c net-tools-1.60_p20120127084908/netstat.c
+--- net-tools-1.60_p20120127084908.orig/netstat.c	2012-01-27 08:49:08.000000000 +0000
++++ net-tools-1.60_p20120127084908/netstat.c	2014-01-21 20:43:34.023483625 +0000
+@@ -88,6 +88,7 @@
+ #include <sys/stat.h>
+ #include <net/if.h>
+ #include <dirent.h>
++#include <asm-generic/param.h>
+ 
+ #if HAVE_SELINUX
+ #include <selinux/selinux.h>
+diff -Naur net-tools-1.60_p20120127084908.orig/slattach.c net-tools-1.60_p20120127084908/slattach.c
+--- net-tools-1.60_p20120127084908.orig/slattach.c	2012-01-27 08:49:08.000000000 +0000
++++ net-tools-1.60_p20120127084908/slattach.c	2014-01-21 20:44:46.953487703 +0000
+@@ -45,14 +45,7 @@
+ #include <unistd.h>
+ #include <getopt.h>
+ #include <linux/if_slip.h>
+-
+-#if defined(__GLIBC__)
+-#if __GLIBC__ == 2 && __GLIBC_MINOR__ == 0
+-# include <termbits.h>
+-#else
+ # include <termios.h>
+-#endif
+-#endif
+ 
+ #include "pathnames.h"
+ #include "net-support.h"

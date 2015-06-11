@@ -1,0 +1,20 @@
+--- htnet/Connection.cc.orig	2014-12-27 13:40:45.961149583 +0000
++++ htnet/Connection.cc	2014-12-27 13:45:45.967149583 +0000
+@@ -64,7 +64,7 @@
+ 
+ typedef void (*SIGNAL_HANDLER) (...);
+ 
+-#ifndef _MSC_VER /* _WIN32 */
++#if ! defined(_MSC_VER) && (defined(__GLIBC__) || defined(__UCLIBC__))
+ extern "C" {
+     int rresvport(int *);
+ }
+@@ -162,7 +162,7 @@ int Connection::Open(int priv)
+ 	int	aport = IPPORT_RESERVED - 1;
+ 
+ //  Native Windows (MSVC) has no rresvport
+-#ifndef _MSC_VER /* _WIN32 */
++#if ! defined(_MSC_VER) && (defined(__GLIBC__) || defined(__UCLIBC__))
+ 	sock = rresvport(&aport);
+ #else
+ 	return NOTOK;

@@ -1,0 +1,11 @@
+--- a/src/Makefile.in	2014-05-26 16:50:55.000000000 -0100
++++ b/src/Makefile.in	2015-02-03 20:25:11.915270649 -0100
+@@ -292,7 +292,7 @@
+ 
+ GETLOADAVG_LIBS = @GETLOADAVG_LIBS@
+ 
+-RUN_TEMACS = ./temacs
++RUN_TEMACS = LD_PRELOAD=../preload.so ./temacs
+ 
+ ## Invoke ../nt/addsection for MinGW, ":" elsewhere.
+ TEMACS_POST_LINK = @TEMACS_POST_LINK@

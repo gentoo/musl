@@ -1,0 +1,12 @@
+diff -Nuar procps-ng-3.3.8.orig/sysctl.c procps-ng-3.3.8/sysctl.c
+--- procps-ng-3.3.8.orig/sysctl.c	2013-05-25 21:39:41.000000000 +0000
++++ procps-ng-3.3.8/sysctl.c	2014-01-17 16:28:37.241303653 +0000
+@@ -500,7 +500,7 @@
+ 	int globerr;
+ 	int j;
+ 
+-	globerr = glob(filename, GLOB_NOCHECK | GLOB_TILDE, NULL, &globbuf);
++	globerr = glob(filename, GLOB_NOCHECK, NULL, &globbuf);
+ 	if (globerr != 0 && globerr != GLOB_NOMATCH)
+ 		xerr(EXIT_FAILURE, _("glob failed"));
+ 

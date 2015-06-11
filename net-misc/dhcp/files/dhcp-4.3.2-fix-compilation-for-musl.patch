@@ -1,0 +1,44 @@
+diff -Naur dhcp-4.3.2.orig/dst/dst_api.c dhcp-4.3.2/dst/dst_api.c
+--- dhcp-4.3.2.orig/dst/dst_api.c	2015-02-26 20:35:43.000000000 +0100
++++ dhcp-4.3.2/dst/dst_api.c	2015-05-19 01:11:22.520053688 +0200
+@@ -49,6 +49,7 @@
+ #include <sys/param.h>
+ #include <sys/stat.h>
+ #include <sys/socket.h>
++#include <sys/types.h>
+ #include <netinet/in.h>
+ 
+ #include "cdefs.h"
+diff -Naur dhcp-4.3.2.orig/dst/dst_internal.h dhcp-4.3.2/dst/dst_internal.h
+--- dhcp-4.3.2.orig/dst/dst_internal.h	2015-02-26 20:35:43.000000000 +0100
++++ dhcp-4.3.2/dst/dst_internal.h	2015-05-19 01:02:22.090054505 +0200
+@@ -20,6 +20,7 @@
+  */
+ #include <limits.h>
+ #include <sys/param.h>
++#include <sys/types.h>
+ 
+ #ifndef PATH_MAX
+ # ifdef POSIX_PATH_MAX
+diff -Naur dhcp-4.3.2.orig/dst/dst_support.c dhcp-4.3.2/dst/dst_support.c
+--- dhcp-4.3.2.orig/dst/dst_support.c	2015-02-26 20:35:43.000000000 +0100
++++ dhcp-4.3.2/dst/dst_support.c	2015-05-19 01:10:29.790053768 +0200
+@@ -25,6 +25,7 @@
+ #include <sys/stat.h>
+ #include <netinet/in.h>
+ #include <sys/socket.h>
++#include <sys/types.h>
+ 
+ #include "cdefs.h"
+ #include "osdep.h"
+diff -Naur dhcp-4.3.2.orig/dst/hmac_link.c dhcp-4.3.2/dst/hmac_link.c
+--- dhcp-4.3.2.orig/dst/hmac_link.c	2015-02-26 20:35:43.000000000 +0100
++++ dhcp-4.3.2/dst/hmac_link.c	2015-05-19 01:12:14.190053610 +0200
+@@ -31,6 +31,7 @@
+ #include <sys/time.h>
+ #include <netinet/in.h>
+ #include <sys/socket.h>
++#include <sys/types.h>
+ 
+ #include "cdefs.h"
+ #include "osdep.h"

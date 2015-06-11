@@ -1,0 +1,11 @@
+--- a/libpciaccess-0.13.2/src/linux_sysfs.c
++++ b/libpciaccess-0.13.2/src/linux_sysfs.c
+@@ -45,7 +45,7 @@
+ #include <dirent.h>
+ #include <errno.h>
+ 
+-#if defined(__i386__) || defined(__x86_64__) || defined(__arm__)
++#if defined(__i386__) || defined(__x86_64__)
+ #include <sys/io.h>
+ #else
+ #define inb(x) -1

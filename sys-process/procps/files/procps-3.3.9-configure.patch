@@ -1,0 +1,13 @@
+--- a/procps-ng-3.3.9/configure.ac
++++ b/procps-ng-3.3.9/configure.ac
+@@ -235,7 +235,9 @@
+ else
+   AC_SEARCH_LIBS([dlopen], [dl], [],
+     [AC_MSG_ERROR([dynamic linking unavailable, circumvent with --disable-numa])])
+-  DL_LIB="$ac_cv_search_dlopen"
++  if test "$ac_cv_search_dlopen" != "none required" ; then               
++    DL_LIB="$ac_cv_search_dlopen"
++  fi                                                                     
+ fi
+ AC_SUBST([DL_LIB])
+ 

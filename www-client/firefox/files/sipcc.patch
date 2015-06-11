@@ -1,0 +1,159 @@
+# HG changeset patch
+# User Felix Janda <felix.janda@posteo.de>
+# Date 1423304332 -3600
+#      Sat Feb 07 11:18:52 2015 +0100
+# Node ID fbbc5e616bd05c0f3b29ede3d777609e04dce620
+# Parent  204cb68867f5b09f0949bd4a49a4a8c1aaf0f467
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1130709
+sipcc: Make __BEGIN_DECLS and __END_DECLS explicit
+
+diff -r 204cb68867f5 -r fbbc5e616bd0 media/webrtc/signaling/src/sdp/sipcc/cpr_darwin_types.h
+--- a/media/webrtc/signaling/src/sdp/sipcc/cpr_darwin_types.h	Sat Feb 07 09:22:26 2015 +0100
++++ b/media/webrtc/signaling/src/sdp/sipcc/cpr_darwin_types.h	Sat Feb 07 11:18:52 2015 +0100
+@@ -54,27 +54,6 @@
+ #endif
+ 
+ /**
+- * __BEGIN_DECLS and __END_DECLS
+- *
+- * Define macros for compilation by C++ compiler
+- */
+-#ifndef __BEGIN_DECLS
+-#ifdef __cplusplus
+-#define __BEGIN_DECLS extern "C" {
+-#else
+-#define __BEGIN_DECLS
+-#endif
+-#endif
+-
+-#ifndef __END_DECLS
+-#ifdef __cplusplus
+-#define __END_DECLS   }
+-#else
+-#define __END_DECLS
+-#endif
+-#endif
+-
+-/**
+  * Define TRUE/FALSE
+  *     defined in several header files
+  */
+diff -r 204cb68867f5 -r fbbc5e616bd0 media/webrtc/signaling/src/sdp/sipcc/cpr_linux_types.h
+--- a/media/webrtc/signaling/src/sdp/sipcc/cpr_linux_types.h	Sat Feb 07 09:22:26 2015 +0100
++++ b/media/webrtc/signaling/src/sdp/sipcc/cpr_linux_types.h	Sat Feb 07 11:18:52 2015 +0100
+@@ -62,28 +62,6 @@
+ #endif
+ #endif
+ 
+-
+-
+-/**
+- * __BEGIN_DECLS and __END_DECLS
+- *
+- * Define macros for compilation by C++ compiler
+- */
+-#ifndef __BEGIN_DECLS
+-#ifdef __cplusplus
+-#define __BEGIN_DECLS extern "C" {
+-#else
+-#define __BEGIN_DECLS
+-#endif
+-#endif
+-
+-#ifndef __END_DECLS
+-#ifdef __cplusplus
+-#define __END_DECLS   }
+-#else
+-#define __END_DECLS
+-#endif
+-#endif
+ /**
+  * Define TRUE/FALSE
+  *     defined in several header files
+diff -r 204cb68867f5 -r fbbc5e616bd0 media/webrtc/signaling/src/sdp/sipcc/cpr_string.h
+--- a/media/webrtc/signaling/src/sdp/sipcc/cpr_string.h	Sat Feb 07 09:22:26 2015 +0100
++++ b/media/webrtc/signaling/src/sdp/sipcc/cpr_string.h	Sat Feb 07 11:18:52 2015 +0100
+@@ -10,7 +10,9 @@
+ #include "cpr_types.h"
+ #include "cpr_strings.h"
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * sstrncpy
+@@ -130,6 +132,8 @@
+ char *
+ cpr_strdup(const char *str);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+diff -r 204cb68867f5 -r fbbc5e616bd0 media/webrtc/signaling/src/sdp/sipcc/cpr_strings.h
+--- a/media/webrtc/signaling/src/sdp/sipcc/cpr_strings.h	Sat Feb 07 09:22:26 2015 +0100
++++ b/media/webrtc/signaling/src/sdp/sipcc/cpr_strings.h	Sat Feb 07 11:18:52 2015 +0100
+@@ -7,8 +7,6 @@
+ 
+ #include "cpr_types.h"
+ 
+-__BEGIN_DECLS
+-
+ 
+ #include <string.h>
+ 
+@@ -25,6 +23,4 @@
+ 
+ #endif // _MSC_VER
+ 
+-__END_DECLS
+-
+ #endif
+diff -r 204cb68867f5 -r fbbc5e616bd0 media/webrtc/signaling/src/sdp/sipcc/cpr_types.h
+--- a/media/webrtc/signaling/src/sdp/sipcc/cpr_types.h	Sat Feb 07 09:22:26 2015 +0100
++++ b/media/webrtc/signaling/src/sdp/sipcc/cpr_types.h	Sat Feb 07 11:18:52 2015 +0100
+@@ -13,7 +13,9 @@
+ #include "cpr_darwin_types.h"
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*
+  * CPR Return Codes
+@@ -114,6 +116,8 @@
+ 
+ typedef const char *string_t;
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+diff -r 204cb68867f5 -r fbbc5e616bd0 media/webrtc/signaling/src/sdp/sipcc/cpr_win_types.h
+--- a/media/webrtc/signaling/src/sdp/sipcc/cpr_win_types.h	Sat Feb 07 09:22:26 2015 +0100
++++ b/media/webrtc/signaling/src/sdp/sipcc/cpr_win_types.h	Sat Feb 07 11:18:52 2015 +0100
+@@ -100,16 +100,5 @@
+  */
+ /* DONE defined in windef.h */
+ 
+-/*
+- * Define __BEGIN_DECLS and __END_DECLS
+- */
+-#ifdef __cplusplus
+-#define __BEGIN_DECLS extern "C" {
+-#define __END_DECLS   }
+-#else
+-#define __BEGIN_DECLS
+-#define __END_DECLS
+-#endif
+-
+ #endif // _CPR_WIN_TYPES_H_
+ 

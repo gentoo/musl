@@ -1,0 +1,11 @@
+--- a/nspr-4.10.6/nspr/pr/src/misc/prnetdb.c	2014-06-05 23:42:08.000000000 -0200
++++ b/nspr-4.10.6/nspr/pr/src/misc/prnetdb.c	2014-07-29 19:02:42.037638550 -0200
+@@ -65,8 +65,6 @@
+ 	|| (defined(LINUX) && defined(_REENTRANT) \
+         && !(defined(__GLIBC__) && __GLIBC__ >= 2) \
+         && !defined(ANDROID))
+-#define _PR_HAVE_GETPROTO_R
+-#define _PR_HAVE_GETPROTO_R_POINTER
+ #endif
+ 
+ #if defined(OSF1) \

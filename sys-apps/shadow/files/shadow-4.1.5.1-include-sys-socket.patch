@@ -1,0 +1,13 @@
+diff -Naur shadow-4.1.5.1.orig/libmisc/utmp.c shadow-4.1.5.1/libmisc/utmp.c
+--- shadow-4.1.5.1.orig/libmisc/utmp.c	2012-05-18 17:57:54.000000000 +0000
++++ shadow-4.1.5.1/libmisc/utmp.c	2013-07-06 03:49:09.871428783 +0000
+@@ -44,6 +44,9 @@
+ #include <assert.h>
+ #include <netdb.h>
+ #include <stdio.h>
++#include <sys/socket.h>
++#include <linux/in.h>
++#include <linux/in6.h>
+ 
+ #ident "$Id: utmp.c 3720 2012-05-18 17:57:52Z nekral-guest $"
+ 

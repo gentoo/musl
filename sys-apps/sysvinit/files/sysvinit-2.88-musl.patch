@@ -1,0 +1,10 @@
+--- sysvinit-2.88dsf.org/src/init.c
++++ sysvinit-2.88dsf/src/init.c
+@@ -51,6 +51,7 @@
+ #include <stdarg.h>
+ #include <sys/syslog.h>
+ #include <sys/time.h>
++#include <sys/ttydefaults.h>
+ 
+ #ifdef WITH_SELINUX
+ #  include <selinux/selinux.h>

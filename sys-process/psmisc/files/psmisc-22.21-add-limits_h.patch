@@ -1,0 +1,11 @@
+diff -Naur psmisc-22.21.orig/src/pstree.c psmisc-22.21/src/pstree.c
+--- psmisc-22.21.orig/src/pstree.c	2013-09-29 05:11:56.000000000 +0000
++++ psmisc-22.21/src/pstree.c	2014-03-26 13:30:36.000000000 +0000
+@@ -41,6 +41,7 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <sys/ioctl.h>
++#include <limits.h>
+ 
+ #include "i18n.h"
+ #include "comm.h"

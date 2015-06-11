@@ -1,0 +1,66 @@
+diff -ur a/fuse-2.9.3/lib/fuse.c b/fuse-2.9.3/lib/fuse.c
+--- a/fuse-2.9.3/lib/fuse.c
++++ b/fuse-2.9.3/lib/fuse.c
+@@ -33,6 +33,7 @@
+ #include <dlfcn.h>
+ #include <assert.h>
+ #include <poll.h>
++#include <sys/file.h>
+ #include <sys/param.h>
+ #include <sys/uio.h>
+ #include <sys/time.h>
+diff -ur a/fuse-2.9.3/lib/fuse_lowlevel.c b/fuse-2.9.3/lib/fuse_lowlevel.c
+--- a/fuse-2.9.3/lib/fuse_lowlevel.c
++++ b/fuse-2.9.3/lib/fuse_lowlevel.c
+@@ -24,6 +24,7 @@
+ #include <limits.h>
+ #include <errno.h>
+ #include <assert.h>
++#include <sys/file.h>
+ 
+ #ifndef F_LINUX_SPECIFIC_BASE
+ #define F_LINUX_SPECIFIC_BASE       1024
+diff -ur a/fuse-2.9.3/lib/mount.c b/fuse-2.9.3/lib/mount.c
+--- a/fuse-2.9.3/lib/mount.c
++++ b/fuse-2.9.3/lib/mount.c
+@@ -20,6 +20,7 @@
+ #include <string.h>
+ #include <fcntl.h>
+ #include <errno.h>
++#include <paths.h>
+ #include <sys/poll.h>
+ #include <sys/socket.h>
+ #include <sys/un.h>
+diff -ur a/fuse-2.9.3/lib/mount_util.c b/fuse-2.9.3/lib/mount_util.c
+--- a/fuse-2.9.3/lib/mount_util.c
++++ b/fuse-2.9.3/lib/mount_util.c
+@@ -16,6 +16,7 @@
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <limits.h>
++#include <paths.h>
+ #ifndef __NetBSD__
+ #include <mntent.h>
+ #endif
+diff -ur a/fuse-2.9.3/util/fusermount.c b/fuse-2.9.3/util/fusermount.c
+--- a/fuse-2.9.3/util/fusermount.c
++++ b/fuse-2.9.3/util/fusermount.c
+@@ -19,6 +19,7 @@
+ #include <getopt.h>
+ #include <errno.h>
+ #include <fcntl.h>
++#include <paths.h>
+ #include <pwd.h>
+ #include <mntent.h>
+ #include <sys/wait.h>
+diff -ur a/fuse-2.9.3/util/mount_util.c b/fuse-2.9.3/util/mount_util.c
+--- a/fuse-2.9.3/util/mount_util.c
++++ b/fuse-2.9.3/util/mount_util.c
+@@ -16,6 +16,7 @@
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <limits.h>
++#include <paths.h>
+ #ifndef __NetBSD__
+ #include <mntent.h>
+ #endif

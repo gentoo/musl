@@ -1,0 +1,11 @@
+--- a/emacs-24.3/src/print.c
++++ b/emacs-24.3/src/print.c
+@@ -733,7 +733,7 @@
+   print_output_debug_flag = x;
+ }
+ 
+-#if defined (GNU_LINUX)
++#if 0
+ 
+ /* This functionality is not vitally important in general, so we rely on
+    non-portable ability to use stderr as lvalue.  */

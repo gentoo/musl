@@ -1,0 +1,29 @@
+Portability fixes:
+
+- Initialize outbuf with the expected size! fixes a segfault with musl.
+- Really use __builtin_va_arg_pack_len().
+
+--- a/src/efivar.h
++++ b/src/efivar.h
+@@ -85,7 +85,7 @@ efi_set_variable(efi_guid_t guid, const char *name,
+ 		return -1;
+ 	}
+ 
+-	if (__va_arg_pack_len() == 0)
++	if (__builtin_va_arg_pack_len() == 0)
+ 		return _efi_set_variable(guid, name, data, data_size,
+ 					 attributes, 0644);
+ 
+diff --git a/src/makeguids.c b/src/makeguids.c
+index 321a7e7..7d68b8a 100644
+--- a/src/makeguids.c
++++ b/src/makeguids.c
+@@ -100,7 +100,7 @@ main(int argc, char *argv[])
+ 		err(1, "makeguids: could not read \"%s\"", argv[1]);
+ 
+ 	/* strictly speaking, this *has* to be too large. */
+-	struct guidname *outbuf = calloc(inlen, sizeof (char));
++	struct guidname *outbuf = calloc(inlen, sizeof (struct guidname));
+ 	if (!outbuf)
+ 		err(1, "makeguids");
+ 

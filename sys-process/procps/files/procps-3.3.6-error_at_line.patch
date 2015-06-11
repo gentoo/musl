@@ -1,0 +1,12 @@
+ps/display.c:65:7: warning: implicit declaration of function ‘error_at_line’ [-Wimplicit-function-declaration]
+
+--- ps/display.c
++++ ps/display.c
+@@ -25,6 +25,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <error.h> /* error_at_line */
+ 
+ #include <sys/sysmacros.h>
+ #include <sys/types.h>

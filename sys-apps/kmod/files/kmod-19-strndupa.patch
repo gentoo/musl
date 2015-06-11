@@ -1,0 +1,23 @@
+From efb5bfaca938fa5991865c1e9a0c730dc919708c Mon Sep 17 00:00:00 2001
+From: Natanael Copa <ncopa@alpinelinux.org>
+Date: Mon, 17 Nov 2014 09:36:29 +0100
+Subject: util: fix build on systems missing strndupa
+
+we need include shared/missing.h to be able to compile on sysmtes that
+lacks strndupa.
+
+diff --git a/shared/util.c b/shared/util.c
+index 855d4e4..23bbb26 100644
+--- a/shared/util.c
++++ b/shared/util.c
+@@ -30,6 +30,7 @@
+ #include <string.h>
+ #include <unistd.h>
+ 
++#include <shared/missing.h>
+ #include <shared/util.h>
+ 
+ #define USEC_PER_SEC  1000000ULL
+-- 
+cgit v0.10.1
+

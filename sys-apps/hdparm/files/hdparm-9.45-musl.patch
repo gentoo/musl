@@ -1,0 +1,35 @@
+diff -ur a/hdparm-9.45/fallocate.c b/hdparm-9.45/fallocate.c
+--- a/hdparm-9.45/fallocate.c	2010-10-04 20:38:39.000000000 -0100
++++ b/hdparm-9.45/fallocate.c	2015-01-28 21:19:59.201795557 -0100
+@@ -27,7 +27,7 @@
+ 	err = EINVAL;
+ #else
+ 	int fd;
+-	loff_t offset = 0, len;
++	off_t offset = 0, len;
+ 	int mode = 0;
+ 
+ 	fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0600);
+diff -ur a/hdparm-9.45/hdparm.h b/hdparm-9.45/hdparm.h
+--- a/hdparm-9.45/hdparm.h	2014-09-27 14:31:18.000000000 -0100
++++ b/hdparm-9.45/hdparm.h	2015-01-28 21:19:08.662427386 -0100
+@@ -1,7 +1,7 @@
+ /* Some prototypes for extern functions. */
+ 
+ //#undef __KERNEL_STRICT_NAMES
+-#include <linux/types.h>
++#include <sys/types.h>
+ 
+ #if !defined(__GNUC__) && !defined(__attribute__)
+ #define __attribute__(x)
+diff -ur a/hdparm-9.45/sysfs.c b/hdparm-9.45/sysfs.c
+--- a/hdparm-9.45/sysfs.c	2010-10-04 20:39:20.000000000 -0100
++++ b/hdparm-9.45/sysfs.c	2015-01-28 21:19:25.692214485 -0100
+@@ -13,6 +13,7 @@
+ #include <fcntl.h>
+ #include <errno.h>
+ #include <dirent.h>
++#include <limits.h>
+ #include <sys/stat.h>
+ #include <linux/types.h>
+ 

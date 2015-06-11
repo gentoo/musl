@@ -1,0 +1,12 @@
+Patch sent to dhowells@redhat.com
+
+--- a/keyutils-1.5.9/key.dns_resolver.c	2014-02-21 17:18:24.000000000 -0200
++++ b/keyutils-1.5.9/key.dns_resolver.c	2015-04-03 17:29:22.517832174 -0200
+@@ -42,6 +42,7 @@
+ #include <netinet/in.h>
+ #include <arpa/nameser.h>
+ #include <arpa/inet.h>
++#include <limits.h>
+ #include <resolv.h>
+ #include <getopt.h>
+ #include <sys/types.h>

@@ -1,0 +1,618 @@
+--- ./tirpc/rpc/xdr.h.orig	2014-11-28 09:09:44.902289976 +0000
++++ ./tirpc/rpc/xdr.h	2014-11-28 09:09:44.903289976 +0000
+@@ -40,7 +40,9 @@
+ 
+ #ifndef _TIRPC_XDR_H
+ #define _TIRPC_XDR_H
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <stdio.h>
+ #include <netinet/in.h>
+ 
+--- ./tirpc/rpc/pmap_prot.h.orig	2014-11-28 09:09:44.901289976 +0000
++++ ./tirpc/rpc/pmap_prot.h	2014-11-28 09:09:44.902289976 +0000
+@@ -71,7 +71,9 @@
+ 
+ #ifndef _RPC_PMAP_PROT_H
+ #define _RPC_PMAP_PROT_H
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ #define PMAPPORT		((u_short)111)
+ #define PMAPPROG		((u_long)100000)
+--- ./tirpc/rpc/auth.h.orig	2014-11-28 09:09:44.896289976 +0000
++++ ./tirpc/rpc/auth.h	2014-11-28 09:09:44.897289976 +0000
+@@ -48,7 +48,9 @@
+ 
+ #include <rpc/xdr.h>
+ #include <rpc/clnt_stat.h>
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <sys/socket.h>
+ #include <sys/types.h>
+ 
+--- ./tirpc/rpc/svc.h.orig	2014-11-28 09:09:44.904289976 +0000
++++ ./tirpc/rpc/svc.h	2014-11-28 09:09:44.905289976 +0000
+@@ -40,7 +40,9 @@
+ 
+ #ifndef _TIRPC_SVC_H
+ #define _TIRPC_SVC_H
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * This interface must manage two items concerning remote procedure calling:
+--- ./tirpc/rpc/svc_soc.h.orig	2014-11-28 09:09:44.906289976 +0000
++++ ./tirpc/rpc/svc_soc.h	2014-11-28 09:09:44.907289976 +0000
+@@ -38,7 +38,9 @@
+ 
+ #ifndef _RPC_SVC_SOC_H
+ #define _RPC_SVC_SOC_H
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /* #pragma ident   "@(#)svc_soc.h  1.11    94/04/25 SMI" */
+ /*      svc_soc.h 1.8 89/05/01 SMI      */
+--- ./tirpc/rpc/clnt_soc.h.orig	2014-11-28 09:09:44.893289976 +0000
++++ ./tirpc/rpc/clnt_soc.h	2014-11-28 09:09:44.894289976 +0000
+@@ -46,7 +46,9 @@
+  * with TS-RPC.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ #define UDPMSGSIZE      8800    /* rpc imposed limit on udp msg size */  
+ 
+--- ./tirpc/rpc/rpc_com.h.orig	2014-11-28 09:09:44.894289976 +0000
++++ ./tirpc/rpc/rpc_com.h	2014-11-28 09:09:44.894289976 +0000
+@@ -41,7 +41,9 @@
+ #ifndef _RPC_RPCCOM_H
+ #define	_RPC_RPCCOM_H
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /* #pragma ident	"@(#)rpc_com.h	1.11	93/07/05 SMI" */
+ 
+--- ./tirpc/rpc/auth_unix.h.orig	2014-11-28 09:09:44.905289976 +0000
++++ ./tirpc/rpc/auth_unix.h	2014-11-28 09:09:44.906289976 +0000
+@@ -45,7 +45,9 @@
+ 
+ #ifndef _TIRPC_AUTH_UNIX_H
+ #define _TIRPC_AUTH_UNIX_H
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /* The machine name is part of a credential; it may not exceed 255 bytes */
+ #define MAX_MACHINE_NAME 255
+--- ./tirpc/rpc/pmap_rmt.h.orig	2014-11-28 09:09:44.899289976 +0000
++++ ./tirpc/rpc/pmap_rmt.h	2014-11-28 09:09:44.900289976 +0000
+@@ -41,7 +41,9 @@
+ 
+ #ifndef _RPC_PMAP_RMT_H
+ #define _RPC_PMAP_RMT_H
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ struct rmtcallargs {
+ 	u_long prog, vers, proc, arglen;
+--- ./tirpc/rpc/des_crypt.h.orig	2014-11-28 09:09:44.900289976 +0000
++++ ./tirpc/rpc/des_crypt.h	2014-11-28 09:09:44.901289976 +0000
+@@ -43,7 +43,9 @@
+ #ifndef _DES_DES_CRYPT_H
+ #define _DES_DES_CRYPT_H
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <rpc/rpc.h>
+ 
+ #define DES_MAXDATA 8192	/* max bytes encrypted in one call */
+--- ./tirpc/rpc/clnt.h.orig	2014-11-28 09:09:44.897289976 +0000
++++ ./tirpc/rpc/clnt.h	2014-11-28 09:09:44.899289976 +0000
+@@ -42,7 +42,9 @@
+ #include <rpc/clnt_stat.h>
+ #include <rpc/auth.h>
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <netconfig.h>
+ #include <sys/un.h>
+ 
+--- ./tirpc/rpc/pmap_clnt.h.orig	2014-11-28 09:09:44.895289976 +0000
++++ ./tirpc/rpc/pmap_clnt.h	2014-11-28 09:09:44.895289976 +0000
+@@ -63,7 +63,9 @@
+ 
+ #ifndef _RPC_PMAP_CLNT_H_
+ #define _RPC_PMAP_CLNT_H_
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ __BEGIN_DECLS
+ extern bool_t		pmap_set(u_long, u_long, int, int);
+--- ./tirpc/rpcsvc/crypt.x.orig	2014-11-28 09:09:44.907289976 +0000
++++ ./tirpc/rpcsvc/crypt.x	2014-11-28 09:09:44.908289976 +0000
+@@ -31,7 +31,9 @@
+  */
+ 
+ #ifndef RPC_HDR
+-%#include <sys/cdefs.h>
++%#ifdef __GLIBC__
++%#include <sys/cdefs.h>
++%#endif
+ %__FBSDID("$FreeBSD: src/include/rpcsvc/crypt.x,v 1.5 2003/05/04 02:51:42 obrien Exp $");
+ #endif
+ 
+--- ./src/auth_none.c.orig	2014-11-28 09:09:44.875289976 +0000
++++ ./src/auth_none.c	2014-11-28 09:09:44.876289976 +0000
+@@ -31,7 +31,9 @@
+ static char *sccsid = "@(#)auth_none.c 1.19 87/08/11 Copyr 1984 Sun Micro";
+ static char *sccsid = "@(#)auth_none.c	2.1 88/07/29 4.0 RPCSRC";
+ #endif
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ __FBSDID("$FreeBSD: src/lib/libc/rpc/auth_none.c,v 1.12 2002/03/22 23:18:35 obrien Exp $");
+ */
+ 
+--- ./src/crypt_client.c.orig	2014-11-28 09:09:44.886289976 +0000
++++ ./src/crypt_client.c	2014-11-28 09:09:44.886289976 +0000
+@@ -30,7 +30,9 @@
+  * SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ #include <err.h>
+ #include <sys/types.h>
+--- ./src/xdr_reference.c.orig	2014-11-28 09:09:44.858289976 +0000
++++ ./src/xdr_reference.c	2014-11-28 09:09:44.859289976 +0000
+@@ -26,8 +26,12 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * xdr_reference.c, Generic XDR routines impelmentation.
+--- ./src/auth_unix.c.orig	2014-11-28 09:09:44.863289976 +0000
++++ ./src/auth_unix.c	2014-11-28 09:09:44.864289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * auth_unix.c, Implements UNIX style authentication parameters.
+--- ./src/authdes_prot.c.orig	2014-11-28 09:09:44.868289976 +0000
++++ ./src/authdes_prot.c	2014-11-28 09:09:44.869289976 +0000
+@@ -1,4 +1,6 @@
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ /*
+  * Copyright (c) 2009, Sun Microsystems, Inc.
+  * All rights reserved.
+--- ./src/rpcb_st_xdr.c.orig	2014-11-28 09:09:44.847289976 +0000
++++ ./src/rpcb_st_xdr.c	2014-11-28 09:09:44.848289976 +0000
+@@ -35,7 +35,9 @@
+  * routines used with the rpcbind stats facility.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ #include <rpc/rpc.h>
+ 
+--- ./src/auth_time.c.orig	2014-11-28 09:09:44.887289976 +0000
++++ ./src/auth_time.c	2014-11-28 09:09:44.888289976 +0000
+@@ -25,7 +25,9 @@
+  *	needed to deal with TCP connections.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <stdio.h>
+ #include <syslog.h>
+ #include <string.h>
+--- ./src/des_crypt.c.orig	2014-11-28 09:09:44.871289976 +0000
++++ ./src/des_crypt.c	2014-11-28 09:09:44.872289976 +0000
+@@ -39,7 +39,9 @@
+ static char sccsid[] = "@(#)des_crypt.c	2.2 88/08/10 4.0 RPCSRC; from 1.13 88/02/08 SMI";
+ #endif
+ #endif
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ static int common_crypt( char *, char *, unsigned, unsigned, struct desparams * );
+ int (*__des_crypt_LOCAL)() = 0;
+--- ./src/svc_vc.c.orig	2014-11-28 09:09:44.878289976 +0000
++++ ./src/svc_vc.c	2014-11-28 09:09:44.879289976 +0000
+@@ -27,7 +27,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * svc_vc.c, Server side for Connection Oriented based RPC. 
+--- ./src/xdr_float.c.orig	2014-11-28 09:09:44.882289976 +0000
++++ ./src/xdr_float.c	2014-11-28 09:09:44.883289976 +0000
+@@ -27,7 +27,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * xdr_float.c, Generic XDR routines implementation.
+--- ./src/xdr_sizeof.c.orig	2014-11-28 09:09:44.865289976 +0000
++++ ./src/xdr_sizeof.c	2014-11-28 09:09:44.866289976 +0000
+@@ -34,7 +34,9 @@
+  * when serialized using XDR.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ #include <rpc/types.h>
+ #include <rpc/xdr.h>
+--- ./src/xdr_array.c.orig	2014-11-28 09:09:44.892289976 +0000
++++ ./src/xdr_array.c	2014-11-28 09:09:44.893289976 +0000
+@@ -27,7 +27,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * xdr_array.c, Generic XDR routines impelmentation.
+--- ./src/rpc_generic.c.orig	2014-11-28 09:09:44.842289976 +0000
++++ ./src/rpc_generic.c	2014-11-28 09:09:44.844289976 +0000
+@@ -29,7 +29,9 @@
+  * Copyright (c) 1986-1991 by Sun Microsystems Inc. 
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * rpc_generic.c, Miscl routines for RPC.
+--- ./src/getpeereid.c.orig	2014-11-28 09:09:44.855289976 +0000
++++ ./src/getpeereid.c	2014-11-28 09:09:44.856289976 +0000
+@@ -24,7 +24,9 @@
+  * SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ #include <sys/param.h>
+ #include <sys/socket.h>
+--- ./src/xdr_stdio.c.orig	2014-11-28 09:09:44.880289976 +0000
++++ ./src/xdr_stdio.c	2014-11-28 09:09:44.881289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * xdr_stdio.c, XDR implementation on standard i/o file.
+--- ./src/clnt_bcast.c.orig	2014-11-28 09:09:44.859289976 +0000
++++ ./src/clnt_bcast.c	2014-11-28 09:09:44.861289976 +0000
+@@ -28,7 +28,9 @@
+ /*
+  * Copyright (c) 1986-1991 by Sun Microsystems Inc. 
+  */
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * clnt_bcast.c
+--- ./src/xdr_mem.c.orig	2014-11-28 09:09:44.876289976 +0000
++++ ./src/xdr_mem.c	2014-11-28 09:09:44.877289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * xdr_mem.h, XDR implementation using memory buffers.
+--- ./src/key_call.c.orig	2014-11-28 09:09:44.889289976 +0000
++++ ./src/key_call.c	2014-11-28 09:09:44.890289976 +0000
+@@ -30,7 +30,9 @@
+  */
+ 
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * key_call.c, Interface to keyserver
+--- ./src/svc_simple.c.orig	2014-11-28 09:09:44.874289976 +0000
++++ ./src/svc_simple.c	2014-11-28 09:09:44.875289976 +0000
+@@ -29,7 +29,9 @@
+  * Copyright (c) 1986-1991 by Sun Microsystems Inc. 
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * svc_simple.c
+--- ./src/mt_misc.c.orig	2014-11-28 09:09:44.870289976 +0000
++++ ./src/mt_misc.c	2014-11-28 09:09:44.871289976 +0000
+@@ -1,5 +1,7 @@
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <pthread.h>
+ #include <reentrant.h>
+ #include <rpc/rpc.h>
+--- ./src/authunix_prot.c.orig	2014-11-28 09:09:44.885289976 +0000
++++ ./src/authunix_prot.c	2014-11-28 09:09:44.885289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * authunix_prot.c
+--- ./src/des_soft.c.orig	2014-11-28 09:09:44.851289976 +0000
++++ ./src/des_soft.c	2014-11-28 09:09:44.851289976 +0000
+@@ -1,4 +1,6 @@
+-//#include <sys/cdefs.h>
++//#ifdef __GLIBC__
++#include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * Copyright (c) 2009, Sun Microsystems, Inc.
+--- ./src/rpcdname.c.orig	2014-11-28 09:09:44.850289976 +0000
++++ ./src/rpcdname.c	2014-11-28 09:09:44.850289976 +0000
+@@ -25,7 +25,9 @@
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * rpcdname.c
+--- ./src/getnetpath.c.orig	2014-11-28 09:09:44.884289976 +0000
++++ ./src/getnetpath.c	2014-11-28 09:09:44.884289976 +0000
+@@ -25,13 +25,17 @@
+  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * Copyright (c) 1989 by Sun Microsystems, Inc.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <stdio.h>
+ #include <errno.h>
+ #include <netconfig.h>
+--- ./src/svc_dg.c.orig	2014-11-28 09:09:44.852289976 +0000
++++ ./src/svc_dg.c	2014-11-28 09:09:44.853289976 +0000
+@@ -31,7 +31,9 @@
+  * Copyright (c) 1986-1991 by Sun Microsystems Inc.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * svc_dg.c, Server side for connectionless RPC.
+--- ./src/rpc_com.h.orig	2014-11-28 09:09:44.845289976 +0000
++++ ./src/rpc_com.h	2014-11-28 09:09:44.846289976 +0000
+@@ -40,7 +40,9 @@
+ #ifndef _TIRPC_RPCCOM_H
+ #define	_TIRPC_RPCCOM_H
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /* #pragma ident	"@(#)rpc_com.h	1.11	93/07/05 SMI" */
+ 
+--- ./src/pmap_getmaps.c.orig	2014-11-28 09:09:44.891289976 +0000
++++ ./src/pmap_getmaps.c	2014-11-28 09:09:44.892289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * pmap_getmap.c
+--- ./src/pmap_clnt.c.orig	2014-11-28 09:09:44.869289976 +0000
++++ ./src/pmap_clnt.c	2014-11-28 09:09:44.870289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * pmap_clnt.c
+--- ./src/bindresvport.c.orig	2014-11-28 09:09:44.848289976 +0000
++++ ./src/bindresvport.c	2014-11-28 09:09:44.849289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * Copyright (c) 1987 by Sun Microsystems, Inc.
+--- ./src/xdr_rec.c.orig	2014-11-28 09:09:44.866289976 +0000
++++ ./src/xdr_rec.c	2014-11-28 09:09:44.868289976 +0000
+@@ -27,8 +27,12 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * xdr_rec.c, Implements TCP/IP based XDR streams with a "record marking"
+--- ./src/clnt_perror.c.orig	2014-11-28 09:09:44.854289976 +0000
++++ ./src/clnt_perror.c	2014-11-28 09:09:44.855289976 +0000
+@@ -27,7 +27,9 @@
+  */
+ 
+ /*
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ */
+ /*
+  * clnt_perror.c
+--- ./src/key_prot_xdr.c.orig	2014-11-28 09:09:44.888289976 +0000
++++ ./src/key_prot_xdr.c	2014-11-28 09:09:44.889289976 +0000
+@@ -33,7 +33,9 @@
+  */
+ /* Copyright (c)  1990, 1991 Sun Microsystems, Inc. */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /* 
+  * Compiled from key_prot.x using rpcgen.
+--- ./src/getnetconfig.c.orig	2014-11-28 09:09:44.856289976 +0000
++++ ./src/getnetconfig.c	2014-11-28 09:09:44.858289976 +0000
+@@ -32,7 +32,9 @@
+  
+ #include <pthread.h>
+ #include <reentrant.h>
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <stdio.h>
+ #include <errno.h>
+ #include <netconfig.h>
+--- ./src/getpublickey.c.orig	2014-11-28 09:09:44.844289976 +0000
++++ ./src/getpublickey.c	2014-11-28 09:09:44.845289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ /*
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ */
+ 
+ /*
+--- ./src/clnt_simple.c.orig	2014-11-28 09:09:44.881289976 +0000
++++ ./src/clnt_simple.c	2014-11-28 09:09:44.882289976 +0000
+@@ -29,7 +29,9 @@
+  * Copyright (c) 1986-1991 by Sun Microsystems Inc. 
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * clnt_simple.c
+--- ./src/auth_des.c.orig	2014-11-28 09:09:44.872289976 +0000
++++ ./src/auth_des.c	2014-11-28 09:09:44.874289976 +0000
+@@ -38,7 +38,9 @@
+ #include <string.h>
+ #include <stdlib.h>
+ #include <unistd.h>
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ #include <rpc/des_crypt.h>
+ #include <syslog.h>
+ #include <rpc/types.h>
+@@ -52,7 +54,9 @@
+ 
+ #if defined(LIBC_SCCS) && !defined(lint)
+ #endif
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ #include "debug.h"
+ 
+--- ./src/xdr.c.orig	2014-11-28 09:09:44.861289976 +0000
++++ ./src/xdr.c	2014-11-28 09:09:44.863289976 +0000
+@@ -26,7 +26,9 @@
+  * POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifdef __GLIBC__
+ #include <sys/cdefs.h>
++#endif
+ 
+ /*
+  * xdr.c, Generic XDR routines implementation.

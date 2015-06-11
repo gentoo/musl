@@ -1,0 +1,20 @@
+--- a/wine-1.6.2/dlls/ws2_32/socket.c
++++ b/wine-1.6.2/dlls/ws2_32/socket.c
+@@ -2835,7 +2835,7 @@
+             return SOCKET_ERROR;
+         } /* end switch(optname) */
+     }/* end case WS_SOL_SOCKET */
+-#ifdef HAS_IPX
++#if 0
+     case NSPROTO_IPX:
+     {
+         struct WS_sockaddr_ipx addr;
+@@ -4372,7 +4372,7 @@
+         }
+         break; /* case WS_SOL_SOCKET */
+ 
+-#ifdef HAS_IPX
++#if 0
+     case NSPROTO_IPX:
+         switch(optname)
+         {

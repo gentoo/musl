@@ -1,0 +1,147 @@
+diff --git a/src/kbdinfo.c b/src/kbdinfo.c
+index e5f122d..dcdcac0 100644
+--- a/src/kbdinfo.c
++++ b/src/kbdinfo.c
+@@ -1,6 +1,5 @@
+ #include <stdio.h>
+ #include <errno.h>
+-#include <error.h>
+ #include <unistd.h>
+ #include <sys/ioctl.h>
+ #include <linux/kd.h>
+@@ -9,6 +8,10 @@
+ #include "nls.h"
+ #include "version.h"
+ 
++#define error(e, n, ...)               \
++       fprintf(stderr, ##__VA_ARGS__); \
++       exit(e);
++
+ static const char *action = NULL;
+ static const char *value  = NULL;
+ 
+diff --git a/src/kbdrate.c b/src/kbdrate.c
+index 2ab8388..5faff00 100644
+--- a/src/kbdrate.c
++++ b/src/kbdrate.c
+@@ -74,6 +74,7 @@ beats rebuilding the kernel!
+ #include <errno.h>
+ #include <sys/file.h>
+ #include <sys/ioctl.h>
++#include <fcntl.h>
+ #include <linux/kd.h>
+ 
+ #ifdef __sparc__
+diff --git a/src/libkeymap/dump.c b/src/libkeymap/dump.c
+index 0262e24..606931e 100644
+--- a/src/libkeymap/dump.c
++++ b/src/libkeymap/dump.c
+@@ -13,6 +13,7 @@
+ #include <string.h>
+ #include <ctype.h>
+ #include <unistd.h>
++#include <sys/types.h>
+ 
+ #include "keymap.h"
+ 
+diff --git a/src/libkeymap/kmap.c b/src/libkeymap/kmap.c
+index 67be81e..e13498b 100644
+--- a/src/libkeymap/kmap.c
++++ b/src/libkeymap/kmap.c
+@@ -1,5 +1,6 @@
+ #include <stdlib.h>
+ #include <string.h>
++#include <sys/types.h>
+ 
+ #include "nls.h"
+ #include "kbd.h"
+diff --git a/src/libkeymap/summary.c b/src/libkeymap/summary.c
+index 46df90d..0912ae8 100644
+--- a/src/libkeymap/summary.c
++++ b/src/libkeymap/summary.c
+@@ -9,6 +9,7 @@
+ #include <string.h>
+ #include <errno.h>
+ #include <sys/ioctl.h>
++#include <sys/types.h>
+ 
+ #include "keymap.h"
+ 
+diff --git a/src/openvt.c b/src/openvt.c
+index 075136f..49720d7 100644
+--- a/src/openvt.c
++++ b/src/openvt.c
+@@ -10,6 +10,7 @@
+ #include <sys/vt.h>
+ #include <sys/wait.h>
+ #include <sys/file.h>
++#include <fcntl.h>
+ 
+ #include "version.h"
+ #include "xmalloc.h"
+@@ -19,6 +20,8 @@
+ #include "compat/linux-limits.h"
+ #endif
+ 
++#define NAME_MAX 255
++
+ // There must be a universal way to find these!
+ #define TRUE (1)
+ #define FALSE (0)
+diff --git a/src/setvtrgb.c b/src/setvtrgb.c
+index f99badc..f1a631c 100644
+--- a/src/setvtrgb.c
++++ b/src/setvtrgb.c
+@@ -5,12 +5,15 @@
+ #include <sys/ioctl.h>
+ #include <linux/kd.h>
+ #include <errno.h>
+-#include <error.h>
+ #include "kbd.h"
+ #include "getfd.h"
+ #include "nls.h"
+ #include "version.h"
+ 
++#define error(e, n, ...)               \
++       fprintf(stderr, ##__VA_ARGS__); \
++       exit(e);
++
+ static unsigned char *cmap;
+ 
+ /* Standard VGA terminal colors, matching those hardcoded in the Linux kernel's
+diff --git a/src/vlock/auth.c b/src/vlock/auth.c
+index da135ce..a3f365b 100644
+--- a/src/vlock/auth.c
++++ b/src/vlock/auth.c
+@@ -22,7 +22,6 @@
+ */
+ 
+ #include <errno.h>
+-#include <error.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdlib.h>
+diff --git a/src/vlock/vlock.c b/src/vlock/vlock.c
+index c2c4158..fa2f386 100644
+--- a/src/vlock/vlock.c
++++ b/src/vlock/vlock.c
+@@ -23,7 +23,6 @@
+ 
+ #include <stdio.h>
+ #include <errno.h>
+-#include <error.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <unistd.h>
+diff --git a/src/vlock/vt.c b/src/vlock/vt.c
+index 4e5282b..f3ba85d 100644
+--- a/src/vlock/vt.c
++++ b/src/vlock/vt.c
+@@ -23,7 +23,6 @@
+ 
+ #include <stdio.h>
+ #include <errno.h>
+-#include <error.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <unistd.h>
