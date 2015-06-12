@@ -12,7 +12,7 @@ HOMEPAGE="http://developer.gnome.org/libgtop/stable/"
 
 LICENSE="GPL-2"
 SLOT="2/10" # libgtop soname version
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="debug +introspection"
 
 RDEPEND=">=dev-libs/glib-2.6:2"
