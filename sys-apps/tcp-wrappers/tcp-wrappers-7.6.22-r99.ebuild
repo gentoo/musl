@@ -76,7 +76,7 @@ multilib_src_install() {
 	insinto /usr/include
 	doins tcpd.h
 
-	if multilib_build_binaries; then
+	if multilib_is_native_abi; then
 		gen_usr_ldscript -a wrap
 		dosbin tcpd tcpdchk tcpdmatch safe_finger try-from
 	fi
