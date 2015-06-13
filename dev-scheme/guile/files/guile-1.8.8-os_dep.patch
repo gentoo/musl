@@ -1,0 +1,10 @@
+--- a/guile-1.8.8/libguile/gc_os_dep.c
++++ b/guile-1.8.8/libguile/gc_os_dep.c
+@@ -1472,6 +1472,7 @@
+ 	  /* has the right declaration for glibc 2.1.			*/
+ #         include <sigcontext.h>
+ #       endif /* 0 == __GLIBC_MINOR__ */
++#     elif 1
+ #     else /* not 2 <= __GLIBC__ */
+         /* libc5 doesn't have <sigcontext.h>: go directly with the kernel   */
+         /* one.  Check LINUX_VERSION_CODE to see which we should reference. */
