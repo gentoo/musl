@@ -1,22 +1,25 @@
 # HG changeset patch
 # User Felix Janda <felix.janda@posteo.de>
-# Date 1424989496 -3600
-#      Thu Feb 26 23:24:56 2015 +0100
-# Node ID 6980ec675819ae01048026a1be510c64e069ffe3
-# Parent  490274146476bc459cc1a9ed9e0d3771a4fe7d57
-xpcom: Use dbtob instead of BLOCK_SIZE
+# Date 1428472846 -7200
+#      Wed Apr 08 08:00:46 2015 +0200
+# Node ID 5a447d953442dc1809a11ad8d41217b42f4766ef
+# Parent  ab0490972e1e47a356c3fc2f9e749a2d77a9739b
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1152176
+xpcom: Make (linux quota) BLOCK_SIZE explicit
 
-diff -r 490274146476 -r 6980ec675819 xpcom/io/nsLocalFileUnix.cpp
---- a/xpcom/io/nsLocalFileUnix.cpp	Thu Feb 26 22:58:09 2015 +0100
-+++ b/xpcom/io/nsLocalFileUnix.cpp	Thu Feb 26 23:24:56 2015 +0100
-@@ -1408,8 +1408,8 @@
+diff -r ab0490972e1e -r 5a447d953442 xpcom/io/nsLocalFileUnix.cpp
+--- a/xpcom/io/nsLocalFileUnix.cpp	Mon Apr 06 21:30:03 2015 -0400
++++ b/xpcom/io/nsLocalFileUnix.cpp	Wed Apr 08 08:00:46 2015 +0200
+@@ -1403,9 +1403,9 @@
+ #endif
        && dq.dqb_bhardlimit) {
      int64_t QuotaSpaceAvailable = 0;
-     // dqb_bhardlimit is count of BLOCK_SIZE blocks, dqb_curspace is bytes
+-    // dqb_bhardlimit is count of BLOCK_SIZE blocks, dqb_curspace is bytes
 -    if ((BLOCK_SIZE * dq.dqb_bhardlimit) > dq.dqb_curspace)
 -      QuotaSpaceAvailable = int64_t(BLOCK_SIZE * dq.dqb_bhardlimit - dq.dqb_curspace);
-+    if (dbtob(dq.dqb_bhardlimit) > dq.dqb_curspace)
-+      QuotaSpaceAvailable = (dbtob(dq.dqb_bhardlimit) - dq.dqb_curspace);
++    // dqb_bhardlimit is count of blocks of 1024 bytes, dqb_curspace is bytes
++    if ((1024 * dq.dqb_bhardlimit) > dq.dqb_curspace)
++      QuotaSpaceAvailable = int64_t(1024 * dq.dqb_bhardlimit - dq.dqb_curspace);
      if (QuotaSpaceAvailable < *aDiskSpaceAvailable) {
        *aDiskSpaceAvailable = QuotaSpaceAvailable;
      }

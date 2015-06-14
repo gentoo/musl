@@ -4,7 +4,8 @@
 #      Thu Feb 05 22:41:38 2015 +0100
 # Node ID 375c73854f92701f13403b8461b35727dccde825
 # Parent  2d344ef8da33717224d5a08570dc834ca2254f9f
-# https://codereview.chromium.org/278583005
+# https://code.google.com/p/chromium/issues/detail?id=463208
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1157864
 chromium sandbox: Avoid cdefs.h
 
 diff -r 2d344ef8da33 -r 375c73854f92 security/sandbox/chromium/sandbox/linux/seccomp-bpf/linux_seccomp.h

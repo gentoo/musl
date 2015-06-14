@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/www-client/firefox/firefox-37.0.1.ebuild,v 1.1 2015/04/05 23:07:55 polynomial-c Exp $
+# $Id$
 
 EAPI="5"
 VIRTUALX_REQUIRED="pgo"
@@ -27,16 +27,14 @@ if [[ ${MOZ_ESR} == 1 ]]; then
 fi
 
 # Patch version
-PATCH="${PN}-36.0-patches-01"
-# Upstream ftp release URI that's used by mozlinguas.eclass
-# We don't use the http mirror because it deletes old tarballs.
-MOZ_FTP_URI="ftp://ftp.mozilla.org/pub/${PN}/releases"
-MOZ_HTTP_URI="http://ftp.mozilla.org/pub/${PN}/releases"
+PATCH="${PN}-40.0-patches-0.01"
+
+MOZ_HTTP_URI="http://archive.mozilla.org/pub/${PN}/releases"
 
 MOZCONFIG_OPTIONAL_WIFI=1
 MOZCONFIG_OPTIONAL_JIT="enabled"
 
-inherit check-reqs flag-o-matic toolchain-funcs eutils gnome2-utils mozconfig-v5.36 multilib pax-utils fdo-mime autotools virtualx mozlinguas
+inherit check-reqs flag-o-matic toolchain-funcs eutils gnome2-utils mozconfig-v6.40 multilib pax-utils fdo-mime autotools virtualx mozlinguas
 
 DESCRIPTION="Firefox Web Browser"
 HOMEPAGE="http://www.mozilla.com/firefox"
@@ -45,20 +43,20 @@ KEYWORDS="~amd64 ~arm ~ppc ~x86"
 
 SLOT="0"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
-IUSE="bindist hardened +minimal pgo selinux +gmp-autoupdate test"
+IUSE="bindist egl hardened +minimal neon pgo selinux +gmp-autoupdate test"
 RESTRICT="!bindist? ( bindist )"
 
 # More URIs appended below...
 SRC_URI="${SRC_URI}
-	http://dev.gentoo.org/~anarchy/mozilla/patchsets/${PATCH}.tar.xz
-	http://dev.gentoo.org/~axs/distfiles/${PATCH}.tar.xz
-	http://dev.gentoo.org/~polynomial-c/mozilla/patchsets/${PATCH}.tar.xz"
+	https://dev.gentoo.org/~anarchy/mozilla/patchsets/${PATCH}.tar.xz
+	https://dev.gentoo.org/~axs/mozilla/patchsets/${PATCH}.tar.xz
+	https://dev.gentoo.org/~polynomial-c/mozilla/patchsets/${PATCH}.tar.xz"
 
 ASM_DEPEND=">=dev-lang/yasm-1.1"
 
 # Mesa 7.10 needed for WebGL + bugfixes
 RDEPEND="
-	>=dev-libs/nss-3.17.4
+	>=dev-libs/nss-3.19.2
 	>=dev-libs/nspr-4.10.8
 	selinux? ( sec-policy/selinux-mozilla )"
 
@@ -74,16 +72,14 @@ DEPEND="${RDEPEND}
 if [[ ${PV} =~ alpha ]]; then
 	CHANGESET="8a3042764de7"
 	SRC_URI="${SRC_URI}
-		http://dev.gentoo.org/~nirbheek/mozilla/firefox/firefox-${MOZ_PV}_${CHANGESET}.source.tar.bz2"
+		https://dev.gentoo.org/~nirbheek/mozilla/firefox/firefox-${MOZ_PV}_${CHANGESET}.source.tar.bz2"
 	S="${WORKDIR}/mozilla-aurora-${CHANGESET}"
 elif [[ ${PV} =~ beta ]]; then
-	S="${WORKDIR}/mozilla-beta"
+	S="${WORKDIR}/mozilla-release"
 	SRC_URI="${SRC_URI}
-		${MOZ_FTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.bz2
 		${MOZ_HTTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.bz2"
 else
 	SRC_URI="${SRC_URI}
-		${MOZ_FTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.bz2
 		${MOZ_HTTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.bz2"
 	if [[ ${MOZ_ESR} == 1 ]]; then
 		S="${WORKDIR}/mozilla-esr${PV%%.*}"
@@ -142,35 +138,27 @@ src_unpack() {
 
 src_prepare() {
 	# Apply our patches
-	EPATCH_EXCLUDE="8002_jemalloc_configure_unbashify.patch" \
 	EPATCH_SUFFIX="patch" \
 	EPATCH_FORCE="yes" \
+	EPATCH_EXCLUDE="8010_bug114311-freetype26.patch" \
 	epatch "${WORKDIR}/firefox"
-
-	epatch "${FILESDIR}"/${PN}-35.0-gmp-clearkey-sprintf.patch
-	#epatch "${FILESDIR}"/${PN}-36.0-disable-ion.patch
-	#epatch "${FILESDIR}"/${PN}-36.0-depollute-CONST-from-dtoa.patch
+	epatch "${FILESDIR}"/${PN}-38-hppa-js-syntax-error.patch #556196
+	epatch "${FILESDIR}"/${PN}-38-dont-hardcode-libc-soname.patch #557956
 
 	## patches for building with musl libc
 
 	#  already upstream
-	epatch "${FILESDIR}"/1130164.patch
-	epatch "${FILESDIR}"/1130175.patch
-	epatch "${FILESDIR}"/sctp-36.patch # backported
-	epatch "${FILESDIR}"/1130710.patch
-
-	#  others against hg
-	epatch "${FILESDIR}"/basename.patch
-	epatch "${FILESDIR}"/crashreporter.patch
-	epatch "${FILESDIR}"/fts.patch
-	epatch "${FILESDIR}"/libstagefright-cdefs.patch
-	epatch "${FILESDIR}"/profiler-gettid.patch
+	epatch "${FILESDIR}"/1152176.patch
 	epatch "${FILESDIR}"/sandbox-cdefs.patch
-	epatch "${FILESDIR}"/updater.patch
-	epatch "${FILESDIR}"/xpcom-blocksize.patch
-	epatch "${FILESDIR}"/sipcc.patch
 
-	cp "${S}"/media/mtransport/third_party/nrappkit/src/port/generic/include/sys/queue.h "${S}"/media/mtransport/third_party/nrappkit/src/port/linux/include/sys
+	#  with mozilla bug
+	epatch "${FILESDIR}"/basename.patch
+	epatch "${FILESDIR}"/updater.patch
+
+	#  others
+	epatch "${FILESDIR}"/crashreporter.patch
+	epatch "${FILESDIR}"/profiler-gettid.patch
+	epatch "${FILESDIR}"/skia.patch
 
 	## end of musl patching
 
@@ -238,6 +226,24 @@ src_configure() {
 	# Add full relro support for hardened
 	use hardened && append-ldflags "-Wl,-z,relro,-z,now"
 
+	if use neon ; then
+		mozconfig_annotate '' --with-fpu=neon
+		mozconfig_annotate '' --with-thumb=yes
+		mozconfig_annotate '' --with-thumb-interwork=no
+	fi
+
+	if [[ ${CHOST} == armv* ]] ; then
+		mozconfig_annotate '' --with-float-abi=hard
+		mozconfig_annotate '' --enable-skia
+
+		if ! use system-libvpx ; then
+			sed -i -e "s|softfp|hard|" \
+				"${S}"/media/libvpx/moz.build
+		fi
+	fi
+
+	use egl && mozconfig_annotate 'Enable EGL as GL provider' --with-gl-provider=EGL
+
 	# Setup api key for location services
 	echo -n "${_google_api_key}" > "${S}"/google-api-key
 	mozconfig_annotate '' --with-google-api-keyfile="${S}/google-api-key"
@@ -247,10 +253,6 @@ src_configure() {
 
 	# Other ff-specific settings
 	mozconfig_annotate '' --with-default-mozilla-five-home=${MOZILLA_FIVE_HOME}
-
-	# mozjemalloc doesn't build on musl yet
-	mozconfig_annotate '' --disable-replace-malloc
-	mozconfig_annotate '' --disable-jemalloc
 
 	# Allow for a proper pgo build
 	if use pgo; then
@@ -264,11 +266,10 @@ src_configure() {
 
 	if [[ $(gcc-major-version) -lt 4 ]]; then
 		append-cxxflags -fno-stack-protector
-	elif [[ $(gcc-major-version) -gt 4 || $(gcc-minor-version) -gt 3 ]]; then
-		if use amd64 || use x86; then
-			append-flags -mno-avx
-		fi
 	fi
+
+	# workaround for funky/broken upstream configure...
+	emake -f client.mk configure
 }
 
 src_compile() {
@@ -299,7 +300,7 @@ src_compile() {
 	else
 		CC="$(tc-getCC)" CXX="$(tc-getCXX)" LD="$(tc-getLD)" \
 		MOZ_MAKE_FLAGS="${MAKEOPTS}" SHELL="${SHELL}" \
-		emake -f client.mk
+		emake -f client.mk realbuild
 	fi
 
 }
@@ -401,9 +402,9 @@ src_install() {
 	doins "${T}"/10${PN} || die
 
 	# workaround to make firefox find libmozalloc.so on musl
-	insinto /etc/env.d
-	echo "LDPATH=${MOZILLA_FIVE_HOME}" >> "${T}"/20firefox
-	doins "${T}"/20firefox || die
+	into /
+	echo "LDPATH=${MOZILLA_FIVE_HOME}" > "${T}"/20firefox
+	doenvd "${T}"/20firefox || die
 }
 
 pkg_preinst() {

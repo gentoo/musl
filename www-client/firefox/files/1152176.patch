@@ -1,0 +1,31 @@
+# HG changeset patch
+# User Felix Janda <felix.janda@posteo.de>
+# Date 1431977414 -7200
+# Node ID fd517a7fc20f9a63e0d3d3246aa617a0b203d141
+# Parent  580e0c9bb03f867512b4f839edc45c338ebdb411
+Bug 1152176 - xpcom: Define linux kernel BLOCK_SIZE if necessary. r=nfroyd
+
+diff --git a/xpcom/io/nsLocalFileUnix.cpp b/xpcom/io/nsLocalFileUnix.cpp
+--- a/xpcom/io/nsLocalFileUnix.cpp
++++ b/xpcom/io/nsLocalFileUnix.cpp
+@@ -23,16 +23,19 @@
+ #if defined(VMS)
+ #include <fabdef.h>
+ #endif
+ 
+ #if defined(HAVE_SYS_QUOTA_H) && defined(HAVE_LINUX_QUOTA_H)
+ #define USE_LINUX_QUOTACTL
+ #include <sys/mount.h>
+ #include <sys/quota.h>
++#ifndef BLOCK_SIZE
++#define BLOCK_SIZE 1024 /* kernel block size */
++#endif
+ #endif
+ 
+ #include "xpcom-private.h"
+ #include "nsDirectoryServiceDefs.h"
+ #include "nsCRT.h"
+ #include "nsCOMPtr.h"
+ #include "nsMemory.h"
+ #include "nsIFile.h"
+

@@ -1,0 +1,20 @@
+--- a/mozilla-release/gfx/skia/trunk/src/core/SkUtilsArm.cpp
++++ b/mozilla-release/gfx/skia/trunk/src/core/SkUtilsArm.cpp
+@@ -109,7 +109,7 @@
+ 
+     do {
+         // open /proc/cpuinfo
+-        int fd = TEMP_FAILURE_RETRY(open("/proc/cpuinfo", O_RDONLY));
++        int fd = open("/proc/cpuinfo", O_RDONLY);
+         if (fd < 0) {
+             SkDebugf("Could not open /proc/cpuinfo: %s\n", strerror(errno));
+             break;
+@@ -119,7 +119,7 @@
+         // sentinel '\n' characters: one at the start of the buffer, and one at
+         // the end. This means we reserve the first and last buffer bytes.
+         buffer[0] = '\n';
+-        int size = TEMP_FAILURE_RETRY(read(fd, buffer+1, sizeof(buffer)-2));
++        int size = read(fd, buffer+1, sizeof(buffer)-2);
+         close(fd);
+ 
+         if (size < 0) {  // should not happen

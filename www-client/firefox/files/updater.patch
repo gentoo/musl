@@ -4,6 +4,7 @@
 #      Sat Apr 04 12:10:17 2015 +0200
 # Node ID c04cc88f3bb26e254356df6de06583a542ae6796
 # Parent  90adc073cbc6398f4fab9b1cd07b685368559f34
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1157850
 updater: no fts.h and MAXNAMLEN
 
 diff -r 90adc073cbc6 -r c04cc88f3bb2 toolkit/mozapps/update/common/updatedefines.h
