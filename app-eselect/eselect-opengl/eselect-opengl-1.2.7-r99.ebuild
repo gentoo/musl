@@ -31,7 +31,7 @@ RDEPEND=">=app-admin/eselect-1.2.4
 		 !<x11-proto/glproto-1.4.15-r1
 		 !=media-libs/mesa-10.3.4-r1
 		 !=media-libs/mesa-10.3.5-r1
-		 !>=media-libs/mesa-10.3.7-r2
+		 !>media-libs/mesa-10.3.7-r99
 		 !>=x11-proto/glproto-1.4.17-r1
 		 !=x11-base/xorg-server-1.16.4-r1
 		 !>x11-base/xorg-server-1.16.4-r99"
