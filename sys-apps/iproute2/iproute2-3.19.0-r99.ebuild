@@ -37,7 +37,6 @@ DEPEND="${RDEPEND}
 src_prepare() {
 	epatch "${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
 	use ipv6 || epatch "${FILESDIR}"/${PN}-3.10.0-no-ipv6.patch #326849
-
 	epatch "${FILESDIR}"/${PN}-3.19.0-musl.patch
 
 	sed -i \
@@ -52,7 +51,7 @@ src_prepare() {
 	# Use /run instead of /var/run.
 	sed -i \
 		-e 's:/var/run:/run:g' \
-		ip/ipnetns.c \
+		include/namespace.h \
 		man/man8/ip-netns.8 || die
 
 	# build against system headers

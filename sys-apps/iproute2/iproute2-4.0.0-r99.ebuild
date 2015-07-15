@@ -23,15 +23,16 @@ IUSE="atm berkdb +iptables ipv6 minimal selinux"
 
 RDEPEND="!net-misc/arpd
 	iptables? ( >=net-firewall/iptables-1.4.20:= )
-	!minimal? ( berkdb? ( sys-libs/db:= ) )
+	berkdb? ( sys-libs/db:= )
 	atm? ( net-dialup/linux-atm )
 	selinux? ( sys-libs/libselinux )"
+# We require newer linux-headers for ipset support #549948
 DEPEND="${RDEPEND}
 	app-arch/xz-utils
 	iptables? ( virtual/pkgconfig )
 	sys-devel/bison
 	sys-devel/flex
-	>=sys-kernel/linux-headers-2.6.27
+	>=sys-kernel/linux-headers-3.7
 	elibc_glibc? ( >=sys-libs/glibc-2.7 )"
 
 src_prepare() {
@@ -52,7 +53,7 @@ src_prepare() {
 	# Use /run instead of /var/run.
 	sed -i \
 		-e 's:/var/run:/run:g' \
-		ip/ipnetns.c \
+		include/namespace.h \
 		man/man8/ip-netns.8 || die
 
 	# build against system headers
@@ -62,7 +63,7 @@ src_prepare() {
 	# don't build arpd if USE=-berkdb #81660
 	use berkdb || sed -i '/^TARGETS=/s: arpd : :' misc/Makefile
 
-	use minimal && sed -i -e '/^SUBDIRS=/s:=.*:=lib tc:' Makefile
+	use minimal && sed -i -e '/^SUBDIRS=/s:=.*:=lib tc ip:' Makefile
 }
 
 src_configure() {
@@ -80,6 +81,8 @@ src_configure() {
 	cat <<-EOF > Config
 	TC_CONFIG_ATM := $(usex atm y n)
 	TC_CONFIG_XT  := $(usex iptables y n)
+	# We've locked in recent enough kernel headers #549948
+	TC_CONFIG_IPSET := y
 	HAVE_SELINUX  := $(usex selinux y n)
 	IP_CONFIG_SETNS := ${setns}
 	# Use correct iptables dir, #144265 #293709
@@ -91,6 +94,7 @@ src_install() {
 	if use minimal ; then
 		into /
 		dosbin tc/tc
+		dobin ip/ip
 		return 0
 	fi
 
