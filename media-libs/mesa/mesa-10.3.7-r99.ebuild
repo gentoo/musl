@@ -11,7 +11,7 @@ if [[ ${PV} = 9999* ]]; then
 	EXPERIMENTAL="true"
 fi
 
-PYTHON_COMPAT=( python{2_6,2_7} )
+PYTHON_COMPAT=( python2_7 )
 
 inherit base autotools multilib multilib-minimal flag-o-matic \
 	python-any-r1 toolchain-funcs pax-utils ${GIT_ECLASS}
@@ -40,6 +40,7 @@ fi
 LICENSE="MIT SGI-B-2.0"
 SLOT="0"
 KEYWORDS="amd64 arm ~mips ppc x86"
+RESTRICT="!bindist? ( bindist )"
 
 INTEL_CARDS="i915 i965 ilo intel"
 RADEON_CARDS="r100 r200 r300 r600 radeon radeonsi"
@@ -50,7 +51,7 @@ done
 
 IUSE="${IUSE_VIDEO_CARDS}
 	bindist +classic debug +dri3 +egl +gallium +gbm gles1 gles2 +llvm +nptl
-	opencl openvg osmesa pax_kernel openmax pic r600-llvm-compiler selinux
+	opencl openvg osmesa pax_kernel openmax pic selinux
 	+udev vdpau wayland xvmc xa kernel_FreeBSD kernel_linux"
 
 REQUIRED_USE="
@@ -59,14 +60,10 @@ REQUIRED_USE="
 	opencl? (
 		gallium
 		llvm
-		video_cards_r600? ( r600-llvm-compiler )
-		video_cards_radeon? ( r600-llvm-compiler )
-		video_cards_radeonsi? ( r600-llvm-compiler )
 	)
 	openmax? ( gallium )
 	gles1?  ( egl )
 	gles2?  ( egl )
-	r600-llvm-compiler? ( gallium llvm || ( video_cards_r600 video_cards_radeonsi video_cards_radeon ) )
 	wayland? ( egl gbm )
 	xa?  ( gallium )
 	video_cards_freedreno?  ( gallium )
@@ -119,6 +116,7 @@ RDEPEND="
 				) )
 		)
 		>=sys-devel/llvm-3.3-r3:=[${MULTILIB_USEDEP}]
+		<sys-devel/llvm-3.6
 		video_cards_radeonsi? ( >=sys-devel/llvm-3.4.2:=[${MULTILIB_USEDEP}] )
 	)
 	opencl? (
@@ -146,7 +144,6 @@ done
 DEPEND="${RDEPEND}
 	${PYTHON_DEPS}
 	llvm? (
-		r600-llvm-compiler? ( sys-devel/llvm[video_cards_radeon] )
 		video_cards_radeonsi? ( sys-devel/llvm[video_cards_radeon] )
 	)
 	opencl? (
@@ -207,6 +204,8 @@ src_prepare() {
 	fi
 
 	epatch "${FILESDIR}"/${PN}-10.3.7-dont-use-clrsb.patch
+	epatch "${FILESDIR}"/${PN}-10.3.7-format_utils.c.patch
+	epatch "${FILESDIR}"/${PN}-10.5.1-fstat-include.patch
 
 	# relax the requirement that r300 must have llvm, bug 380303
 	epatch "${FILESDIR}"/${PN}-10.2-dont-require-llvm-for-r300.patch
@@ -266,7 +265,6 @@ multilib_src_configure() {
 			$(use_enable openvg)
 			$(use_enable openvg gallium-egl)
 			$(use_enable openmax omx)
-			$(use_enable r600-llvm-compiler)
 			$(use_enable vdpau)
 			$(use_enable xa)
 			$(use_enable xvmc)
@@ -307,7 +305,7 @@ multilib_src_configure() {
 		"
 	fi
 
-	# on abi_x86_32 hardened we need to have asm disable  
+	# on abi_x86_32 hardened we need to have asm disable
 	if [[ ${ABI} == x86* ]] && use pic; then
 		myconf+=" --disable-asm"
 	fi
