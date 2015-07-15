@@ -1,16 +1,13 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/dev-qt/qtcore/qtcore-4.8.7.ebuild,v 1.1 2015/05/26 18:14:28 pesa Exp $
+# $Header: /var/cvsroot/gentoo-x86/dev-qt/qtcore/qtcore-4.8.6-r2.ebuild,v 1.9 2015/07/05 21:13:12 klausman Exp $
 
 EAPI=5
+
 inherit qt4-build-multilib
 
 DESCRIPTION="Cross-platform application development framework"
-
-if [[ ${QT4_BUILD_TYPE} == release ]]; then
-	KEYWORDS="~amd64 ~arm ~ppc ~x86"
-fi
-
+KEYWORDS="alpha amd64 arm ~arm64 hppa ~ia64 ~mips ppc ppc64 ~sparc x86 ~amd64-fbsd ~x86-fbsd ~x86-freebsd ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~x64-solaris ~x86-solaris"
 IUSE="+glib iconv icu qt3support ssl"
 
 DEPEND="
@@ -35,6 +32,7 @@ PATCHES=(
 	"${FILESDIR}/${PN}-4.8.5-moc-boost-lexical-cast.patch"
 	"${FILESDIR}/${PN}-4.8.5-honor-ExcludeSocketNotifiers-in-glib-event-loop.patch" # bug 514968
 	"${FILESDIR}/${PN}-4.8.5-qeventdispatcher-recursive.patch" # bug 514968
+	"${FILESDIR}/${PN}-4.8.6-QNAM-corruptions-fix.patch" # bug 548622
 	"${FILESDIR}/${PN}-4.8.7-fix-socklent-for-musl.patch"
 )
 
