@@ -1,0 +1,21 @@
+diff -Naur xinetd-2.3.15.orig/xinetd/confparse.c xinetd-2.3.15/xinetd/confparse.c
+--- xinetd-2.3.15.orig/xinetd/confparse.c	2007-09-20 10:58:27.000000000 -0400
++++ xinetd-2.3.15/xinetd/confparse.c	2015-07-15 17:44:58.782269320 -0400
+@@ -632,7 +632,7 @@
+           */
+          continue;
+       }
+-#if defined(HAVE_RPC_RPCENT_H) || defined(HAVE_NETDB_H)
++#ifdef HAVE_RPC_RPCENT_H
+       if ( SC_IS_RPC( scp ) && SC_IS_RPC ( tmp_scp ) )
+       {
+          const struct rpc_data *rdp1 = SC_RPCDATA( scp ) ;
+@@ -746,7 +746,7 @@
+    }
+ 
+ /* #ifndef NO_RPC */
+-#if defined(HAVE_RPC_RPCENT_H) || defined(HAVE_NETDB_H)
++#ifdef HAVE_RPC_RPCENT_H
+    if ( SC_IS_RPC( scp ) && !SC_IS_UNLISTED( scp ) )
+    {
+       struct rpcent *rep = (struct rpcent *)getrpcbyname( SC_NAME(scp) ) ;
