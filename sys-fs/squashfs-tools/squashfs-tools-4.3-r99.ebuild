@@ -28,7 +28,7 @@ DEPEND="${RDEPEND}"
 S="${WORKDIR}/squashfs${PV}/${PN}"
 
 src_prepare() {
-	epatch ${FILESDIR}/${PN}-4.2-missing-includes.patch
+	epatch "${FILESDIR}"/${PN}-4.2-missing-includes.patch
 }
 
 src_configure() {
