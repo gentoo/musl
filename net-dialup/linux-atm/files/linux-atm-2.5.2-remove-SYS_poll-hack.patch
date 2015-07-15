@@ -1,0 +1,18 @@
+diff -Naur linux-atm-2.5.2.orig/src/mpoad/io.c linux-atm-2.5.2/src/mpoad/io.c
+--- linux-atm-2.5.2.orig/src/mpoad/io.c	2007-12-31 19:14:51.000000000 -0500
++++ linux-atm-2.5.2/src/mpoad/io.c	2015-07-15 13:25:41.500014905 -0400
+@@ -10,14 +10,7 @@
+ #include <errno.h>
+ #include <sys/ioctl.h>
+ #include <sys/param.h> /* for OPEN_MAX   */
+-#if __GLIBC__ >= 2
+ #include <sys/poll.h>
+-#else /* ugly hack to make it compile on RH 4.2 - WA */
+-#include <syscall.h>
+-#include <linux/poll.h>
+-#define SYS_poll 168
+-_syscall3(int,poll,struct pollfd *,ufds,unsigned int,nfds,int,timeout);
+-#endif
+ #include <atm.h>
+ #include <linux/types.h>
+ #include <linux/atmioc.h>

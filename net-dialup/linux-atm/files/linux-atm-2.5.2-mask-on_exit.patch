@@ -1,0 +1,14 @@
+diff --git a/linux-atm-2.5.2.orig/src/sigd/atmsigd.c b/linux-atm-2.5.2/src/sigd/atmsigd.c
+index 52e41c7..3546f65 100644
+--- a/linux-atm-2.5.2.orig/src/sigd/atmsigd.c
++++ b/linux-atm-2.5.2/src/sigd/atmsigd.c
+@@ -517,7 +517,9 @@ int main(int argc,char **argv)
+ 	    exit(0);
+ 	}
+     }
++    /* on_exit() is not implemented on musl.
+     (void) on_exit(trace_on_exit,NULL);
++    */
+     poll_loop();
+     close_all();
+     for (sig = entities; sig; sig = sig->next) stop_saal(&sig->saal);
