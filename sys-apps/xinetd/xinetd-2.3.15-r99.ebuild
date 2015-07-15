@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-inherit eutils flag-o-matic systemd toolchain-funcs
+inherit autotools eutils flag-o-matic systemd toolchain-funcs
 
 DESCRIPTION="powerful replacement for inetd"
 HOMEPAGE="http://www.xinetd.org/"
@@ -28,7 +28,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-2.3.14-config.patch
 	epatch "${FILESDIR}"/${PN}-2.3.15-no-rpc-netdb_h.patch
 	epatch "${FILESDIR}"/${PN}-2.3.15-remove-XINETD_CHECK_TYPE.patch
-
+	eautoconf
 	find -name Makefile.in -exec sed -i 's:\<ar\>:$(AR):' {} +
 }
 
