@@ -1,0 +1,14 @@
+diff -Naur skey-1.1.5.orig/skey.h skey-1.1.5/skey.h
+--- skey-1.1.5.orig/skey.h	2015-07-16 21:23:26.097880936 +0000
++++ skey-1.1.5/skey.h	2015-07-16 21:45:00.553832237 +0000
+@@ -67,6 +67,10 @@
+ /* Location of random file for bogus challenges */
+ #define _SKEY_RAND_FILE_PATH_	"/var/db/host.random"
+ 
++#ifndef __P
++#define __P(x) x
++#endif
++
+ /* Prototypes */
+ void f __P ((char *));
+ int keycrunch __P ((char *, const char *, const char *));
