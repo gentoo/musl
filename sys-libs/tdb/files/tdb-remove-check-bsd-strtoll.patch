@@ -1,7 +1,7 @@
-diff -Naur tdb-1.2.11.orig/lib/replace/wscript tdb-1.2.11/lib/replace/wscript
---- tdb-1.2.11.orig/lib/replace/wscript	2012-11-30 08:51:31.000000000 +0000
-+++ tdb-1.2.11/lib/replace/wscript	2014-02-23 12:37:58.921617847 +0000
-@@ -215,21 +215,6 @@
+diff -Naur tdb-1.3.0.orig/lib/replace/wscript tdb-1.3.0/lib/replace/wscript
+--- tdb-1.3.0.orig/lib/replace/wscript	2014-05-22 22:30:38.000000000 +0000
++++ tdb-1.3.0/lib/replace/wscript	2015-07-16 22:13:34.985767738 +0000
+@@ -276,20 +276,6 @@
  
      #Some OS (ie. freebsd) return EINVAL if the convertion could not be done, it's not what we expect
      #Let's detect those cases
@@ -17,7 +17,6 @@ diff -Naur tdb-1.2.11.orig/lib/replace/wscript tdb-1.2.11/lib/replace/wscript
 -                        msg="Checking correct behavior of strtoll",
 -                        headers = 'errno.h',
 -                        execute = True,
--                        define_ret = True,
 -                        define = 'HAVE_BSD_STRTOLL',
 -                        )
      conf.CHECK_FUNCS('if_nametoindex strerror_r')
