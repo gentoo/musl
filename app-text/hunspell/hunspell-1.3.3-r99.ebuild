@@ -14,7 +14,7 @@ HOMEPAGE="http://hunspell.sourceforge.net/"
 SLOT="0"
 LICENSE="MPL-1.1 GPL-2 LGPL-2.1"
 IUSE="ncurses nls readline static-libs"
-KEYWORDS="~alpha ~amd64 arm hppa ~ia64 ~mips ~ppc ~ppc64 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~x64-solaris ~x86-solaris"
+KEYWORDS="amd64 arm ~mips ppc x86"
 
 RDEPEND="
 	ncurses? ( sys-libs/ncurses )
@@ -58,7 +58,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-1.3-renameexes.patch \
 		"${FILESDIR}"/${PN}-1.3.3-multibyte-chars.patch
 
-	epatch "${FILESDIR}"/${PN}-9999-error_h.patch
+	epatch "${FILESDIR}"/${PN}-1.3.3-error_h.patch
 
 	eautoreconf
 }
