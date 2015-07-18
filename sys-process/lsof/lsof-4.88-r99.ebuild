@@ -1,8 +1,8 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-process/lsof/lsof-4.85-r2.ebuild,v 1.12 2014/01/20 06:40:56 vapier Exp $
+# $Header: /var/cvsroot/gentoo-x86/sys-process/lsof/lsof-4.88-r1.ebuild,v 1.6 2015/07/17 20:05:46 maekke Exp $
 
-EAPI="2"
+EAPI="4"
 
 inherit eutils flag-o-matic toolchain-funcs
 
@@ -10,12 +10,11 @@ MY_P=${P/-/_}
 DESCRIPTION="Lists open files for running Unix processes"
 HOMEPAGE="ftp://lsof.itap.purdue.edu/pub/tools/unix/lsof/"
 SRC_URI="ftp://lsof.itap.purdue.edu/pub/tools/unix/lsof/${MY_P}.tar.bz2
-	ftp://vic.cc.purdue.edu/pub/tools/unix/lsof/${MY_P}.tar.bz2
-	ftp://ftp.cerias.purdue.edu/pub/tools/unix/sysutils/lsof/${MY_P}.tar.bz2"
+	ftp://lsof.itap.purdue.edu/pub/tools/unix/lsof/OLD/${MY_P}.tar.bz2"
 
 LICENSE="lsof"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm ~mips ~ppc x86"
 IUSE="examples ipv6 rpc selinux static"
 
 RDEPEND="rpc? ( net-libs/libtirpc )
@@ -32,9 +31,13 @@ src_unpack() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${P}-fix-missing-netinet_tcp_h.patch #for musl
-	epatch "${FILESDIR}"/${P}-arg.c.patch #388555
+	epatch "${FILESDIR}"/${PN}-4.87-remove-glibc-check.patch
 	epatch "${FILESDIR}"/${PN}-4.85-cross.patch #432120
+	epatch "${FILESDIR}"/${P}-linux.dnode.c.patch
+	# fix POSIX compliance with `echo`
+	sed -i \
+		-e 's:echo -n:printf:' \
+		AFSConfig Configure Customize Inventory tests/CkTestDB || die
 	# convert `test -r header.h` into a compile test
 	sed -i -r \
 		-e 's:test -r \$\{LSOF_INCLUDE\}/([[:alnum:]/._]*):echo "#include <\1>" | ${LSOF_CC} ${LSOF_CFGF} -E - >/dev/null 2>\&1:' \
@@ -42,7 +45,16 @@ src_prepare() {
 		Configure || die
 }
 
-target() { usex kernel_FreeBSD freebsd linux ; }
+target() {
+	case ${CHOST} in
+	*-darwin*)  echo darwin  ;;
+	*-freebsd*) echo freebsd ;;
+	*-solaris*) echo solaris ;;
+	*-aix*)     echo aixgcc  ;;
+	*)          echo linux   ;;
+	esac
+}
+
 src_configure() {
 	use static && append-ldflags -static
 
@@ -65,17 +77,27 @@ src_configure() {
 }
 
 src_compile() {
-	emake DEBUG="" all || die
+	emake DEBUG="" all
 }
 
 src_install() {
-	dobin lsof || die
+	dobin lsof
 
 	if use examples ; then
 		insinto /usr/share/lsof/scripts
-		doins scripts/* || die
+		doins scripts/*
 	fi
 
-	doman lsof.8 || die
+	doman lsof.8
 	dodoc 00*
+}
+
+pkg_postinst() {
+	if [[ ${CHOST} == *-solaris* ]] ; then
+		einfo "Note: to use lsof on Solaris you need read permissions on"
+		einfo "/dev/kmem, i.e. you need to be root, or to be in the group sys"
+	elif [[ ${CHOST} == *-aix* ]] ; then
+		einfo "Note: to use lsof on AIX you need read permissions on /dev/mem and"
+		einfo "/dev/kmem, i.e. you need to be root, or to be in the group system"
+	fi
 }
