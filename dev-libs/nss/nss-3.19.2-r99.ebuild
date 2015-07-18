@@ -1,11 +1,11 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/dev-libs/nss/nss-3.17.4.ebuild,v 1.3 2015/03/26 11:36:48 ago Exp $
+# $Header: /var/cvsroot/gentoo-x86/dev-libs/nss/nss-3.19.2.ebuild,v 1.5 2015/07/14 15:29:53 klausman Exp $
 
 EAPI=5
 inherit eutils flag-o-matic multilib toolchain-funcs multilib-minimal
 
-NSPR_VER="4.10.6-r1"
+NSPR_VER="4.10.8"
 RTM_NAME="NSS_${PV//./_}_RTM"
 # Rev of https://git.fedorahosted.org/cgit/nss-pem.git
 PEM_GIT_REV="015ae754dd9f6fbcd7e52030ec9732eb27fc06a8"
@@ -19,14 +19,15 @@ SRC_URI="ftp://ftp.mozilla.org/pub/mozilla.org/security/nss/releases/${RTM_NAME}
 
 LICENSE="|| ( MPL-2.0 GPL-2 LGPL-2.1 )"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 ~arm ~mips ~ppc ~x86"
 IUSE="+cacert +nss-pem utils"
-
+CDEPEND=">=dev-db/sqlite-3.8.2[${MULTILIB_USEDEP}]
+	>=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}]"
 DEPEND=">=virtual/pkgconfig-0-r1[${MULTILIB_USEDEP}]
-	>=dev-libs/nspr-${NSPR_VER}[${MULTILIB_USEDEP}]"
+	>=dev-libs/nspr-${NSPR_VER}[${MULTILIB_USEDEP}]
+	${CDEPEND}"
 RDEPEND=">=dev-libs/nspr-${NSPR_VER}[${MULTILIB_USEDEP}]
-	>=dev-db/sqlite-3.8.2[${MULTILIB_USEDEP}]
-	>=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}]
+	${CDEPEND}
 	abi_x86_32? (
 		!<=app-emulation/emul-linux-x86-baselibs-20140508-r12
 		!app-emulation/emul-linux-x86-baselibs[-abi_x86_32(-)]
@@ -48,13 +49,15 @@ src_unpack() {
 }
 
 src_prepare() {
+	# For musl
+	epatch "${FILESDIR}"/${PN}-3.16-musl.patch
 	# Custom changes for gentoo
 	epatch "${FILESDIR}/${PN}-3.17.1-gentoo-fixups.patch"
 	epatch "${FILESDIR}/${PN}-3.15-gentoo-fixup-warnings.patch"
 	use cacert && epatch "${DISTDIR}/${PN}-3.14.1-add_spi+cacerts_ca_certs.patch"
 	use nss-pem && epatch "${FILESDIR}/${PN}-3.15.4-enable-pem.patch"
 	epatch "${FILESDIR}/nss-3.14.2-solaris-gcc.patch"
-	epatch "${FILESDIR}/nss-3.16-musl.patch"
+	epatch "${FILESDIR}/${PN}-cacert-class3.patch" # 521462
 
 	pushd coreconf >/dev/null || die
 	# hack nspr paths
@@ -279,6 +282,8 @@ multilib_src_install() {
 			nonspr10 ocspclnt oidcalc p7content p7env p7sign p7verify pk11mode
 			pk12util pp rsaperf selfserv shlibsign signtool signver ssltap strsclnt
 			symkeyutil tstclnt vfychain vfyserv"
+			# install man-pages for utils (bug #516810)
+			doman doc/nroff/*.1
 		fi
 		pushd dist/*/bin >/dev/null || die
 		for f in ${nssutils}; do
