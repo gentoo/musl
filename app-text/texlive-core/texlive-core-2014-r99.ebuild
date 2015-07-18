@@ -155,6 +155,8 @@ src_prepare() {
 	#EPATCH_MULTI_MSG="Applying patches from upstream bugfix branch..." EPATCH_SUFFIX="patch" epatch "${WORKDIR}/gentoo_branch2011_patches"
 	EPATCH_SUFFIX="patch" epatch "${WORKDIR}/patches"
 
+	epatch "${FILESDIR}"/${PN}-2014-pmx-sysdep.patch
+
 	elibtoolize
 }
 
