@@ -2,9 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: /var/cvsroot/gentoo-x86/sys-devel/gcc/gcc-4.7.3.ebuild,v 1.2 2013/05/20 10:56:06 aballier Exp $
 
-EAPI="2"
+EAPI="4"
 
-PATCH_VER="1.1"
+PATCH_VER="1.3"
 UCLIBC_VER="1.0"
 
 # Hardened gcc 4 stuff
@@ -41,6 +41,9 @@ src_prepare() {
 		ewarn "Please rebuild gcc after upgrading to >=glibc-2.12 #362315"
 		EPATCH_EXCLUDE+=" 10_all_default-fortify-source.patch"
 	fi
+
+	# drop the x32 stuff in the next patchset #543578
+	EPATCH_EXCLUDE+=" 90_all_gcc-4.7-x32.patch"
 
 	toolchain_src_prepare
 
