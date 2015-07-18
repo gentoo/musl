@@ -1,9 +1,9 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-libs/libv4l/libv4l-1.0.0.ebuild,v 1.6 2014/07/28 13:46:11 ago Exp $
+# $Header: /var/cvsroot/gentoo-x86/media-libs/libv4l/libv4l-1.6.2.ebuild,v 1.5 2015/07/16 15:45:55 klausman Exp $
 
 EAPI=5
-inherit eutils linux-info udev multilib-minimal autotools
+inherit eutils flag-o-matic linux-info multilib-minimal
 
 MY_P=v4l-utils-${PV}
 
@@ -14,17 +14,16 @@ SRC_URI="http://linuxtv.org/downloads/v4l-utils/${MY_P}.tar.bz2"
 LICENSE="LGPL-2.1+"
 SLOT="0"
 KEYWORDS="amd64 arm ~mips ppc x86"
-IUSE=""
+IUSE="jpeg"
 
 # The libraries only link to -ljpeg, therefore multilib depend only for virtual/jpeg.
-RDEPEND=">=virtual/jpeg-0-r2:0=[${MULTILIB_USEDEP}]
-	virtual/glu
-	virtual/opengl
-	x11-libs/libX11:=
+RDEPEND="jpeg? ( >=virtual/jpeg-0-r2:0=[${MULTILIB_USEDEP}] )
 	!media-tv/v4l2-ctl
 	!<media-tv/ivtv-utils-1.4.0-r2
-	abi_x86_32? ( !<=app-emulation/emul-linux-x86-medialibs-20130224-r5
-		!app-emulation/emul-linux-x86-medialibs[-abi_x86_32(-)] )"
+	abi_x86_32? (
+		!<=app-emulation/emul-linux-x86-medialibs-20130224-r5
+		!app-emulation/emul-linux-x86-medialibs[-abi_x86_32(-)]
+	)"
 DEPEND="${RDEPEND}
 	sys-devel/gettext
 	virtual/os-headers
@@ -38,18 +37,21 @@ pkg_setup() {
 }
 
 src_prepare() {
-	epatch ${FILESDIR}/${P}-configure.patch
-	epatch ${FILESDIR}/${P}-off_t.patch
-	eautoreconf
+	epatch "${FILESDIR}"/${P}-off_t.patch
+	epatch "${FILESDIR}"/${P}-musl-open64-mmap64.patch
+	epatch "${FILESDIR}"/${P}-musl-ioctl.patch
+	multilib_copy_sources
 }
 
 multilib_src_configure() {
+	# Hard disable the flags that apply only to the utils.
 	ECONF_SOURCE=${S} \
 	econf \
 		--disable-static \
 		--disable-qv4l2 \
 		--disable-v4l-utils \
-		--with-udevdir="$(get_udevdir)"
+		--without-libudev \
+		$(use_with jpeg)
 }
 
 multilib_src_compile() {

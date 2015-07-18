@@ -1,0 +1,108 @@
+Note that musl uses
+
+#define open64 open
+
+in <fcntl.h> and
+
+#define mmap64 mmap
+
+in <sys/mman.h>.  These break with the following attempt to wrap the libc
+function.  Its (hopefully?) safe to remove them because of the musl defines.
+
+diff -Naur v4l-utils-1.6.2.orig/lib/libv4l1/v4l1compat.c v4l-utils-1.6.2/lib/libv4l1/v4l1compat.c
+--- v4l-utils-1.6.2.orig/lib/libv4l1/v4l1compat.c	2013-06-28 20:10:56.000000000 +0000
++++ v4l-utils-1.6.2/lib/libv4l1/v4l1compat.c	2015-07-18 14:44:18.140280932 +0000
+@@ -62,28 +62,6 @@
+ 	return fd;
+ }
+ 
+-#ifdef linux
+-LIBV4L_PUBLIC int open64(const char *file, int oflag, ...)
+-{
+-	int fd;
+-
+-	if (oflag & O_CREAT) {
+-		va_list ap;
+-		mode_t mode;
+-
+-		va_start(ap, oflag);
+-		mode = va_arg(ap, mode_t);
+-
+-		fd = v4l1_open(file, oflag | O_LARGEFILE, mode);
+-
+-		va_end(ap);
+-	} else
+-		fd = v4l1_open(file, oflag | O_LARGEFILE);
+-
+-	return fd;
+-}
+-#endif
+-
+ LIBV4L_PUBLIC int close(int fd)
+ {
+ 	return v4l1_close(fd);
+@@ -117,14 +95,6 @@
+ 	return v4l1_mmap(start, length, prot, flags, fd, offset);
+ }
+ 
+-#ifdef linux
+-LIBV4L_PUBLIC void *mmap64(void *start, size_t length, int prot, int flags, int fd,
+-		__off64_t offset)
+-{
+-	return v4l1_mmap(start, length, prot, flags, fd, offset);
+-}
+-#endif
+-
+ LIBV4L_PUBLIC int munmap(void *start, size_t length)
+ {
+ 	return v4l1_munmap(start, length);
+diff -Naur v4l-utils-1.6.2.orig/lib/libv4l2/v4l2convert.c v4l-utils-1.6.2/lib/libv4l2/v4l2convert.c
+--- v4l-utils-1.6.2.orig/lib/libv4l2/v4l2convert.c	2013-06-28 20:10:56.000000000 +0000
++++ v4l-utils-1.6.2/lib/libv4l2/v4l2convert.c	2015-07-18 14:44:03.728281474 +0000
+@@ -86,31 +86,6 @@
+ 	return fd;
+ }
+ 
+-#ifdef linux
+-LIBV4L_PUBLIC int open64(const char *file, int oflag, ...)
+-{
+-	int fd;
+-
+-	/* original open code */
+-	if (oflag & O_CREAT) {
+-		va_list ap;
+-		mode_t mode;
+-
+-		va_start(ap, oflag);
+-		mode = va_arg(ap, PROMOTED_MODE_T);
+-
+-		fd = open(file, oflag | O_LARGEFILE, mode);
+-
+-		va_end(ap);
+-	} else {
+-		fd = open(file, oflag | O_LARGEFILE);
+-	}
+-	/* end of original open code */
+-
+-	return fd;
+-}
+-#endif
+-
+ LIBV4L_PUBLIC int close(int fd)
+ {
+ 	return v4l2_close(fd);
+@@ -144,14 +119,6 @@
+ 	return v4l2_mmap(start, length, prot, flags, fd, offset);
+ }
+ 
+-#ifdef linux
+-LIBV4L_PUBLIC void *mmap64(void *start, size_t length, int prot, int flags, int fd,
+-		__off64_t offset)
+-{
+-	return v4l2_mmap(start, length, prot, flags, fd, offset);
+-}
+-#endif
+-
+ LIBV4L_PUBLIC int munmap(void *start, size_t length)
+ {
+ 	return v4l2_munmap(start, length);
