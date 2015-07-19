@@ -64,6 +64,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-20121221-remove-rdisc-glibc-assumption.patch
 	epatch "${FILESDIR}"/${PN}-20121221-fix-init-elemnt.patch
 	epatch "${FILESDIR}"/${PN}-20121221-fix-header-order.patch
+	epatch "${FILESDIR}"/${PN}-20121221-missing-AI_IDN-NI_IDN.patch
 	use SECURITY_HAZARD && epatch "${FILESDIR}"/${PN}-20071127-nonroot-floodping.patch
 	use static && append-ldflags -static
 }
