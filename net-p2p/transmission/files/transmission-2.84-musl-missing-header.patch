@@ -1,0 +1,11 @@
+diff -Naur transmission-2.84.orig/libtransmission/transmission.h transmission-2.84/libtransmission/transmission.h
+--- transmission-2.84.orig/libtransmission/transmission.h	2014-07-01 13:09:01.682910744 -0400
++++ transmission-2.84/libtransmission/transmission.h	2015-07-19 03:11:07.379219181 -0400
+@@ -28,6 +28,7 @@
+ 
+ #include <inttypes.h> /* uintN_t */
+ #include <time.h> /* time_t */
++#include <sys/types.h>
+ 
+ #ifdef WIN32
+  #define __USE_MINGW_ANSI_STDIO 1
