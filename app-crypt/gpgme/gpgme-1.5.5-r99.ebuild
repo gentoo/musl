@@ -21,7 +21,7 @@ DEPEND="app-crypt/gnupg
 RDEPEND="${DEPEND}"
 
 src_prepare() {
-	epatch "${FIELSDIR}"/${P}-error_t-provided-by-argp_h.patch
+	epatch "${FILESDIR}"/${P}-error_t-provided-by-argp_h.patch
 	epatch "${FILESDIR}"/${PN}-1.1.8-et_EE.patch
 	elibtoolize
 }
