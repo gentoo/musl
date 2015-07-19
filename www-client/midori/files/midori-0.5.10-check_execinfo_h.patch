@@ -1,0 +1,36 @@
+See: https://code.launchpad.net/~midori/midori/findFileExecInfo/+merge/265222
+
+=== modified file 'CMakeLists.txt'
+--- CMakeLists.txt	2015-06-18 05:03:38 +0000
++++ CMakeLists.txt	2015-07-19 22:27:33 +0000
+@@ -68,6 +68,11 @@
+     if (SIGNAL)
+         add_definitions("-DHAVE_SIGNAL_H")
+     endif ()
++
++    find_file (EXEC_INFO execinfo.h)
++    if (EXEC_INFO)
++        set(VALAFLAGS ${VALAFLAGS} -D HAVE_EXECINFO_H)
++    endif ()
+ endif ()
+ 
+ find_library (X11 X11)
+@@ -101,17 +106,6 @@
+     add_definitions("-DHAVE_OSX=0")
+ endif ()
+ 
+-# Check if execinfo.h header exists
+-string(FIND ${CMAKE_SYSTEM_NAME} "BSD" BEGIN)
+-if (${BEGIN} GREATER 0)
+-    string(SUBSTRING ${CMAKE_SYSTEM_NAME} ${BEGIN} 3 BSD)
+-else()
+-    set(BSD 0)
+-endif()
+-if (UNIX AND NOT BSD AND NOT DFLY)
+-    set(VALAFLAGS ${VALAFLAGS} -D HAVE_EXECINFO_H)
+-endif ()
+-
+ find_package(PkgConfig)
+ pkg_check_modules(DEPS REQUIRED
+                   libxml-2.0>=2.6
+
