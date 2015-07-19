@@ -1,3 +1,20 @@
+libtransmission/transmission.h: add missing <sys/types.h>
+
+transmission.h and several files including it, like bitfield.c and fdlimits.h
+make reference to ssize_t, off_t and other types defined in <sys/types.> but
+never include the header.  By including <sys/types.h> in transmission.h, the
+required type definitions are propagated to all files that need them.
+
+Not including <sys/types.h> on glibc and uClibc systems does not pose a problem
+because of the way the headers stack in those Standard C Libraries, but on musl
+exclusing <sys/types.h> leads to compile time failure.
+
+For the POSIX specs, see
+
+http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_types.h.html
+
+Signed-of-by: Anthony G. Basile <blueness@gentoo.org>
+
 diff -Naur transmission-2.84.orig/libtransmission/transmission.h transmission-2.84/libtransmission/transmission.h
 --- transmission-2.84.orig/libtransmission/transmission.h	2014-07-01 13:09:01.682910744 -0400
 +++ transmission-2.84/libtransmission/transmission.h	2015-07-19 03:11:07.379219181 -0400
