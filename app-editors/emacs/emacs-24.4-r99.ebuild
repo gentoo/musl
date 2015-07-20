@@ -1,25 +1,25 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-editors/emacs/emacs-24.4-r2.ebuild,v 1.1 2015/01/23 20:38:44 ulm Exp $
+# $Header: /var/cvsroot/gentoo-x86/app-editors/emacs/emacs-24.4-r4.ebuild,v 1.11 2015/04/17 10:42:05 zlogene Exp $
 
 EAPI=5
 
-inherit elisp-common eutils flag-o-matic multilib readme.gentoo
+inherit autotools elisp-common eutils flag-o-matic multilib readme.gentoo
 
 DESCRIPTION="The extensible, customizable, self-documenting real-time display editor"
 HOMEPAGE="http://www.gnu.org/software/emacs/"
 SRC_URI="mirror://gnu/emacs/${P}.tar.xz
-	http://dev.gentoo.org/~ulm/emacs/${P}-patches-3.tar.xz"
+	http://dev.gentoo.org/~ulm/emacs/${P}-patches-5.tar.xz"
 
 LICENSE="GPL-3+ FDL-1.3+ BSD HPND MIT W3C unicode PSF-2"
 SLOT="24"
-KEYWORDS="amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="acl alsa aqua athena dbus games gconf gfile gif gnutls gpm gsettings gtk +gtk3 gzip-el hesiod imagemagick +inotify jpeg kerberos libxml2 livecd m17n-lib motif pax_kernel png selinux sound source svg tiff toolkit-scroll-bars wide-int X Xaw3d xft +xpm zlib"
 REQUIRED_USE="?? ( aqua X )"
 
 RDEPEND="sys-libs/ncurses
 	>=app-eselect/eselect-emacs-1.16
-	>=app-emacs/emacs-common-gentoo-1.4-r1[games?,X?]
+	>=app-emacs/emacs-common-gentoo-1.5[games?,X?]
 	net-libs/liblockfile
 	acl? ( virtual/acl )
 	alsa? ( media-libs/alsa-lib )
@@ -42,7 +42,7 @@ RDEPEND="sys-libs/ncurses
 		jpeg? ( virtual/jpeg:0= )
 		png? ( >=media-libs/libpng-1.4:0= )
 		svg? ( >=gnome-base/librsvg-2.0 )
-		tiff? ( media-libs/tiff:= )
+		tiff? ( media-libs/tiff:0 )
 		xpm? ( x11-libs/libXpm )
 		imagemagick? ( >=media-gfx/imagemagick-6.6.2 )
 		xft? (
@@ -101,7 +101,7 @@ src_prepare() {
 	sed -i -e "/^\\.so/s/etags/&-${EMACS_SUFFIX}/" doc/man/ctags.1 \
 		|| die "unable to sed ctags.1"
 
-	#AT_M4DIR=m4 eautoreconf
+	AT_M4DIR=m4 eautoreconf
 }
 
 src_configure() {
@@ -189,7 +189,7 @@ src_configure() {
 		--infodir="${EPREFIX}"/usr/share/info/${EMACS_SUFFIX} \
 		--localstatedir="${EPREFIX}"/var \
 		--enable-locallisppath="${EPREFIX}/etc/emacs:${EPREFIX}${SITELISP}" \
-		--with-gameuser="${GAMES_USER_DED:-games}" \
+		--with-gameuser=":gamestat" \
 		--without-compress-install \
 		--with-file-notification=$(usev gfile || usev inotify || echo no) \
 		$(use_enable acl) \
@@ -206,9 +206,6 @@ src_configure() {
 }
 
 src_compile() {
-	echo $S
-	$(tc-getCC) -shared -fPIC -o preload.so "${FILESDIR}/preload.c" || die
-
 	export SANDBOX_ON=0			# for the unbelievers, see Bug #131505
 	emake
 }
