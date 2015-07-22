@@ -33,6 +33,7 @@ src_prepare() {
 
 	# Remove reference to __GLIBC__ for musl.
 	epatch "${FILESDIR}"/${P}-remove__GLIBC__.patch
+	epatch "${FILESDIR}"/${P}-remove-O_ACCMODE.patch
 
 	# Do not strip and have parallel make
 	# FIXME: images/Makefile does weird stuff
