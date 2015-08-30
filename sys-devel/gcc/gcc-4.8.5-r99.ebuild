@@ -4,7 +4,7 @@
 
 EAPI="4"
 
-PATCH_VER="1.0"
+PATCH_VER="1.2"
 UCLIBC_VER="1.0"
 
 # Hardened gcc 4 stuff
@@ -24,7 +24,7 @@ SSP_MUSL_STABLE="amd64 arm ppc mips"
 
 inherit eutils toolchain
 
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
