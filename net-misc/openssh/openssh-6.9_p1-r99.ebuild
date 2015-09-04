@@ -152,6 +152,9 @@ src_prepare() {
 	)
 	sed -i "${sed_args[@]}" configure{.ac,} || die
 
+	# ppc musl lacks __stack_chk_fail_local()
+	epatch "${FILESDIR}"/${P}-remove-stackprotector.patch
+
 	epatch_user #473004
 
 	# Now we can build a sane merged version.h
@@ -201,9 +204,6 @@ src_configure() {
 
 	# The seccomp sandbox is broken on x32, so use the older method for now. #553748
 	use amd64 && [[ ${ABI} == "x32" ]] && myconf+=( --with-sandbox=rlimit )
-
-	# ppc musl lacks __stack_chk_fail_local()
-	myconf+=( --without-hardening )
 
 	# Special settings for Gentoo/FreeBSD 9.0 or later (see bug #391011)
 	if use elibc_FreeBSD && version_is_at_least 9.0 "$(uname -r|sed 's/\(.\..\).*/\1/')" ; then
