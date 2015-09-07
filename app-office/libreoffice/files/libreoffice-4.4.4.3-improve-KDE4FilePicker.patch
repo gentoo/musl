@@ -2,6 +2,8 @@ Merged upstream commits:
 
 6fc55b9abd783b624241d56e34751ea495adbd7d	"KDE4: actually apply file dialog operation mode"
 b613270a730ace29dd1b16b29be2222b34f34a5d	"KDE4: improve default load and save dialog titles"
+2b999dd6da5a90db66afe852a007fab8c62ffaec	"vcl: kde4: loplugin:staticmethods"
+3e8c14df67a43d3088ed7df0a2b0d96a4bc42d57	"tdf#92353 FileSave: Not confirmed for overwrite a file (unix)"
 
 
 diff -u b/vcl/unx/kde4/KDE4FilePicker.cxx b/vcl/unx/kde4/KDE4FilePicker.cxx
@@ -24,17 +26,16 @@ diff -u b/vcl/unx/kde4/KDE4FilePicker.cxx b/vcl/unx/kde4/KDE4FilePicker.cxx
      , allowRemoteUrls( false )
  {
      _extraControls = new QWidget();
-@@ -128,8 +129,7 @@
+@@ -128,8 +129,6 @@
  #endif
  
      setMultiSelectionMode( false );
 -    //default mode
 -    _dialog->setOperationMode(KFileDialog::Opening);
-+    _dialog->setConfirmOverwrite( true );
  
      // XExecutableDialog functions
      connect( this, SIGNAL( setTitleSignal( const OUString & ) ),
-@@ -202,7 +202,6 @@
+@@ -202,7 +201,6 @@
          SalYieldMutexReleaser aReleaser;
          return Q_EMIT cleanupProxySignal();
      }
@@ -42,7 +43,7 @@ diff -u b/vcl/unx/kde4/KDE4FilePicker.cxx b/vcl/unx/kde4/KDE4FilePicker.cxx
      delete _dialog;
  }
  
-@@ -524,6 +523,24 @@
+@@ -524,6 +522,24 @@
      return toOUString(label);
  }
  
@@ -67,7 +68,7 @@ diff -u b/vcl/unx/kde4/KDE4FilePicker.cxx b/vcl/unx/kde4/KDE4FilePicker.cxx
  void KDE4FilePicker::addCustomControl(sal_Int16 controlId)
  {
      QWidget* widget = 0;
-@@ -532,37 +549,37 @@
+@@ -532,37 +548,37 @@
      switch (controlId)
      {
          case CHECKBOX_AUTOEXTENSION:
@@ -116,7 +117,7 @@ diff -u b/vcl/unx/kde4/KDE4FilePicker.cxx b/vcl/unx/kde4/KDE4FilePicker.cxx
              break;
          case LISTBOX_VERSION_LABEL:
          case LISTBOX_TEMPLATE_LABEL:
-@@ -581,16 +598,7 @@
+@@ -581,16 +597,7 @@
          case CHECKBOX_PREVIEW:
          case CHECKBOX_SELECTION:
          {
@@ -134,7 +135,7 @@ diff -u b/vcl/unx/kde4/KDE4FilePicker.cxx b/vcl/unx/kde4/KDE4FilePicker.cxx
  
              // the checkbox is created even for CHECKBOX_AUTOEXTENSION to simplify
              // code, but the checkbox is hidden and ignored
-@@ -719,8 +727,22 @@
+@@ -719,8 +726,23 @@
                      1 );
      }
  
@@ -150,6 +151,7 @@ diff -u b/vcl/unx/kde4/KDE4FilePicker.cxx b/vcl/unx/kde4/KDE4FilePicker.cxx
 +        break;
 +    case KFileDialog::Saving:
 +        resId = STR_FPICKER_SAVE;
++        _dialog->setConfirmOverwrite( true );
 +        break;
 +    default:
 +        break;
@@ -159,11 +161,10 @@ diff -u b/vcl/unx/kde4/KDE4FilePicker.cxx b/vcl/unx/kde4/KDE4FilePicker.cxx
  }
  
  void SAL_CALL KDE4FilePicker::cancel()
-only in patch2:
-unchanged:
---- a/vcl/unx/kde4/KDE4FilePicker.hxx
+diff -u b/vcl/unx/kde4/KDE4FilePicker.hxx b/vcl/unx/kde4/KDE4FilePicker.hxx
+--- b/vcl/unx/kde4/KDE4FilePicker.hxx
 +++ b/vcl/unx/kde4/KDE4FilePicker.hxx
-@@ -41,8 +41,6 @@ class KFileDialog;
+@@ -41,8 +41,6 @@
  class QWidget;
  class QLayout;
  
@@ -172,7 +173,7 @@ unchanged:
  typedef ::cppu::WeakComponentImplHelper5
  <   ::com::sun::star::ui::dialogs::XFilePicker2
  ,   ::com::sun::star::ui::dialogs::XFilePicker3
-@@ -61,8 +59,6 @@ protected:
+@@ -61,8 +59,6 @@
  
      ::com::sun::star::uno::Reference< ::com::sun::star::ui::dialogs::XFilePickerListener > m_xListener;
  
@@ -181,11 +182,11 @@ unchanged:
      //the dialog to display
      KFileDialog* _dialog;
  
-@@ -225,6 +221,8 @@ private:
+@@ -225,6 +221,8 @@
      //add a custom control widget to the file dialog
      void addCustomControl(sal_Int16 controlId);
  
-+    QString getResString( sal_Int16 aRedId );
++    static QString getResString( sal_Int16 aRedId );
 +
  private Q_SLOTS:
      void cleanupProxy();

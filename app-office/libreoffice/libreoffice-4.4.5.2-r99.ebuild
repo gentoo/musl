@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/app-office/libreoffice/libreoffice-4.4.1.2.ebuild,v 1.6 2015/04/11 20:43:16 dilfridge Exp $
+# $Id$
 
 EAPI=5
 
@@ -90,7 +90,7 @@ unset lo_xt
 LICENSE="|| ( LGPL-3 MPL-1.1 )"
 SLOT="0"
 [[ ${PV} == *9999* ]] || \
-KEYWORDS="amd64 ~arm x86 ~amd64-linux ~x86-linux"
+KEYWORDS="amd64 ~arm x86"
 
 COMMON_DEPEND="
 	${PYTHON_DEPS}
@@ -108,7 +108,7 @@ COMMON_DEPEND="
 	>=app-text/libodfgen-0.1.0
 	app-text/libwpd:0.10[tools]
 	app-text/libwpg:0.3
-	>=app-text/libwps-0.3.0
+	=app-text/libwps-0.3*
 	>=app-text/poppler-0.16:=[xpdf-headers(+),cxx]
 	>=dev-cpp/clucene-2.3.3.4-r2
 	=dev-cpp/libcmis-0.5*
@@ -117,7 +117,7 @@ COMMON_DEPEND="
 	dev-libs/expat
 	>=dev-libs/hyphen-2.7.1
 	>=dev-libs/icu-4.8.1.1:=
-	>=dev-libs/liborcus-0.7.0
+	=dev-libs/liborcus-0.7*
 	>=dev-libs/librevenge-0.0.1
 	>=dev-libs/nspr-4.8.8
 	>=dev-libs/nss-3.12.9
@@ -175,7 +175,7 @@ COMMON_DEPEND="
 		dev-java/tomcat-servlet-api:3.0
 	)
 	mysql? ( >=dev-db/mysql-connector-c++-1.1.0 )
-	postgres? ( >=dev-db/postgresql-9.0[kerberos] )
+	postgres? ( >=dev-db/postgresql-9.0:*[kerberos] )
 	telepathy? (
 		dev-libs/glib:2
 		>=net-libs/telepathy-glib-0.18.0
@@ -192,7 +192,7 @@ RDEPEND="${COMMON_DEPEND}
 	media-fonts/liberation-fonts
 	media-fonts/urw-fonts
 	java? ( >=virtual/jre-1.6 )
-	kde? ( || ( $(add_kdeapps_dep kioclient) $(add_kdebase_dep kioclient) ) )
+	kde? ( $(add_kdeapps_dep kioclient) )
 	vlc? ( media-video/vlc )
 "
 
@@ -215,7 +215,7 @@ DEPEND="${COMMON_DEPEND}
 	dev-util/cppunit
 	>=dev-util/gperf-3
 	dev-util/intltool
-	>=dev-util/mdds-0.10.3:=
+	>=dev-util/mdds-0.11.2:=
 	media-libs/glm
 	net-misc/npapi-sdk
 	>=sys-apps/findutils-4.4.2
@@ -245,17 +245,21 @@ PATCHES=(
 	# not upstreamable stuff
 	"${FILESDIR}/${PN}-4.4-system-pyuno.patch"
 
-	# from 4.4 branch
-	"${FILESDIR}/${PN}-4.4.0.3-gcc-4.9-Os-link-failure.patch" # bug 538348
-
-	# from master branch
+	# from 5.0 branch
+	"${FILESDIR}/${PN}-4.3.5.2-remove-bashisms.patch" # bug 525454
 	"${FILESDIR}/${PN}-4.4.0.3-telepathy-build-fix.patch"
 	"${FILESDIR}/${PN}-4.4.1.2-add-kde4-open-url-script.patch"
-	"${FILESDIR}/${PN}-4.4.1.2-improve-KDE4FilePicker.patch"
-	"${FILESDIR}/${PN}-4.3.5.2-remove-bashisms.patch" # bug 525454
-	"${FILESDIR}/${PN}-4.4.1.2-musl-fix-execinfo.patch"
+	"${FILESDIR}/${PN}-4.4.4.3-improve-KDE4FilePicker.patch"
+	"${FILESDIR}/${PN}-4.4.4.3-fix-KDE4-FileDialog.patch"
+	"${FILESDIR}/${PN}-4.4.4.3-cleanup-IsNativeControlSupported.patch"
+
+	# from master branch
+	"${FILESDIR}/${PN}-4.4.5.2-fix-KDE4-listbox-regression.patch"
+
+	# musl fixes
 	"${FILESDIR}/${PN}-4.4.1.2-fix-includes.patch"
 	"${FILESDIR}/${PN}-4.4.1.2-linux-musl.patch"
+	"${FILESDIR}/${PN}-4.4.1.2-musl-fix-execinfo.patch"
 )
 
 REQUIRED_USE="
