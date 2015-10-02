@@ -1,0 +1,12 @@
+diff -Naur gcc-4.9.3.orig/libsanitizer/tsan/tsan_platform_linux.cc gcc-4.9.3/libsanitizer/tsan/tsan_platform_linux.cc
+--- gcc-4.9.3.orig/libsanitizer/tsan/tsan_platform_linux.cc	2013-12-05 09:18:38.000000000 +0000
++++ gcc-4.9.3/libsanitizer/tsan/tsan_platform_linux.cc	2015-10-02 19:19:15.765680892 +0000
+@@ -351,7 +351,7 @@
+ // closes within glibc. The code is a pure hack.
+ int ExtractResolvFDs(void *state, int *fds, int nfd) {
+   int cnt = 0;
+-  __res_state *statp = (__res_state*)state;
++  res_state statp = (res_state)state;
+   for (int i = 0; i < MAXNS && cnt < nfd; i++) {
+     if (statp->_u._ext.nsaddrs[i] && statp->_u._ext.nssocks[i] != -1)
+       fds[cnt++] = statp->_u._ext.nssocks[i];
