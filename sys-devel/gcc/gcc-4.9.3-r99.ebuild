@@ -24,7 +24,7 @@ SSP_MUSL_STABLE="amd64 arm ppc mips"
 
 inherit eutils toolchain
 
-KEYWORDS="amd64 ~arm ~mips ~ppc x86"
+KEYWORDS="amd64 ~arm ~mips x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
