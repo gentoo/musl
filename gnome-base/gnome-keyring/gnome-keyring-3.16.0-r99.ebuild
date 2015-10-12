@@ -47,7 +47,7 @@ pkg_setup() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${P}-musl-add-sys_select_h.patch
+	epatch "${FILESDIR}"/${PN}-3.14.0-musl-add-sys_select_h.patch
 
 	# Disable stupid CFLAGS
 	sed -e 's/CFLAGS="$CFLAGS -g"//' \
