@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/net-misc/modemmanager/modemmanager-1.4.10.ebuild,v 1.1 2015/07/14 11:39:29 chainsaw Exp $
+# $Id$
 
 EAPI="5"
 GCONF_DEBUG="no"
@@ -15,7 +15,7 @@ SRC_URI="http://www.freedesktop.org/software/ModemManager/ModemManager-${PV}.tar
 
 LICENSE="GPL-2+"
 SLOT="0/1" # subslot = dbus interface version, i.e. N in org.freedesktop.ModemManager${N}
-KEYWORDS="~alpha ~amd64 ~arm ~ia64 ~mips ~ppc ~ppc64 ~sparc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="+introspection mbim policykit +qmi qmi-newest vala"
 REQUIRED_USE="
 	qmi-newest? ( qmi )
