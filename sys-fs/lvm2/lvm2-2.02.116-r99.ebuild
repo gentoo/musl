@@ -12,7 +12,7 @@ SRC_URI="ftp://sources.redhat.com/pub/lvm2/${PN/lvm/LVM}.${PV}.tgz
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="readline static static-libs systemd clvm cman lvm1 lvm2create_initrd selinux +udev +thin device-mapper-only"
 REQUIRED_USE="device-mapper-only? ( !clvm !cman !lvm1 !lvm2create_initrd !thin )
 	systemd? ( udev )"
