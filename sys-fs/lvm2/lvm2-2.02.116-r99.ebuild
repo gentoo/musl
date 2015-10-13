@@ -101,6 +101,7 @@ src_prepare() {
 	# Patches for musl
 	epatch "${FILESDIR}"/${PN}-fix-stdio-usage.patch # Patch from alpine linux
 	epatch "${FILESDIR}"/${PN}-musl-fixes.patch
+	epatch "${FILESDIR}"/${PN}-avoid-mallinfo.patch
 
 	# Without thin-privision-tools, there is nothing to install for target install_man7:
 	use thin || { sed -i -e '/^install_lvm2/s:install_man7::' man/Makefile.in || die; }
