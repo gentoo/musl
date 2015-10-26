@@ -10,8 +10,8 @@ inherit kernel-2
 detect_version
 
 PATCH_VER="1"
-SRC_URI="mirror://gentoo/gentoo-headers-base-${PV}.tar.xz
-	${PATCH_VER:+mirror://gentoo/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}"
+SRC_URI="http://dev.gentoo.org/~blueness/dist/gentoo-headers-3.16-1.tar.xz
+	http://dev.gentoo.org/~blueness/dist/gentoo-headers-base-3.16.tar.xz"
 
 KEYWORDS="amd64 arm ~mips ppc x86"
 
