@@ -1,0 +1,28 @@
+# HG changeset patch
+# User Felix Janda <felix.janda@posteo.de>
+# Date 1428437372 -7200
+#      Tue Apr 07 22:09:32 2015 +0200
+# Node ID e783ca150f8370a4d8811ceecc28707617e6a4b8
+# Parent  ab0490972e1e47a356c3fc2f9e749a2d77a9739b
+# https://bugzilla.mozilla.org/show_bug.cgi?id=1152185
+Include port/generic/include also for webrtc/signaling/test
+
+diff -r ab0490972e1e media/webrtc/signaling/test/moz.build
+--- a/mozilla/media/webrtc/signaling/test/moz.build	Mon Apr 06 21:30:03 2015 -0400
++++ b/mozilla/media/webrtc/signaling/test/moz.build	Tue Apr 07 22:51:38 2015 +0200
+@@ -35,6 +35,7 @@
+     '/media/mtransport/third_party/nrappkit/src/event',
+     '/media/mtransport/third_party/nrappkit/src/log',
+     '/media/mtransport/third_party/nrappkit/src/plugin',
++    '/media/mtransport/third_party/nrappkit/src/port/generic/include',
+     '/media/mtransport/third_party/nrappkit/src/registry',
+     '/media/mtransport/third_party/nrappkit/src/share',
+     '/media/mtransport/third_party/nrappkit/src/stats',
+@@ -84,7 +85,6 @@
+ if CONFIG['OS_TARGET'] in ('DragonFly', 'FreeBSD', 'NetBSD', 'OpenBSD'):
+     LOCAL_INCLUDES += [
+         '/media/mtransport/third_party/nrappkit/src/port/darwin/include',
+-        '/media/mtransport/third_party/nrappkit/src/port/generic/include',
+     ]
+ 
+ USE_LIBS += [

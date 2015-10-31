@@ -1,0 +1,503 @@
+# HG changeset patch
+# User Felix Janda <felix.janda@posteo.de>
+# Date 1429134526 -7200
+#      Wed Apr 15 23:48:46 2015 +0200
+# Node ID 62325b792c42746df0c4322d47c6c3e965ec6aaa
+# Parent  da3e6557e0301899024eeaa24b0a43e837a409d7
+Bug 1139173 - ipc/chromium: Use <errno.h> instead of non-standard <sys/errno.h>. r=froydnj
+
+diff -r da3e6557e030 -r 62325b792c42 ipc/chromium/src/base/file_util_posix.cc
+--- a/mozilla/ipc/chromium/src/base/file_util_posix.cc	Wed Apr 22 19:17:15 2015 +0100
++++ b/mozilla/ipc/chromium/src/base/file_util_posix.cc	Wed Apr 15 23:48:46 2015 +0200
+@@ -14,7 +14,7 @@
+ #include <libgen.h>
+ #include <stdio.h>
+ #include <string.h>
+-#include <sys/errno.h>
++#include <errno.h>
+ #include <sys/mman.h>
+ #define _DARWIN_USE_64_BIT_INODE // Use 64-bit inode data structures
+ #include <sys/stat.h>
+# HG changeset patch
+# User Felix Janda <felix.janda@posteo.de>
+# Date 1429135060 -7200
+#      Wed Apr 15 23:57:40 2015 +0200
+# Node ID 1e75c69141cadfd8ea35f5f60e32cb7320d297ab
+# Parent  62325b792c42746df0c4322d47c6c3e965ec6aaa
+Bug 1139173 - ipc/chromium: Remove ScopedTempDir. r=froydnj
+
+diff -r 62325b792c42 -r 1e75c69141ca ipc/chromium/moz.build
+--- a/mozilla/ipc/chromium/moz.build	Wed Apr 15 23:48:46 2015 +0200
++++ b/mozilla/ipc/chromium/moz.build	Wed Apr 15 23:57:40 2015 +0200
+@@ -50,7 +50,6 @@
+     'src/base/pickle.cc',
+     'src/base/rand_util.cc',
+     'src/base/revocable_store.cc',
+-    'src/base/scoped_temp_dir.cc',
+     'src/base/string_piece.cc',
+     'src/base/string_util.cc',
+     'src/base/thread.cc',
+diff -r 62325b792c42 -r 1e75c69141ca ipc/chromium/src/base/scoped_temp_dir.cc
+--- a/mozilla/ipc/chromium/src/base/scoped_temp_dir.cc	Wed Apr 15 23:48:46 2015 +0200
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,47 +0,0 @@
+-// Copyright (c) 2009 The Chromium Authors. All rights reserved.
+-// Use of this source code is governed by a BSD-style license that can be
+-// found in the LICENSE file.
+-
+-#include "base/scoped_temp_dir.h"
+-
+-#include "base/file_util.h"
+-#include "base/logging.h"
+-#include "base/string_util.h"
+-
+-ScopedTempDir::ScopedTempDir() {
+-}
+-
+-ScopedTempDir::~ScopedTempDir() {
+-  if (!path_.empty() && !file_util::Delete(path_, true))
+-    CHROMIUM_LOG(ERROR) << "ScopedTempDir unable to delete " << path_.value();
+-}
+-
+-bool ScopedTempDir::CreateUniqueTempDir() {
+-  // This "scoped_dir" prefix is only used on Windows and serves as a template
+-  // for the unique name.
+-  if (!file_util::CreateNewTempDirectory(FILE_PATH_LITERAL("scoped_dir"),
+-                                         &path_))
+-    return false;
+-
+-  return true;
+-}
+-
+-bool ScopedTempDir::Set(const FilePath& path) {
+-  DCHECK(path_.empty());
+-  if (!file_util::DirectoryExists(path) &&
+-      !file_util::CreateDirectory(path)) {
+-    return false;
+-  }
+-  path_ = path;
+-  return true;
+-}
+-
+-FilePath ScopedTempDir::Take() {
+-  FilePath ret = path_;
+-  path_ = FilePath();
+-  return ret;
+-}
+-
+-bool ScopedTempDir::IsValid() const {
+-  return !path_.empty() && file_util::DirectoryExists(path_);
+-}
+diff -r 62325b792c42 -r 1e75c69141ca ipc/chromium/src/base/scoped_temp_dir.h
+--- a/mozilla/ipc/chromium/src/base/scoped_temp_dir.h	Wed Apr 15 23:48:46 2015 +0200
++++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
+@@ -1,47 +0,0 @@
+-// Copyright (c) 2009 The Chromium Authors. All rights reserved.
+-// Use of this source code is governed by a BSD-style license that can be
+-// found in the LICENSE file.
+-
+-#ifndef BASE_SCOPED_TEMP_DIR_H_
+-#define BASE_SCOPED_TEMP_DIR_H_
+-
+-// An object representing a temporary / scratch directory that should be cleaned
+-// up (recursively) when this object goes out of scope.  Note that since
+-// deletion occurs during the destructor, no further error handling is possible
+-// if the directory fails to be deleted.  As a result, deletion is not
+-// guaranteed by this class.
+-
+-#include "base/file_path.h"
+-
+-class ScopedTempDir {
+- public:
+-  // No directory is owned/created initially.
+-  ScopedTempDir();
+-
+-  // Recursively delete path_
+-  ~ScopedTempDir();
+-
+-  // Creates a unique directory in TempPath, and takes ownership of it.
+-  // See file_util::CreateNewTemporaryDirectory.
+-  bool CreateUniqueTempDir();
+-
+-  // Takes ownership of directory at |path|, creating it if necessary.
+-  // Don't call multiple times unless Take() has been called first.
+-  bool Set(const FilePath& path);
+-
+-  // Caller takes ownership of the temporary directory so it won't be destroyed
+-  // when this object goes out of scope.
+-  FilePath Take();
+-
+-  const FilePath& path() const { return path_; }
+-
+-  // Returns true if path_ is non-empty and exists.
+-  bool IsValid() const;
+-
+- private:
+-  FilePath path_;
+-
+-  DISALLOW_COPY_AND_ASSIGN(ScopedTempDir);
+-};
+-
+-#endif  // BASE_SCOPED_TEMP_DIR_H_
+# HG changeset patch
+# User Felix Janda <felix.janda@posteo.de>
+# Date 1429135184 -7200
+#      Wed Apr 15 23:59:44 2015 +0200
+# Node ID 9b6b694dd82e1a3f7652c35d3e8b264d701ec253
+# Parent  1e75c69141cadfd8ea35f5f60e32cb7320d297ab
+Bug 1139173 - ipc/chromium: Remove unused functions from file_util. r=froydnj
+CLOSED TREE
+
+diff -r 1e75c69141ca -r 9b6b694dd82e ipc/chromium/src/base/file_util.cc
+--- a/mozilla/ipc/chromium/src/base/file_util.cc	Wed Apr 15 23:57:40 2015 +0200
++++ b/mozilla/ipc/chromium/src/base/file_util.cc	Wed Apr 15 23:59:44 2015 +0200
+@@ -139,12 +139,6 @@
+     path->push_back(FilePath::kSeparators[0]);
+   path->append(new_ending);
+ }
+-bool CopyDirectory(const std::wstring& from_path, const std::wstring& to_path,
+-                   bool recursive) {
+-  return CopyDirectory(FilePath::FromWStringHack(from_path),
+-                       FilePath::FromWStringHack(to_path),
+-                       recursive);
+-}
+ bool CopyFile(const std::wstring& from_path, const std::wstring& to_path) {
+   return CopyFile(FilePath::FromWStringHack(from_path),
+                   FilePath::FromWStringHack(to_path));
+@@ -172,8 +166,8 @@
+   *temp_file = temp_file_path.ToWStringHack();
+   return true;
+ }
+-bool Delete(const std::wstring& path, bool recursive) {
+-  return Delete(FilePath::FromWStringHack(path), recursive);
++bool Delete(const std::wstring& path) {
++  return Delete(FilePath::FromWStringHack(path));
+ }
+ bool DirectoryExists(const std::wstring& path) {
+   return DirectoryExists(FilePath::FromWStringHack(path));
+diff -r 1e75c69141ca -r 9b6b694dd82e ipc/chromium/src/base/file_util.h
+--- a/mozilla/ipc/chromium/src/base/file_util.h	Wed Apr 15 23:57:40 2015 +0200
++++ b/mozilla/ipc/chromium/src/base/file_util.h	Wed Apr 15 23:59:44 2015 +0200
+@@ -16,7 +16,6 @@
+ #include <sys/stat.h>
+ #elif defined(OS_POSIX) 
+ #include <sys/types.h>
+-#include <fts.h>
+ #include <sys/stat.h>
+ #endif
+ 
+@@ -87,34 +86,17 @@
+ 
+ // Deletes the given path, whether it's a file or a directory.
+ // If it's a directory, it's perfectly happy to delete all of the
+-// directory's contents.  Passing true to recursive deletes
+-// subdirectories and their contents as well.
++// directory's contents.
+ // Returns true if successful, false otherwise.
+-//
+-// WARNING: USING THIS WITH recursive==true IS EQUIVALENT
+-//          TO "rm -rf", SO USE WITH CAUTION.
+-bool Delete(const FilePath& path, bool recursive);
++bool Delete(const FilePath& path);
+ // Deprecated temporary compatibility function.
+-bool Delete(const std::wstring& path, bool recursive);
++bool Delete(const std::wstring& path);
+ 
+ // Copies a single file. Use CopyDirectory to copy directories.
+ bool CopyFile(const FilePath& from_path, const FilePath& to_path);
+ // Deprecated temporary compatibility function.
+ bool CopyFile(const std::wstring& from_path, const std::wstring& to_path);
+ 
+-// Copies the given path, and optionally all subdirectories and their contents
+-// as well.
+-// If there are files existing under to_path, always overwrite.
+-// Returns true if successful, false otherwise.
+-// Dont't use wildcards on the names, it may stop working without notice.
+-//
+-// If you only need to copy a file use CopyFile, it's faster.
+-bool CopyDirectory(const FilePath& from_path, const FilePath& to_path,
+-                   bool recursive);
+-// Deprecated temporary compatibility function.
+-bool CopyDirectory(const std::wstring& from_path, const std::wstring& to_path,
+-                   bool recursive);
+-
+ // Returns true if the given path exists on the local filesystem,
+ // false otherwise.
+ bool PathExists(const FilePath& path);
+diff -r 1e75c69141ca -r 9b6b694dd82e ipc/chromium/src/base/file_util_posix.cc
+--- a/mozilla/ipc/chromium/src/base/file_util_posix.cc	Wed Apr 15 23:57:40 2015 +0200
++++ b/mozilla/ipc/chromium/src/base/file_util_posix.cc	Wed Apr 15 23:59:44 2015 +0200
+@@ -8,9 +8,6 @@
+ #include <errno.h>
+ #include <fcntl.h>
+ #include <fnmatch.h>
+-#ifndef ANDROID
+-#include <fts.h>
+-#endif
+ #include <libgen.h>
+ #include <stdio.h>
+ #include <string.h>
+@@ -53,7 +50,7 @@
+ // which works both with and without the recursive flag.  I'm not sure we need
+ // that functionality. If not, remove from file_util_win.cc, otherwise add it
+ // here.
+-bool Delete(const FilePath& path, bool recursive) {
++bool Delete(const FilePath& path) {
+   const char* path_str = path.value().c_str();
+   struct stat file_info;
+   int test = stat(path_str, &file_info);
+@@ -64,174 +61,8 @@
+   }
+   if (!S_ISDIR(file_info.st_mode))
+     return (unlink(path_str) == 0);
+-  if (!recursive)
+-    return (rmdir(path_str) == 0);
+ 
+-#ifdef ANDROID
+-  // XXX Need ftsless impl for bionic
+-  return false;
+-#else
+-  bool success = true;
+-  int ftsflags = FTS_PHYSICAL | FTS_NOSTAT;
+-  char top_dir[PATH_MAX];
+-  if (base::strlcpy(top_dir, path_str,
+-                    arraysize(top_dir)) >= arraysize(top_dir)) {
+-    return false;
+-  }
+-  char* dir_list[2] = { top_dir, NULL };
+-  FTS* fts = fts_open(dir_list, ftsflags, NULL);
+-  if (fts) {
+-    FTSENT* fts_ent = fts_read(fts);
+-    while (success && fts_ent != NULL) {
+-      switch (fts_ent->fts_info) {
+-        case FTS_DNR:
+-        case FTS_ERR:
+-          // log error
+-          success = false;
+-          continue;
+-          break;
+-        case FTS_DP:
+-          success = (rmdir(fts_ent->fts_accpath) == 0);
+-          break;
+-        case FTS_D:
+-          break;
+-        case FTS_NSOK:
+-        case FTS_F:
+-        case FTS_SL:
+-        case FTS_SLNONE:
+-          success = (unlink(fts_ent->fts_accpath) == 0);
+-          break;
+-        default:
+-          DCHECK(false);
+-          break;
+-      }
+-      fts_ent = fts_read(fts);
+-    }
+-    fts_close(fts);
+-  }
+-  return success;
+-#endif
+-}
+-
+-bool Move(const FilePath& from_path, const FilePath& to_path) {
+-  if (rename(from_path.value().c_str(), to_path.value().c_str()) == 0)
+-    return true;
+-
+-  if (!CopyDirectory(from_path, to_path, true))
+-    return false;
+-
+-  Delete(from_path, true);
+-  return true;
+-}
+-
+-bool CopyDirectory(const FilePath& from_path,
+-                   const FilePath& to_path,
+-                   bool recursive) {
+-  // Some old callers of CopyDirectory want it to support wildcards.
+-  // After some discussion, we decided to fix those callers.
+-  // Break loudly here if anyone tries to do this.
+-  // TODO(evanm): remove this once we're sure it's ok.
+-  DCHECK(to_path.value().find('*') == std::string::npos);
+-  DCHECK(from_path.value().find('*') == std::string::npos);
+-
+-  char top_dir[PATH_MAX];
+-  if (base::strlcpy(top_dir, from_path.value().c_str(),
+-                    arraysize(top_dir)) >= arraysize(top_dir)) {
+-    return false;
+-  }
+-
+-#ifdef ANDROID
+-  // XXX Need ftsless impl for bionic
+-  return false;
+-#else
+-  char* dir_list[] = { top_dir, NULL };
+-  FTS* fts = fts_open(dir_list, FTS_PHYSICAL | FTS_NOSTAT, NULL);
+-  if (!fts) {
+-    CHROMIUM_LOG(ERROR) << "fts_open failed: " << strerror(errno);
+-    return false;
+-  }
+-
+-  int error = 0;
+-  FTSENT* ent;
+-  while (!error && (ent = fts_read(fts)) != NULL) {
+-    // ent->fts_path is the source path, including from_path, so paste
+-    // the suffix after from_path onto to_path to create the target_path.
+-    std::string suffix(&ent->fts_path[from_path.value().size()]);
+-    // Strip the leading '/' (if any).
+-    if (!suffix.empty()) {
+-      DCHECK_EQ('/', suffix[0]);
+-      suffix.erase(0, 1);
+-    }
+-    const FilePath target_path = to_path.Append(suffix);
+-    switch (ent->fts_info) {
+-      case FTS_D:  // Preorder directory.
+-        // If we encounter a subdirectory in a non-recursive copy, prune it
+-        // from the traversal.
+-        if (!recursive && ent->fts_level > 0) {
+-          if (fts_set(fts, ent, FTS_SKIP) != 0)
+-            error = errno;
+-          continue;
+-        }
+-
+-        // Try creating the target dir, continuing on it if it exists already.
+-        // Rely on the user's umask to produce correct permissions.
+-        if (mkdir(target_path.value().c_str(), 0777) != 0) {
+-          if (errno != EEXIST)
+-            error = errno;
+-        }
+-        break;
+-      case FTS_F:     // Regular file.
+-      case FTS_NSOK:  // File, no stat info requested.
+-        errno = 0;
+-        if (!CopyFile(FilePath(ent->fts_path), target_path))
+-          error = errno ? errno : EINVAL;
+-        break;
+-      case FTS_DP:   // Postorder directory.
+-      case FTS_DOT:  // "." or ".."
+-        // Skip it.
+-        continue;
+-      case FTS_DC:   // Directory causing a cycle.
+-        // Skip this branch.
+-        if (fts_set(fts, ent, FTS_SKIP) != 0)
+-          error = errno;
+-        break;
+-      case FTS_DNR:  // Directory cannot be read.
+-      case FTS_ERR:  // Error.
+-      case FTS_NS:   // Stat failed.
+-        // Abort with the error.
+-        error = ent->fts_errno;
+-        break;
+-      case FTS_SL:      // Symlink.
+-      case FTS_SLNONE:  // Symlink with broken target.
+-        CHROMIUM_LOG(WARNING) << "CopyDirectory() skipping symbolic link: " <<
+-            ent->fts_path;
+-        continue;
+-      case FTS_DEFAULT:  // Some other sort of file.
+-        CHROMIUM_LOG(WARNING) << "CopyDirectory() skipping file of unknown type: " <<
+-            ent->fts_path;
+-        continue;
+-      default:
+-        NOTREACHED();
+-        continue;  // Hope for the best!
+-    }
+-  }
+-  // fts_read may have returned NULL and set errno to indicate an error.
+-  if (!error && errno != 0)
+-    error = errno;
+-
+-  if (!fts_close(fts)) {
+-    // If we already have an error, let's use that error instead of the error
+-    // fts_close set.
+-    if (!error)
+-      error = errno;
+-  }
+-
+-  if (error) {
+-    CHROMIUM_LOG(ERROR) << "CopyDirectory(): " << strerror(error);
+-    return false;
+-  }
+-  return true;
+-#endif
++  return (rmdir(path_str) == 0);
+ }
+ 
+ bool PathExists(const FilePath& path) {
+diff -r 1e75c69141ca -r 9b6b694dd82e ipc/chromium/src/base/file_util_win.cc
+--- a/mozilla/ipc/chromium/src/base/file_util_win.cc	Wed Apr 15 23:57:40 2015 +0200
++++ b/mozilla/ipc/chromium/src/base/file_util_win.cc	Wed Apr 15 23:59:44 2015 +0200
+@@ -27,14 +27,14 @@
+   return true;
+ }
+ 
+-bool Delete(const FilePath& path, bool recursive) {
++bool Delete(const FilePath& path) {
+   if (path.value().length() >= MAX_PATH)
+     return false;
+ 
+-  // If we're not recursing use DeleteFile; it should be faster. DeleteFile
++  // Use DeleteFile; it should be faster. DeleteFile
+   // fails if passed a directory though, which is why we fall through on
+   // failure to the SHFileOperation.
+-  if (!recursive && DeleteFile(path.value().c_str()) != 0)
++  if (DeleteFile(path.value().c_str()) != 0)
+     return true;
+ 
+   // SHFILEOPSTRUCT wants the path to be terminated with two NULLs,
+@@ -48,8 +48,7 @@
+   file_operation.wFunc = FO_DELETE;
+   file_operation.pFrom = double_terminated_path;
+   file_operation.fFlags = FOF_NOERRORUI | FOF_SILENT | FOF_NOCONFIRMATION;
+-  if (!recursive)
+-    file_operation.fFlags |= FOF_NORECURSION | FOF_FILESONLY;
++  file_operation.fFlags |= FOF_NORECURSION | FOF_FILESONLY;
+   int err = SHFileOperation(&file_operation);
+   // Some versions of Windows return ERROR_FILE_NOT_FOUND when
+   // deleting an empty directory.
+@@ -98,26 +97,6 @@
+   return (SHFileOperation(&file_operation) == 0);
+ }
+ 
+-bool CopyDirectory(const FilePath& from_path, const FilePath& to_path,
+-                   bool recursive) {
+-  if (recursive)
+-    return ShellCopy(from_path, to_path, true);
+-
+-  // Instead of creating a new directory, we copy the old one to include the
+-  // security information of the folder as part of the copy.
+-  if (!PathExists(to_path)) {
+-    // Except that Vista fails to do that, and instead do a recursive copy if
+-    // the target directory doesn't exist.
+-    if (win_util::GetWinVersion() >= win_util::WINVERSION_VISTA)
+-      CreateDirectory(to_path);
+-    else
+-      ShellCopy(from_path, to_path, false);
+-  }
+-
+-  FilePath directory = from_path.Append(L"*.*");
+-  return ShellCopy(directory, to_path, false);
+-}
+-
+ bool PathExists(const FilePath& path) {
+   return (GetFileAttributes(path.value().c_str()) != INVALID_FILE_ATTRIBUTES);
+ }
+diff -r 1e75c69141ca -r 9b6b694dd82e ipc/chromium/src/base/shared_memory_posix.cc
+--- a/mozilla/ipc/chromium/src/base/shared_memory_posix.cc	Wed Apr 15 23:57:40 2015 +0200
++++ b/mozilla/ipc/chromium/src/base/shared_memory_posix.cc	Wed Apr 15 23:59:44 2015 +0200
+@@ -93,7 +93,7 @@
+ 
+   FilePath path(WideToUTF8(mem_filename));
+   if (file_util::PathExists(path)) {
+-    return file_util::Delete(path, false);
++    return file_util::Delete(path);
+   }
+ 
+   // Doesn't exist, so success.
+@@ -170,7 +170,7 @@
+     // Deleting the file prevents anyone else from mapping it in
+     // (making it private), and prevents the need for cleanup (once
+     // the last fd is closed, it is truly freed).
+-    file_util::Delete(path, false);
++    file_util::Delete(path);
+   } else {
+     std::wstring mem_filename;
+     if (FilenameForMemoryName(name, &mem_filename) == false)

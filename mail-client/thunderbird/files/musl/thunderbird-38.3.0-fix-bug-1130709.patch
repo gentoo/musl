@@ -1,0 +1,227 @@
+# HG changeset patch
+# User Felix Janda <felix.janda@posteo.de>
+# Date 1423304332 -3600
+# Node ID 3e7a3784e7479ab7c663eecbccf8107c271290a0
+# Parent  12394290ae583134871ed40c93677f62ffb1e9e0
+Bug 1130709: Make __BEGIN_DECLS and __END_DECLS explicit r=bwc
+
+diff --git a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_darwin_types.h b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_darwin_types.h
+--- a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_darwin_types.h
++++ b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_darwin_types.h
+@@ -49,37 +49,16 @@ typedef uint8_t boolean;
+ #ifdef __GNUC__
+ #define MAX(a,b)  ({ typeof(a) _a = (a); typeof(b) _b = (b); _a > _b ? _a : _b; })
+ #else
+ #define MAX(a,b) (((a) > (b)) ? (a) : (b))
+ #endif
+ #endif
+ 
+ /**
+- * __BEGIN_DECLS and __END_DECLS
+- *
+- * Define macros for compilation by C++ compiler
+- */
+-#ifndef __BEGIN_DECLS
+-#ifdef __cplusplus
+-#define __BEGIN_DECLS extern "C" {
+-#else
+-#define __BEGIN_DECLS
+-#endif
+-#endif
+-
+-#ifndef __END_DECLS
+-#ifdef __cplusplus
+-#define __END_DECLS   }
+-#else
+-#define __END_DECLS
+-#endif
+-#endif
+-
+-/**
+  * Define TRUE/FALSE
+  *     defined in several header files
+  */
+ #ifndef TRUE
+ #define TRUE 1
+ #endif
+ 
+ #ifndef FALSE
+diff --git a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_linux_types.h b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_linux_types.h
+--- a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_linux_types.h
++++ b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_linux_types.h
+@@ -57,38 +57,16 @@ typedef uint8_t boolean;
+ #ifndef MAX
+ #ifdef __GNUC__
+ #define MAX(a,b)  ({ typeof(a) _a = (a); typeof(b) _b = (b); _a > _b ? _a : _b; })
+ #else
+ #define MAX(a,b) (((a) > (b)) ? (a) : (b))
+ #endif
+ #endif
+ 
+-
+-
+-/**
+- * __BEGIN_DECLS and __END_DECLS
+- *
+- * Define macros for compilation by C++ compiler
+- */
+-#ifndef __BEGIN_DECLS
+-#ifdef __cplusplus
+-#define __BEGIN_DECLS extern "C" {
+-#else
+-#define __BEGIN_DECLS
+-#endif
+-#endif
+-
+-#ifndef __END_DECLS
+-#ifdef __cplusplus
+-#define __END_DECLS   }
+-#else
+-#define __END_DECLS
+-#endif
+-#endif
+ /**
+  * Define TRUE/FALSE
+  *     defined in several header files
+  */
+ #ifndef TRUE
+ #define TRUE 1
+ #endif
+ 
+diff --git a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_string.h b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_string.h
+--- a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_string.h
++++ b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_string.h
+@@ -5,17 +5,19 @@
+ #ifndef _CPR_STRING_H_
+ #define _CPR_STRING_H_
+ 
+ #include <stdarg.h>
+ 
+ #include "cpr_types.h"
+ #include "cpr_strings.h"
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /**
+  * sstrncpy
+  *
+  * @brief The CPR wrapper for strncpy
+  *
+  * This is Cisco's *safe* version of strncpy.  The string will always
+  * be NUL terminated (which is not ANSI compliant).
+@@ -125,11 +127,13 @@ void flex_string_sprintf(flex_string *fs
+  * @param[in] str  - The string that needs to be duplicated
+  *
+  * @return The duplicated string or NULL in case of no memory
+  *
+  */
+ char *
+ cpr_strdup(const char *str);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+diff --git a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_strings.h b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_strings.h
+--- a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_strings.h
++++ b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_strings.h
+@@ -2,29 +2,25 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+ #ifndef _CPR_STRINGS_H_
+ #define _CPR_STRINGS_H_
+ 
+ #include "cpr_types.h"
+ 
+-__BEGIN_DECLS
+-
+ 
+ #include <string.h>
+ 
+ #if defined(_MSC_VER)
+ #define cpr_strcasecmp _stricmp
+ #define cpr_strncasecmp _strnicmp
+ #if _MSC_VER < 1900
+ #define snprintf _snprintf
+ #endif
+ #else // _MSC_VER
+ 
+ #define cpr_strcasecmp  strcasecmp
+ #define cpr_strncasecmp strncasecmp
+ 
+ #endif // _MSC_VER
+ 
+-__END_DECLS
+-
+ #endif
+diff --git a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_types.h b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_types.h
+--- a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_types.h
++++ b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_types.h
+@@ -8,17 +8,19 @@
+ #if defined SIP_OS_LINUX
+ #include "cpr_linux_types.h"
+ #elif defined SIP_OS_WINDOWS
+ #include "cpr_win_types.h"
+ #elif defined SIP_OS_OSX
+ #include "cpr_darwin_types.h"
+ #endif
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*
+  * CPR Return Codes
+  */
+ typedef enum
+ {
+     CPR_SUCCESS,
+     CPR_FAILURE
+@@ -109,11 +111,13 @@ extern const cpr_ip_addr_t ip_addr_inval
+  * of memory that have a "hidden" header block immediately preceding
+  * the pointer. You MUST use the functions in string_lib.c to
+  * create, manipulate, destroy, copy, or otherwise work with these
+  * strings.
+  */
+ 
+ typedef const char *string_t;
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+diff --git a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_win_types.h b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_win_types.h
+--- a/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_win_types.h
++++ b/mozilla/media/webrtc/signaling/src/sdp/sipcc/cpr_win_types.h
+@@ -95,21 +95,10 @@ typedef int pid_t;
+ #endif
+ 
+ /*
+  * Define NULL
+  *    defined in numerous header files
+  */
+ /* DONE defined in windef.h */
+ 
+-/*
+- * Define __BEGIN_DECLS and __END_DECLS
+- */
+-#ifdef __cplusplus
+-#define __BEGIN_DECLS extern "C" {
+-#define __END_DECLS   }
+-#else
+-#define __BEGIN_DECLS
+-#define __END_DECLS
+-#endif
+-
+ #endif // _CPR_WIN_TYPES_H_
+ 
+
