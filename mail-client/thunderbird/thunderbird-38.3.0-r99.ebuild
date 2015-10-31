@@ -140,20 +140,20 @@ src_prepare() {
 
 	## backports from firefox
 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-crashreporter.patch	# fixed? 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-fts-header.patch	# bug 1139173, fixed in 40.0.a1 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-u_int64_t.patch	# bug 1130164, fixed in 39.0a1 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-profiler-gettid.patch	# fixed? 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-sandbox-cdefs.patch	# bug 1157864, fixed in 42.0a1 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-updater.patch		# bug 1157850, not fixed as of today 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-basename.patch		# bug 1041962, not fixed as of today 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-sysctl-headers.patch	# bug 1130175, fixed in 39.0a1 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-xpcom-blocksize.patch	# bug 1152176, fixed in 41.0a1 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-cdefs-header.patch	# bug 1151202, fixed in 40.0a1 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-xre.patch			# bug 1130710, fixed in 40.0a1 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-netwerk.patch		# from alpine 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-bug-1130709.patch	# bug 1130709, fixed in 40.0a1 
-	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-queue.patch 		# bug 1152185, fixed in 41.0a1 | works, but not sure if needed 
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-crashreporter.patch	# fixed?
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-fts-header.patch	# bug 1139173, fixed in 40.0.a1
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-u_int64_t.patch	# bug 1130164, fixed in 39.0a1
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-profiler-gettid.patch	# fixed?
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-sandbox-cdefs.patch	# bug 1157864, fixed in 42.0a1
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-updater.patch		# bug 1157850, not fixed as of today
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-basename.patch		# bug 1041962, not fixed as of today
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-sysctl-headers.patch	# bug 1130175, fixed in 39.0a1
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-xpcom-blocksize.patch	# bug 1152176, fixed in 41.0a1
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-cdefs-header.patch	# bug 1151202, fixed in 40.0a1
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-xre.patch			# bug 1130710, fixed in 40.0a1
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-netwerk.patch		# from alpine
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-bug-1130709.patch	# bug 1130709, fixed in 40.0a1
+	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-queue.patch 		# bug 1152185, fixed in 41.0a1 | works, but not sure if needed
 
 #	epatch "${FILESDIR}"/musl/thunderbird-38.3.0-fix-bug-1130175.patch # cannot be applied due to major changes in mozilla/media/mtransport/third_party/nICEr/src/stun/addrs.c
 
