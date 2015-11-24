@@ -13,7 +13,7 @@ else
 	PATCH_VER="1"
 	SRC_URI="mirror://gentoo/${P}.tar.xz
 		mirror://gentoo/${P}-patches-${PATCH_VER}.tar.xz"
-	KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+	KEYWORDS="amd64 arm ~mips ppc x86"
 fi
 
 DESCRIPTION="Standard Linux networking tools"
