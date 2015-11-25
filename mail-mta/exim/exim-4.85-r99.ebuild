@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/mail-mta/exim/exim-4.84.ebuild,v 1.17 2015/03/21 21:18:34 jlec Exp $
+# $Id$
 
 EAPI="5"
 
@@ -19,7 +19,7 @@ HOMEPAGE="http://www.exim.org/"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="amd64 ppc ~mips  x86"
+KEYWORDS="amd64 ppc x86"
 
 COMMON_DEPEND=">=sys-apps/sed-4.0.5
 	>=sys-libs/db-3.2
@@ -117,7 +117,6 @@ src_configure() {
 
 	if use elibc_musl; then
 		sed -e 's/^LIBS = -lnsl/LIBS =/g' \
-		-e 's/^HAVE_ICONV=yes/#HAVE_ICONV=yes/' \
 		-i OS/Makefile-Linux
 	fi
 
@@ -127,6 +126,7 @@ src_configure() {
 		INFO_DIRECTORY=${EPREFIX}/usr/share/info
 		PID_FILE_PATH=${EPREFIX}/run/exim.pid
 		SPOOL_DIRECTORY=${EPREFIX}/var/spool/exim
+		HAVE_ICONV=yes
 	EOC
 
 	# if we use libiconv, now is the time to tell so
@@ -349,7 +349,7 @@ src_configure() {
 	# Transport post-delivery actions
 	if use tpda; then
 		cat >> Makefile <<- EOC
-			EXPERIMENTAL_TPDA=yes
+			EXPERIMENTAL_EVENT=yes
 		EOC
 	fi
 
@@ -469,14 +469,14 @@ src_install () {
 	insinto /etc/logrotate.d
 	newins "${FILESDIR}/exim.logrotate" exim
 
-	newinitd "${FILESDIR}"/exim.rc8 exim
+	newinitd "${FILESDIR}"/exim.rc9 exim
 	newconfd "${FILESDIR}"/exim.confd exim
 
 	systemd_dounit "${FILESDIR}"/{exim.service,exim.socket,exim-submission.socket}
 	systemd_newunit "${FILESDIR}"/exim_at.service 'exim@.service'
 	systemd_newunit "${FILESDIR}"/exim-submission_at.service 'exim-submission@.service'
 
-	DIROPTIONS="-m 0750 -o ${MAILUSER} -g ${MAILGROUP}"
+	diropts -m 0750 -o ${MAILUSER} -g ${MAILGROUP}
 	dodir /var/log/${PN}
 }
 
@@ -498,13 +498,13 @@ pkg_postinst() {
 		einfo "configure DMARC, for usage see the documentation at "
 		einfo "experimental-spec.txt."
 	fi
-	use tpda && einfo "TPDA support is experimental"
+	use tpda && einfo "TPDA/EVENT support is experimental"
 	use proxy && einfo "proxy support is experimental"
 	if use dsn ; then
 		einfo "Starting from Exim 4.83, DSN support comes from upstream."
 		einfo "DSN support is an experimental feature.  If you used DSN"
 		einfo "support prior to 4.83, make sure to remove all dsn_process"
-		einfo "switches from your routers, see http://bugs.gentoo.org/511818"
+		einfo "switches from your routers, see https://bugs.gentoo.org/511818"
 	fi
 	einfo "Exim maintains some db files under its spool directory that need"
 	einfo "cleaning from time to time.  (${EROOT}var/spool/exim/db)"
