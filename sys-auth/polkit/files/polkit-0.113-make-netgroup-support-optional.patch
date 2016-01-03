@@ -1,0 +1,130 @@
+--- polkit-0.113/configure.ac
++++ polkit-0.113-optional-netgroup/configure.ac
+@@ -158,7 +158,7 @@ AC_CHECK_LIB(expat,XML_ParserCreate,[EXP
+ 	     [AC_MSG_ERROR([Can't find expat library. Please install expat.])])
+ AC_SUBST(EXPAT_LIBS)
+ 
+-AC_CHECK_FUNCS(clearenv fdatasync)
++AC_CHECK_FUNCS(clearenv fdatasync getnetgrent)
+ 
+ if test "x$GCC" = "xyes"; then
+   LDFLAGS="-Wl,--as-needed $LDFLAGS"
+--- polkit-0.113/src/polkitbackend/init.js
++++ polkit-0.113-optional-netgroup/src/polkitbackend/init.js
+@@ -29,7 +29,10 @@ function Subject() {
+     };
+ 
+     this.isInNetGroup = function(netGroup) {
+-        return polkit._userIsInNetGroup(this.user, netGroup);
++        if (polkit._userIsInNetGroup)
++            return polkit._userIsInNetGroup(this.user, netGroup);
++        else
++            return false;
+     };
+ 
+     this.toString = function() {
+--- polkit-0.113/src/polkitbackend/polkitbackendinteractiveauthority.c
++++ polkit-0.113-optional-netgroup/src/polkitbackend/polkitbackendinteractiveauthority.c
+@@ -2214,6 +2214,7 @@ get_users_in_group (PolkitIdentity
+   return ret;
+ }
+ 
++#ifdef HAVE_GETNETGRENT
+ static GList *
+ get_users_in_net_group (PolkitIdentity                    *group,
+                         gboolean                           include_root)
+@@ -2269,6 +2270,7 @@ get_users_in_net_group (PolkitIdentity
+   endnetgrent ();
+   return ret;
+ }
++#endif
+ 
+ /* ---------------------------------------------------------------------------------------------------- */
+ 
+@@ -2355,10 +2357,12 @@ authentication_agent_initiate_challenge
+         {
+           user_identities = g_list_concat (user_identities, get_users_in_group (identity, FALSE));
+         }
++#ifdef HAVE_GETNETGRENT
+       else if (POLKIT_IS_UNIX_NETGROUP (identity))
+         {
+           user_identities =  g_list_concat (user_identities, get_users_in_net_group (identity, FALSE));
+         }
++#endif
+       else
+         {
+           g_warning ("Unsupported identity");
+--- polkit-0.113/src/polkitbackend/polkitbackendjsauthority.c
++++ polkit-0.113-optional-netgroup/src/polkitbackend/polkitbackendjsauthority.c
+@@ -189,13 +189,16 @@ static JSClass js_polkit_class = {
+ 
+ static JSBool js_polkit_log (JSContext *cx, unsigned argc, jsval *vp);
+ static JSBool js_polkit_spawn (JSContext *cx, unsigned argc, jsval *vp);
++#ifdef HAVE_GETNETGRENT
+ static JSBool js_polkit_user_is_in_netgroup (JSContext *cx, unsigned argc, jsval *vp);
+-
++#endif
+ static JSFunctionSpec js_polkit_functions[] =
+ {
+   JS_FS("log",            js_polkit_log,            0, 0),
+   JS_FS("spawn",          js_polkit_spawn,          0, 0),
++#ifdef HAVE_GETNETGRENT
+   JS_FS("_userIsInNetGroup", js_polkit_user_is_in_netgroup,          0, 0),
++#endif
+   JS_FS_END
+ };
+ 
+@@ -1498,7 +1501,7 @@ js_polkit_spawn (JSContext  *cx,
+ 
+ /* ---------------------------------------------------------------------------------------------------- */
+ 
+-
++#ifdef HAVE_GETNETGRENT
+ static JSBool
+ js_polkit_user_is_in_netgroup (JSContext  *cx,
+                                unsigned    argc,
+@@ -1535,7 +1538,7 @@ js_polkit_user_is_in_netgroup (JSContext
+  out:
+   return ret;
+ }
+-
++#endif
+ 
+ 
+ /* ---------------------------------------------------------------------------------------------------- */
+--- polkit-0.113/test/polkitbackend/test-polkitbackendjsauthority.c
++++ polkit-0.113-optional-netgroup/test/polkitbackend/test-polkitbackendjsauthority.c
+@@ -137,12 +137,14 @@ test_get_admin_identities (void)
+         "unix-group:users"
+       }
+     },
++#ifdef HAVE_GETNETGRENT
+     {
+       "net.company.action3",
+       {
+         "unix-netgroup:foo"
+       }
+     },
++#endif
+   };
+   guint n;
+ 
+@@ -258,7 +260,7 @@ static const RulesTestCase rules_test_ca
+     NULL,
+     POLKIT_IMPLICIT_AUTHORIZATION_NOT_AUTHORIZED,
+   },
+-
++#if HAVE_GETNETGRENT
+   /* check netgroup membership */
+   {
+     /* john is a member of netgroup 'foo', see test/etc/netgroup */
+@@ -276,7 +278,7 @@ static const RulesTestCase rules_test_ca
+     NULL,
+     POLKIT_IMPLICIT_AUTHORIZATION_NOT_AUTHORIZED,
+   },
+-
++#endif
+   /* spawning */
+   {
+     "spawning_non_existing_helper",
+
