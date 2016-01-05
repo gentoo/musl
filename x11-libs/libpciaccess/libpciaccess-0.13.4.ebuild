@@ -16,7 +16,11 @@ DEPEND="!<x11-base/xorg-server-1.5
 RDEPEND="${DEPEND}
 	sys-apps/hwids"
 
-PATCHES=( "${FILESDIR}"/${P}-path_max.patch )
+PATCHES=(
+	"${FILESDIR}"/${P}-path_max.patch
+	"${FILESDIR}"/arm-implicit-declaration-musl.patch
+ )
+
 pkg_setup() {
 	xorg-2_pkg_setup
 
