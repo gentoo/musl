@@ -1,0 +1,11 @@
+diff -urN a/src/linux_sysfs.c b/src/linux_sysfs.c
+--- a/src/linux_sysfs.c	2015-04-30 23:44:47.000000000 -0500
++++ b/src/linux_sysfs.c	2015-12-09 22:53:31.824813630 -0600
+@@ -38,6 +38,7 @@
+ #include "config.h"
+ #endif
+ 
++#include <limits.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <stdio.h>
