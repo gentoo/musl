@@ -1,6 +1,6 @@
 # Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/net-fs/cifs-utils/cifs-utils-6.1-r1.ebuild,v 1.13 2014/06/22 21:28:55 klausman Exp $
+# $Id$
 
 EAPI=5
 
@@ -52,9 +52,7 @@ pkg_setup() {
 }
 
 src_prepare() {
-	# Do not rely on hardcoded path to systemd-ask-password, bug #478538
-	epatch "${FILESDIR}/${P}-hardcoded-path.patch"
-	epatch "${FILESDIR}/${P}-paths.h.patch" #for musl
+	epatch "${FILESDIR}/${PN}-6.1-paths.h.patch" #for musl
 }
 
 src_configure() {
