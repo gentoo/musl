@@ -1,6 +1,6 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-fs/xfsprogs/xfsprogs-3.2.2.ebuild,v 1.1 2014/12/15 10:01:52 polynomial-c Exp $
+# $Id$
 
 EAPI="4"
 
@@ -13,7 +13,7 @@ SRC_URI="ftp://oss.sgi.com/projects/xfs/cmd_tars/${P}.tar.gz
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
+KEYWORDS="amd64 arm ~mips ppc ppc64 x86"
 IUSE="libedit nls readline static static-libs"
 REQUIRED_USE="static? ( static-libs )"
 
@@ -48,7 +48,7 @@ src_prepare() {
 		-e '1iLLDFLAGS = -static' \
 		{estimate,fsr}/Makefile || die
 	sed -i \
-		-e "/LLDFLAGS/s:-static:$(use static && echo -all-static):" \
+		-e "/LLDFLAGS/s:-static-libtool-libs:$(use static && echo -all-static):" \
 		$(find -name Makefile) || die
 
 	# libdisk has broken blkid conditional checking
