@@ -92,7 +92,7 @@ src_prepare() {
 	[[ -n ${RPM} ]] && rpm_spec_epatch "${WORKDIR}"/gdb.spec
 	! use vanilla && [[ -n ${PATCH_VER} ]] && EPATCH_SUFFIX="patch" epatch "${WORKDIR}"/patch
 
-	epatch "${FILESDIR}"/${PN}-7.4-linux-nat.patch
+	epatch "${FILESDIR}"/${PN}-linux_nat.patch
 
 	epatch_user
 	strip-linguas -u bfd/po opcodes/po
@@ -105,6 +105,7 @@ gdb_branding() {
 	else
 		printf "vanilla"
 	fi
+	[[ -n ${EGIT_COMMIT} ]] && printf " ${EGIT_COMMIT}"
 }
 
 src_configure() {
@@ -145,6 +146,8 @@ src_configure() {
 			--enable-64-bit-bfd
 			--disable-install-libbfd
 			--disable-install-libiberty
+			# Disable guile for now as it requires guile-2.x #562902
+			--without-guile
 			# This only disables building in the readline subdir.
 			# For gdb itself, it'll use the system version.
 			--disable-readline
@@ -171,6 +174,14 @@ src_install() {
 	default
 	use client && find "${ED}"/usr -name libiberty.a -delete
 	cd "${S}"
+
+	# Delete translations that conflict with binutils-libs. #528088
+	# Note: Should figure out how to store these in an internal gdb dir.
+	if use nls ; then
+		find "${ED}" \
+			-regextype posix-extended -regex '.*/(bfd|opcodes)[.]g?mo$' \
+			-delete
+	fi
 
 	# Don't install docs when building a cross-gdb
 	if [[ ${CTARGET} != ${CHOST} ]] ; then
