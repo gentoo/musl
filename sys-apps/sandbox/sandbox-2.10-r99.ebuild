@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -49,6 +49,7 @@ src_unpack() {
 	epatch "${FILESDIR}"/${P}-memory-corruption.patch #568714
 	epatch "${FILESDIR}"/${P}-disable-same.patch
 	epatch "${FILESDIR}"/${PN}-2.6-musl.patch
+	epatch "${FILESDIR}"/${P}-fix-visibility-musl.patch
 	epatch_user
 }
 
