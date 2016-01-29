@@ -1,10 +1,10 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/dev-libs/boehm-gc/boehm-gc-7.4.2.ebuild,v 1.4 2015/02/21 12:19:01 ago Exp $
+# $Id$
 
 EAPI=5
 
-inherit eutils
+inherit eutils flag-o-matic
 
 MY_P="gc-${PV}"
 
@@ -25,6 +25,7 @@ S="${WORKDIR}/${MY_P}"
 src_prepare() {
 	epatch "${FILESDIR}"/${PN}-7.2e-os_dep.patch
 	epatch "${FILESDIR}"/${PN}-7.4.2-getcontext.patch
+	epatch "${FILESDIR}"/${PN}-7.4.2-testsuite.patch
 }
 
 src_configure() {
@@ -34,6 +35,7 @@ src_configure() {
 		$(use_enable static-libs static)
 		$(use threads || echo --disable-threads)
 	)
+	append-cppflags -DUSE_MMAP -DHAVE_DL_ITERATE_PHDR
 	econf "${config[@]}"
 }
 
