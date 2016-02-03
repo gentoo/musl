@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -11,7 +11,7 @@ FORTRAN_NEEDED=lapack
 
 inherit distutils-r1 eutils flag-o-matic fortran-2 multilib multiprocessing toolchain-funcs versionator
 
-DOC_PV="1.9.1"
+DOC_PV="1.10.1"
 DOC_P="${PN}-${DOC_PV}"
 
 DESCRIPTION="Fast array and numerical python library"
@@ -25,7 +25,7 @@ SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz
 # It appears the docs haven't been upgraded, still @ 1.8.1
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~x86-freebsd ~x86-interix ~amd64-linux ~arm-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~x64-solaris ~x86-solaris"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="doc lapack test"
 
 RDEPEND="
@@ -40,10 +40,8 @@ DEPEND="${RDEPEND}
 DISTUTILS_IN_SOURCE_BUILD=1
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-1.9.2-no-hardcode-blas.patch
+	"${FILESDIR}"/${PN}-1.10.2-no-hardcode-blas.patch
 	"${FILESDIR}"/${PN}-1.10.1-musl-fix.patch
-	"${FILESDIR}"/${P}-backport-1.patch
-	"${FILESDIR}"/${P}-backport-2.patch
 )
 
 src_unpack() {
@@ -74,8 +72,6 @@ python_prepare_all() {
 	if use lapack; then
 		append-ldflags "$($(tc-getPKG_CONFIG) --libs-only-other cblas lapack)"
 		local libdir="${EPREFIX}"/usr/$(get_libdir)
-		# make sure _dotblas.so gets built
-		sed -i -e '/NO_ATLAS_INFO/,+1d' numpy/core/setup.py || die
 		cat >> site.cfg <<-EOF
 			[blas]
 			include_dirs = $(pc_incdir cblas)
@@ -111,18 +107,20 @@ python_prepare_all() {
 	fi
 
 	# don't version f2py, we will handle it.
-	sed -i -e '/f2py_exe/s:+os\.path.*$::' numpy/f2py/setup.py || die
+	sed -i -e '/f2py_exe/s: + os\.path.*$::' numpy/f2py/setup.py || die
 
 	# we don't have f2py-3.3
-	sed \
-		-e "/f2py_cmd/s:'f2py'.*:'f2py':g" \
-		-i numpy/tests/test_scripts.py || die
+#	sed \
+#		-e 's:test_f2py:_&:g' \
+#		-i numpy/tests/test_scripts.py || die
 
 	distutils-r1_python_prepare_all
 }
 
 python_compile() {
-	distutils-r1_python_compile -j $(makeopts_jobs) ${NUMPY_FCONFIG}
+	distutils-r1_python_compile \
+		$(usex python_targets_python3_5 "" "-j $(makeopts_jobs)") \
+		${NUMPY_FCONFIG}
 }
 
 python_test() {
@@ -140,17 +138,16 @@ python_install() {
 }
 
 python_install_all() {
-	distutils-r1_python_install_all
-
-	dodoc COMPATIBILITY DEV_README.txt THANKS.txt
+	DOCS+=( COMPATIBILITY DEV_README.txt THANKS.txt )
 
 	if use doc; then
-		dohtml -r "${WORKDIR}"/html/*
-		dodoc "${DISTDIR}"/${PN}-{user,ref}-${DOC_PV}.pdf
+		HTML_DOCS=( "${WORKDIR}"/html/. )
+		DOCS+=( "${DISTDIR}"/${PN}-{user,ref}-${DOC_PV}.pdf )
 	fi
 
-	# absent in 1.9
-	#docinto f2py
-	#dodoc numpy/f2py/docs/*.txt
-	#doman numpy/f2py/f2py.1
+	distutils-r1_python_install_all
+
+	docinto f2py
+	dodoc doc/f2py/*.txt
+	doman doc/f2py/f2py.1
 }
