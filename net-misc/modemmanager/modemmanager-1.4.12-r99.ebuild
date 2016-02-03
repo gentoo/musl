@@ -7,7 +7,7 @@ GCONF_DEBUG="no"
 GNOME2_LA_PUNT="yes"
 VALA_USE_DEPEND="vapigen"
 
-inherit eutils gnome2 user readme.gentoo udev vala
+inherit gnome2 user readme.gentoo udev vala
 
 DESCRIPTION="Modem and mobile broadband management libraries"
 HOMEPAGE="http://cgit.freedesktop.org/ModemManager/ModemManager/"
@@ -25,7 +25,7 @@ REQUIRED_USE="
 RDEPEND="
 	>=dev-libs/glib-2.32:2
 	virtual/libgudev:=
-	introspection? ( >=dev-libs/gobject-introspection-0.9.6 )
+	introspection? ( >=dev-libs/gobject-introspection-0.9.6:= )
 	mbim? ( >=net-libs/libmbim-1.10 )
 	policykit? ( >=sys-auth/polkit-0.106[introspection] )
 	qmi? ( >=net-libs/libqmi-1.12.4:= )
