@@ -1,8 +1,8 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI="4"
+EAPI="5"
 
 PATCH_VER="1.2"
 UCLIBC_VER="1.0"
@@ -52,7 +52,7 @@ src_prepare() {
 		local EPATCH_EXCLUDE="gcc-ssp.diff vis_hide.diff"
 		local EPATCH_SUFFIX="diff"
 		local EPATCH_FORCE="yes"
-		epatch ${FILESDIR}/musl-gcc-patches-${PV}
+		epatch "${FILESDIR}"/musl-gcc-patches-${PV}
 	fi
 
 	use vanilla && return 0
