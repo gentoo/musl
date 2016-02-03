@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/media-gfx/fontforge/fontforge-20150430.ebuild,v 1.6 2015/08/02 18:43:00 ago Exp $
+# $Id$
 
 EAPI=5
 
@@ -8,14 +8,9 @@ PYTHON_COMPAT=( python{2_7,3_3,3_4} )
 
 inherit autotools eutils fdo-mime python-single-r1
 
-GNULIB="b287b621969d5a3f56058ff01e554839814da4e1"
-UTHASH="ac47d4928e61c5abc6e977d91310d31ed74690e4"
-
 DESCRIPTION="postscript font editor and converter"
 HOMEPAGE="http://fontforge.github.io/"
-SRC_URI="https://github.com/fontforge/fontforge/archive/${PV}.tar.gz -> ${P}.tar.gz
-	http://dev.gentoo.org/~floppym/dist/gnulib-${GNULIB}.tar.gz
-	https://github.com/troydhanson/uthash/archive/${UTHASH}.tar.gz -> uthash-${UTHASH}.tar.gz"
+SRC_URI="https://github.com/fontforge/fontforge/releases/download/${PV}/${P}.tar.gz"
 
 LICENSE="BSD GPL-3+"
 SLOT="0"
@@ -47,7 +42,6 @@ RDEPEND="
 	X? (
 		x11-libs/libX11:0=
 		x11-libs/libXi:0=
-		x11-libs/libxkbui:0=
 		>=x11-libs/pango-1.10:0=[X]
 	)
 	!media-gfx/pfaedit
@@ -72,16 +66,18 @@ gnulib_import() {
 	(
 		func_add_hook() { :; }
 		source bootstrap.conf
-		set -- "${WORKDIR}/gnulib/gnulib-tool" --libtool --import ${gnulib_modules}
+		set -- "${S}/gnulib/gnulib-tool" --libtool --import ${gnulib_modules}
 		echo "$@"
 		"$@"
 	)
 }
 
 src_prepare() {
-	mv "${WORKDIR}/uthash-${UTHASH}" "${S}/uthash" || die
+	# Tarball comes with broken absolute symlinks
+	# https://github.com/fontforge/fontforge/issues/2439
+	find . -lname "/*" -delete || die
 	gnulib_import || die
-	epatch "${FILESDIR}"/${P}-intelligent-execinfo_h.patch
+	epatch "${FILESDIR}"/${PN}-20150430-intelligent-execinfo_h.patch
 	epatch_user
 	eautoreconf
 }
@@ -118,7 +114,7 @@ src_compile() {
 
 src_install() {
 	default
-	prune_libtool_files
+	prune_libtool_files --modules
 }
 
 pkg_postrm() {
