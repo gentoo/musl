@@ -1,0 +1,72 @@
+diff -Naur vte-0.42.4.orig/src/pty.cc vte-0.42.4/src/pty.cc
+--- vte-0.42.4.orig/src/pty.cc	2016-02-27 14:27:22.376000000 +0000
++++ vte-0.42.4/src/pty.cc	2016-02-27 14:27:36.496000000 +0000
+@@ -401,7 +401,7 @@
+ 	array = g_ptr_array_sized_new (g_hash_table_size (table) + 1);
+         g_hash_table_iter_init(&iter, table);
+         while (g_hash_table_iter_next(&iter, (void**) &name, (void**) &value)) {
+-                g_ptr_array_add (array, g_strconcat (name, "=", value, NULL));
++                g_ptr_array_add (array, g_strconcat (name, "=", value, (char *)NULL));
+         }
+         g_assert(g_hash_table_size(table) == array->len);
+ 	g_hash_table_destroy (table);
+diff -Naur vte-0.42.4.orig/src/vte.cc vte-0.42.4/src/vte.cc
+--- vte-0.42.4.orig/src/vte.cc	2016-02-27 14:27:22.379000000 +0000
++++ vte-0.42.4/src/vte.cc	2016-02-27 14:27:36.499000000 +0000
+@@ -4654,7 +4654,7 @@
+         vte_terminal_set_font(terminal, terminal->pvt->unscaled_font_desc);
+         vte_terminal_set_padding(terminal);
+ 
+-        gtk_widget_style_get(widget, "cursor-aspect-ratio", &aspect, NULL);
++        gtk_widget_style_get(widget, "cursor-aspect-ratio", &aspect, (char *)NULL);
+         if (aspect != terminal->pvt->cursor_aspect_ratio) {
+                 terminal->pvt->cursor_aspect_ratio = aspect;
+                 _vte_invalidate_cursor_once(terminal, FALSE);
+@@ -7475,7 +7475,7 @@
+ 
+                                 g_object_get (gtk_widget_get_settings(widget),
+                                               "gtk-enable-primary-paste",
+-                                              &do_paste, NULL);
++                                              &do_paste, (char *)NULL);
+                                 if (do_paste)
+                                         vte_terminal_paste_primary(terminal);
+ 				handled = do_paste;
+@@ -7913,7 +7913,7 @@
+ 
+ 	/* Create an owned font description. */
+         context = gtk_widget_get_style_context(&terminal->widget);
+-        gtk_style_context_get(context, GTK_STATE_FLAG_NORMAL, "font", &desc, NULL);
++        gtk_style_context_get(context, GTK_STATE_FLAG_NORMAL, "font", &desc, (char *)NULL);
+ 	pango_font_description_set_family_static (desc, "monospace");
+ 	if (font_desc != NULL) {
+ 		pango_font_description_merge (desc, font_desc, TRUE);
+@@ -8715,7 +8715,7 @@
+                      "gtk-cursor-blink", &blink,
+                      "gtk-cursor-blink-time", &blink_time,
+                      "gtk-cursor-blink-timeout", &blink_timeout,
+-                     NULL);
++                     (char *)NULL);
+ 
+         _vte_debug_print(VTE_DEBUG_MISC,
+                          "Cursor blinking settings setting: blink=%d time=%d timeout=%d\n",
+@@ -11799,7 +11799,7 @@
+         case VTE_CURSOR_BLINK_SYSTEM:
+                 g_object_get(gtk_widget_get_settings(GTK_WIDGET(terminal)),
+                                                      "gtk-cursor-blink",
+-                                                     &blink, NULL);
++                                                     &blink, (char *)NULL);
+                 break;
+         case VTE_CURSOR_BLINK_ON:
+                 blink = TRUE;
+diff -Naur vte-0.42.4.orig/src/vtedraw.cc vte-0.42.4/src/vtedraw.cc
+--- vte-0.42.4.orig/src/vtedraw.cc	2016-02-27 14:27:22.380000000 +0000
++++ vte-0.42.4/src/vtedraw.cc	2016-02-27 14:27:36.501000000 +0000
+@@ -629,7 +629,7 @@
+ {
+ 	GtkSettings *settings = gtk_settings_get_for_screen (screen);
+ 	int fontconfig_timestamp;
+-	g_object_get (settings, "gtk-fontconfig-timestamp", &fontconfig_timestamp, NULL);
++	g_object_get (settings, "gtk-fontconfig-timestamp", &fontconfig_timestamp, (char *)NULL);
+ 	return font_info_create_for_context (gdk_pango_context_get_for_screen (screen),
+ 					     desc, language, fontconfig_timestamp);
+ }
