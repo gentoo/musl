@@ -4,3 +4,6 @@ for information about the entire overlay.
 This overlay/branch is to set up a profile for musl based system.
 
 See: http://www.etalabs.net/musl/
+
+## Repoman status
+[![Repoman Status](https://travis-ci.org/gentoo/musl.png)](https://travis-ci.org/gentoo/musl)
