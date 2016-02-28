@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -11,7 +11,7 @@ SRC_URI="http://dist.schmorp.de/rxvt-unicode/Attic/${P}.tar.bz2"
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="alpha amd64 arm hppa ia64 ~mips ppc ppc64 sparc x86 ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris"
+KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
 IUSE="
 	256-color alt-font-width blink buffer-on-clear +focused-urgency
 	fading-colors +font-styles iso14755 +mousewheel +perl pixbuf secondary-wheel
@@ -19,7 +19,7 @@ IUSE="
 "
 
 RDEPEND="
-	>=sys-libs/ncurses-5.7-r6
+	>=sys-libs/ncurses-5.7-r6:=
 	kernel_Darwin? ( dev-perl/Mac-Pasteboard )
 	media-libs/fontconfig
 	perl? ( dev-lang/perl:= )
@@ -93,8 +93,6 @@ src_configure() {
 		$(use_enable startup-notification) \
 		$(use_enable xft) \
 		$(use_enable unicode3) \
-		--disable-utmp \
-		--disable-wtmp \
 		${myconf}
 }
 

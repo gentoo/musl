@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -9,12 +9,12 @@ inherit python-any-r1 qt5-build
 DESCRIPTION="WebKit rendering library for the Qt5 framework (deprecated)"
 
 if [[ ${QT5_BUILD_TYPE} == release ]]; then
-	KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~x86"
+	KEYWORDS="~amd64 ~arm ~x86"
 fi
 
-# TODO: qttestlib, geolocation, orientation/sensors
+# TODO: qttestlib
 
-IUSE="gstreamer gstreamer010 multimedia opengl printsupport qml udev webp"
+IUSE="geolocation gstreamer gstreamer010 +jit multimedia opengl orientation printsupport qml webchannel webp"
 REQUIRED_USE="?? ( gstreamer gstreamer010 multimedia )"
 
 RDEPEND="
@@ -23,11 +23,11 @@ RDEPEND="
 	>=dev-libs/leveldb-1.18-r1
 	dev-libs/libxml2:2
 	dev-libs/libxslt
-	>=dev-qt/qtcore-${PV}:5[icu]
-	>=dev-qt/qtgui-${PV}:5
-	>=dev-qt/qtnetwork-${PV}:5
-	>=dev-qt/qtsql-${PV}:5
-	>=dev-qt/qtwidgets-${PV}:5
+	~dev-qt/qtcore-${PV}[icu]
+	~dev-qt/qtgui-${PV}
+	~dev-qt/qtnetwork-${PV}
+	~dev-qt/qtsql-${PV}
+	~dev-qt/qtwidgets-${PV}
 	media-libs/fontconfig:1.0
 	media-libs/libpng:0=
 	>=sys-libs/zlib-1.2.5
@@ -36,6 +36,7 @@ RDEPEND="
 	x11-libs/libX11
 	x11-libs/libXcomposite
 	x11-libs/libXrender
+	geolocation? ( ~dev-qt/qtpositioning-${PV} )
 	gstreamer? (
 		dev-libs/glib:2
 		media-libs/gstreamer:1.0
@@ -46,11 +47,12 @@ RDEPEND="
 		media-libs/gstreamer:0.10
 		media-libs/gst-plugins-base:0.10
 	)
-	multimedia? ( >=dev-qt/qtmultimedia-${PV}:5[widgets] )
-	opengl? ( >=dev-qt/qtopengl-${PV}:5 )
-	printsupport? ( >=dev-qt/qtprintsupport-${PV}:5 )
-	qml? ( >=dev-qt/qtdeclarative-${PV}:5 )
-	udev? ( virtual/udev )
+	multimedia? ( ~dev-qt/qtmultimedia-${PV}[widgets] )
+	opengl? ( ~dev-qt/qtopengl-${PV} )
+	orientation? ( ~dev-qt/qtsensors-${PV} )
+	printsupport? ( ~dev-qt/qtprintsupport-${PV} )
+	qml? ( ~dev-qt/qtdeclarative-${PV} )
+	webchannel? ( ~dev-qt/qtwebchannel-${PV} )
 	webp? ( media-libs/libwebp:0= )
 "
 DEPEND="${RDEPEND}
@@ -77,22 +79,27 @@ src_prepare() {
 		Tools/qmake/mkspecs/features/{force_static_libs_as_shared,unix/default_post}.prf \
 		|| die
 
+	qt_use_disable_mod geolocation positioning Tools/qmake/mkspecs/features/features.prf
+	qt_use_disable_mod multimedia multimediawidgets Tools/qmake/mkspecs/features/features.prf
+	qt_use_disable_mod orientation sensors Tools/qmake/mkspecs/features/features.prf
+	qt_use_disable_mod printsupport printsupport Tools/qmake/mkspecs/features/features.prf
+	qt_use_disable_mod qml quick Tools/qmake/mkspecs/features/features.prf
+	qt_use_disable_mod webchannel webchannel \
+		Source/WebKit2/Target.pri \
+		Source/WebKit2/WebKit2.pri
+
 	if use gstreamer010; then
 		epatch "${FILESDIR}/${PN}-5.3.2-use-gstreamer010.patch"
 	elif ! use gstreamer; then
 		epatch "${FILESDIR}/${PN}-5.2.1-disable-gstreamer.patch"
 	fi
-	use multimedia   || sed -i -e '/WEBKIT_CONFIG += video use_qt_multimedia/d' \
+
+	# bug 562396
+	use jit || epatch "${FILESDIR}/${PN}-5.5.1-disable-jit.patch"
+
+	use opengl || sed -i -e '/contains(QT_CONFIG, opengl): WEBKIT_CONFIG += use_3d_graphics/d' \
 		Tools/qmake/mkspecs/features/features.prf || die
-	use opengl       || sed -i -e '/contains(QT_CONFIG, opengl): WEBKIT_CONFIG += use_3d_graphics/d' \
-		Tools/qmake/mkspecs/features/features.prf || die
-	use printsupport || sed -i -e '/WEBKIT_CONFIG += have_qtprintsupport/d' \
-		Tools/qmake/mkspecs/features/features.prf || die
-	use qml          || sed -i -e '/have?(QTQUICK): SUBDIRS += declarative/d' \
-		Source/QtWebKit.pro || die
-	use udev         || sed -i -e '/linux: WEBKIT_CONFIG += gamepad/d' \
-		Tools/qmake/mkspecs/features/features.prf || die
-	use webp         || sed -i -e '/config_libwebp: WEBKIT_CONFIG += use_webp/d' \
+	use webp || sed -i -e '/config_libwebp: WEBKIT_CONFIG += use_webp/d' \
 		Tools/qmake/mkspecs/features/features.prf || die
 
 	# bug 458222

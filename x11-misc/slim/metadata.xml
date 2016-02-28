@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
-	<herd>desktop-misc</herd>
-	<maintainer>
+	<maintainer type="person">
 		<email>axs@gentoo.org</email>
 	</maintainer>
-	<use> 
-        	<flag name='consolekit'>Enable native consolekit support</flag>
+	<maintainer type="project">
+		<email>desktop-misc@gentoo.org</email>
+		<name>Gentoo Desktop Miscellaneous Project</name>
+	</maintainer>
+	<use>
+		<flag name="consolekit">Enable native consolekit support</flag>
 	</use>
+	<upstream>
+		<remote-id type="sourceforge">slim.berlios</remote-id>
+	</upstream>
 </pkgmetadata>
-
