@@ -28,9 +28,9 @@ diff -ru llvm-3.5.0.src.orig/tools/clang/lib/Driver/Tools.cpp llvm-3.5.0.src/too
 +    switch (ToolChain.getTriple().getEnvironment()) {
 +    case llvm::Triple::Musl:
 +    case llvm::Triple::MuslEABI:
-+      return "/lib/ld-musl-arm.so.3";
++      return "/lib/ld-musl-arm.so.1";
 +    case llvm::Triple::MuslEABIHF:
-+      return "/lib/ld-musl-armhf.so.3";
++      return "/lib/ld-musl-armhf.so.1";
 +    case llvm::Triple::GNUEABIHF:
        return "/lib/ld-linux-armhf.so.3";
 -    else
