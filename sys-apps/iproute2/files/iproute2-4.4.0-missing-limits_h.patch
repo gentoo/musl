@@ -1,0 +1,11 @@
+diff -Naur iproute2-4.4.0.orig/lib/rt_names.c iproute2-4.4.0/lib/rt_names.c
+--- iproute2-4.4.0.orig/lib/rt_names.c	2016-01-11 16:33:03.000000000 +0000
++++ iproute2-4.4.0/lib/rt_names.c	2016-03-13 22:19:57.103454162 +0000
+@@ -18,6 +18,7 @@
+ #include <sys/time.h>
+ #include <sys/socket.h>
+ #include <dirent.h>
++#include <limits.h>
+ 
+ #include <asm/types.h>
+ #include <linux/rtnetlink.h>
