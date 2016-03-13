@@ -11,7 +11,7 @@ SRC_URI="http://udisks.freedesktop.org/releases/${P}.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="2"
-KEYWORDS="~alpha ~amd64 ~arm ~ia64 ~mips ~ppc ~ppc64 ~sh ~sparc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="debug cryptsetup +gptfdisk +introspection selinux systemd"
 
 COMMON_DEPEND="
@@ -19,10 +19,10 @@ COMMON_DEPEND="
 	>=dev-libs/libatasmart-0.19
 	>=sys-auth/polkit-0.110
 	virtual/acl
-	virtual/libgudev:=
+	>=virtual/libgudev-165:=
 	virtual/udev
 	introspection? ( >=dev-libs/gobject-introspection-1.30:= )
-	systemd? ( sys-apps/systemd )
+	systemd? ( >=sys-apps/systemd-209 )
 "
 # gptfdisk -> src/udiskslinuxpartition.c -> sgdisk (see also #412801#c1)
 # util-linux -> mount, umount, swapon, swapoff (see also #403073)
@@ -41,6 +41,7 @@ DEPEND="${COMMON_DEPEND}
 	app-text/docbook-xsl-stylesheets
 	dev-libs/libxslt
 	>=dev-util/gdbus-codegen-2.32
+	>=dev-util/gtk-doc-am-1.3
 	dev-util/intltool
 	>=sys-kernel/linux-headers-3.1
 	virtual/pkgconfig
@@ -66,7 +67,7 @@ src_prepare() {
 	use systemd || { sed -i -e 's:libsystemd-login:&disable:' configure || die; }
 
 	epatch "${FILESDIR}"/${PN}-2.1.6-musl-fixup.patch
-        epatch "${FILESDIR}"/${PN}-2.1.6-musl-fixup1.patch
+	epatch "${FILESDIR}"/${PN}-2.1.6-musl-fixup1.patch
 
 	epatch_user
 }
