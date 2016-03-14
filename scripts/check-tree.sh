@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 PWD=$(pwd)
 PWD=$(dirname ${PWD})
