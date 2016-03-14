@@ -11,7 +11,7 @@ SRC_URI="http://dist.schmorp.de/rxvt-unicode/Attic/${P}.tar.bz2"
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="
 	256-color alt-font-width blink buffer-on-clear +focused-urgency
 	fading-colors +font-styles iso14755 +mousewheel +perl pixbuf secondary-wheel
