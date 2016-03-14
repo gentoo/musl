@@ -1,6 +1,6 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/net-libs/webkit-gtk/webkit-gtk-2.4.9.ebuild,v 1.5 2015/06/26 09:23:38 ago Exp $
+# $Id$
 
 EAPI="5"
 GCONF_DEBUG="no"
@@ -81,6 +81,7 @@ DEPEND="${RDEPEND}
 		virtual/rubygems[ruby_targets_ruby20]
 		virtual/rubygems[ruby_targets_ruby21]
 		virtual/rubygems[ruby_targets_ruby22]
+		virtual/rubygems[ruby_targets_ruby23]
 		virtual/rubygems[ruby_targets_ruby19]
 	)
 	>=app-accessibility/at-spi2-core-2.5.3
@@ -113,7 +114,7 @@ pkg_pretend() {
 		check-reqs_pkg_pretend
 	fi
 
-	if ! test-flag-CXX -std=c++11; then
+	if [[ ${MERGE_TYPE} != "binary" ]] && ! test-flag-CXX -std=c++11; then
 		die "You need at least GCC 4.7.x or Clang >= 3.3 for C++11-specific compiler flags"
 	fi
 }
@@ -223,7 +224,9 @@ src_configure() {
 
 	local ruby_interpreter=""
 
-	if has_version "virtual/rubygems[ruby_targets_ruby22]"; then
+	if has_version "virtual/rubygems[ruby_targets_ruby23]"; then
+		ruby_interpreter="RUBY=$(type -P ruby23)"
+	elif has_version "virtual/rubygems[ruby_targets_ruby22]"; then
 		ruby_interpreter="RUBY=$(type -P ruby22)"
 	elif has_version "virtual/rubygems[ruby_targets_ruby21]"; then
 		ruby_interpreter="RUBY=$(type -P ruby21)"
