@@ -1,30 +1,30 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/net-dialup/ppp/ppp-2.4.7-r1.ebuild,v 1.2 2015/05/14 10:21:15 pinkbyte Exp $
+# $Id$
 
 EAPI=5
 
 inherit eutils linux-info multilib pam toolchain-funcs
 
-PATCH_VER="2"
+PATCH_VER="1"
 DESCRIPTION="Point-to-Point Protocol (PPP)"
 HOMEPAGE="http://www.samba.org/ppp"
 SRC_URI="ftp://ftp.samba.org/pub/ppp/${P}.tar.gz
-	http://dev.gentoo.org/~pinkbyte/distfiles/patches/${P}-patches-${PATCH_VER}.tar.xz
+	https://dev.gentoo.org/~polynomial-c/${P}-patches-${PATCH_VER}.tar.xz
 	http://www.netservers.net.uk/gpl/ppp-dhcpc.tgz"
 
 LICENSE="BSD GPL-2"
 SLOT="0/${PV}"
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="activefilter atm dhcp eap-tls gtk ipv6 pam radius"
 
-DEPEND="activefilter? ( net-libs/libpcap )
+DEPEND="!net-dialup/ppp-scripts
+	activefilter? ( net-libs/libpcap )
 	atm? ( net-dialup/linux-atm )
 	pam? ( virtual/pam )
 	gtk? ( x11-libs/gtk+:2 )
 	eap-tls? ( net-misc/curl dev-libs/openssl:0 )"
 RDEPEND="${DEPEND}"
-PDEPEND="net-dialup/ppp-scripts"
 
 src_prepare() {
 	mv "${WORKDIR}/dhcp" "${S}/pppd/plugins" || die
@@ -127,6 +127,14 @@ src_install() {
 
 	insopts -m0644
 	doins etc.ppp/options
+
+	exeinto /etc/ppp
+	for i in ip-up ip-down ; do
+		doexe "${WORKDIR}/scripts/${i}"
+		insinto /etc/ppp/${i}.d
+		use ipv6 && dosym ${i} /etc/ppp/${i/ip/ipv6}
+		doins "${WORKDIR}/scripts/${i}.d"/*
+	done
 
 	pamd_mimic_system ppp auth account session
 
