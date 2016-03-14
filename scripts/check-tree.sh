@@ -13,5 +13,6 @@ slist=$(for i in ${list}; do
 done | sort -u)
 
 for i in $slist; do
-	emerge -qvp $i
+	equery w $i
+#	emerge -qvp $i
 done
