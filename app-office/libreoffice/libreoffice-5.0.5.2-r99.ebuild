@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -96,7 +96,7 @@ unset lo_xt
 LICENSE="|| ( LGPL-3 MPL-1.1 )"
 SLOT="0"
 [[ ${PV} == *9999* ]] || \
-KEYWORDS="~amd64 ~arm ~x86"
+KEYWORDS="amd64 ~arm x86"
 
 COMMON_DEPEND="
 	${PYTHON_DEPS}
@@ -115,7 +115,7 @@ COMMON_DEPEND="
 	app-text/libwpd:0.10[tools]
 	app-text/libwpg:0.3
 	=app-text/libwps-0.4*
-	>=app-text/poppler-0.16:=[xpdf-headers(+),cxx]
+	>=app-text/poppler-0.16:=[cxx]
 	>=dev-cpp/clucene-2.3.3.4-r2
 	=dev-cpp/libcmis-0.5*
 	dev-db/unixODBC
@@ -266,7 +266,7 @@ PATCHES=(
 
 	# musl fixes
 	"${FILESDIR}/${PN}-4.4.1.2-fix-includes.patch"
-	"${FILESDIR}/${PN}-4.4.1.2-linux-musl.patch"
+	"${FILESDIR}/${PN}-5.0.5.2-linux-musl.patch"
 	"${FILESDIR}/${PN}-4.4.1.2-musl-fix-execinfo.patch"
 )
 
