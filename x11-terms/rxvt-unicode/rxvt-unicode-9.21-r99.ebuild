@@ -93,6 +93,8 @@ src_configure() {
 		$(use_enable startup-notification) \
 		$(use_enable xft) \
 		$(use_enable unicode3) \
+		--disable-utmp \
+		--disable-wtmp \
 		${myconf}
 }
 
