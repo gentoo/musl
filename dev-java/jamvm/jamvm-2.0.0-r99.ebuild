@@ -25,16 +25,12 @@ RDEPEND="${DEPEND}"
 PATCHES=(
 	"${FILESDIR}"/"${P}-classes-location.patch"
 	"${FILESDIR}"/"${P}-noexecstack.patch"
+	"${FILESDIR}"/"${P}-fenv.patch"
 )
 
 src_prepare() {
 	# without this patch, classes.zip is not found at runtime
 	epatch "${PATCHES[@]}"
-
-	if use elibc_musl ; then
-		epatch "${FILESDIR}"/"${P}-musl.patch"
-	fi
-
 	eautoreconf
 
 	# These come precompiled.
