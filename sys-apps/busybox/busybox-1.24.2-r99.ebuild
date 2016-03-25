@@ -16,7 +16,7 @@ if [[ ${PV} == "9999" ]] ; then
 else
 	MY_P=${PN}-${PV/_/-}
 	SRC_URI="http://www.busybox.net/downloads/${MY_P}.tar.bz2"
-	KEYWORDS="amd64 arm ~mips ppc x86"
+	KEYWORDS="~alpha amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-linux ~arm-linux ~x86-linux"
 fi
 
 LICENSE="GPL-2" # GPL-2 only
@@ -67,7 +67,10 @@ src_prepare() {
 
 	# patches go here!
 	epatch "${FILESDIR}"/${PN}-1.19.0-bb.patch
-	epatch "${FILESDIR}"/${P}-*.patch
+	epatch "${FILESDIR}"/busybox-1.24.1-trylink-ldflags.patch
+	epatch "${FILESDIR}"/busybox-1.24.2-ash-recursive-heredocs.patch
+	epatch "${FILESDIR}"/busybox-1.24.2-CVE-2016-2147.patch
+	epatch "${FILESDIR}"/busybox-1.24.2-CVE-2016-2148.patch
 	cp "${FILESDIR}"/ginit.c init/ || die
 
 	# flag cleanup
@@ -115,7 +118,6 @@ src_configure() {
 	busybox_config_option n BUILD_LIBBUSYBOX
 	busybox_config_option n FEATURE_CLEAN_UP
 	busybox_config_option n MONOTONIC_SYSCALL
-	busybox_config_option n START_STOP_DAEMON
 	busybox_config_option n USE_PORTABLE_CODE
 	busybox_config_option n WERROR
 
