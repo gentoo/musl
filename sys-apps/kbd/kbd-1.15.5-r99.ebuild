@@ -1,6 +1,6 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/sys-apps/kbd/kbd-1.15.5-r1.ebuild,v 1.6 2014/01/09 13:37:41 polynomial-c Exp $
+# $Id$
 
 EAPI="4"
 

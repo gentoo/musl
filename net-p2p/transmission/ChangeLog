@@ -1,6 +1,6 @@
 # ChangeLog for net-p2p/transmission
 # Copyright 1999-2015 Gentoo Foundation; Distributed under the GPL v2
-# $Header: /var/cvsroot/gentoo-x86/net-p2p/transmission/ChangeLog,v 1.264 2015/03/25 20:25:27 grknight Exp $
+# $Id$
 
   25 Mar 2015; Brian Evans <grknight@gentoo.org> transmission-2.84-r1.ebuild:
   Fix REQUIRED_USE at the request of mgorny in IRC

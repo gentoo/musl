@@ -1,6 +1,6 @@
-# Copyright 1999-2013 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo-x86/dev-scheme/guile/guile-1.8.8-r1.ebuild,v 1.16 2013/04/24 22:53:08 pchrist Exp $
+# $Id$
 
 EAPI=3
 inherit eutils autotools flag-o-matic elisp-common
