@@ -1,0 +1,25 @@
+Remove the dependency on sys/cdefs.h.
+
+Note that upstream has already done similar changes so it would be unnecessary
+with newer versions.
+
+diff -ru tmux-2.1.orig/compat/vis.h tmux-2.1/compat/vis.h
+--- tmux-2.1.orig/compat/vis.h	2016-03-31 11:16:36.113228256 +0900
++++ tmux-2.1/compat/vis.h	2016-03-31 11:17:04.263228615 +0900
+@@ -73,9 +73,6 @@
+  */
+ #define	UNVIS_END	1	/* no more characters */
+ 
+-#include <sys/cdefs.h>
+-
+-__BEGIN_DECLS
+ char	*vis(char *, int, int, int);
+ int	strvis(char *, const char *, int);
+ int	stravis(char **, const char *, int);
+@@ -85,6 +82,4 @@
+ int	unvis(char *, char, int *, int);
+ ssize_t strnunvis(char *, const char *, size_t);
+ 
+-__END_DECLS
+-
+ #endif /* !_VIS_H_ */
