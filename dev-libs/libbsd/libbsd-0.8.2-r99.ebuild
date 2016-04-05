@@ -27,7 +27,7 @@ pkg_setup() {
 
 src_prepare() {
 	epatch "${FILESDIR}"/${P}-replace__BEGIN_DECLS.patch
-	#epatch "${FILESDIR}"/${P}-fix-headers.patch
+	epatch "${FILESDIR}"/${P}-fix-headers.patch
 
 	/* This requires autoconf */
 	epatch "${FILESDIR}"/${P}-remore-funopen.patch

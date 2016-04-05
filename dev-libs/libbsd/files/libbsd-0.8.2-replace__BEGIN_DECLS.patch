@@ -219,23 +219,6 @@ diff -Naur /var/tmp/portage/dev-libs/libbsd-0.8.2/work/libbsd-0.8.2/include/bsd/
 +/* __END_DECLS */
  
  #endif /* _STRINGLIST_H */
-diff -Naur /var/tmp/portage/dev-libs/libbsd-0.8.2/work/libbsd-0.8.2/include/bsd/sys/cdefs.h libbsd-0.8.2/include/bsd/sys/cdefs.h
---- /var/tmp/portage/dev-libs/libbsd-0.8.2/work/libbsd-0.8.2/include/bsd/sys/cdefs.h	2015-09-23 05:59:27.000000000 +0000
-+++ libbsd-0.8.2/include/bsd/sys/cdefs.h	2016-04-04 22:04:30.264000000 +0000
-@@ -24,11 +24,13 @@
-  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  */
- 
-+/*
- #ifdef LIBBSD_OVERLAY
- #include_next <sys/cdefs.h>
- #else
- #include <sys/cdefs.h>
- #endif
-+*/
- 
- #ifndef LIBBSD_SYS_CDEFS_H
- #define LIBBSD_SYS_CDEFS_H
 diff -Naur /var/tmp/portage/dev-libs/libbsd-0.8.2/work/libbsd-0.8.2/include/bsd/unistd.h libbsd-0.8.2/include/bsd/unistd.h
 --- /var/tmp/portage/dev-libs/libbsd-0.8.2/work/libbsd-0.8.2/include/bsd/unistd.h	2015-12-13 23:58:51.000000000 +0000
 +++ libbsd-0.8.2/include/bsd/unistd.h	2016-04-04 23:39:19.816000000 +0000
