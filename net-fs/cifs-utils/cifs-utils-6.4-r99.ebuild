@@ -52,7 +52,7 @@ pkg_setup() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}/${PN}-6.1-paths.h.patch" #for musl
+	epatch "${FILESDIR}/${PN}-6.4-fix-headers.patch" #for musl
 }
 
 src_configure() {
