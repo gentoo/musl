@@ -13,7 +13,7 @@ SRC_URI="http://linuxwireless.org/download/crda/${P}.tar.bz2"
 
 LICENSE="ISC"
 SLOT="0"
-KEYWORDS="alpha amd64 arm ~arm64 ia64 ~mips ppc ppc64 sparc x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE=""
 
 RDEPEND="dev-libs/openssl:0

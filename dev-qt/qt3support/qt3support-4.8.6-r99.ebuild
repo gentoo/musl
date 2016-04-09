@@ -9,9 +9,9 @@ inherit qt4-build-multilib
 DESCRIPTION="The Qt3Support module for the Qt toolkit"
 
 if [[ ${QT4_BUILD_TYPE} == live ]]; then
-	KEYWORDS="alpha arm hppa ppc ppc64"
+	KEYWORDS="amd64 arm ~mips ppc x86"
 else
-	KEYWORDS="alpha amd64 arm ~arm64 hppa ~ia64 ~mips ppc ppc64 ~sparc x86 ~amd64-fbsd ~x86-fbsd ~x86-freebsd ~amd64-linux ~x86-linux ~ppc-macos ~x86-macos ~x64-solaris ~x86-solaris"
+	KEYWORDS="amd64 arm ~mips ppc x86"
 fi
 
 IUSE="+accessibility"
