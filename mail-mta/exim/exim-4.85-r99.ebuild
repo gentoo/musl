@@ -19,7 +19,7 @@ HOMEPAGE="http://www.exim.org/"
 
 SLOT="0"
 LICENSE="GPL-2"
-KEYWORDS="amd64 ppc x86"
+KEYWORDS="amd64 ~arm ~mips ppc x86"
 
 COMMON_DEPEND=">=sys-apps/sed-4.0.5
 	>=sys-libs/db-3.2
