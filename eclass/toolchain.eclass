@@ -153,7 +153,7 @@ if [[ ${PN} != "kgcc64" && ${PN} != gcc-* ]] ; then
 	# the older versions, we don't want to bother supporting it.  #448024
 	tc_version_is_at_least 4.8 && IUSE+=" graphite" IUSE_DEF+=( sanitize )
 	tc_version_is_at_least 4.9 && IUSE+=" cilk"
-	tc_version_is_at_least 5.0 && IUSE+=" jit"
+	tc_version_is_at_least 5.0 && IUSE+=" jit pch"
 	tc_version_is_at_least 6.0 && IUSE+=" pie +ssp"
 fi
 
@@ -626,6 +626,23 @@ do_gcc_PIE_patches() {
 
 # configure to build with the hardened GCC specs as the default
 make_gcc_hard() {
+
+	# Gcc >= 6.X we don't need to sed in Makefile
+	# It have configurations options to turn pie/ssp on as default
+	if tc_version_is_at_least 6.0 ; then
+		if use hardened ; then
+			# rebrand to make bug reports easier
+			BRANDING_GCC_PKGVERSION=${BRANDING_GCC_PKGVERSION/Gentoo/Gentoo Hardened}
+		fi
+		if use pie ; then
+			einfo "Updating gcc to use automatic PIE building ..."
+		fi
+		if use ssp ; then
+			einfo "Updating gcc to use automatic SSP building ..."
+		fi
+		return 1
+	fi
+
 	# we want to be able to control the pie patch logic via something other
 	# than ALL_CFLAGS...
 	sed -e '/^ALL_CFLAGS/iHARD_CFLAGS = ' \
@@ -897,6 +914,11 @@ toolchain_src_configure() {
 	# going to link in -lrt to all C++ apps.  #411681
 	if tc_version_is_at_least 4.4 && is_cxx ; then
 		confgcc+=( --enable-libstdcxx-time )
+	fi
+
+	# Support to disable pch when building libstdcxx
+	if tc_version_is_at_least 5.0 && ! use pch ; then
+		confgcc+=( --disable-libstdcxx-pch )
 	fi
 
 	# The jit language requires this.
@@ -1915,6 +1937,11 @@ create_gcc_env_entry() {
 }
 
 copy_minispecs_gcc_specs() {
+	# on gcc 6 we don't need minispecs
+	if tc_version_is_at_least 6.0 ; then
+		return 0
+	fi
+
 	# setup the hardenedno* specs files and the vanilla specs file.
 	if hardened_gcc_works ; then
 		create_gcc_env_entry hardenednopiessp
@@ -2263,6 +2290,10 @@ hardened_gcc_is_stable() {
 }
 
 want_minispecs() {
+	# on gcc 6 we don't need minispecs
+	if tc_version_is_at_least 6.0 ; then
+		return 0
+	fi
 	if tc_version_is_at_least 4.3.2 && use hardened ; then
 		if ! want_pie ; then
 			ewarn "PIE_VER or SPECS_VER is not defined in the GCC ebuild."
