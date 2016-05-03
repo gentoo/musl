@@ -21,6 +21,7 @@
       instead of just 3.3)</flag>
     <flag name="nopie">Disable PIE support (NOT FOR GENERAL USE)</flag>
     <flag name="nossp">Disable SSP support (NOT FOR GENERAL USE)</flag>
+    <flag name="ssp">Enable SSP support</flag>
     <flag name="objc">Build support for the Objective C code language</flag>
     <flag name="objc++">Build support for the Objective C++ language</flag>
     <flag name="objc-gc">Build support for the Objective C code language Garbage
