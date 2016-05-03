@@ -104,6 +104,7 @@ INCLUDEPATH=${TOOLCHAIN_INCLUDEPATH:-${LIBPATH}/include}
 
 if is_crosscompile ; then
 	BINPATH=${TOOLCHAIN_BINPATH:-${PREFIX}/${CHOST}/${CTARGET}/gcc-bin/${GCC_CONFIG_VER}}
+	HOSTLIBPATH=${PREFIX}/${CHOST}/${CTARGET}/lib/${GCC_CONFIG_VER}
 else
 	BINPATH=${TOOLCHAIN_BINPATH:-${PREFIX}/${CTARGET}/gcc-bin/${GCC_CONFIG_VER}}
 fi
@@ -152,17 +153,13 @@ if [[ ${PN} != "kgcc64" && ${PN} != gcc-* ]] ; then
 	# the older versions, we don't want to bother supporting it.  #448024
 	tc_version_is_at_least 4.8 && IUSE+=" graphite" IUSE_DEF+=( sanitize )
 	tc_version_is_at_least 4.9 && IUSE+=" cilk"
+	tc_version_is_at_least 5.0 && IUSE+=" jit"
 	tc_version_is_at_least 6.0 && IUSE+=" pie +ssp"
 fi
 
 IUSE+=" ${IUSE_DEF[*]/#/+}"
 
-# Support upgrade paths here or people get pissed
-if ! tc_version_is_at_least 4.7 || is_crosscompile || use multislot || [[ ${GCC_PV} == *_alpha* ]] ; then
-	SLOT="${GCC_CONFIG_VER}"
-else
-	SLOT="${GCC_BRANCH_VER}"
-fi
+SLOT="${GCC_CONFIG_VER}"
 
 #---->> DEPEND <<----
 
@@ -656,7 +653,7 @@ make_gcc_hard() {
 			ewarn "PIE has not been enabled by default"
 			gcc_hard_flags+=" -DEFAULT_SSP"
 		else
-			# do nothing if hardened is't supported, but don't die either
+			# do nothing if hardened isn't supported, but don't die either
 			ewarn "hardened is not supported for this arch in this gcc version"
 			return 0
 		fi
@@ -838,6 +835,7 @@ toolchain_src_configure() {
 	is_d   && GCC_LANG+=",d"
 	is_gcj && GCC_LANG+=",java"
 	is_go  && GCC_LANG+=",go"
+	is_jit && GCC_LANG+=",jit"
 	if is_objc || is_objcxx ; then
 		GCC_LANG+=",objc"
 		if tc_version_is_at_least 4 ; then
@@ -900,6 +898,9 @@ toolchain_src_configure() {
 	if tc_version_is_at_least 4.4 && is_cxx ; then
 		confgcc+=( --enable-libstdcxx-time )
 	fi
+
+	# The jit language requires this.
+	is_jit && confgcc+=( --enable-host-shared )
 
 	# # Turn on the -Wl,--build-id flag by default for ELF targets. #525942
 	# # This helps with locating debug files.
@@ -1502,7 +1503,7 @@ toolchain_src_compile() {
 
 	# Do not make manpages if we do not have perl ...
 	[[ ! -x /usr/bin/perl ]] \
-		&& find "${WORKDIR}"/build -name '*.[17]' | xargs touch
+		&& find "${WORKDIR}"/build -name '*.[17]' -exec touch {} +
 
 	gcc_do_make ${GCC_MAKE_TARGET}
 }
@@ -1660,7 +1661,12 @@ toolchain_src_install() {
 	for x in cpp gcc g++ c++ gcov g77 gcj gcjh gfortran gccgo ; do
 		# For some reason, g77 gets made instead of ${CTARGET}-g77...
 		# this should take care of that
-		[[ -f ${x} ]] && mv ${x} ${CTARGET}-${x}
+		if [[ -f ${x} ]] ; then
+			# In case they're hardlinks, clear out the target first
+			# otherwise the mv below will complain.
+			rm -f ${CTARGET}-${x}
+			mv ${x} ${CTARGET}-${x}
+		fi
 
 		if [[ -f ${CTARGET}-${x} ]] ; then
 			if ! is_crosscompile ; then
@@ -1678,9 +1684,18 @@ toolchain_src_install() {
 			ln -sf ${CTARGET}-${x} ${CTARGET}-${x}-${GCC_CONFIG_VER}
 		fi
 	done
+	# Rename the main go binaries as we don't want to clobber dev-lang/go
+	# when gcc-config runs. #567806
+	if tc_version_is_at_least 5 && is_go ; then
+		for x in go gofmt; do
+			mv ${x} ${x}-${GCCMAJOR} || die
+		done
+	fi
 
 	# Now do the fun stripping stuff
 	env RESTRICT="" CHOST=${CHOST} prepstrip "${D}${BINPATH}"
+	is_crosscompile && \
+		env RESTRICT="" CHOST=${CHOST} prepstrip "${D}/${HOSTLIBPATH}"
 	env RESTRICT="" CHOST=${CTARGET} prepstrip "${D}${LIBPATH}"
 	# gcc used to install helper binaries in lib/ but then moved to libexec/
 	[[ -d ${D}${PREFIX}/libexec/gcc ]] && \
@@ -1710,9 +1725,8 @@ toolchain_src_install() {
 	# install testsuite results
 	if use regression-test; then
 		docinto testsuite
-		find "${WORKDIR}"/build -type f -name "*.sum" -print0 | xargs -0 dodoc
-		find "${WORKDIR}"/build -type f -path "*/testsuite/*.log" -print0 \
-			| xargs -0 dodoc
+		find "${WORKDIR}"/build -type f -name "*.sum" -exec dodoc {} +
+		find "${WORKDIR}"/build -type f -path "*/testsuite/*.log" -exec dodoc {} +
 	fi
 
 	# Rather install the script, else portage with changing $FILESDIR
@@ -1762,6 +1776,17 @@ gcc_movelibs() {
 	# older versions of gcc did not support --print-multi-os-directory
 	tc_version_is_at_least 3.2 || return 0
 
+	# For non-target libs which are for CHOST and not CTARGET, we want to
+	# move them to the compiler-specific CHOST internal dir.  This is stuff
+	# that you want to link against when building tools rather than building
+	# code to run on the target.
+	if tc_version_is_at_least 5 && is_crosscompile ; then
+		dodir "${HOSTLIBPATH}"
+		mv "${D}"/usr/$(get_libdir)/libcc1* "${D}${HOSTLIBPATH}" || die
+	fi
+
+	# For all the libs that are built for CTARGET, move them into the
+	# compiler-specific CTARGET internal dir.
 	local x multiarg removedirs=""
 	for multiarg in $($(XGCC) -print-multi-lib) ; do
 		multiarg=${multiarg#*;}
@@ -1807,7 +1832,7 @@ gcc_movelibs() {
 	for FROMDIR in ${removedirs} ; do
 		rmdir "${D}"${FROMDIR} >& /dev/null
 	done
-	find "${D}" -type d | xargs rmdir >& /dev/null
+	find -depth "${D}" -type d -exec rmdir {} + >& /dev/null
 }
 
 # make sure the libtool archives have libdir set to where they actually
@@ -1957,7 +1982,7 @@ toolchain_pkg_postinst() {
 		echo
 		ewarn "You might want to review the GCC upgrade guide when moving between"
 		ewarn "major versions (like 4.2 to 4.3):"
-		ewarn "https://www.gentoo.org/doc/en/gcc-upgrading.xml"
+		ewarn "https://wiki.gentoo.org/wiki/Upgrading_GCC"
 		echo
 
 		# Clean up old paths
@@ -2025,26 +2050,36 @@ do_gcc_config() {
 		return 0
 	fi
 
-	local current_gcc_config="" current_specs="" use_specs=""
+	local current_gcc_config target
 
 	current_gcc_config=$(env -i ROOT="${ROOT}" gcc-config -c ${CTARGET} 2>/dev/null)
 	if [[ -n ${current_gcc_config} ]] ; then
+		local current_specs use_specs
 		# figure out which specs-specific config is active
 		current_specs=$(gcc-config -S ${current_gcc_config} | awk '{print $3}')
 		[[ -n ${current_specs} ]] && use_specs=-${current_specs}
-	fi
-	if [[ -n ${use_specs} ]] && \
-	   [[ ! -e ${ROOT}/etc/env.d/gcc/${CTARGET}-${GCC_CONFIG_VER}${use_specs} ]]
-	then
-		ewarn "The currently selected specs-specific gcc config,"
-		ewarn "${current_specs}, doesn't exist anymore. This is usually"
-		ewarn "due to enabling/disabling hardened or switching to a version"
-		ewarn "of gcc that doesnt create multiple specs files. The default"
-		ewarn "config will be used, and the previous preference forgotten."
-		use_specs=""
+
+		if [[ -n ${use_specs} ]] && \
+		   [[ ! -e ${ROOT}/etc/env.d/gcc/${CTARGET}-${GCC_CONFIG_VER}${use_specs} ]]
+		then
+			ewarn "The currently selected specs-specific gcc config,"
+			ewarn "${current_specs}, doesn't exist anymore. This is usually"
+			ewarn "due to enabling/disabling hardened or switching to a version"
+			ewarn "of gcc that doesnt create multiple specs files. The default"
+			ewarn "config will be used, and the previous preference forgotten."
+			use_specs=""
+		fi
+
+		target="${CTARGET}-${GCC_CONFIG_VER}${use_specs}"
+	else
+		# The curent target is invalid.  Attempt to switch to a valid one.
+		# Blindly pick the latest version.  #529608
+		# TODO: Should update gcc-config to accept `-l ${CTARGET}` rather than
+		# doing a partial grep like this.
+		target=$(gcc-config -l 2>/dev/null | grep " ${CTARGET}-[0-9]" | tail -1 | awk '{print $2}')
 	fi
 
-	gcc-config ${CTARGET}-${GCC_CONFIG_VER}${use_specs}
+	gcc-config "${target}"
 }
 
 should_we_gcc_config() {
@@ -2141,6 +2176,11 @@ is_gcj() {
 is_go() {
 	gcc-lang-supported go || return 1
 	use cxx && use_if_iuse go
+}
+
+is_jit() {
+	gcc-lang-supported jit || return 1
+	use_if_iuse jit
 }
 
 is_multilib() {
