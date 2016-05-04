@@ -18,6 +18,8 @@ PATCH_VER="1.0"
 # uclibc need tls and nptl support for SSP support
 # uclibc need to be >= 0.9.33
 #SSP_UCLIBC_STABLE="x86 amd64 mips ppc ppc64 arm"
+PIE_MUSL_STABLE="amd64 arm ppc mips x86"
+SSP_MUSL_STABLE="amd64 arm ppc mips"
 #end Hardened stuff
 
 inherit toolchain
