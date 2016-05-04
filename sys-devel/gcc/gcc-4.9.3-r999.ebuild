@@ -2,13 +2,13 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI="5"
+EAPI="4"
 
-PATCH_VER="1.2"
+PATCH_VER="1.5"
 UCLIBC_VER="1.0"
 
 # Hardened gcc 4 stuff
-PIE_VER="0.6.3"
+PIE_VER="0.6.4"
 SPECS_VER="0.2.0"
 SPECS_GCC_VER="4.4.3"
 # arch/libc configurations known to be stable with {PIE,SSP}-by-default
@@ -45,7 +45,7 @@ src_prepare() {
 	toolchain_src_prepare
 
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl ]]; then
-		epatch "${FILESDIR}"/${PN}-4.8.3-musl-res_state.patch
+		epatch "${FILESDIR}"/${PN}-4.9.3-musl-res_state.patch
 		epatch "${FILESDIR}"/${PN}-4.8.3-musl-fix-libc5-assumption.patch
 		epatch "${FILESDIR}"/${PN}-4.8.5-posix_memalign.patch
 
