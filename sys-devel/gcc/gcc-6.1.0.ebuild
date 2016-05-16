@@ -38,4 +38,7 @@ fi
 src_prepare() {
 
 	toolchain_src_prepare
+	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl ]]; then
+		epatch "${FILESDIR}"/${P}-musl-cpu.patch
+	fi
 }
