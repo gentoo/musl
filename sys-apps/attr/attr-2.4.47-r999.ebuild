@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI="4"
+EAPI="5"
 
 inherit eutils toolchain-funcs multilib-minimal
 
@@ -24,6 +24,7 @@ RDEPEND="abi_x86_32? (
 
 src_prepare() {
 	epatch "${FILESDIR}"/${PN}-2.4.46-ifdef_cplusplus.patch
+	epatch "${FILESDIR}"/${P}-fix-missing-sys_types_h.patch
 	sed -i \
 		-e "/^PKG_DOC_DIR/s:@pkg_name@:${PF}:" \
 		-e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
