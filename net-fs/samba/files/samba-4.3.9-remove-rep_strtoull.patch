@@ -1,6 +1,6 @@
 diff -Naur samba-4.3.9.orig/lib/replace/replace.c samba-4.3.9/lib/replace/replace.c
 --- samba-4.3.9.orig/lib/replace/replace.c	2015-09-08 13:45:25.000000000 +0000
-+++ samba-4.3.9/lib/replace/replace.c	2016-05-29 00:50:43.794008282 +0000
++++ samba-4.3.9/lib/replace/replace.c	2016-05-29 06:47:07.529796925 +0000
 @@ -558,43 +558,6 @@
  #endif /* HAVE_STRTOLL */
  
@@ -45,3 +45,23 @@ diff -Naur samba-4.3.9.orig/lib/replace/replace.c samba-4.3.9/lib/replace/replac
  #ifndef HAVE_SETENV
  int rep_setenv(const char *name, const char *value, int overwrite) 
  {
+diff -Naur samba-4.3.9.orig/lib/replace/replace.h samba-4.3.9/lib/replace/replace.h
+--- samba-4.3.9.orig/lib/replace/replace.h	2015-09-08 13:45:25.000000000 +0000
++++ samba-4.3.9/lib/replace/replace.h	2016-05-29 06:47:28.886795715 +0000
+@@ -371,16 +371,6 @@
+ #endif
+ #endif
+ 
+-#ifndef HAVE_STRTOULL
+-#define strtoull rep_strtoull
+-unsigned long long int rep_strtoull(const char *str, char **endptr, int base);
+-#else
+-#ifdef HAVE_BSD_STRTOLL /* yes, it's not HAVE_BSD_STRTOULL */
+-#define strtoull rep_strtoull
+-unsigned long long int rep_strtoull(const char *str, char **endptr, int base);
+-#endif
+-#endif
+-
+ #ifndef HAVE_FTRUNCATE
+ #define ftruncate rep_ftruncate
+ int rep_ftruncate(int,off_t);

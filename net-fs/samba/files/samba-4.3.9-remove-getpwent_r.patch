@@ -1,101 +1,80 @@
-diff -Naur samba-4.3.9.orig/source4/torture/local/nss_tests.c samba-4.3.9/source4/torture/local/nss_tests.c
---- samba-4.3.9.orig/source4/torture/local/nss_tests.c	2015-12-01 08:42:55.000000000 +0000
-+++ samba-4.3.9/source4/torture/local/nss_tests.c	2016-05-29 00:52:30.412002243 +0000
-@@ -337,48 +337,6 @@
+diff --git a/source4/torture/local/nss_tests.c b/source4/torture/local/nss_tests.c
+index 2cd6122..04f13c6 100644
+--- a/source4/torture/local/nss_tests.c
++++ b/source4/torture/local/nss_tests.c
+@@ -247,7 +247,6 @@ static bool test_getgrnam_r(struct torture_context *tctx,
+ 	return true;
+ }
+ 
+-
+ static bool test_getgrgid(struct torture_context *tctx,
+ 			  gid_t gid,
+ 			  struct group *grp_p)
+@@ -333,6 +332,7 @@ static bool test_enum_passwd(struct torture_context *tctx,
+ 	return true;
+ }
+ 
++#if HAVE_GETPWENT_R
+ static bool test_enum_r_passwd(struct torture_context *tctx,
  			       struct passwd **pwd_array_p,
  			       size_t *num_pwd_p)
- {
--	struct passwd pwd, *pwdp;
--	struct passwd *pwd_array = NULL;
--	size_t num_pwd = 0;
--	char buffer[4096];
--	int ret;
--
--	torture_comment(tctx, "Testing setpwent\n");
--	setpwent();
--
--	while (1) {
--		torture_comment(tctx, "Testing getpwent_r\n");
--
--#ifdef SOLARIS_GETPWENT_R
--		ret = getpwent_r(&pwd, buffer, sizeof(buffer));
--#else /* SOLARIS_GETPWENT_R */
--		ret = getpwent_r(&pwd, buffer, sizeof(buffer), &pwdp);
--#endif /* SOLARIS_GETPWENT_R */
--		if (ret != 0) {
--			if (ret != ENOENT) {
--				torture_comment(tctx, "got %d return code\n", ret);
--			}
--			break;
--		}
--		print_passwd(&pwd);
--		if (pwd_array_p && num_pwd_p) {
--			pwd_array = talloc_realloc(tctx, pwd_array, struct passwd, num_pwd+1);
--			torture_assert(tctx, pwd_array, "out of memory");
--			copy_passwd(tctx, &pwd, &pwd_array[num_pwd]);
--			num_pwd++;
--		}
--	}
--
--	torture_comment(tctx, "Testing endpwent\n");
--	endpwent();
--
--	if (pwd_array_p) {
--		*pwd_array_p = pwd_array;
--	}
--	if (num_pwd_p) {
--		*num_pwd_p = num_pwd;
--	}
--
+@@ -381,6 +381,7 @@ static bool test_enum_r_passwd(struct torture_context *tctx,
+ 
+ 	return true;
+ }
++#endif
+ 
+ static bool torture_assert_passwd_equal(struct torture_context *tctx,
+ 					const struct passwd *p1,
+@@ -432,7 +433,7 @@ static bool test_passwd_r(struct torture_context *tctx)
+ 	struct passwd *pwd, pwd1, pwd2;
+ 	size_t num_pwd;
+ 
+-	torture_assert(tctx, test_enum_r_passwd(tctx, &pwd, &num_pwd),
++	torture_assert(tctx, test_enum_passwd(tctx, &pwd, &num_pwd),
+ 						"failed to enumerate passwd");
+ 
+ 	for (i=0; i < num_pwd; i++) {
+@@ -460,7 +461,7 @@ static bool test_passwd_r_cross(struct torture_context *tctx)
+ 	struct passwd *pwd, pwd1, pwd2, pwd3, pwd4;
+ 	size_t num_pwd;
+ 
+-	torture_assert(tctx, test_enum_r_passwd(tctx, &pwd, &num_pwd),
++	torture_assert(tctx, test_enum_passwd(tctx, &pwd, &num_pwd),
+ 						"failed to enumerate passwd");
+ 
+ 	for (i=0; i < num_pwd; i++) {
+@@ -531,6 +532,7 @@ static bool test_enum_group(struct torture_context *tctx,
  	return true;
  }
  
-@@ -535,48 +493,6 @@
++#if HAVE_GETGRENT_R
+ static bool test_enum_r_group(struct torture_context *tctx,
  			      struct group **grp_array_p,
  			      size_t *num_grp_p)
- {
--	struct group grp, *grpp;
--	struct group *grp_array = NULL;
--	size_t num_grp = 0;
--	char buffer[4096];
--	int ret;
--
--	torture_comment(tctx, "Testing setgrent\n");
--	setgrent();
--
--	while (1) {
--		torture_comment(tctx, "Testing getgrent_r\n");
--
--#ifdef SOLARIS_GETGRENT_R
--		ret = getgrent_r(&grp, buffer, sizeof(buffer));
--#else /* SOLARIS_GETGRENT_R */
--		ret = getgrent_r(&grp, buffer, sizeof(buffer), &grpp);
--#endif /* SOLARIS_GETGRENT_R */
--		if (ret != 0) {
--			if (ret != ENOENT) {
--				torture_comment(tctx, "got %d return code\n", ret);
--			}
--			break;
--		}
--		print_group(&grp);
--		if (grp_array_p && num_grp_p) {
--			grp_array = talloc_realloc(tctx, grp_array, struct group, num_grp+1);
--			torture_assert(tctx, grp_array, "out of memory");
--			copy_group(tctx, &grp, &grp_array[num_grp]);
--			num_grp++;
--		}
--	}
--
--	torture_comment(tctx, "Testing endgrent\n");
--	endgrent();
--
--	if (grp_array_p) {
--		*grp_array_p = grp_array;
--	}
--	if (num_grp_p) {
--		*num_grp_p = num_grp;
--	}
--
+@@ -579,6 +581,7 @@ static bool test_enum_r_group(struct torture_context *tctx,
+ 
  	return true;
  }
++#endif
  
+ static bool torture_assert_group_equal(struct torture_context *tctx,
+ 				       const struct group *g1,
+@@ -635,7 +638,7 @@ static bool test_group_r(struct torture_context *tctx)
+ 	struct group *grp, grp1, grp2;
+ 	size_t num_grp;
+ 
+-	torture_assert(tctx, test_enum_r_group(tctx, &grp, &num_grp),
++	torture_assert(tctx, test_enum_group(tctx, &grp, &num_grp),
+ 					       "failed to enumerate group");
+ 
+ 	for (i=0; i < num_grp; i++) {
+@@ -663,7 +666,7 @@ static bool test_group_r_cross(struct torture_context *tctx)
+ 	struct group *grp, grp1, grp2, grp3, grp4;
+ 	size_t num_grp;
+ 
+-	torture_assert(tctx, test_enum_r_group(tctx, &grp, &num_grp),
++	torture_assert(tctx, test_enum_group(tctx, &grp, &num_grp),
+ 					       "failed to enumerate group");
+ 
+ 	for (i=0; i < num_grp; i++) {
