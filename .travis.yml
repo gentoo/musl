@@ -24,4 +24,4 @@ before_script:
     - ln -s /usr/portage/profiles/base/ /etc/portage/make.profile
     - cd travis-overlay
 script:
-    - "./../portage-2.2.28/bin/repoman full -i -d"
+    - "ARCH=amd64 ./../portage-2.2.28/bin/repoman full -i -d"
