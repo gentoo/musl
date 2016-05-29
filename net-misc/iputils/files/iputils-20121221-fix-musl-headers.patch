@@ -39,7 +39,7 @@ diff -Naur iputils-s20121221.orig/ping_common.h iputils-s20121221/ping_common.h
  #include <string.h>
  #include <netdb.h>
  #include <setjmp.h>
-+#include <asm-generic/param.h>
++#include <linux/param.h>
  
  #ifdef CAPABILITIES
  #include <sys/prctl.h>
