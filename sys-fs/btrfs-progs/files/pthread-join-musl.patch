@@ -1,0 +1,11 @@
+--- btrfs-progs-4.5.3/chunk-recover.c	2016-05-27 14:30:52.868999654 -0500
++++ btrfs-progs-4.5.3/chunk-recover.c	2016-05-27 14:31:00.008999652 -0500
+@@ -887,7 +887,7 @@
+ 		for (i = 0; i < devidx; i++) {
+ 			if (dev_scans[i].bytenr == -1)
+ 				continue;
+-			ret = pthread_tryjoin_np(t_scans[i],
++			ret = pthread_join(t_scans[i],
+ 						 (void **)&t_rets[i]);
+ 			if (ret == EBUSY) {
+ 				all_done = 0;
