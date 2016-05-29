@@ -57,7 +57,7 @@ CDEPEND="${PYTHON_DEPS}
 	>=sys-libs/tdb-1.3.7[python,${PYTHON_USEDEP},${MULTILIB_USEDEP}]
 	>=sys-libs/tevent-0.9.25[${MULTILIB_USEDEP}]
 	sys-libs/zlib[${MULTILIB_USEDEP}]
-	virtual/pam
+	pam? ( virtual/pam )
 	acl? ( virtual/acl )
 	addns? ( net-dns/bind-tools[gssapi] )
 	aio? ( dev-libs/libaio )
