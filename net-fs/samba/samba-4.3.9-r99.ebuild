@@ -88,6 +88,9 @@ S="${WORKDIR}/${MY_P}"
 PATCHES=(
 	"${FILESDIR}/${PN}-4.2.3-heimdal_compilefix.patch"
 	"${FILESDIR}/${PN}-4.2.7-pam.patch"
+	"${FILESDIR}/${P}-remove-getpwent_r.patch"
+	"${FILESDIR}/${P}-remove-rep_strtoull.patch"
+
 )
 
 CONFDIR="${FILESDIR}/$(get_version_component_range 1-2)"
