@@ -1,0 +1,13 @@
+diff -Naur gpgme-1.5.5.orig/config.h.in gpgme-1.5.5/config.h.in
+--- gpgme-1.5.5.orig/config.h.in	2015-06-08 09:04:08.000000000 -0400
++++ gpgme-1.5.5/config.h.in	2015-07-18 20:41:00.362340965 -0400
+@@ -253,9 +253,6 @@
+ /* Activate POSIX interface on MacOS X */
+ #undef _XOPEN_SOURCE
+ 
+-/* Define to a type to use for `error_t' if it is not otherwise available. */
+-#undef error_t
+-
+ /* Define to `__inline__' or `__inline' if that's what the C compiler
+    calls it, or to nothing if 'inline' is not supported under any name.  */
+ #ifndef __cplusplus
