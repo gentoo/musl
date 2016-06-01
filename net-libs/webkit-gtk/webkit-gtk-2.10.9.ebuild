@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -22,6 +22,7 @@ KEYWORDS="amd64 ~arm ~mips ~ppc x86"
 IUSE="aqua coverage doc +egl +geoloc gles2 gnome-keyring +gstreamer +introspection +jit nsplugin +opengl spell wayland +webgl X"
 # seccomp
 
+# webgl needs gstreamer, bug #560612
 REQUIRED_USE="
 	geoloc? ( introspection )
 	gles2? ( egl )
@@ -29,6 +30,7 @@ REQUIRED_USE="
 	nsplugin? ( X )
 	webgl? ( ^^ ( gles2 opengl ) )
 	!webgl? ( ?? ( gles2 opengl ) )
+	webgl? ( gstreamer )
 	|| ( aqua wayland X )
 "
 
@@ -150,7 +152,7 @@ src_prepare() {
 
 	# musl patches
 	epatch "${FILESDIR}"/${PN}-2.4.9-remove-disallow_ctypes_h-braindead.patch
-	epatch "${FILESDIR}"/${PN}-2.10.7-remove-execinfo_h.patch
+	epatch "${FILESDIR}"/${PN}-2.10.9-remove-execinfo_h.patch
 
 	# https://bugs.gentoo.org/show_bug.cgi?id=564352
 	epatch "${FILESDIR}"/${PN}-2.8.5-fix-alpha-build.patch
@@ -214,6 +216,16 @@ src_configure() {
 	# should somehow let user select between them?
 	#
 	# FTL_JIT requires llvm
+	#
+	# opengl needs to be explicetly handled, bug #576634
+
+	local opengl_enabled
+	if use opengl || use gles2; then
+		opengl_enabled=ON
+	else
+		opengl_enabled=OFF
+	fi
+
 	local mycmakeargs=(
 		$(cmake-utils_use_enable aqua QUARTZ_TARGET)
 		$(cmake-utils_use_enable test API_TESTS)
@@ -233,6 +245,7 @@ src_configure() {
 		$(cmake-utils_use_find_package egl EGL)
 		$(cmake-utils_use_find_package opengl OpenGL)
 		$(cmake-utils_use_enable X X11_TARGET)
+		-DENABLE_OPENGL=${opengl_enabled}
 		-DCMAKE_BUILD_TYPE=Release
 		-DPORT=GTK
 		${ruby_interpreter}
