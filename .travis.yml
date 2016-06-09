@@ -21,7 +21,7 @@ before_script:
     - tar xJf portage-latest.tar.xz -C /usr/
     - cp portage-2.2.28/cnf/repos.conf /etc/portage/
     - rsync --recursive --links --safe-links --perms --times --omit-dir-times --compress --force --whole-file --delete --stats --human-readable --timeout=180 --exclude=/distfiles --checksum --quiet rsync://rsync.gentoo.org/gentoo-portage /usr/portage
-    - ln -s /usr/portage/profiles/base/ /etc/portage/make.profile
+    - ln -s /usr/portage/profiles/default/linux/amd64/13.0 /etc/portage/make.profile
     - cd travis-overlay
 script:
-    - "ARCH=amd64 ./../portage-2.2.28/bin/repoman full -i -d"
+    - ./../portage-2.2.28/bin/repoman full -i -d
