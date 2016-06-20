@@ -1,0 +1,59 @@
+From 0ce1fa04fc6ce32c54efa0e48cd61f577aa585b2 Mon Sep 17 00:00:00 2001
+From: "Anthony G. Basile" <blueness@gentoo.org>
+Date: Thu, 19 May 2016 06:52:43 -0400
+Subject: [PATCH 2/3] setup.py: add stub for building custom modules in C/C++
+
+Currently portage doesn't include any custom modules written in C/C++.
+This commit introduces stub code for building such modules in setup.py.
+
+Signed-off-by: Anthony G. Basile <blueness@gentoo.org>
+---
+ setup.py | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/setup.py b/setup.py
+index 75c4bcb..25429bc 100755
+--- a/setup.py
++++ b/setup.py
+@@ -4,7 +4,7 @@
+ 
+ from __future__ import print_function
+ 
+-from distutils.core import setup, Command
++from distutils.core import setup, Command, Extension
+ from distutils.command.build import build
+ from distutils.command.build_scripts import build_scripts
+ from distutils.command.clean import clean
+@@ -30,6 +30,9 @@ import sys
+ # TODO:
+ # - smarter rebuilds of docs w/ 'install_docbook' and 'install_epydoc'.
+ 
++# Dictionary of scripts.  The structure is
++#   key   = location in filesystem to install the scripts
++#   value = list of scripts, path relative to top source directory
+ x_scripts = {
+ 	'bin': [
+ 		'bin/ebuild', 'bin/egencache', 'bin/emerge', 'bin/emerge-webrsync',
+@@ -41,6 +44,10 @@ x_scripts = {
+ 	],
+ }
+ 
++# Dictionary custom modules written in C/C++ here.  The structure is
++#   key   = module name
++#   value = list of C/C++ source code, path relative to top source directory
++x_c_helpers = {}
+ 
+ class x_build(build):
+ 	""" Build command with extra build_man call. """
+@@ -636,6 +643,8 @@ setup(
+ 		['$sysconfdir/portage/repo.postsync.d', ['cnf/repo.postsync.d/example']],
+ 	],
+ 
++	ext_modules = [Extension(name=n, sources=m) for n, m in x_c_helpers.items()],
++
+ 	cmdclass = {
+ 		'build': x_build,
+ 		'build_man': build_man,
+-- 
+2.7.3
+

@@ -11,13 +11,13 @@ PYTHON_COMPAT=(
 )
 PYTHON_REQ_USE='bzip2(+)'
 
-inherit distutils-r1 eutils multilib
+inherit distutils-r1 multilib
 
 DESCRIPTION="Portage is the package management and distribution system for Gentoo"
 HOMEPAGE="https://wiki.gentoo.org/wiki/Project:Portage"
 
 LICENSE="GPL-2"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
 SLOT="0"
 IUSE="build doc epydoc +ipc linguas_ru selinux xattr"
 
@@ -85,7 +85,9 @@ pkg_setup() {
 python_prepare_all() {
 	distutils-r1_python_prepare_all
 
-	epatch "${FILESDIR}"/${P}-fix-check_locale.patch
+	epatch "${FILESDIR}"/0001-pym-portage-util-locale.py-fix-decoding-for-python2-.patch
+	epatch "${FILESDIR}"/0002-setup.py-add-stub-for-building-custom-modules-in-C-C.patch
+	epatch "${FILESDIR}"/0003-pym-portage-util-locale.py-add-a-C-module-to-help-ch.patch
 
 	if ! use ipc ; then
 		einfo "Disabling ipc..."
