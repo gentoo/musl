@@ -7,8 +7,10 @@ EAPI=5
 PYTHON_COMPAT=( python2_7 )
 PYTHON_REQ_USE="ncurses,readline"
 
+PLOCALES="de_DE fr_FR hu it tr zh_CN"
+
 inherit eutils flag-o-matic linux-info toolchain-funcs multilib python-r1 \
-	user udev fcaps readme.gentoo pax-utils
+	user udev fcaps readme.gentoo pax-utils l10n
 
 BACKPORTS=
 
@@ -95,9 +97,9 @@ SOFTMMU_LIB_DEPEND="${COMMON_LIB_DEPEND}
 			vte? ( x11-libs/vte:2.90 )
 		)
 	)
-	infiniband? ( sys-infiniband/librdmacm:=[static-libs(+)] )
+	infiniband? ( sys-fabric/librdmacm:=[static-libs(+)] )
 	iscsi? ( net-libs/libiscsi )
-	jpeg? ( virtual/jpeg:=[static-libs(+)] )
+	jpeg? ( virtual/jpeg:0=[static-libs(+)] )
 	lzo? ( dev-libs/lzo:2[static-libs(+)] )
 	ncurses? ( sys-libs/ncurses:0=[static-libs(+)] )
 	nfs? ( >=net-fs/libnfs-1.9.3[static-libs(+)] )
@@ -212,11 +214,14 @@ QA_WX_LOAD="usr/bin/qemu-i386
 DOC_CONTENTS="If you don't have kvm compiled into the kernel, make sure
 you have the kernel module loaded before running kvm. The easiest way to
 ensure that the kernel module is loaded is to load it on boot.\n
-For AMD CPUs the module is called 'kvm-amd'\n
-For Intel CPUs the module is called 'kvm-intel'\n
-Please review /etc/conf.d/modules for how to load these\n\n
+For AMD CPUs the module is called 'kvm-amd'.\n
+For Intel CPUs the module is called 'kvm-intel'.\n
+Please review /etc/conf.d/modules for how to load these.\n\n
 Make sure your user is in the 'kvm' group\n
-Just run 'gpasswd -a <USER> kvm', then have <USER> re-login."
+Just run 'gpasswd -a <USER> kvm', then have <USER> re-login.\n\n
+For brand new installs, the default permissions on /dev/kvm might not let you
+access it.  You can tell udev to reset ownership/perms:\n
+udevadm trigger -c add /dev/kvm"
 
 qemu_support_kvm() {
 	if use qemu_softmmu_targets_x86_64 || use qemu_softmmu_targets_i386 \
@@ -295,6 +300,29 @@ check_targets() {
 	popd >/dev/null
 }
 
+handle_locales() {
+	# Make sure locale list is kept up-to-date.
+	local detected sorted
+	detected=$(echo $(cd po && printf '%s\n' *.po | grep -v messages.po | sed 's:.po$::' | sort -u))
+	sorted=$(echo $(printf '%s\n' ${PLOCALES} | sort -u))
+	if [[ ${sorted} != "${detected}" ]] ; then
+		eerror "The ebuild needs to be kept in sync."
+		eerror "PLOCALES: ${sorted}"
+		eerror " po/*.po: ${detected}"
+		die "sync PLOCALES"
+	fi
+
+	# Deal with selective install of locales.
+	if use nls ; then
+		# Delete locales the user does not want. #577814
+		rm_loc() { rm po/$1.po || die; }
+		l10n_for_each_disabled_locale_do rm_loc
+	else
+		# Cheap hack to disable gettext .mo generation.
+		rm -f po/*.po
+	fi
+}
+
 src_prepare() {
 	check_targets IUSE_SOFTMMU_TARGETS softmmu
 	check_targets IUSE_USER_TARGETS linux-user
@@ -303,9 +331,6 @@ src_prepare() {
 	sed -i -r \
 		-e 's/^(C|OP_C|HELPER_C)FLAGS=/\1FLAGS+=/' \
 		Makefile Makefile.target || die
-
-	# Cheap hack to disable gettext .mo generation.
-	use nls || rm -f po/*.po
 
 	# Patching for musl
 	epatch "${FILESDIR}"/${PN}-2.0.0-F_SHLCK-and-F_EXLCK.patch
@@ -322,6 +347,20 @@ src_prepare() {
 	epatch "${FILESDIR}"/${P}-CVE-2015-8701.patch #570110
 	epatch "${FILESDIR}"/${P}-CVE-2015-8743.patch #570988
 	epatch "${FILESDIR}"/${P}-CVE-2016-1568.patch #571566
+	epatch "${FILESDIR}"/${P}-CVE-2015-8613.patch #569118
+	epatch "${FILESDIR}"/${P}-CVE-2015-8619.patch #569300
+	epatch "${FILESDIR}"/${P}-CVE-2016-1714.patch #571560
+	epatch "${FILESDIR}"/${P}-CVE-2016-1922.patch #572082
+	epatch "${FILESDIR}"/${P}-CVE-2016-1981.patch #572412
+	epatch "${FILESDIR}"/${P}-usb-ehci-oob.patch #572454
+	epatch "${FILESDIR}"/${P}-CVE-2016-2197.patch #573280
+	epatch "${FILESDIR}"/${P}-CVE-2016-2198.patch #573314
+	epatch "${FILESDIR}"/${P}-CVE-2016-2392.patch #574902
+	epatch "${FILESDIR}"/${P}-usb-ndis-int-overflow.patch #575492
+	epatch "${FILESDIR}"/${P}-rng-stack-corrupt-{0,1,2,3}.patch #576420
+	epatch "${FILESDIR}"/${P}-sysmacros.patch
+	epatch "${FILESDIR}"/${P}-ne2000-reg-check.patch #573816
+	epatch "${FILESDIR}"/${P}-9pfs-segfault.patch #578142
 
 	# Fix ld and objcopy being called directly
 	tc-export AR LD OBJCOPY
@@ -330,6 +369,9 @@ src_prepare() {
 	MAKEOPTS+=" V=1"
 
 	epatch_user
+
+	# Run after we've applied all patches.
+	handle_locales
 }
 
 ##
