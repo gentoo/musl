@@ -84,8 +84,8 @@ SOFTMMU_LIB_DEPEND="${COMMON_LIB_DEPEND}
 	fdt? ( >=sys-apps/dtc-1.4.0[static-libs(+)] )
 	glusterfs? ( >=sys-cluster/glusterfs-3.4.0[static-libs(+)] )
 	gnutls? (
-		dev-libs/nettle[static-libs(+)]
-		>=net-libs/gnutls-3.0[static-libs(+)]
+		dev-libs/nettle:=[static-libs(+)]
+		>=net-libs/gnutls-3.0:=[static-libs(+)]
 	)
 	gtk? (
 		gtk2? (
@@ -342,25 +342,13 @@ src_prepare() {
 		EPATCH_FORCE=yes EPATCH_SUFFIX="patch" EPATCH_SOURCE="${S}/patches" \
 			epatch
 
-	epatch "${FILESDIR}"/${P}-CVE-2015-8567.patch #567868
-	epatch "${FILESDIR}"/${P}-CVE-2015-8558.patch #568246
-	epatch "${FILESDIR}"/${P}-CVE-2015-8701.patch #570110
-	epatch "${FILESDIR}"/${P}-CVE-2015-8743.patch #570988
-	epatch "${FILESDIR}"/${P}-CVE-2016-1568.patch #571566
-	epatch "${FILESDIR}"/${P}-CVE-2015-8613.patch #569118
-	epatch "${FILESDIR}"/${P}-CVE-2015-8619.patch #569300
-	epatch "${FILESDIR}"/${P}-CVE-2016-1714.patch #571560
-	epatch "${FILESDIR}"/${P}-CVE-2016-1922.patch #572082
-	epatch "${FILESDIR}"/${P}-CVE-2016-1981.patch #572412
-	epatch "${FILESDIR}"/${P}-usb-ehci-oob.patch #572454
-	epatch "${FILESDIR}"/${P}-CVE-2016-2197.patch #573280
-	epatch "${FILESDIR}"/${P}-CVE-2016-2198.patch #573314
-	epatch "${FILESDIR}"/${P}-CVE-2016-2392.patch #574902
-	epatch "${FILESDIR}"/${P}-usb-ndis-int-overflow.patch #575492
-	epatch "${FILESDIR}"/${P}-rng-stack-corrupt-{0,1,2,3}.patch #576420
-	epatch "${FILESDIR}"/${P}-sysmacros.patch
-	epatch "${FILESDIR}"/${P}-ne2000-reg-check.patch #573816
-	epatch "${FILESDIR}"/${P}-9pfs-segfault.patch #578142
+	epatch "${FILESDIR}"/${PN}-2.5.0-CVE-2016-2198.patch #573314
+	epatch "${FILESDIR}"/${PN}-2.5.0-rng-stack-corrupt-{0,1,2,3}.patch #576420
+	epatch "${FILESDIR}"/${PN}-2.5.1-stellaris_enet-overflow.patch #579614
+	epatch "${FILESDIR}"/${PN}-2.5.1-CVE-2016-4020.patch #580040
+	epatch "${FILESDIR}"/${PN}-2.5.1-CVE-2015-8558.patch #568246 #580426
+	epatch "${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
+	epatch "${FILESDIR}"/${PN}-2.5.1-xfs-linux-headers.patch #577810
 
 	# Fix ld and objcopy being called directly
 	tc-export AR LD OBJCOPY
