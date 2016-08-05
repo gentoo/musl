@@ -62,6 +62,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-20121221-strtod.patch #472592
 	"${FILESDIR}"/${PN}-20121221-add-bits_types_h.patch #for musl
 	"${FILESDIR}"/${PN}-20121221-fix-init-elemnt.patch  #for musl
+	"${FILESDIR}"/${PN}-20121221-fix-header-order.patch
 	"${FILESDIR}"/${PN}-20121221-fix-musl-headers.patch #for musl
 )
 
