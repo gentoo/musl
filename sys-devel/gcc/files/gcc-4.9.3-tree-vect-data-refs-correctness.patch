@@ -1,0 +1,11 @@
+--- trunk/gcc/tree-vect-data-refs.c	2015/11/20 16:15:57	230666
++++ trunk/gcc/tree-vect-data-refs.c	2015/11/20 16:27:17
+@@ -2545,6 +2545,8 @@ 
+   if (t2 == NULL)
+     return 1;
+ 
++  STRIP_NOPS (t1);
++  STRIP_NOPS (t2);
+ 
+   if (TREE_CODE (t1) != TREE_CODE (t2))
+     return TREE_CODE (t1) < TREE_CODE (t2) ? -1 : 1;
