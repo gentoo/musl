@@ -139,7 +139,6 @@ src_configure() {
 		INFO_DIRECTORY=${EPREFIX}/usr/share/info
 		PID_FILE_PATH=${EPREFIX}/run/exim.pid
 		SPOOL_DIRECTORY=${EPREFIX}/var/spool/exim
-		HAVE_ICONV=yes
 	EOC
 
 	# if we use libiconv, now is the time to tell so
