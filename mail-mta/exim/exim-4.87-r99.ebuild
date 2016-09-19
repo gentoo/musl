@@ -6,8 +6,14 @@ EAPI="5"
 
 inherit eutils toolchain-funcs multilib pam systemd
 
-IUSE="dcc +dkim dlfunc dmarc +dnsdb doc dovecot-sasl dsn exiscan-acl gnutls ipv6 ldap lmtp maildir mbx mysql nis pam perl pkcs11 postgres +prdr proxy radius redis sasl selinux spf sqlite srs ssl syslog tcpd tpda X"
-REQUIRED_USE="spf? ( exiscan-acl ) srs? ( exiscan-acl ) dmarc? ( spf dkim ) pkcs11? ( gnutls )"
+IUSE="dane dcc +dkim dlfunc dmarc +dnsdb doc dovecot-sasl dsn exiscan-acl gnutls ipv6 ldap libressl lmtp maildir mbx mysql nis pam perl pkcs11 postgres +prdr proxy radius redis sasl selinux spf sqlite srs ssl syslog tcpd tpda X elibc_glibc"
+REQUIRED_USE="
+	dane? ( !gnutls )
+	dmarc? ( spf dkim )
+	pkcs11? ( gnutls )
+	spf? ( exiscan-acl )
+	srs? ( exiscan-acl )
+"
 
 COMM_URI="ftp://ftp.exim.org/pub/exim/exim4$([[ ${PV} == *_rc* ]] && echo /test)"
 
@@ -22,17 +28,24 @@ LICENSE="GPL-2"
 KEYWORDS="amd64 ~arm ~mips ppc x86"
 
 COMMON_DEPEND=">=sys-apps/sed-4.0.5
-	>=sys-libs/db-3.2
+	>=sys-libs/db-3.2:=
 	dev-libs/libpcre
 	perl? ( dev-lang/perl:= )
 	pam? ( virtual/pam )
 	tcpd? ( sys-apps/tcp-wrappers )
-	ssl? ( dev-libs/openssl )
+	ssl? (
+		!libressl? ( dev-libs/openssl:0= )
+		libressl? ( dev-libs/libressl:= )
+	)
 	gnutls? ( net-libs/gnutls[pkcs11?]
 			  dev-libs/libtasn1 )
 	ldap? ( >=net-nds/openldap-2.0.7 )
+	nis? ( elibc_glibc? ( || (
+		<sys-libs/glibc-2.23
+		>=sys-libs/glibc-2.23[rpc]
+	) ) )
 	mysql? ( virtual/mysql )
-	postgres? ( dev-db/postgresql )
+	postgres? ( dev-db/postgresql:= )
 	sasl? ( >=dev-libs/cyrus-sasl-2.1.26-r2 )
 	redis? ( dev-libs/hiredis )
 	spf? ( >=mail-filter/libspf2-1.2.5-r1 )
@@ -45,7 +58,7 @@ COMMON_DEPEND=">=sys-apps/sed-4.0.5
 		x11-libs/libXaw
 	)
 	sqlite? ( dev-db/sqlite )
-	radius? ( net-dialup/radiusclient )
+	radius? ( net-dialup/freeradius-client )
 	virtual/libiconv
 	"
 	# added X check for #57206
@@ -80,7 +93,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/exim-4.69-r1.27021.patch
 	epatch "${FILESDIR}"/exim-4.74-radius-db-ENV-clash.patch # 287426
 	epatch "${FILESDIR}"/exim-4.82-makefile-freebsd.patch # 235785
-	epatch "${FILESDIR}"/exim-4.77-as-needed-ldflags.patch # 352265, 391279
+	epatch "${FILESDIR}"/exim-4.87-as-needed-ldflags.patch # 352265, 391279
 	epatch "${FILESDIR}"/exim-4.76-crosscompile.patch # 266591
 
 	if use maildir ; then
@@ -220,7 +233,7 @@ src_configure() {
 
 	if use redis; then
 		cat >> Makefile <<- EOC
-			EXPERIMENTAL_REDIS=yes
+			LOOKUP_REDIS=yes
 			LOOKUP_LIBS += -lhiredis
 		EOC
 	fi
@@ -317,6 +330,13 @@ src_configure() {
 	#
 	# experimental features
 
+	# DANE
+	if use dane; then
+		cat >> Makefile <<- EOC
+			EXPERIMENTAL_DANE=yes
+		EOC
+	fi
+
 	# Distributed Checksum Clearinghouse
 	if use dcc; then
 		echo "EXPERIMENTAL_DCC=yes">> Makefile
@@ -405,14 +425,14 @@ src_configure() {
 	if use radius; then
 		cat >> Makefile <<- EOC
 			RADIUS_CONFIG_FILE=${EPREFIX}/etc/radiusclient/radiusclient.conf
-			RADIUS_LIB_TYPE=RADIUSCLIENT
-			AUTH_LIBS += -lradiusclient
+			RADIUS_LIB_TYPE=RADIUSCLIENTNEW
+			AUTH_LIBS += -lfreeradius-client
 		EOC
 	fi
 }
 
 src_compile() {
-	emake -j1 CC="$(tc-getCC)" HOSTCC="$(tc-getCC $CBUILD)" \
+	emake CC="$(tc-getCC)" HOSTCC="$(tc-getCC $CBUILD)" \
 		AR="$(tc-getAR) cq" RANLIB="$(tc-getRANLIB)" FULLECHO='' \
 		|| die "make failed"
 }
@@ -486,6 +506,7 @@ pkg_postinst() {
 		einfo "${EROOT}etc/exim/auth_conf.sub contains the configuration sub for using smtp auth."
 		einfo "Please create ${EROOT}etc/exim/exim.conf from ${EROOT}etc/exim/exim.conf.dist."
 	fi
+	use dane && einfo "DANE support is experimental"
 	if use dcc ; then
 		einfo "DCC support is experimental, you can find some limited"
 		einfo "documentation at the bottom of this prerelease message:"
@@ -510,4 +531,7 @@ pkg_postinst() {
 	einfo "cleaning from time to time.  (${EROOT}var/spool/exim/db)"
 	einfo "Please use the exim_tidydb tool as documented in the Exim manual:"
 	einfo "http://www.exim.org/exim-html-current/doc/html/spec_html/ch-exim_utilities.html#SECThindatmai"
+	einfo "For CVE-2016-1531, Exim introduced keep_environment and"
+	einfo "add_environment flags.  You might want to set them, see:"
+	einfo "https://lists.exim.org/lurker/message/20160302.191005.a72d8433.en.html"
 }
