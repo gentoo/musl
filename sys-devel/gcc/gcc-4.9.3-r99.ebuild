@@ -57,6 +57,7 @@ src_prepare() {
 		epatch "${FILESDIR}"/${PN}-4.9.3-musl-res_state.patch
 		epatch "${FILESDIR}"/${PN}-4.8.3-musl-fix-libc5-assumption.patch
 		epatch "${FILESDIR}"/${PN}-4.8.5-posix_memalign.patch
+		epatch "${FILESDIR}"/${PN}-4.9.3-pr68470.patch
 	fi
 
 	use vanilla && return 0
