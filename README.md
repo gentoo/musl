@@ -6,6 +6,7 @@ http://www.musl-libc.org/
 
 MAINTAINERS:
 Anthony G. Basile <blueness@gentoo.org>
+Felix Janda <felix.janda@posteo.de>
 
 ## Repoman status
 [![Repoman Status](https://travis-ci.org/gentoo/musl.png)](https://travis-ci.org/gentoo/musl)
