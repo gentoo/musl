@@ -6,6 +6,7 @@ http://www.musl-libc.org/
 
 MAINTAINERS:
 Anthony G. Basile <blueness@gentoo.org>
+Aric Belsito <lluixhi@gmail.com>
 Felix Janda <felix.janda@posteo.de>
 
 ## Repoman status
