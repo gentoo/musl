@@ -1,0 +1,13 @@
+diff -Naur qemu-2.7.0.orig/configure qemu-2.7.0/configure
+--- qemu-2.7.0.orig/configure	2016-09-05 18:30:41.722529882 -0700
++++ qemu-2.7.0/configure	2016-09-05 18:32:22.473649654 -0700
+@@ -1805,7 +1805,8 @@
+ EOF
+   if compile_object "" ; then
+       if has readelf; then
+-          if readelf --syms $TMPO 2>/dev/null |grep -q "IFUNC.*foo"; then
++          if readelf --syms $TMPO 2>/dev/null |grep -q "IFUNC.*foo" &&
++             ldd $TMPO >dev/null 2>&1; then
+               avx2_opt="yes"
+           fi
+       fi

@@ -18,7 +18,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
-	KEYWORDS="amd64 ~ppc x86"
+	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 x86 ~x86-fbsd"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -337,9 +337,11 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-2.0.0-F_SHLCK-and-F_EXLCK.patch
 	epatch "${FILESDIR}"/${PN}-2.0.0-linux-user-signal.c-define-__SIGRTMIN-MAX-for-non-GN.patch
 	epatch "${FILESDIR}"/${PN}-2.2.0-_sigev_un.patch
+	epatch "${FILESDIR}"/${PN}-2.7.0-configure-ifunc.patch
 
 	epatch "${FILESDIR}"/${PN}-2.5.0-cflags.patch
 	epatch "${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
+
 	epatch "${FILESDIR}"/${P}-CVE-2016-6836.patch   # bug 591242
 	epatch "${FILESDIR}"/${P}-CVE-2016-7155.patch   # bug 593034
 	epatch "${FILESDIR}"/${P}-CVE-2016-7156.patch   # bug 593036
@@ -348,8 +350,21 @@ src_prepare() {
 	epatch "${FILESDIR}"/${P}-CVE-2016-7170.patch   # bug 593284
 	epatch "${FILESDIR}"/${P}-CVE-2016-7421.patch   # bug 593950
 	epatch "${FILESDIR}"/${P}-CVE-2016-7422.patch   # bug 593956
-	epatch "${FILESDIR}"/${P}-CVE-2016-7466.patch   # bug 594520
 	epatch "${FILESDIR}"/${P}-CVE-2016-7423.patch   # bug 594368
+	epatch "${FILESDIR}"/${P}-CVE-2016-7466.patch   # bug 594520
+	epatch "${FILESDIR}"/${P}-CVE-2016-7907.patch   # bug 596048
+	epatch "${FILESDIR}"/${P}-CVE-2016-7908.patch   # bug 596049
+	epatch "${FILESDIR}"/${P}-CVE-2016-7909.patch   # bug 596048
+	epatch "${FILESDIR}"/${P}-CVE-2016-7994-1.patch # bug 596738
+	epatch "${FILESDIR}"/${P}-CVE-2016-7994-2.patch # bug 596738
+	epatch "${FILESDIR}"/${P}-CVE-2016-8576.patch   # bug 596752
+	epatch "${FILESDIR}"/${P}-CVE-2016-8577.patch   # bug 596776
+	epatch "${FILESDIR}"/${P}-CVE-2016-8578.patch   # bug 596774
+	epatch "${FILESDIR}"/${P}-CVE-2016-8668.patch   # bug 597110
+	epatch "${FILESDIR}"/${P}-CVE-2016-8669-1.patch # bug 597108
+	epatch "${FILESDIR}"/${P}-CVE-2016-8669-2.patch # bug 597108
+	epatch "${FILESDIR}"/${P}-CVE-2016-8909.patch   # bug 598044
+	epatch "${FILESDIR}"/${P}-CVE-2016-8910.patch   # bug 598046
 
 	# Fix ld and objcopy being called directly
 	tc-export AR LD OBJCOPY
