@@ -1,0 +1,12 @@
+diff -Naur qtwebengine-opensource-src-5.6.1.orig/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h qtwebengine-opensource-src-5.6.1/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h
+--- qtwebengine-opensource-src-5.6.1.orig/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h	2016-07-28 17:15:59.433552637 -0700
++++ qtwebengine-opensource-src-5.6.1/src/3rdparty/chromium/sandbox/linux/bpf_dsl/seccomp_macros.h	2016-07-28 17:17:39.275610371 -0700
+@@ -5,7 +5,7 @@
+ #ifndef SANDBOX_LINUX_BPF_DSL_SECCOMP_MACROS_H_
+ #define SANDBOX_LINUX_BPF_DSL_SECCOMP_MACROS_H_
+ 
+-#include <sys/cdefs.h>
++#include <sys/types.h>
+ // Old Bionic versions do not have sys/user.h.  The if can be removed once we no
+ // longer need to support these old Bionic versions.
+ // All x86_64 builds use a new enough bionic to have sys/user.h.
