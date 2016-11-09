@@ -32,6 +32,7 @@ MULTILIB_CHOST_TOOLS=(
 
 PATCHES=(
 	"${FILESDIR}/${PN}-58.1-remove-bashisms.patch"
+	"${FILESDIR}/${PN}-58.1-iterator.patch"
 	"${FILESDIR}/${PN}-58.1-no-xlocale.patch"
 )
 
@@ -82,9 +83,9 @@ src_configure() {
 
 multilib_src_configure() {
 	local myeconfargs=(
-		--disable-layoutex
 		--disable-renaming
 		--disable-samples
+		--disable-layoutex
 		$(use_enable debug)
 		$(use_enable static-libs static)
 	)
