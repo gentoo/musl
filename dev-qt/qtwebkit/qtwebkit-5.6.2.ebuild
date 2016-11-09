@@ -2,14 +2,15 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=5
+EAPI=6
 PYTHON_COMPAT=( python2_7 )
 inherit python-any-r1 qt5-build
 
 DESCRIPTION="WebKit rendering library for the Qt5 framework (deprecated)"
+SRC_URI="https://download.qt.io/community_releases/${PV%.*}/${PV}/${PN}-opensource-src-${PV}.tar.xz"
 
 if [[ ${QT5_BUILD_TYPE} == release ]]; then
-	KEYWORDS="~amd64 ~arm ~x86"
+	KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~x86"
 fi
 
 # TODO: qttestlib
@@ -67,6 +68,7 @@ DEPEND="${RDEPEND}
 PATCHES=(
 	"${FILESDIR}/${PN}-5.4.2-system-leveldb.patch"
 	"${FILESDIR}/${PN}-5.5.0-fix-backtrace-detection-musl.patch"
+	"${FILESDIR}/${PN}-5.5.1-fix-stack-size-musl.patch"
 )
 
 src_prepare() {
@@ -89,13 +91,13 @@ src_prepare() {
 		Source/WebKit2/WebKit2.pri
 
 	if use gstreamer010; then
-		epatch "${FILESDIR}/${PN}-5.3.2-use-gstreamer010.patch"
+		PATCHES+=("${FILESDIR}/${PN}-5.3.2-use-gstreamer010.patch")
 	elif ! use gstreamer; then
-		epatch "${FILESDIR}/${PN}-5.2.1-disable-gstreamer.patch"
+		PATCHES+=("${FILESDIR}/${PN}-5.2.1-disable-gstreamer.patch")
 	fi
 
 	# bug 562396
-	use jit || epatch "${FILESDIR}/${PN}-5.5.1-disable-jit.patch"
+	use jit || PATCHES+=("${FILESDIR}/${PN}-5.5.1-disable-jit.patch")
 
 	use opengl || sed -i -e '/contains(QT_CONFIG, opengl): WEBKIT_CONFIG += use_3d_graphics/d' \
 		Tools/qmake/mkspecs/features/features.prf || die
