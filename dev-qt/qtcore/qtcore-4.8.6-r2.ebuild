@@ -7,7 +7,7 @@ EAPI=5
 inherit qt4-build-multilib
 
 DESCRIPTION="Cross-platform application development framework"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 ~mips ppc ppc64 sparc x86 ~amd64-fbsd ~x86-fbsd"
 IUSE="+glib iconv icu qt3support ssl"
 
 DEPEND="
@@ -29,10 +29,10 @@ MULTILIB_WRAPPED_HEADERS=(
 )
 
 PATCHES=(
-	"${FILESDIR}/${PN}-4.8.5-moc-boost-lexical-cast.patch"
 	"${FILESDIR}/${PN}-4.8.5-honor-ExcludeSocketNotifiers-in-glib-event-loop.patch" # bug 514968
 	"${FILESDIR}/${PN}-4.8.5-qeventdispatcher-recursive.patch" # bug 514968
 	"${FILESDIR}/${PN}-4.8.6-QNAM-corruptions-fix.patch" # bug 548622
+	"${FILESDIR}/${PN}-4.8.6-moc-boost-1.60.patch" # bug 556104
 	"${FILESDIR}/${PN}-4.8.7-fix-socklent-for-musl.patch"
 )
 
