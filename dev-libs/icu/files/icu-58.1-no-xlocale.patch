@@ -1,0 +1,18 @@
+diff -Naur a/i18n/digitlst.cpp b/i18n/digitlst.cpp
+--- a/i18n/digitlst.cpp	2016-10-16 22:10:38.000000000 -0700
++++ b/i18n/digitlst.cpp	2016-11-07 02:46:13.155828312 -0800
+@@ -60,13 +60,7 @@
+ # endif
+ #endif
+ 
+-#if U_USE_STRTOD_L && !U_PLATFORM_USES_ONLY_WIN32_API
+-# if U_PLATFORM == U_PF_CYGWIN
+-#   include <locale.h>
+-# else
+-#   include <xlocale.h>
+-# endif
+-#endif
++#include <locale.h>
+ 
+ // ***************************************************************************
+ // class DigitList
