@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI="4"
+EAPI=5
 
 inherit eutils
 
@@ -12,10 +12,10 @@ SRC_URI="mirror://sourceforge/${PN}/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~amd64-linux ~arm-linux ~ia64-linux ~x86-linux"
 IUSE="ipv6 nls selinux X"
 
-RDEPEND=">=sys-libs/ncurses-5.7-r7
+RDEPEND=">=sys-libs/ncurses-5.7-r7:0=
 	nls? ( virtual/libintl )
 	selinux? ( sys-libs/libselinux )"
 DEPEND="${RDEPEND}
@@ -24,8 +24,14 @@ DEPEND="${RDEPEND}
 
 DOCS="AUTHORS ChangeLog NEWS README"
 
+PATCHES=(
+	"${FILESDIR}/${P}-fuser_typo_fix.patch"
+	"${FILESDIR}/${P}-sysmacros.patch"
+	"${FILESDIR}/${P}-add-limits_h.patch"
+)
+
 src_prepare() {
-	epatch "${FILESDIR}"/${P}-add-limits_h.patch
+	epatch "${PATCHES[@]}"
 }
 
 src_configure() {
