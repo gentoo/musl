@@ -1,0 +1,30 @@
+From feb4fb2842ef123b16b0cdf8d50be192e30862be Mon Sep 17 00:00:00 2001
+From: Dan Winship <danw@gnome.org>
+Date: Mon, 16 Nov 2015 16:57:38 -0500
+Subject: Fix g_strerror() on non-glibc
+
+When using one of the codepaths that copies the error string into buf,
+make sure the string gets strdup() afterward.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=758194
+---
+ glib/gstrfuncs.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/glib/gstrfuncs.c b/glib/gstrfuncs.c
+index 6712a64..0e2498f 100644
+--- a/glib/gstrfuncs.c
++++ b/glib/gstrfuncs.c
+@@ -1293,6 +1293,8 @@ g_strerror (gint errnum)
+           if (error)
+             g_print ("%s\n", error->message);
+         }
++      else if (msg == (const gchar *)buf)
++        msg = g_strdup (buf);
+ 
+       g_hash_table_insert (errors, GINT_TO_POINTER (errnum), (char *) msg);
+     }
+-- 
+cgit v0.12
+
+
