@@ -18,7 +18,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
-	KEYWORDS="~amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
+	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 x86 ~x86-fbsd"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -70,7 +70,6 @@ REQUIRED_USE="${PYTHON_REQUIRED_USE}
 # TODO: Split out tools deps into another var.  e.g. bzip2 is only used by
 # system binaries and tools, not user binaries.
 COMMON_LIB_DEPEND=">=dev-libs/glib-2.0[static-libs(+)]
-	dev-libs/libpcre[static-libs(+)]
 	sys-libs/zlib[static-libs(+)]
 	bzip2? ( app-arch/bzip2[static-libs(+)] )
 	xattr? ( sys-apps/attr[static-libs(+)] )"
@@ -95,7 +94,7 @@ SOFTMMU_LIB_DEPEND="${COMMON_LIB_DEPEND}
 		)
 		!gtk2? (
 			x11-libs/gtk+:3
-			vte? ( x11-libs/vte:2.90 )
+			vte? ( x11-libs/vte:2.91 )
 		)
 	)
 	infiniband? ( sys-fabric/librdmacm:=[static-libs(+)] )
