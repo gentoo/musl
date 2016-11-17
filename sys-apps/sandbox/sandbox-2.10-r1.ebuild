@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -7,16 +7,16 @@
 # period.
 #
 
-inherit eutils flag-o-matic toolchain-funcs multilib unpacker multiprocessing
+inherit eutils flag-o-matic toolchain-funcs multilib unpacker multiprocessing pax-utils
 
 DESCRIPTION="sandbox'd LD_PRELOAD hack"
-HOMEPAGE="http://www.gentoo.org/proj/en/portage/sandbox/"
+HOMEPAGE="https://www.gentoo.org/proj/en/portage/sandbox/"
 SRC_URI="mirror://gentoo/${P}.tar.xz
-	http://dev.gentoo.org/~vapier/dist/${P}.tar.xz"
+	https://dev.gentoo.org/~vapier/dist/${P}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~sparc-fbsd ~x86-fbsd"
 IUSE="multilib"
 
 DEPEND="app-arch/xz-utils
@@ -28,7 +28,7 @@ has sandbox_death_notice ${EBUILD_DEATH_HOOKS} || EBUILD_DEATH_HOOKS="${EBUILD_D
 
 sandbox_death_notice() {
 	ewarn "If configure failed with a 'cannot run C compiled programs' error, try this:"
-	ewarn "FEATURES=-sandbox emerge sandbox"
+	ewarn "FEATURES='-sandbox -usersandbox' emerge sandbox"
 }
 
 sb_get_install_abis() { use multilib && get_install_abis || echo ${ABI:-default} ; }
@@ -46,15 +46,10 @@ sb_foreach_abi() {
 src_unpack() {
 	unpacker
 	cd "${S}"
-	epatch "${FILESDIR}"/${P}-trace-hppa.patch #425062
-	epatch "${FILESDIR}"/${P}-log-var.patch
-	epatch "${FILESDIR}"/${P}-static-close-fd.patch #364877
-	epatch "${FILESDIR}"/${P}-desktop.patch #443672
-	epatch "${FILESDIR}"/${P}-open-nofollow.patch #413441
-	epatch "${FILESDIR}"/${P}-check-empty-paths-at.patch #346929
-	epatch "${FILESDIR}"/${P}-no-pch.patch #425524
-	epatch "${FILESDIR}"/${P}-musl.patch
-	epatch "${FILESDIR}"/${P}-include-PROTECTED-symbols.patch
+	epatch "${FILESDIR}"/${P}-memory-corruption.patch #568714
+	epatch "${FILESDIR}"/${P}-disable-same.patch
+	epatch "${FILESDIR}"/${PN}-2.6-musl.patch
+	epatch "${FILESDIR}"/${P}-fix-visibility-musl.patch
 	epatch_user
 }
 
@@ -64,11 +59,11 @@ sb_configure() {
 
 	use multilib && multilib_toolchain_setup ${ABI}
 
-	# hack for conflict between powerpc bits/user.h and asm/ptrace.h
-	use elibc_musl && append-cppflags -D_ASM_POWERPC_PTRACE_H
+	local myconf=()
+	host-is-pax && myconf+=( --disable-pch ) #301299 #425524 #572092
 
 	einfo "Configuring sandbox for ABI=${ABI}..."
-	ECONF_SOURCE="../${P}/" \
+	ECONF_SOURCE="${S}" \
 	econf ${myconf} || die
 }
 
@@ -132,7 +127,4 @@ pkg_preinst() {
 
 pkg_postinst() {
 	chmod 0755 "${ROOT}"/etc/sandbox.d #265376
-
-	# Sandbox builds on mips-musl but fails to run
-	use mips && chmod -x "${ROOT}"/usr/bin/sandbox
 }
