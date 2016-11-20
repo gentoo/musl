@@ -32,14 +32,10 @@ sandbox_death_notice() {
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${P}-execvpe.patch #578516
-	epatch "${FILESDIR}"/${P}-exec-hash.patch #578524
-	epatch "${FILESDIR}"/${P}-exec-prelink.patch #599894
-
-	# Fix for MUSL
-	epatch "${FILESDIR}"/${P}-musl.patch
-	epatch "${FILESDIR}"/${PN}-2.10-fix-visibility-musl.patch
-
+	epatch "${FILESDIR}"/${P}-memory-corruption.patch #568714
+	epatch "${FILESDIR}"/${P}-disable-same.patch
+	epatch "${FILESDIR}"/${PN}-2.6-musl.patch
+	epatch "${FILESDIR}"/${P}-fix-visibility-musl.patch
 	epatch_user
 }
 
