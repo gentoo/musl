@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -31,7 +31,6 @@ src_prepare() {
 		"${FILESDIR}"/${P}-glext-missing-definition.patch \
 		"${FILESDIR}"/${P}-VAEncH264VUIBufferType.patch \
 		"${FILESDIR}"/${P}-libvdpau-0.8.patch \
-		"${FILESDIR}"/${P}-nouveau.patch \
 		"${FILESDIR}"/${P}-missing-sys_time_h.patch
 	sed -i 's:AM_CONFIG_HEADER:AC_CONFIG_HEADERS:' configure.ac || die
 	autotools-multilib_src_prepare
