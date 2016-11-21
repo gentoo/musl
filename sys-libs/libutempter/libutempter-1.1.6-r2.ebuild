@@ -1,10 +1,10 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2014 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
 EAPI="4"
 
-inherit eutils user multilib flag-o-matic
+inherit user multilib flag-o-matic
 
 DESCRIPTION="Library that allows non-privileged apps to write utmp (login) info, which need root access"
 HOMEPAGE="http://altlinux.org/index.php?module=sisyphus&package=libutempter"
@@ -12,7 +12,7 @@ SRC_URI="ftp://ftp.altlinux.org/pub/people/ldv/${PN}/${P}.tar.bz2"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux"
 IUSE="static-libs elibc_FreeBSD"
 
 RDEPEND="!sys-apps/utempter"
