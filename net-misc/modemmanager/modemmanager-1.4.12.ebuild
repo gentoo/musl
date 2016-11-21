@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -10,12 +10,12 @@ VALA_USE_DEPEND="vapigen"
 inherit gnome2 user readme.gentoo udev vala
 
 DESCRIPTION="Modem and mobile broadband management libraries"
-HOMEPAGE="http://cgit.freedesktop.org/ModemManager/ModemManager/"
-SRC_URI="http://www.freedesktop.org/software/ModemManager/ModemManager-${PV}.tar.xz"
+HOMEPAGE="https://cgit.freedesktop.org/ModemManager/ModemManager/"
+SRC_URI="https://www.freedesktop.org/software/ModemManager/ModemManager-${PV}.tar.xz"
 
 LICENSE="GPL-2+"
 SLOT="0/1" # subslot = dbus interface version, i.e. N in org.freedesktop.ModemManager${N}
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="~alpha amd64 arm ~ia64 ~mips ppc ppc64 ~sparc x86"
 IUSE="+introspection mbim policykit +qmi qmi-newest vala"
 REQUIRED_USE="
 	qmi-newest? ( qmi )
