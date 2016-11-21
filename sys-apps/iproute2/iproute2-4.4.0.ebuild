@@ -11,11 +11,11 @@ if [[ ${PV} == "9999" ]] ; then
 	inherit git-2
 else
 	SRC_URI="mirror://kernel/linux/utils/net/${PN}/${P}.tar.xz"
-	KEYWORDS="amd64 arm ~mips ppc x86"
+	KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 ~m68k ~mips ppc ppc64 ~s390 ~sh sparc x86"
 fi
 
 DESCRIPTION="kernel routing and traffic control utilities"
-HOMEPAGE="http://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2"
+HOMEPAGE="https://wiki.linuxfoundation.org/networking/iproute2"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -38,11 +38,11 @@ DEPEND="${RDEPEND}
 	elibc_glibc? ( >=sys-libs/glibc-2.7 )"
 
 src_prepare() {
-	epatch "${FILESDIR}"/${PN}-4.4.0-missing-limits_h.patch
-	epatch "${FILESDIR}"/${PN}-4.3.0-musl.patch
-	epatch "${FILESDIR}"/${PN}-4.3.0-musl-noiptables.patch
 	epatch "${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
 	use ipv6 || epatch "${FILESDIR}"/${PN}-4.2.0-no-ipv6.patch #326849
+	epatch "${FILESDIR}"/${PN}-4.3.0-musl.patch
+	epatch "${FILESDIR}"/${PN}-4.3.0-musl-noiptables.patch
+	epatch "${FILESDIR}"/${PN}-4.4.0-missing-limits_h.patch
 
 	sed -i \
 		-e '/^CC =/d' \

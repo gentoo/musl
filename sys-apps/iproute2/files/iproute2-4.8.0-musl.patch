@@ -1,0 +1,102 @@
+diff -Naur iproute2-4.8.0.orig/include/libiptc/ipt_kernel_headers.h iproute2-4.8.0/include/libiptc/ipt_kernel_headers.h
+--- iproute2-4.8.0.orig/include/libiptc/ipt_kernel_headers.h	2016-10-10 16:29:55.095612698 -0700
++++ iproute2-4.8.0/include/libiptc/ipt_kernel_headers.h	2016-10-10 16:30:11.793808479 -0700
+@@ -6,7 +6,6 @@
+ #include <limits.h>
+ 
+ #include <netinet/ip.h>
+-#include <netinet/in.h>
+ #include <netinet/ip_icmp.h>
+ #include <netinet/tcp.h>
+ #include <netinet/udp.h>
+diff -Naur iproute2-4.8.0.orig/include/linux/if_bridge.h iproute2-4.8.0/include/linux/if_bridge.h
+--- iproute2-4.8.0.orig/include/linux/if_bridge.h	2016-10-10 16:29:55.102612780 -0700
++++ iproute2-4.8.0/include/linux/if_bridge.h	2016-10-10 16:30:11.794808491 -0700
+@@ -15,7 +15,6 @@
+ 
+ #include <linux/types.h>
+ #include <linux/if_ether.h>
+-#include <linux/in6.h>
+ 
+ #define SYSFS_BRIDGE_ATTR	"bridge"
+ #define SYSFS_BRIDGE_FDB	"brforward"
+diff -Naur iproute2-4.8.0.orig/include/linux/if_tunnel.h iproute2-4.8.0/include/linux/if_tunnel.h
+--- iproute2-4.8.0.orig/include/linux/if_tunnel.h	2016-10-10 16:29:55.103612792 -0700
++++ iproute2-4.8.0/include/linux/if_tunnel.h	2016-10-10 16:32:16.883845219 -0700
+@@ -2,9 +2,7 @@
+ #define _IF_TUNNEL_H_
+ 
+ #include <linux/types.h>
+-#include <linux/if.h>
+ #include <linux/ip.h>
+-#include <linux/in6.h>
+ #include <asm/byteorder.h>
+ 
+ 
+diff -Naur iproute2-4.8.0.orig/include/linux/netfilter.h iproute2-4.8.0/include/linux/netfilter.h
+--- iproute2-4.8.0.orig/include/linux/netfilter.h	2016-10-10 16:29:55.107612839 -0700
++++ iproute2-4.8.0/include/linux/netfilter.h	2016-10-10 16:30:11.794808491 -0700
+@@ -4,8 +4,6 @@
+ #include <linux/types.h>
+ 
+ #include <linux/sysctl.h>
+-#include <linux/in.h>
+-#include <linux/in6.h>
+ 
+ /* Responses from hook functions. */
+ #define NF_DROP 0
+diff -Naur iproute2-4.8.0.orig/include/linux/xfrm.h iproute2-4.8.0/include/linux/xfrm.h
+--- iproute2-4.8.0.orig/include/linux/xfrm.h	2016-10-10 16:29:55.113612909 -0700
++++ iproute2-4.8.0/include/linux/xfrm.h	2016-10-10 16:30:11.794808491 -0700
+@@ -1,7 +1,6 @@
+ #ifndef _LINUX_XFRM_H
+ #define _LINUX_XFRM_H
+ 
+-#include <linux/in6.h>
+ #include <linux/types.h>
+ 
+ /* All of the structures in this file may not change size as they are
+diff -Naur iproute2-4.8.0.orig/include/xtables.h iproute2-4.8.0/include/xtables.h
+--- iproute2-4.8.0.orig/include/xtables.h	2016-10-10 16:29:55.118612968 -0700
++++ iproute2-4.8.0/include/xtables.h	2016-10-10 16:30:11.795808503 -0700
+@@ -13,7 +13,6 @@
+ #include <stddef.h>
+ #include <stdint.h>
+ #include <netinet/in.h>
+-#include <net/if.h>
+ #include <linux/types.h>
+ #include <linux/netfilter.h>
+ #include <linux/netfilter/x_tables.h>
+diff -Naur iproute2-4.8.0.orig/misc/ss.c iproute2-4.8.0/misc/ss.c
+--- iproute2-4.8.0.orig/misc/ss.c	2016-10-10 16:29:55.135613167 -0700
++++ iproute2-4.8.0/misc/ss.c	2016-10-10 16:30:11.797808526 -0700
+@@ -25,6 +25,7 @@
+ #include <dirent.h>
+ #include <fnmatch.h>
+ #include <getopt.h>
++#include <limits.h>
+ #include <stdbool.h>
+ #include <limits.h>
+ 
+diff -Naur iproute2-4.8.0.orig/tc/f_matchall.c iproute2-4.8.0/tc/f_matchall.c
+--- iproute2-4.8.0.orig/tc/f_matchall.c	2016-10-10 16:29:55.143613261 -0700
++++ iproute2-4.8.0/tc/f_matchall.c	2016-10-10 16:33:22.886394033 -0700
+@@ -10,6 +10,7 @@
+  *
+  */
+ 
++#include <limits.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <unistd.h>
+diff -Naur iproute2-4.8.0.orig/tc/m_xt.c iproute2-4.8.0/tc/m_xt.c
+--- iproute2-4.8.0.orig/tc/m_xt.c	2016-10-10 16:29:55.148613319 -0700
++++ iproute2-4.8.0/tc/m_xt.c	2016-10-10 16:30:11.800808561 -0700
+@@ -14,7 +14,6 @@
+ #include <sys/socket.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+-#include <net/if.h>
+ #include <limits.h>
+ #include <linux/netfilter.h>
+ #include <linux/netfilter_ipv4/ip_tables.h>
