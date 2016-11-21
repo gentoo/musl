@@ -1,18 +1,18 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI="5"
+EAPI="4"
 
-inherit eutils toolchain-funcs multilib-minimal
+inherit eutils libtool toolchain-funcs multilib-minimal
 
 DESCRIPTION="Extended attributes tools"
-HOMEPAGE="http://savannah.nongnu.org/projects/attr"
+HOMEPAGE="https://savannah.nongnu.org/projects/attr"
 SRC_URI="mirror://nongnu/${PN}/${P}.src.tar.gz"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~amd64-linux ~arm-linux ~x86-linux"
 IUSE="nls static-libs"
 
 DEPEND="nls? ( sys-devel/gettext )
@@ -23,14 +23,17 @@ RDEPEND="abi_x86_32? (
 	)"
 
 src_prepare() {
-	epatch "${FILESDIR}"/${PN}-2.4.46-ifdef_cplusplus.patch
+	epatch "${FILESDIR}"/${P}-cdecls.patch
 	epatch "${FILESDIR}"/${P}-fix-missing-sys_types_h.patch
+
 	sed -i \
 		-e "/^PKG_DOC_DIR/s:@pkg_name@:${PF}:" \
 		-e '/HAVE_ZIPPED_MANPAGES/s:=.*:=false:' \
 		include/builddefs.in \
 		|| die
 	strip-linguas -u po
+	elibtoolize #580792
+
 	multilib_copy_sources # https://savannah.nongnu.org/bugs/index.php?39736
 }
 
@@ -61,7 +64,7 @@ multilib_src_install() {
 		gen_usr_ldscript -a attr
 		# the man-pages packages provides the man2 files
 		# note: man-pages are installed by TOOL_SUBDIRS
-		rm -r "${ED}"/usr/share/man/man2 || die
+		rm -r "${ED}"/usr/share/man/man2 "${ED}"/usr/share/man/man5/attr.5 || die
 	fi
 }
 
