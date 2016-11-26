@@ -10,13 +10,13 @@ EGIT_REPO_URI="git://anongit.freedesktop.org/git/xorg/xserver"
 
 DESCRIPTION="X.Org X servers"
 SLOT="0/${PV}"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="arm"
 
 IUSE_SERVERS="dmx kdrive xephyr xnest xorg xvfb"
 IUSE="${IUSE_SERVERS} glamor ipv6 libressl minimal nptl selinux +suid systemd tslib +udev unwind wayland"
 
 CDEPEND=">=app-eselect/eselect-opengl-1.3.0
-	!libressl? ( dev-libs/openssl:0 )
+	!libressl? ( dev-libs/openssl:0= )
 	libressl? ( dev-libs/libressl )
 	media-libs/freetype
 	>=x11-apps/iceauth-1.0.2
@@ -79,7 +79,7 @@ CDEPEND=">=app-eselect/eselect-opengl-1.3.0
 	>=x11-apps/xinit-1.3.3-r1
 	systemd? (
 		sys-apps/dbus
-		sys-apps/systemd
+		<sys-apps/systemd-230
 	)"
 
 DEPEND="${CDEPEND}
