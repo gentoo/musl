@@ -1,0 +1,48 @@
+diff -Naurw FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4.orig/winpr/libwinpr/comm/comm_io.c FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4/winpr/libwinpr/comm/comm_io.c
+--- FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4.orig/winpr/libwinpr/comm/comm_io.c	2015-03-26 08:42:54.000000000 -0700
++++ FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4/winpr/libwinpr/comm/comm_io.c	2015-09-02 18:59:22.610753099 -0700
+@@ -27,6 +27,7 @@
+ #include <errno.h>
+ #include <termios.h>
+ #include <unistd.h>
++#include <sys/select.h>
+ 
+ #include <winpr/io.h>
+ #include <winpr/wlog.h>
+diff -Naurw FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4.orig/winpr/libwinpr/comm/comm_serial_sys.c FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4/winpr/libwinpr/comm/comm_serial_sys.c
+--- FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4.orig/winpr/libwinpr/comm/comm_serial_sys.c	2015-03-26 08:42:54.000000000 -0700
++++ FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4/winpr/libwinpr/comm/comm_serial_sys.c	2015-09-02 18:59:22.610753099 -0700
+@@ -42,6 +42,9 @@
+ #define TTY_THRESHOLD_UNTHROTTLE 	128
+ #define N_TTY_BUF_SIZE			4096
+ 
++#ifndef CMSPAR
++#define CMSPAR   010000000000
++#endif
+ 
+ #define _BAUD_TABLE_END	0010020	/* __MAX_BAUD + 1 */
+ 
+diff -Naurw FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4.orig/winpr/libwinpr/synch/wait.c FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4/winpr/libwinpr/synch/wait.c
+--- FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4.orig/winpr/libwinpr/synch/wait.c	2015-03-26 08:42:54.000000000 -0700
++++ FreeRDP-aa2181dcf2dd98693767ba738c5b2ad8c3d742d4/winpr/libwinpr/synch/wait.c	2015-09-02 18:59:22.610753099 -0700
+@@ -25,6 +25,7 @@
+ #ifdef HAVE_PTHREAD_GNU_EXT
+ #define _GNU_SOURCE
+ #endif
++#include <sys/select.h>
+ 
+ #ifdef HAVE_UNISTD_H
+ #include <unistd.h>
+@@ -109,12 +110,7 @@
+ #if !defined(HAVE_PTHREAD_GNU_EXT)
+ #include <pthread.h>
+ 
+-#if defined(__FreeBSD__) || defined(sun)
+-/*the only way to get it work is to remove the static*/
+ int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *timeout)
+-#else
+-static int pthread_mutex_timedlock(pthread_mutex_t *mutex, const struct timespec *timeout)
+-#endif
+ {
+ 	struct timespec timenow;
+ 	struct timespec sleepytime;
