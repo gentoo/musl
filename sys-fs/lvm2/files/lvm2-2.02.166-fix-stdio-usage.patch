@@ -1,0 +1,53 @@
+diff -Naur LVM2.2.02.166.orig/lib/log/log.c LVM2.2.02.166/lib/log/log.c
+--- LVM2.2.02.166.orig/lib/log/log.c	2016-09-26 06:21:54.000000000 -0700
++++ LVM2.2.02.166/lib/log/log.c	2016-10-23 15:54:11.538608214 -0700
+@@ -161,6 +161,7 @@
+  * Close and reopen standard stream on file descriptor fd.
+  */
+ int reopen_standard_stream(FILE **stream, const char *mode)
++#if defined(__GLIBC__)
+ {
+ 	int fd, fd_copy, new_fd;
+ 	const char *name;
+@@ -207,6 +208,11 @@
+ 	*stream = new_stream;
+ 	return 1;
+ }
++#else
++{
++	return freopen(NULL, mode, *stream) != NULL;
++}
++#endif
+ 
+ void init_log_fn(lvm2_log_fn_t log_fn)
+ {
+diff -Naur LVM2.2.02.166.orig/tools/lvmcmdline.c LVM2.2.02.166/tools/lvmcmdline.c
+--- LVM2.2.02.166.orig/tools/lvmcmdline.c	2016-09-26 06:21:55.000000000 -0700
++++ LVM2.2.02.166/tools/lvmcmdline.c	2016-10-23 15:49:07.910610692 -0700
+@@ -1818,7 +1818,7 @@
+ 	int err = is_valid_fd(STDERR_FILENO);
+ 
+ 	if (!is_valid_fd(STDIN_FILENO) &&
+-	    !(stdin = fopen(_PATH_DEVNULL, "r"))) {
++	    !(freopen(_PATH_DEVNULL, "r", stdin))) {
+ 		if (err)
+ 			perror("stdin stream open");
+ 		else
+@@ -1828,7 +1828,7 @@
+ 	}
+ 
+ 	if (!is_valid_fd(STDOUT_FILENO) &&
+-	    !(stdout = fopen(_PATH_DEVNULL, "w"))) {
++	    !(freopen(_PATH_DEVNULL, "w", stdout))) {
+ 		if (err)
+ 			perror("stdout stream open");
+ 		/* else no stdout */
+@@ -1836,7 +1836,7 @@
+ 	}
+ 
+ 	if (!is_valid_fd(STDERR_FILENO) &&
+-	    !(stderr = fopen(_PATH_DEVNULL, "w"))) {
++	    !(freopen(_PATH_DEVNULL, "w", stderr))) {
+ 		printf("stderr stream open: %s\n",
+ 		       strerror(errno));
+ 		return 0;
