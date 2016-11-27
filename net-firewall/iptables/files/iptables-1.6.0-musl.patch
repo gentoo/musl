@@ -1,0 +1,38 @@
+diff -Naurw iptables-1.6.0.orig/extensions/libip6t_ipv6header.c iptables-1.6.0/extensions/libip6t_ipv6header.c
+--- iptables-1.6.0.orig/extensions/libip6t_ipv6header.c	2015-12-09 04:55:06.000000000 -0800
++++ iptables-1.6.0/extensions/libip6t_ipv6header.c	2015-12-23 17:22:56.757094312 -0800
+@@ -10,6 +10,9 @@
+ #include <netdb.h>
+ #include <xtables.h>
+ #include <linux/netfilter_ipv6/ip6t_ipv6header.h>
++#ifndef IPPROTO_HOPOPTS
++#       define IPPROTO_HOPOPTS 0
++#endif
+ 
+ enum {
+ 	O_HEADER = 0,
+diff -Naurw iptables-1.6.0.orig/extensions/libxt_TCPOPTSTRIP.c iptables-1.6.0/extensions/libxt_TCPOPTSTRIP.c
+--- iptables-1.6.0.orig/extensions/libxt_TCPOPTSTRIP.c	2015-12-09 04:55:06.000000000 -0800
++++ iptables-1.6.0/extensions/libxt_TCPOPTSTRIP.c	2015-12-23 17:21:50.463763843 -0800
+@@ -12,6 +12,21 @@
+ #ifndef TCPOPT_MD5SIG
+ #	define TCPOPT_MD5SIG 19
+ #endif
++#ifndef TCPOPT_MAXSEG
++#	define TCPOPT_MAXSEG 2
++#endif
++#ifndef TCPOPT_WINDOW
++#	define TCPOPT_WINDOW 3
++#endif
++#ifndef TCPOPT_SACK_PERMITTED
++#	define TCPOPT_SACK_PERMITTED 4
++#endif
++#ifndef TCPOPT_SACK
++#	define TCPOPT_SACK 5
++#endif
++#ifndef TCPOPT_TIMESTAMP
++#	define TCPOPT_TIMESTAMP 8
++#endif
+ 
+ enum {
+ 	O_STRIP_OPTION = 0,
