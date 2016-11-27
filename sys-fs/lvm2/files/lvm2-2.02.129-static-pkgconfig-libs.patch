@@ -1,15 +1,14 @@
-diff -Nuar --exclude '*.orig' --exclude '*.rej' LVM2.2.02.107.orig/configure.in LVM2.2.02.107/configure.in
---- LVM2.2.02.107.orig/configure.in	2014-07-15 12:57:55.867439868 -0700
-+++ LVM2.2.02.107/configure.in	2014-07-15 17:24:02.662666091 -0700
-@@ -997,6 +997,7 @@
+--- LVM2.2.02.129/configure.in
++++ LVM2.2.02.129/configure.in
+@@ -1287,6 +1287,7 @@
  			   fi])
  	if test "$BLKID_WIPING" = yes; then
  		BLKID_PC="blkid"
 +		BLKID_STATIC_LIBS=`$PKG_CONFIG --static --libs $BLKID_PC`
+ 		DEFAULT_USE_BLKID_WIPING=1
  		AC_DEFINE([BLKID_WIPING_SUPPORT], 1, [Define to 1 to use libblkid detection of signatures when wiping.])
- 	fi
- fi
-@@ -1022,6 +1023,7 @@
+ 	else
+@@ -1332,6 +1333,7 @@
  if test "$UDEV_SYNC" = yes; then
  	pkg_config_init
  	PKG_CHECK_MODULES(UDEV, libudev >= 143, [UDEV_PC="libudev"])
@@ -17,7 +16,7 @@ diff -Nuar --exclude '*.orig' --exclude '*.rej' LVM2.2.02.107.orig/configure.in 
  	AC_DEFINE([UDEV_SYNC_SUPPORT], 1, [Define to 1 to enable synchronisation with udev processing.])
  fi
  
-@@ -1242,19 +1244,32 @@
+@@ -1558,19 +1560,32 @@
  if test "$SELINUX" = yes; then
  	AC_CHECK_LIB([sepol], [sepol_check_context], [
  		AC_DEFINE([HAVE_SEPOL], 1, [Define to 1 if sepol_check_context is available.])
@@ -52,15 +51,15 @@ diff -Nuar --exclude '*.orig' --exclude '*.rej' LVM2.2.02.107.orig/configure.in 
  fi
  
  ################################################################################
-@@ -1556,6 +1571,7 @@
+@@ -1902,6 +1917,7 @@
  ################################################################################
  AC_SUBST(APPLIB)
  AC_SUBST(AWK)
 +AC_SUBST(BLKID_STATIC_LIBS)
  AC_SUBST(BLKID_PC)
- AC_SUBST(BLKID_WIPING)
  AC_SUBST(BUILD_CMIRRORD)
-@@ -1651,6 +1667,7 @@
+ AC_SUBST(BUILD_DMEVENTD)
+@@ -2005,6 +2021,7 @@
  AC_SUBST(SALCK_CFLAGS)
  AC_SUBST(SALCK_LIBS)
  AC_SUBST(SELINUX_LIBS)
@@ -68,18 +67,17 @@ diff -Nuar --exclude '*.orig' --exclude '*.rej' LVM2.2.02.107.orig/configure.in 
  AC_SUBST(SELINUX_PC)
  AC_SUBST(SNAPSHOTS)
  AC_SUBST(STATICDIR)
-@@ -1662,6 +1679,7 @@
- AC_SUBST(THIN_DUMP_CMD)
- AC_SUBST(THIN_REPAIR_CMD)
- AC_SUBST(THIN_RESTORE_CMD)
+@@ -2020,6 +2037,7 @@
+ AC_SUBST(CACHE_DUMP_CMD)
+ AC_SUBST(CACHE_REPAIR_CMD)
+ AC_SUBST(CACHE_RESTORE_CMD)
 +AC_SUBST(UDEV_STATIC_LIBS)
  AC_SUBST(UDEV_PC)
  AC_SUBST(UDEV_RULES)
  AC_SUBST(UDEV_SYNC)
-diff -Nuar --exclude '*.orig' --exclude '*.rej' LVM2.2.02.107.orig/make.tmpl.in LVM2.2.02.107/make.tmpl.in
---- LVM2.2.02.107.orig/make.tmpl.in	2014-07-15 12:57:55.868439884 -0700
-+++ LVM2.2.02.107/make.tmpl.in	2014-07-15 17:23:24.060055838 -0700
-@@ -44,7 +44,7 @@
+--- LVM2.2.02.129/make.tmpl.in
++++ LVM2.2.02.129/make.tmpl.in
+@@ -43,7 +43,7 @@
  
  LIBS = @LIBS@
  # Extra libraries always linked with static binaries
@@ -87,8 +85,8 @@ diff -Nuar --exclude '*.orig' --exclude '*.rej' LVM2.2.02.107.orig/make.tmpl.in 
 +STATIC_LIBS = $(SELINUX_STATIC_LIBS) $(UDEV_STATIC_LIBS) $(BLKID_STATIC_LIBS)
  DEFS += @DEFS@
  # FIXME set this only where it's needed, not globally?
- CFLAGS += @CFLAGS@
-@@ -59,10 +59,13 @@
+ CFLAGS ?= @COPTIMISE_FLAG@ @CFLAGS@
+@@ -58,10 +58,13 @@
  PTHREAD_LIBS = @PTHREAD_LIBS@
  READLINE_LIBS = @READLINE_LIBS@
  SELINUX_LIBS = @SELINUX_LIBS@
@@ -99,6 +97,6 @@ diff -Nuar --exclude '*.orig' --exclude '*.rej' LVM2.2.02.107.orig/make.tmpl.in 
  BLKID_CFLAGS = @BLKID_CFLAGS@
  BLKID_LIBS = @BLKID_LIBS@
 +BLKID_STATIC_LIBS = @BLKID_STATIC_LIBS@
+ VALGRIND_CFLAGS = @VALGRIND_CFLAGS@
  TESTING = @TESTING@
  
- # Setup directory variables

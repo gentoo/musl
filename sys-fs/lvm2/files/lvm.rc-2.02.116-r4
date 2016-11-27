@@ -3,10 +3,38 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
+_get_lvm_path() {
+	local lvm_path=
+	for lvm_path in /bin/lvm /sbin/lvm ; do
+		[ -x "$lvm_path" ] && break
+	done
+	echo "${lvm_path}"
+}
+
+_need_lvmetad()
+{
+	local lvm_path="$(_get_lvm_path)"
+	[ ! -x "${lvm_path}" ] && return 1
+	${lvm_path} dumpconfig global | grep -q 'use_lvmetad=1'
+}
+
 depend() {
 	before checkfs fsck
 	after modules device-mapper
-	need lvmetad sysfs
+	# We may use lvmetad based on the configuration. If we added lvmetad
+	# support while lvm2 is running then we aren't dependent on it. For the
+	# more common case, if its disabled in the config we aren't dependent
+	# on it.
+	config /etc/lvm/lvm.conf
+	local _need=
+	if service_started; then
+		_need=$(service_get_value need)
+	else
+		if _need_lvmetad; then
+			_need="${_need} lvmetad"
+		fi
+	fi
+	need sysfs ${_need}
 }
 
 config='global { locking_dir = "/run/lock/lvm" }'
@@ -24,9 +52,10 @@ start() {
 	# LVM support for /usr, /home, /opt ....
 	# This should be done *before* checking local
 	# volumes, or they never get checked.
-	
+
 	# NOTE: Add needed modules for LVM or RAID, etc
 	#       to /etc/modules.autoload if needed
+	lvm_path="$(_get_lvm_path)"
 	for lvm_path in /bin/lvm /sbin/lvm ; do
 		[ -x "$lvm_path" ] && break
 	done
@@ -55,6 +84,14 @@ start() {
 	fi
 }
 
+start_post()
+{
+	# Save if we needed lvmetad
+	if _need_lvmetad; then
+		service_set_value need lvmetad
+	fi
+}
+
 stop() {
 	for lvm_path in /bin/lvm /sbin/lvm ; do
 		[ -x "$lvm_path" ] && break
@@ -71,7 +108,6 @@ if [ -x /sbin/vgs ] && \
    [ -d /proc/lvm  -o "`grep device-mapper /proc/misc 2>/dev/null`" ]
 then
 	einfo "Shutting down the Logical Volume Manager"
-	
 
         VGS=$($lvm_path vgs --config "${config}" -o vg_name --noheadings --nosuffix --rows 2> /dev/null)
 

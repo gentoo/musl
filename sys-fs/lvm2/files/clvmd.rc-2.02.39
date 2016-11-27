@@ -1,5 +1,5 @@
-#!/sbin/runscript
-# Copyright 1999-2013 Gentoo Foundation
+#!/sbin/openrc-run
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -15,7 +15,7 @@ CLVMD_PIDFILE="/var/run/clvmd.pid"
 
 depend() {
 	use net dns logger dmeventd
-	need cman
+	want cman corosync openais
 }
 
 load_modules() {
