@@ -1,0 +1,35 @@
+diff -Naurw openal-soft-1.17.1.orig/Alc/backends/alsa.c openal-soft-1.17.1/Alc/backends/alsa.c
+--- openal-soft-1.17.1.orig/Alc/backends/alsa.c	2016-01-04 12:07:41.460891285 -0800
++++ openal-soft-1.17.1/Alc/backends/alsa.c	2016-01-04 12:29:56.971867369 -0800
+@@ -23,6 +23,7 @@
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <memory.h>
++#include <sys/types.h>
+ 
+ #include "alMain.h"
+ #include "alu.h"
+diff -Naurw openal-soft-1.17.1.orig/CMakeLists.txt openal-soft-1.17.1/CMakeLists.txt
+--- openal-soft-1.17.1.orig/CMakeLists.txt	2016-01-04 12:07:41.462891285 -0800
++++ openal-soft-1.17.1/CMakeLists.txt	2016-01-04 12:55:30.281839910 -0800
+@@ -112,6 +112,20 @@
+     UNSET(OLD_REQUIRED_FLAGS)
+ ENDIF()
+ 
++# Check if _GNU_SOURCE needs to be set.
++CHECK_TYPE_SIZE(u_int8_t HAVE_TYPES_DEFAULT)
++IF(NOT HAVE_TYPES_DEFAULT)
++    SET(OLD_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
++    SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -D_GNU_SOURCE")
++    CHECK_TYPE_SIZE(u_int8_t HAVE_TYPES_POSIX)
++    IF(NOT HAVE_TYPES_POSIX)
++        SET(CMAKE_REQUIRED_FLAGS ${OLD_REQUIRED_FLAGS})
++    ELSE()
++        ADD_DEFINITIONS(-D_GNU_SOURCE)
++    ENDIF()
++    UNSET(OLD_REQUIRED_FLAGS)
++ENDIF()
++
+ # Set defines for large file support
+ CHECK_FILE_OFFSET_BITS()
+ IF(_FILE_OFFSET_BITS)
