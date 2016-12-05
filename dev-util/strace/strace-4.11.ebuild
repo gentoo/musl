@@ -1,13 +1,13 @@
 # Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
-EAPI=5
+EAPI="5"
 
 inherit flag-o-matic eutils
 
 if [[ ${PV} == "9999" ]] ; then
-	EGIT_REPO_URI="git://strace.git.sourceforge.net/gitroot/strace/strace"
+	EGIT_REPO_URI="git://git.code.sf.net/p/strace/code"
+	EGIT_PROJECT="${PN}"
 	inherit git-2 autotools
 else
 	SRC_URI="mirror://sourceforge/${PN}/${P}.tar.xz"
@@ -15,7 +15,7 @@ else
 fi
 
 DESCRIPTION="A useful diagnostic, instructional, and debugging tool"
-HOMEPAGE="http://sourceforge.net/projects/strace/"
+HOMEPAGE="https://sourceforge.net/projects/strace/"
 
 LICENSE="BSD"
 SLOT="0"
@@ -32,7 +32,8 @@ RDEPEND="!static? ( ${LIB_DEPEND//\[static-libs(+)]} )
 src_prepare() {
 	if epatch_user || [[ ! -e configure ]] ; then
 		# git generation
-		./xlat/gen.sh
+		./xlat/gen.sh || die
+		./generate_mpers_am.sh || die
 		eautoreconf
 		[[ ! -e CREDITS ]] && cp CREDITS{.in,}
 	fi
