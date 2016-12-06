@@ -1,0 +1,25 @@
+diff -Naur qtwebengine-opensource-src-5.7.0.orig/src/3rdparty/chromium/third_party/usrsctp/usrsctplib/usrsctplib/netinet/sctp_userspace.c qtwebengine-opensource-src-5.7.0/src/3rdparty/chromium/third_party/usrsctp/usrsctplib/usrsctplib/netinet/sctp_userspace.c
+--- qtwebengine-opensource-src-5.7.0.orig/src/3rdparty/chromium/third_party/usrsctp/usrsctplib/usrsctplib/netinet/sctp_userspace.c	2016-10-07 08:13:22.385902742 -0700
++++ qtwebengine-opensource-src-5.7.0/src/3rdparty/chromium/third_party/usrsctp/usrsctplib/usrsctplib/netinet/sctp_userspace.c	2016-10-07 08:14:48.045335758 -0700
+@@ -37,6 +37,9 @@
+ #if defined(__Userspace_os_FreeBSD)
+ #include <pthread_np.h>
+ #endif
++#if defined(__Userspace_os_Linux) && !defined(__GLIBC__)
++#include <sys/prctl.h>
++#endif
+ 
+ #if defined(__Userspace_os_Windows)
+ /* Adapter to translate Unix thread start routines to Windows thread start
+@@ -72,7 +75,11 @@
+ 	pthread_setname_np(name);
+ #endif
+ #if defined(__Userspace_os_Linux)
++#if defined(__GLIBC__)
+ 	pthread_setname_np(pthread_self(), name);
++#else
++	prctl(PR_SET_NAME, name);
++#endif
+ #endif
+ #if defined(__Userspace_os_FreeBSD)
+ 	pthread_set_name_np(pthread_self(), name);

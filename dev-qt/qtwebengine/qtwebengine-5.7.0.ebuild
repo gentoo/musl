@@ -35,7 +35,7 @@ RDEPEND="
 	media-libs/freetype
 	media-libs/harfbuzz:=
 	media-libs/libpng:0=
-	>=media-libs/libvpx-1.5:=[svc]
+	>=media-libs/libvpx-1.4:=
 	media-libs/libwebp:=
 	media-libs/mesa
 	media-libs/opus
@@ -72,11 +72,18 @@ DEPEND="${RDEPEND}
 "
 
 PATCHES=(
+	"${FILESDIR}/${PN}-5.7.0-fix-system-ffmpeg.patch"
+	"${FILESDIR}/${PN}-5.7.0-gcc6.patch"
+	"${FILESDIR}/${PN}-5.7.0-icu58.patch"
+	"${FILESDIR}/${PN}-5.7.0-undef-madv_free.patch"
+
+	# musl patches
 	"${FILESDIR}/${PN}-5.6.0-musl-execinfo.patch"
-	"${FILESDIR}/${PN}-5.6.0-musl-mallinfo.patch"
+	"${FILESDIR}/${PN}-5.7.0-musl-mallinfo.patch"
 	"${FILESDIR}/${PN}-5.6.0-musl-off_t.patch"
-	"${FILESDIR}/${PN}-5.6.0-musl-resolver.patch"
-	"${FILESDIR}/${PN}-5.6.0-musl-sandbox.patch"
+	"${FILESDIR}/${PN}-5.7.0-musl-pthread-setname.patch"
+	"${FILESDIR}/${PN}-5.7.0-musl-resolver.patch"
+	"${FILESDIR}/${PN}-5.7.0-musl-sandbox.patch"
 	"${FILESDIR}/${PN}-5.6.0-musl-siginfo.patch"
 	"${FILESDIR}/${PN}-5.6.0-musl-stack.patch"
 	"${FILESDIR}/${PN}-5.6.0-musl-sysctl.patch"

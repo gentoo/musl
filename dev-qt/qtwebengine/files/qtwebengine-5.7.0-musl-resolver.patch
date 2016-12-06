@@ -1,0 +1,60 @@
+diff -Naur qtwebengine-opensource-src-5.7.0.orig/src/3rdparty/chromium/net/dns/dns_config_service_posix.cc qtwebengine-opensource-src-5.7.0/src/3rdparty/chromium/net/dns/dns_config_service_posix.cc
+--- qtwebengine-opensource-src-5.7.0.orig/src/3rdparty/chromium/net/dns/dns_config_service_posix.cc	2016-10-06 21:21:24.505574899 -0700
++++ qtwebengine-opensource-src-5.7.0/src/3rdparty/chromium/net/dns/dns_config_service_posix.cc	2016-10-06 21:26:35.597302630 -0700
+@@ -25,6 +25,10 @@
+ #include "net/dns/notify_watcher_mac.h"
+ #include "net/dns/serial_worker.h"
+ 
++#if defined(OS_LINUX) && !defined(__GLIBC__)
++#include "net/dns/resolv_compat.h"
++#endif
++
+ #if defined(OS_MACOSX) && !defined(OS_IOS)
+ #include "net/dns/dns_config_watcher_mac.h"
+ #endif
+diff -Naur qtwebengine-opensource-src-5.7.0.orig/src/3rdparty/chromium/net/dns/dns_reloader.cc qtwebengine-opensource-src-5.7.0/src/3rdparty/chromium/net/dns/dns_reloader.cc
+--- qtwebengine-opensource-src-5.7.0.orig/src/3rdparty/chromium/net/dns/dns_reloader.cc	2016-10-06 21:21:24.506574908 -0700
++++ qtwebengine-opensource-src-5.7.0/src/3rdparty/chromium/net/dns/dns_reloader.cc	2016-10-06 21:27:43.025896377 -0700
+@@ -8,6 +8,9 @@
+     !defined(OS_ANDROID)
+ 
+ #include <resolv.h>
++#if defined(OS_LINUX) && !defined(__GLIBC__)
++#include "net/dns/resolv_compat.h"
++#endif
+ 
+ #include "base/lazy_instance.h"
+ #include "base/logging.h"
+diff -Naur qtwebengine-opensource-src-5.7.0.orig/src/3rdparty/chromium/net/dns/resolv_compat.h qtwebengine-opensource-src-5.7.0/src/3rdparty/chromium/net/dns/resolv_compat.h
+--- qtwebengine-opensource-src-5.7.0.orig/src/3rdparty/chromium/net/dns/resolv_compat.h	1969-12-31 16:00:00.000000000 -0800
++++ qtwebengine-opensource-src-5.7.0/src/3rdparty/chromium/net/dns/resolv_compat.h	2016-10-06 21:26:35.597302630 -0700
+@@ -0,0 +1,29 @@
++#if !defined(__GLIBC__)
++/***************************************************************************
++ * resolv_compat.h
++ *
++ * Mimick GLIBC's res_ninit() and res_nclose() for musl libc
++ * Note: res_init() is actually deprecated according to
++ * http://docs.oracle.com/cd/E36784_01/html/E36875/res-nclose-3resolv.html
++ **************************************************************************/
++#include <string.h>
++
++static inline int res_ninit(res_state statp)
++{
++	int rc = res_init();
++	if (statp != &_res) {
++		memcpy(statp, &_res, sizeof(*statp));
++	}
++	return rc;
++}
++
++static inline int res_nclose(res_state statp)
++{
++	if (!statp)
++		return -1;
++	if (statp != &_res) {
++		memset(statp, 0, sizeof(*statp));
++	}
++	return 0;
++}
++#endif
