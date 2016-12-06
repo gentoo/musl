@@ -1,0 +1,10 @@
+diff -Naurw kexec-tools-2.0.9.orig/vmcore-dmesg/vmcore-dmesg.c kexec-tools-2.0.9/vmcore-dmesg/vmcore-dmesg.c
+--- kexec-tools-2.0.9.orig/vmcore-dmesg/vmcore-dmesg.c	2014-10-13 21:58:06.000000000 -0700
++++ kexec-tools-2.0.9/vmcore-dmesg/vmcore-dmesg.c	2015-12-30 11:51:20.594760356 -0800
+@@ -1,5 +1,6 @@
+ #define _XOPEN_SOURCE 600
+ #define _LARGEFILE_SOURCE 1
++#define _GNU_SOURCE 1
+ #define _FILE_OFFSET_BITS 64
+ #include <endian.h>
+ #include <byteswap.h>
