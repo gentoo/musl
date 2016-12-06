@@ -1,0 +1,14 @@
+diff -Naurw iputils-s20150815/ping.c iputils-s20150815.new/ping.c
+--- iputils-s20150815/ping.c	2015-08-15 07:07:28.000000000 -0700
++++ iputils-s20150815.new/ping.c	2015-10-05 14:49:33.300065816 -0700
+@@ -80,6 +80,10 @@
+ #define	NROUTES		9		/* number of record route slots */
+ #define TOS_MAX		255		/* 8-bit TOS field */
+ 
++#ifndef SCOPE_DELIMITER
++# define SCOPE_DELIMITER '%'
++#endif
++
+ static const int max_ping4_packet = 0x10000;
+ 
+ static int ts_type;

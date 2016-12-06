@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -16,11 +16,11 @@ if [[ ${PV} == "99999999" ]] ; then
 else
 	SRC_URI="http://www.skbuff.net/iputils/iputils-s${PV}.tar.bz2
 		mirror://gentoo/iputils-s${PV}-manpages.tar.bz2"
-	KEYWORDS="amd64 arm ~mips ppc x86"
+	KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~ppc-aix ~amd64-linux ~x86-linux"
 fi
 
 DESCRIPTION="Network monitoring tools including ping and ping6"
-HOMEPAGE="http://www.linuxfoundation.org/collaborate/workgroups/networking/iputils"
+HOMEPAGE="https://wiki.linuxfoundation.org/networking/iputils"
 
 LICENSE="BSD-4"
 SLOT="0"
@@ -52,6 +52,14 @@ fi
 S=${WORKDIR}/${PN}-s${PV}
 
 src_prepare() {
+	# musl patches
+	epatch "${FILESDIR}"/${PN}-20121221-fix-musl-headers.patch
+	epatch "${FILESDIR}"/${PN}-20121221-add-bits_types_h.patch
+	epatch "${FILESDIR}"/${PN}-20121221-remove-rdisc-glibc-assumption.patch
+	epatch "${FILESDIR}"/${PN}-20121221-fix-init-elemnt.patch
+	epatch "${FILESDIR}"/${PN}-20121221-fix-header-order.patch
+	epatch "${FILESDIR}"/${PN}-20121221-missing-AI_IDN-NI_IDN.patch
+
 	epatch "${FILESDIR}"/021109-uclibc-no-ether_ntohost.patch
 	epatch "${FILESDIR}"/${PN}-20121221-openssl.patch #335436
 	epatch "${FILESDIR}"/${PN}-20121221-crypto-build.patch
@@ -59,12 +67,6 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-20121221-makefile.patch
 	epatch "${FILESDIR}"/${PN}-20121221-printf-size.patch
 	epatch "${FILESDIR}"/${PN}-20121221-owl-pingsock.diff
-	epatch "${FILESDIR}"/${PN}-20121221-fix-musl-headers.patch
-	epatch "${FILESDIR}"/${PN}-20121221-add-bits_types_h.patch
-	epatch "${FILESDIR}"/${PN}-20121221-remove-rdisc-glibc-assumption.patch
-	epatch "${FILESDIR}"/${PN}-20121221-fix-init-elemnt.patch
-	epatch "${FILESDIR}"/${PN}-20121221-fix-header-order.patch
-	epatch "${FILESDIR}"/${PN}-20121221-missing-AI_IDN-NI_IDN.patch
 	use SECURITY_HAZARD && epatch "${FILESDIR}"/${PN}-20071127-nonroot-floodping.patch
 	use static && append-ldflags -static
 }
