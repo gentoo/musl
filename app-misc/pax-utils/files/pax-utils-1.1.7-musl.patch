@@ -1,0 +1,51 @@
+diff -Naur pax-utils-1.1.7.orig/paxldso.c pax-utils-1.1.7/paxldso.c
+--- pax-utils-1.1.7.orig/paxldso.c	2016-11-11 23:10:13.000000000 -0800
++++ pax-utils-1.1.7/paxldso.c	2016-12-12 21:13:07.572369685 -0800
+@@ -240,7 +240,7 @@
+ static array_t _ldpaths = array_init_decl;
+ array_t *ldpaths = &_ldpaths;
+ 
+-#if defined(__GLIBC__) || defined(__UCLIBC__) || defined(__NetBSD__)
++#if defined(__linux__) || defined(__NetBSD__)
+ 
+ int ldso_config_load(const char *fname)
+ {
+diff -Naur pax-utils-1.1.7.orig/paxldso.h pax-utils-1.1.7/paxldso.h
+--- pax-utils-1.1.7.orig/paxldso.h	2016-11-11 23:10:13.000000000 -0800
++++ pax-utils-1.1.7/paxldso.h	2016-12-12 21:09:00.571275797 -0800
+@@ -36,8 +36,7 @@
+  * ld.so.conf logic
+  */
+ 
+-#if !defined(__GLIBC__) && \
+-    !defined(__UCLIBC__) && \
++#if !defined(__linux__) && \
+     !defined(__NetBSD__) && \
+     !defined(__FreeBSD__) && \
+     !defined(__DragonFly__)
+diff -Naur pax-utils-1.1.7.orig/porting.h pax-utils-1.1.7/porting.h
+--- pax-utils-1.1.7.orig/porting.h	2016-11-11 23:10:13.000000000 -0800
++++ pax-utils-1.1.7/porting.h	2016-12-12 21:15:13.936750241 -0800
+@@ -47,7 +47,7 @@
+ # include <sys/prctl.h>
+ # include <linux/securebits.h>
+ #endif
+-#if defined(__GLIBC__) || defined(__UCLIBC__) || defined(__ANDROID__)
++#if defined(__linux__) || defined(__ANDROID__)
+ # include <byteswap.h>
+ # include <endian.h>
+ #elif defined(__FreeBSD__)
+@@ -58,11 +58,11 @@
+ # include <machine/endian.h>
+ #endif
+ 
+-#if defined(__GLIBC__) || defined(__UCLIBC__)
++#if defined(__linux__)
+ # include <glob.h>
+ #endif
+ 
+-#if defined(__GLIBC__) || defined(__UCLIBC__) || defined(__NetBSD__)
++#if defined(__linux__) || defined(__NetBSD__)
+ # define __PAX_UTILS_DEFAULT_LD_CACHE_CONFIG "/etc/ld.so.conf"
+ #elif defined(__FreeBSD__) || defined(__DragonFly__)
+ # include <elf-hints.h>
