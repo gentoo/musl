@@ -9,7 +9,7 @@ inherit qt5-build
 DESCRIPTION="Cross-platform application development framework"
 
 if [[ ${QT5_BUILD_TYPE} == release ]]; then
-	KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~ppc ~ppc64 ~x86"
+	KEYWORDS="amd64 ~arm ~arm64 ~hppa ~ppc ~ppc64 x86"
 fi
 
 IUSE="icu systemd"
@@ -25,6 +25,7 @@ DEPEND="
 RDEPEND="${DEPEND}"
 
 PATCHES=(
+	"${FILESDIR}/${P}-plugins.patch"
 	"${FILESDIR}/${PN}-5.5.1-musl-iconv.patch"
 )
 
