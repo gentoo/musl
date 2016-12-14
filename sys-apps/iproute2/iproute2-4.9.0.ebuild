@@ -39,7 +39,6 @@ DEPEND="${RDEPEND}
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
-	"${FILESDIR}"/${PN}-4.5.0-no-iptables.patch #577464
 	"${FILESDIR}"/${PN}-4.8.0-musl.patch
 )
 
@@ -89,6 +88,7 @@ src_configure() {
 	cat <<-EOF > Config
 	TC_CONFIG_ATM := $(usex atm y n)
 	TC_CONFIG_XT  := $(usex iptables y n)
+	TC_CONFIG_NO_XT := $(usex iptables n y)
 	# We've locked in recent enough kernel headers #549948
 	TC_CONFIG_IPSET := y
 	HAVE_BERKELEY_DB := $(usex berkdb y n)
