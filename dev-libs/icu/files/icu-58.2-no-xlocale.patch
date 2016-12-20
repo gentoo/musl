@@ -1,6 +1,6 @@
-diff -Naur icu.orig/source/i18n/digitlst.cpp icu/source/i18n/digitlst.cpp
---- icu.orig/source/i18n/digitlst.cpp	2016-10-26 18:37:56.000000000 -0700
-+++ icu/source/i18n/digitlst.cpp	2016-12-20 13:41:27.124353535 -0800
+diff -Naur a/i18n/digitlst.cpp b/i18n/digitlst.cpp
+--- a/i18n/digitlst.cpp	2016-10-26 18:37:56.000000000 -0700
++++ b/i18n/digitlst.cpp	2016-12-20 13:41:27.124353535 -0800
 @@ -61,11 +61,7 @@
  #endif
  
