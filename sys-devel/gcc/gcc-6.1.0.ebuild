@@ -24,7 +24,7 @@ SSP_MUSL_STABLE="amd64 arm ppc mips"
 
 inherit toolchain
 
-KEYWORDS=""
+KEYWORDS="~amd64"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
