@@ -33,7 +33,7 @@ MULTILIB_CHOST_TOOLS=(
 PATCHES=(
 	"${FILESDIR}/${PN}-58.1-remove-bashisms.patch"
 	"${FILESDIR}/${PN}-58.1-iterator.patch"
-	"${FILESDIR}/${PN}-58.1-no-xlocale.patch"
+	"${FILESDIR}/${PN}-58.2-no-xlocale.patch"
 )
 
 src_prepare() {
