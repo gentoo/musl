@@ -2,40 +2,59 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=3
+EAPI=5
 inherit eutils autotools flag-o-matic elisp-common
 
 DESCRIPTION="Scheme interpreter"
-HOMEPAGE="http://www.gnu.org/software/guile/"
+HOMEPAGE="https://www.gnu.org/software/guile/"
 SRC_URI="mirror://gnu/guile/${P}.tar.gz"
 
 LICENSE="LGPL-2.1"
 KEYWORDS="amd64 arm ~mips ppc x86"
-IUSE="networking +regex discouraged +deprecated emacs nls debug-freelist debug-malloc debug +threads"
+IUSE="debug debug-freelist debug-malloc +deprecated discouraged emacs networking nls readline +regex +threads"
+
 RESTRICT="!regex? ( test )"
 
-DEPEND="
-	>=dev-libs/gmp-4.1
-	>=sys-devel/libtool-1.5.6
+RDEPEND="
+	>=dev-libs/gmp-4.1:0=
+	dev-libs/libltdl:0=
 	sys-devel/gettext
-	emacs? ( virtual/emacs )"
-RDEPEND="${DEPEND}"
+	sys-libs/ncurses:0=
+	emacs? ( virtual/emacs )
+	readline? ( sys-libs/readline:0= )"
+DEPEND="${RDEPEND}
+	sys-apps/texinfo
+	sys-devel/libtool"
 
 # Guile seems to contain some slotting support, /usr/share/guile/ is slotted,
 # but there are lots of collisions. Most in /usr/share/libguile. Therefore
 # I'm slotting this in the same slot as guile-1.6* for now.
-SLOT="12"
+SLOT="12/8"
 MAJOR="1.8"
 
 src_prepare() {
 	epatch "${FILESDIR}/${P}-fix_guile-config.patch" \
 		"${FILESDIR}/${P}-gcc46.patch" \
-		"${FILESDIR}/${P}-os_dep.patch" \
-		"${FILESDIR}/${P}-makeinfo-5.patch"
+		"${FILESDIR}/${P}-gcc5.patch" \
+		"${FILESDIR}/${P}-makeinfo-5.patch" \
+		"${FILESDIR}/${P}-gtexinfo-5.patch" \
+		"${FILESDIR}/${P}-readline.patch" \
+		"${FILESDIR}/${P}-tinfo.patch" \
+		"${FILESDIR}/${P}-sandbox.patch" \
+		"${FILESDIR}/${P}-mkdir-mask.patch"
+
+	epatch "${FILESDIR}/${P}-fix-defines.patch"
+
 	sed \
 		-e "s/AM_CONFIG_HEADER/AC_CONFIG_HEADERS/g" \
 		-e "/AM_PROG_CC_STDC/d" \
-		-i guile-readline/configure.in
+		-i guile-readline/configure.in || die
+
+	epatch_user
+
+	mv "${S}"/configure.{in,ac} || die
+	mv "${S}"/guile-readline/configure.{in,ac} || die
+
 	eautoreconf
 }
 
@@ -49,6 +68,7 @@ src_configure() {
 		--disable-static \
 		--enable-posix \
 		$(use_enable networking) \
+		$(use_enable readline) \
 		$(use_enable regex) \
 		$(use deprecated || use_enable discouraged) \
 		$(use_enable deprecated) \
@@ -64,24 +84,24 @@ src_configure() {
 }
 
 src_compile()  {
-	emake || die "make failed"
+	emake
 
 	# Above we have disabled the build system's Emacs support;
 	# for USE=emacs we compile (and install) the files manually
 	if use emacs; then
-		cd emacs
+		cd emacs || die
 		elisp-compile *.el || die
 	fi
 }
 
 src_install() {
-	einstall || die "install failed"
+	emake DESTDIR="${D}" install
 
-	dodoc AUTHORS ChangeLog GUILE-VERSION HACKING NEWS README THANKS || die
+	dodoc AUTHORS ChangeLog GUILE-VERSION HACKING NEWS README THANKS
 
 	# texmacs needs this, closing bug #23493
 	dodir /etc/env.d
-	echo "GUILE_LOAD_PATH=\"${EPREFIX}/usr/share/guile/${MAJOR}\"" > "${ED}"/etc/env.d/50guile
+	echo "GUILE_LOAD_PATH=\"${EPREFIX}/usr/share/guile/${MAJOR}\"" > "${ED}"/etc/env.d/50guile || die
 
 	# necessary for registering slib, see bug 206896
 	keepdir /usr/share/guile/site
@@ -93,21 +113,9 @@ src_install() {
 }
 
 pkg_postinst() {
-	[ "${EROOT}" == "/" ] && pkg_config
 	use emacs && elisp-site-regen
 }
 
 pkg_postrm() {
 	use emacs && elisp-site-regen
-}
-
-pkg_config() {
-	if has_version dev-scheme/slib; then
-		einfo "Registering slib with guile"
-		install_slib_for_guile
-	fi
-}
-
-_pkg_prerm() {
-	rm -f "${EROOT}"/usr/share/guile/site/slibcat
 }
