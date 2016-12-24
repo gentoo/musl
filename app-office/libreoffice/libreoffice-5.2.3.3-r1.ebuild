@@ -25,7 +25,7 @@ BRANDING="${PN}-branding-gentoo-0.8.tar.xz"
 # PATCHSET="${P}-patchset-01.tar.xz"
 
 [[ ${PV} == *9999* ]] && SCM_ECLASS="git-r3"
-inherit multiprocessing autotools bash-completion-r1 check-reqs eutils java-pkg-opt-2 kde4-base pax-utils python-single-r1 multilib toolchain-funcs flag-o-matic versionator ${SCM_ECLASS}
+inherit multiprocessing autotools bash-completion-r1 check-reqs eutils java-pkg-opt-2 kde4-base pax-utils python-single-r1 multilib toolchain-funcs flag-o-matic versionator xdg-utils qmake-utils ${SCM_ECLASS}
 unset SCM_ECLASS
 
 DESCRIPTION="A full office productivity suite"
@@ -57,8 +57,7 @@ unset DEV_URI
 # These are bundles that can't be removed for now due to huge patchsets.
 # If you want them gone, patches are welcome.
 ADDONS_SRC=(
-	"${ADDONS_URI}/d62650a6f908e85643e557a236ea989c-vigra1.6.0.tar.gz"
-	"${ADDONS_URI}/1f24ab1d39f4a51faf22244c94a6203f-xmlsec1-1.2.14.tar.gz" # modifies source code
+	"${ADDONS_URI}/ce12af00283eb90d9281956524250d6e-xmlsec1-1.2.20.tar.gz" # modifies source code
 	"collada? ( ${ADDONS_URI}/4b87018f7fff1d054939d19920b751a0-collada2gltf-master-cb1d97788a.tar.bz2 )"
 	"java? ( ${ADDONS_URI}/17410483b5b5f267aa18b7e00b65e6e0-hsqldb_1_8_0.zip )"
 	# no release for 8 years, should we package it?
@@ -78,8 +77,8 @@ unset ADDONS_SRC
 # Extensions that need extra work:
 LO_EXTS="nlpsolver scripting-beanshell scripting-javascript wiki-publisher"
 
-IUSE="bluetooth +branding coinmp collada +cups dbus debug eds firebird gltf gnome google
-gstreamer +gtk gtk3 jemalloc kde libressl mysql odk postgres quickstarter telepathy test vlc
+IUSE="bluetooth +branding coinmp collada +cups dbus debug eds firebird gltf gnome googledrive
+gstreamer +gtk gtk3 jemalloc kde libressl mysql odk pdfimport postgres quickstarter telepathy test vlc
 $(printf 'libreoffice_extensions_%s ' ${LO_EXTS})"
 
 LICENSE="|| ( LGPL-3 MPL-1.1 )"
@@ -103,7 +102,6 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	app-text/libwpg:0.3
 	>=app-text/libwps-0.4
 	app-text/mythes
-	app-text/poppler:=[cxx]
 	>=dev-cpp/clucene-2.3.3.4-r2
 	=dev-cpp/libcmis-0.5*
 	dev-db/unixODBC
@@ -112,7 +110,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	dev-libs/expat
 	dev-libs/hyphen
 	dev-libs/icu:=
-	=dev-libs/liborcus-0.9*
+	=dev-libs/liborcus-0.11*
 	dev-libs/librevenge
 	dev-libs/nspr
 	dev-libs/nss
@@ -170,6 +168,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	libreoffice_extensions_scripting-beanshell? ( dev-java/bsh )
 	libreoffice_extensions_scripting-javascript? ( dev-java/rhino:1.6 )
 	mysql? ( dev-db/mysql-connector-c++ )
+	pdfimport? ( app-text/poppler:=[cxx] )
 	postgres? ( >=dev-db/postgresql-9.0:*[kerberos] )
 	telepathy? ( net-libs/telepathy-glib )
 "
@@ -206,9 +205,8 @@ DEPEND="${COMMON_DEPEND}
 	dev-util/cppunit
 	>=dev-util/gperf-3
 	dev-util/intltool
-	>=dev-util/mdds-0.12.0:0=
+	>=dev-util/mdds-1.2.0:1=
 	media-libs/glm
-	net-misc/npapi-sdk
 	sys-devel/bison
 	sys-devel/flex
 	sys-devel/gettext
@@ -242,37 +240,33 @@ REQUIRED_USE="${PYTHON_REQUIRED_USE}
 "
 
 PATCHES=(
-	# from 5.2 branch
-	"${FILESDIR}/${PN}-5.1.4.2-gcc6.patch"
-	"${FILESDIR}/${PN}-curl-7.50.0.patch"
-
+	# from master branch
+	"${FILESDIR}/${PN}-5.2-icu58.patch"
+	
 	# not upstreamable stuff
-	"${FILESDIR}/${PN}-4.4-system-pyuno.patch"
-
-	# musl fixes
-	"${FILESDIR}/${PN}-4.4.1.2-fix-includes.patch"
-	"${FILESDIR}/${PN}-5.0.5.2-linux-musl.patch"
+	"${FILESDIR}/${PN}-5.2-system-pyuno.patch"
+	
+	# musl related stuff
 	"${FILESDIR}/${PN}-4.4.1.2-musl-fix-execinfo.patch"
+	"${FILESDIR}/${PN}-5.0.5.2-linux-musl.patch"
+	"${FILESDIR}/${PN}-5.2.3.3-fix-includes.patch" # new version from alpine
 )
-
-CHECKREQS_MEMORY="512M"
-
-if [[ ${MERGE_TYPE} != binary ]] && is-flagq "-g*" && ! is-flagq "-g*0" ; then
-	CHECKREQS_DISK_BUILD="22G"
-elif [[ ${MERGE_TYPE} != binary ]] ; then
-	CHECKREQS_DISK_BUILD="6G"
-fi
 
 pkg_pretend() {
 	use java || \
 		ewarn "If you plan to use lbase application you should enable java or you will get various crashes."
 
 	if [[ ${MERGE_TYPE} != binary ]]; then
+
+		CHECKREQS_MEMORY="512M"
+		if is-flagq "-g*" && ! is-flagq "-g*0" ; then
+			CHECKREQS_DISK_BUILD="22G"
+		else
+			CHECKREQS_DISK_BUILD="6G"
+		fi
 		check-reqs_pkg_pretend
 
-		if [[ $(tc-getCC) == clang ]] ; then
-			: # ignore clang, which works
-		elif [[ $(gcc-major-version) -lt 4 ]] || {
+		if ! $(tc-is-clang) && [[ $(gcc-major-version) -lt 4 ]] || {
 				[[ $(gcc-major-version) -eq 4 && $(gcc-minor-version) -lt 7 ]]; } then
 			eerror "Compilation with gcc older than 4.7 is not supported"
 			die "Too old gcc found."
@@ -295,8 +289,17 @@ pkg_setup() {
 	java-pkg-opt-2_pkg_setup
 	kde4-base_pkg_setup
 	python-single-r1_pkg_setup
+	xdg_environment_reset
 
-	[[ ${MERGE_TYPE} != binary ]] && check-reqs_pkg_setup
+	if [[ ${MERGE_TYPE} != binary ]]; then
+		CHECKREQS_MEMORY="512M"
+		if is-flagq "-g*" && ! is-flagq "-g*0" ; then
+			CHECKREQS_DISK_BUILD="22G"
+		else
+			CHECKREQS_DISK_BUILD="6G"
+		fi
+		check-reqs_pkg_setup
+	fi
 }
 
 src_unpack() {
@@ -350,6 +353,11 @@ src_prepare() {
 		-e "s#Makefile.gbuild all slowcheck#Makefile.gbuild all#g" \
 		Makefile.in || die
 
+	sed -i \
+		-e "s,/usr/share/bash-completion/completions,$(get_bashcompdir)," \
+		-e "s,\$INSTALLDIRNAME.sh,${PN}," \
+		bin/distro-install-desktop-integration || die
+
 	if use branding; then
 		# hack...
 		mv -v "${WORKDIR}/branding-intro.png" "${S}/icon-themes/galaxy/brand/intro.png" || die
@@ -358,7 +366,6 @@ src_prepare() {
 
 src_configure() {
 	local java_opts
-	local internal_libs
 	local ext_opts
 
 	# Set up Google API keys, see http://www.chromium.org/developers/how-tos/api-keys
@@ -377,16 +384,6 @@ src_configure() {
 		export OPENCOLLADA_CFLAGS="-I/usr/include/opencollada/COLLADABaseUtils -I/usr/include/opencollada/COLLADAFramework -I/usr/include/opencollada/COLLADASaxFrameworkLoader -I/usr/include/opencollada/GeneratedSaxParser"
 		export OPENCOLLADA_LIBS="-L /usr/$(get_libdir)/opencollada -lOpenCOLLADABaseUtils -lOpenCOLLADAFramework -lOpenCOLLADASaxFrameworkLoader -lGeneratedSaxParser"
 	fi
-
-	# sane: just sane.h header that is used for scan in writer, not
-	#       linked or anything else, worthless to depend on
-	# vigra: just uses templates from there
-	#        it is serious pain in the ass for packaging
-	#        should be replaced by boost::gil if someone interested
-	internal_libs+="
-		--without-system-sane
-		--without-system-vigra
-	"
 
 	# libreoffice extensions handling
 	for lo_xt in ${LO_EXTS}; do
@@ -414,6 +411,12 @@ src_configure() {
 			java_opts+=" --with-rhino-jar=$(java-pkg_getjar rhino-1.6 js.jar)"
 	fi
 
+	if use kde; then
+		# bug 544108, bug 599076
+		export QMAKEQT4="$(qt4_get_bindir)/qmake"
+		export MOCQT4="$(qt4_get_bindir)/moc"
+	fi
+
 	# system headers/libs/...: enforce using system packages
 	# --enable-cairo: ensure that cairo is always required
 	# --enable-graphite: disabling causes build breakages
@@ -423,12 +426,14 @@ src_configure() {
 	# --enable-extension-integration: enable any extension integration support
 	# --without-{fonts,myspell-dicts,ppsd}: prevent install of sys pkgs
 	# --disable-report-builder: too much java packages pulled in without pkgs
+	# --without-system-sane: just sane.h header that is used for scan in writer,
+	#   not linked or anything else, worthless to depend on
 	econf \
 		--docdir="${EPREFIX}/usr/share/doc/${PF}/" \
-		--with-system-headers \
-		--with-system-libs \
-		--with-system-jars \
 		--with-system-dicts \
+		--with-system-headers \
+		--with-system-jars \
+		--with-system-libs \
 		--enable-cairo-canvas \
 		--enable-graphite \
 		--enable-largefile \
@@ -436,17 +441,16 @@ src_configure() {
 		--enable-neon \
 		--enable-python=system \
 		--enable-randr \
-		--enable-randr-link \
 		--enable-release-build \
-		--disable-hardlink-deliver \
 		--disable-ccache \
 		--disable-crashdump \
 		--disable-dependency-tracking \
 		--disable-epm \
 		--disable-fetch-external \
 		--disable-gstreamer-0-10 \
-		--disable-report-builder \
+		--disable-hardlink-deliver \
 		--disable-online-update \
+		--disable-report-builder \
 		--with-alloc=$(use jemalloc && echo "jemalloc" || echo "system") \
 		--with-build-version="Gentoo official package" \
 		--enable-extension-integration \
@@ -464,6 +468,7 @@ src_configure() {
 		--without-help \
 		--with-helppack-integration \
 		--without-sun-templates \
+		--without-system-sane \
 		$(use_enable bluetooth sdremote-bluetooth) \
 		$(use_enable coinmp) \
 		$(use_enable collada) \
@@ -481,6 +486,7 @@ src_configure() {
 		$(use_enable kde kde4) \
 		$(use_enable mysql ext-mariadb-connector) \
 		$(use_enable odk) \
+		$(use_enable pdfimport) \
 		$(use_enable postgres postgresql-sdbc) \
 		$(use_enable quickstarter systray) \
 		$(use_enable telepathy) \
@@ -488,12 +494,11 @@ src_configure() {
 		$(use_with coinmp system-coinmp) \
 		$(use_with collada system-opencollada) \
 		$(use_with gltf system-libgltf) \
-		$(use_with google gdrive-client-id ${google_default_client_id}) \
-		$(use_with google gdrive-client-secret ${google_default_client_secret}) \
+		$(use_with googledrive gdrive-client-id ${google_default_client_id}) \
+		$(use_with googledrive gdrive-client-secret ${google_default_client_secret}) \
 		$(use_with java) \
 		$(use_with mysql system-mysql-cppconn) \
 		$(use_with odk doxygen) \
-		${internal_libs} \
 		${java_opts} \
 		${ext_opts}
 }
@@ -539,12 +544,16 @@ src_install() {
 	# This is not Makefile so no buildserver
 	make DESTDIR="${D}" distro-pack-install -o build -o check || die
 
-	# Fix bash completion placement
-	newbashcomp "${ED}"etc/bash_completion.d/libreoffice.sh ${PN}
+	# bug 593514
+	if use gtk3; then
+		dosym /usr/$(get_libdir)/libreoffice/program/liblibreofficekitgtk.so \
+			/usr/$(get_libdir)/liblibreofficekitgtk.so
+	fi
+
+	# bash completion aliases
 	bashcomp_alias \
 		libreoffice \
 		unopkg loimpress lobase localc lodraw lomath lowriter lofromtemplate loweb loffice
-	rm -rf "${ED}"etc/ || die
 
 	if use branding; then
 		insinto /usr/$(get_libdir)/${PN}/program
@@ -561,10 +570,6 @@ src_install() {
 
 	# Remove desktop files to support old installs that can't parse mime
 	rm -r "${ED}"usr/share/mimelnk/ || die
-
-	# FIXME: Hack add missing file
-	exeinto /usr/$(get_libdir)/${PN}/program
-	doexe "${S}"/instdir/program/libsaxlo.so
 
 	pax-mark -m "${ED}"usr/$(get_libdir)/libreoffice/program/soffice.bin
 	pax-mark -m "${ED}"usr/$(get_libdir)/libreoffice/program/unopkg.bin
