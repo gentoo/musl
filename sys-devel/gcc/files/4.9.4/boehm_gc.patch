@@ -1,0 +1,104 @@
+diff -Naur gcc-4.9.4.orig/boehm-gc/dyn_load.c gcc-4.9.4/boehm-gc/dyn_load.c
+--- gcc-4.9.4.orig/boehm-gc/dyn_load.c	2012-11-04 14:56:02.000000000 -0800
++++ gcc-4.9.4/boehm-gc/dyn_load.c	2016-12-25 13:22:28.000677992 -0800
+@@ -459,10 +459,7 @@
+ /* For glibc 2.2.4+.  Unfortunately, it doesn't work for older	*/
+ /* versions.  Thanks to Jakub Jelinek for most of the code.	*/
+ 
+-# if (defined(LINUX) || defined (__GLIBC__)) /* Are others OK here, too? */ \
+-     && (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ > 2) \
+-         || (__GLIBC__ == 2 && __GLIBC_MINOR__ == 2 && defined(DT_CONFIG))) 
+-
++#if defined(LINUX)
+ /* We have the header files for a glibc that includes dl_iterate_phdr.	*/
+ /* It may still not be available in the library on the target system.   */
+ /* Thus we also treat it as a weak symbol.				*/
+diff -Naur gcc-4.9.4.orig/boehm-gc/include/private/gcconfig.h gcc-4.9.4/boehm-gc/include/private/gcconfig.h
+--- gcc-4.9.4.orig/boehm-gc/include/private/gcconfig.h	2013-12-21 12:42:39.000000000 -0800
++++ gcc-4.9.4/boehm-gc/include/private/gcconfig.h	2016-12-25 13:22:28.001678000 -0800
+@@ -696,9 +696,7 @@
+ #       ifdef __ELF__
+ #            define DYNAMIC_LOADING
+ #	     include <features.h>
+-#	     if defined(__GLIBC__)&& __GLIBC__>=2
+-#              define SEARCH_FOR_DATA_START
+-#	     else /* !GLIBC2 */
++#	     if defined(__GLIBC__) && __GLIBC__ < 2
+                extern char **__environ;
+ #              define DATASTART ((ptr_t)(&__environ))
+                              /* hideous kludge: __environ is the first */
+@@ -709,6 +707,8 @@
+                              /* would include .rodata, which may       */
+                              /* contain large read-only data tables    */
+                              /* that we'd rather not scan.             */
++#	     else
++#              define SEARCH_FOR_DATA_START
+ #	     endif /* !GLIBC2 */
+              extern int _end[];
+ #            define DATAEND (_end)
+@@ -1167,9 +1167,7 @@
+ #              define DATASTART ((ptr_t)((((word) (_etext)) + 0xfff) & ~0xfff))
+ #	     endif
+ #	     include <features.h>
+-#	     if defined(__GLIBC__) && __GLIBC__ >= 2
+-#		 define SEARCH_FOR_DATA_START
+-#	     else
++#	     if defined(__GLIBC__) && __GLIBC__ < 2
+      	         extern char **__environ;
+ #                define DATASTART ((ptr_t)(&__environ))
+ 			      /* hideous kludge: __environ is the first */
+@@ -1180,6 +1178,8 @@
+ 			      /* would include .rodata, which may       */
+ 			      /* contain large read-only data tables    */
+ 			      /* that we'd rather not scan.		*/
++#	     else
++#		 define SEARCH_FOR_DATA_START
+ #	     endif
+ 	     extern int _end[];
+ #	     define DATAEND (_end)
+@@ -1387,10 +1387,10 @@
+ #       define HBLKSIZE 4096
+ #     endif
+ #     define USE_GENERIC_PUSH_REGS
+-#     if __GLIBC__ == 2 && __GLIBC_MINOR__ >= 2 || __GLIBC__ > 2
+-#        define LINUX_STACKBOTTOM
+-#     else
++#     if __GLIBC__ == 2 && __GLIBC_MINOR__ < 2 || __GLIBC__ < 2
+ #        define STACKBOTTOM 0x80000000
++#     else
++#        define LINUX_STACKBOTTOM
+ #     endif
+ #   endif /* Linux */
+ #   ifdef EWS4800
+@@ -1904,9 +1904,7 @@
+ #       ifdef __ELF__
+ #            define DYNAMIC_LOADING
+ #	     include <features.h>
+-#	     if defined(__GLIBC__) && __GLIBC__ >= 2
+-#		 define SEARCH_FOR_DATA_START
+-#	     else
++#	     if defined(__GLIBC__) && __GLIBC__ < 2
+      	         extern char **__environ;
+ #                define DATASTART ((ptr_t)(&__environ))
+ 			      /* hideous kludge: __environ is the first */
+@@ -1917,6 +1915,8 @@
+ 			      /* would include .rodata, which may       */
+ 			      /* contain large read-only data tables    */
+ 			      /* that we'd rather not scan.		*/
++#	     else
++#		 define SEARCH_FOR_DATA_START
+ #	     endif
+ 	     extern int _end[];
+ #	     define DATAEND (_end)
+diff -Naur gcc-4.9.4.orig/boehm-gc/os_dep.c gcc-4.9.4/boehm-gc/os_dep.c
+--- gcc-4.9.4.orig/boehm-gc/os_dep.c	2013-03-06 07:08:58.000000000 -0800
++++ gcc-4.9.4/boehm-gc/os_dep.c	2016-12-25 13:22:28.002678009 -0800
+@@ -26,7 +26,7 @@
+ #     define __KERNEL__
+ #     include <asm/signal.h>
+ #     undef __KERNEL__
+-#   else
++#   elif defined(__GLIBC__)
+       /* Kernels prior to 2.1.1 defined struct sigcontext_struct instead of */
+       /* struct sigcontext.  libc6 (glibc2) uses "struct sigcontext" in     */
+       /* prototypes, so we have to include the top-level sigcontext.h to    */

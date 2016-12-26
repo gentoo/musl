@@ -1,0 +1,213 @@
+diff -Naur gcc-5.4.0.orig/gcc/config/aarch64/aarch64-linux.h gcc-5.4.0/gcc/config/aarch64/aarch64-linux.h
+--- gcc-5.4.0.orig/gcc/config/aarch64/aarch64-linux.h	2015-07-24 09:00:26.000000000 -0700
++++ gcc-5.4.0/gcc/config/aarch64/aarch64-linux.h	2016-12-24 14:48:44.236623207 -0800
+@@ -23,6 +23,9 @@
+ 
+ #define GLIBC_DYNAMIC_LINKER "/lib/ld-linux-aarch64%{mbig-endian:_be}%{mabi=ilp32:_ilp32}.so.1"
+ 
++#undef MUSL_DYNAMIC_LINKER
++#define MUSL_DYNAMIC_LINKER "/lib/ld-musl-aarch64%{mbig-endian:_be}%{mabi=ilp32:_ilp32}.so.1"
++
+ #undef  ASAN_CC1_SPEC
+ #define ASAN_CC1_SPEC "%{%:sanitize(address):-funwind-tables}"
+ 
+diff -Naur gcc-5.4.0.orig/gcc/config/arm/linux-eabi.h gcc-5.4.0/gcc/config/arm/linux-eabi.h
+--- gcc-5.4.0.orig/gcc/config/arm/linux-eabi.h	2016-12-24 15:27:49.152307307 -0800
++++ gcc-5.4.0/gcc/config/arm/linux-eabi.h	2016-12-24 14:50:04.522429254 -0800
+@@ -77,6 +77,23 @@
+     %{mfloat-abi=soft*:" GLIBC_DYNAMIC_LINKER_SOFT_FLOAT "} \
+     %{!mfloat-abi=*:" GLIBC_DYNAMIC_LINKER_DEFAULT "}"
+ 
++/* For ARM musl currently supports four dynamic linkers:
++   - ld-musl-arm.so.1 - for the EABI-derived soft-float ABI
++   - ld-musl-armhf.so.1 - for the EABI-derived hard-float ABI
++   - ld-musl-armeb.so.1 - for the EABI-derived soft-float ABI, EB
++   - ld-musl-armebhf.so.1 - for the EABI-derived hard-float ABI, EB
++   musl does not support the legacy OABI mode.
++   All the dynamic linkers live in /lib.
++   We default to soft-float, EL. */
++#undef  MUSL_DYNAMIC_LINKER
++#if TARGET_BIG_ENDIAN_DEFAULT
++#define MUSL_DYNAMIC_LINKER_E "%{mlittle-endian:;:eb}"
++#else
++#define MUSL_DYNAMIC_LINKER_E "%{mbig-endian:eb}"
++#endif
++#define MUSL_DYNAMIC_LINKER \
++  "/lib/ld-musl-arm" MUSL_DYNAMIC_LINKER_E "%{mfloat-abi=hard:hf}.so.1"
++
+ /* At this point, bpabi.h will have clobbered LINK_SPEC.  We want to
+    use the GNU/Linux version, not the generic BPABI version.  */
+ #undef  LINK_SPEC
+diff -Naur gcc-5.4.0.orig/gcc/config/i386/linux.h gcc-5.4.0/gcc/config/i386/linux.h
+--- gcc-5.4.0.orig/gcc/config/i386/linux.h	2015-01-05 04:33:28.000000000 -0800
++++ gcc-5.4.0/gcc/config/i386/linux.h	2016-12-24 14:50:54.802934056 -0800
+@@ -21,3 +21,6 @@
+ 
+ #define GNU_USER_LINK_EMULATION "elf_i386"
+ #define GLIBC_DYNAMIC_LINKER "/lib/ld-linux.so.2"
++
++#undef MUSL_DYNAMIC_LINKER
++#define MUSL_DYNAMIC_LINKER "/lib/ld-musl-i386.so.1"
+diff -Naur gcc-5.4.0.orig/gcc/config/i386/linux64.h gcc-5.4.0/gcc/config/i386/linux64.h
+--- gcc-5.4.0.orig/gcc/config/i386/linux64.h	2015-01-05 04:33:28.000000000 -0800
++++ gcc-5.4.0/gcc/config/i386/linux64.h	2016-12-24 14:51:15.579142643 -0800
+@@ -30,3 +30,10 @@
+ #define GLIBC_DYNAMIC_LINKER32 "/lib/ld-linux.so.2"
+ #define GLIBC_DYNAMIC_LINKER64 "/lib64/ld-linux-x86-64.so.2"
+ #define GLIBC_DYNAMIC_LINKERX32 "/libx32/ld-linux-x32.so.2"
++
++#undef MUSL_DYNAMIC_LINKER32
++#define MUSL_DYNAMIC_LINKER32 "/lib/ld-musl-i386.so.1"
++#undef MUSL_DYNAMIC_LINKER64
++#define MUSL_DYNAMIC_LINKER64 "/lib/ld-musl-x86_64.so.1"
++#undef MUSL_DYNAMIC_LINKERX32
++#define MUSL_DYNAMIC_LINKERX32 "/lib/ld-musl-x32.so.1"
+diff -Naur gcc-5.4.0.orig/gcc/config/microblaze/linux.h gcc-5.4.0/gcc/config/microblaze/linux.h
+--- gcc-5.4.0.orig/gcc/config/microblaze/linux.h	2015-05-28 07:08:19.000000000 -0700
++++ gcc-5.4.0/gcc/config/microblaze/linux.h	2016-12-24 14:58:26.290647241 -0800
+@@ -28,10 +28,20 @@
+ #undef TLS_NEEDS_GOT
+ #define TLS_NEEDS_GOT 1
+ 
+-#define DYNAMIC_LINKER "/lib/ld.so.1"
++#define GLIBC_DYNAMIC_LINKER "/lib/ld.so.1"
++
++#if TARGET_BIG_ENDIAN_DEFAULT == 0 /* LE */
++#define MUSL_DYNAMIC_LINKER_E "%{mbig-endian:;:el}"
++#else
++#define MUSL_DYNAMIC_LINKER_E "%{mlittle-endian:el}"
++#endif
++
++#undef MUSL_DYNAMIC_LINKER
++#define MUSL_DYNAMIC_LINKER "/lib/ld-musl-microblaze" MUSL_DYNAMIC_LINKER_E ".so.1"
++
+ #undef  SUBTARGET_EXTRA_SPECS
+ #define SUBTARGET_EXTRA_SPECS \
+-  { "dynamic_linker", DYNAMIC_LINKER }
++  { "dynamic_linker", GNU_USER_DYNAMIC_LINKER }
+ 
+ #undef LINK_SPEC
+ #define LINK_SPEC "%{shared:-shared} \
+diff -Naur gcc-5.4.0.orig/gcc/config/mips/linux.h gcc-5.4.0/gcc/config/mips/linux.h
+--- gcc-5.4.0.orig/gcc/config/mips/linux.h	2015-01-05 04:33:28.000000000 -0800
++++ gcc-5.4.0/gcc/config/mips/linux.h	2016-12-24 15:01:34.093670361 -0800
+@@ -37,7 +37,13 @@
+ #define UCLIBC_DYNAMIC_LINKERN32 \
+   "%{mnan=2008:/lib32/ld-uClibc-mipsn8.so.0;:/lib32/ld-uClibc.so.0}"
+ 
++#undef MUSL_DYNAMIC_LINKER32
++#define MUSL_DYNAMIC_LINKER32 "/lib/ld-musl-mips%{EL:el}%{msoft-float:-sf}.so.1"
++#undef MUSL_DYNAMIC_LINKER64
++#define MUSL_DYNAMIC_LINKER64 "/lib/ld-musl-mips64%{EL:el}%{msoft-float:-sf}.so.1"
++#define MUSL_DYNAMIC_LINKERN32 "/lib/ld-musl-mipsn32%{EL:el}%{msoft-float:-sf}.so.1"
++
+ #define BIONIC_DYNAMIC_LINKERN32 "/system/bin/linker32"
+ #define GNU_USER_DYNAMIC_LINKERN32 \
+   CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKERN32, UCLIBC_DYNAMIC_LINKERN32, \
+-                         BIONIC_DYNAMIC_LINKERN32)
++                         BIONIC_DYNAMIC_LINKERN32, MUSL_DYNAMIC_LINKERN32)
+diff -Naur gcc-5.4.0.orig/gcc/config/rs6000/linux64.h gcc-5.4.0/gcc/config/rs6000/linux64.h
+--- gcc-5.4.0.orig/gcc/config/rs6000/linux64.h	2015-03-09 16:18:57.000000000 -0700
++++ gcc-5.4.0/gcc/config/rs6000/linux64.h	2016-12-24 15:03:44.985080397 -0800
+@@ -363,19 +367,32 @@
+ #else
+ #define GLIBC_DYNAMIC_LINKER64 "%{mabi=elfv2:/lib64/ld64.so.2;:/lib64/ld64.so.1}"
+ #endif
++
++#define MUSL_DYNAMIC_LINKER32 \
++  "/lib/ld-musl-powerpc" MUSL_DYNAMIC_LINKER_E "%{msoft-float:-sf}.so.1"
++#define MUSL_DYNAMIC_LINKER64 \
++  "/lib/ld-musl-powerpc64" MUSL_DYNAMIC_LINKER_E "%{msoft-float:-sf}.so.1"
++
+ #define UCLIBC_DYNAMIC_LINKER32 "/lib/ld-uClibc.so.0"
+ #define UCLIBC_DYNAMIC_LINKER64 "/lib/ld64-uClibc.so.0"
+ #if DEFAULT_LIBC == LIBC_UCLIBC
+-#define CHOOSE_DYNAMIC_LINKER(G, U) "%{mglibc:" G ";:" U "}"
++#define CHOOSE_DYNAMIC_LINKER(G, U, M) \
++  "%{mglibc:" G ";:%{mmusl:" M ";:" U "}}"
+ #elif DEFAULT_LIBC == LIBC_GLIBC
+-#define CHOOSE_DYNAMIC_LINKER(G, U) "%{muclibc:" U ";:" G "}"
++#define CHOOSE_DYNAMIC_LINKER(G, U, M) \
++  "%{muclibc:" U ";:%{mmusl:" M ";:" G "}}"
++#elif DEFAULT_LIBC == LIBC_MUSL
++#define CHOOSE_DYNAMIC_LINKER(G, U, M) \
++  "%{mglibc:" G ";:%{muclibc:" U ";:" M "}}"
+ #else
+ #error "Unsupported DEFAULT_LIBC"
+ #endif
+ #define GNU_USER_DYNAMIC_LINKER32 \
+-  CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER32, UCLIBC_DYNAMIC_LINKER32)
++  CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER32, UCLIBC_DYNAMIC_LINKER32, \
++			 MUSL_DYNAMIC_LINKER32)
+ #define GNU_USER_DYNAMIC_LINKER64 \
+-  CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER64, UCLIBC_DYNAMIC_LINKER64)
++  CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER64, UCLIBC_DYNAMIC_LINKER64, \
++			 MUSL_DYNAMIC_LINKER64)
+ 
+ #undef  DEFAULT_ASM_ENDIAN
+ #if (TARGET_DEFAULT & MASK_LITTLE_ENDIAN)
+diff -Naur gcc-5.4.0.orig/gcc/config/rs6000/sysv4.h gcc-5.4.0/gcc/config/rs6000/sysv4.h
+--- gcc-5.4.0.orig/gcc/config/rs6000/sysv4.h	2015-09-24 06:46:45.000000000 -0700
++++ gcc-5.4.0/gcc/config/rs6000/sysv4.h	2016-12-24 15:08:38.507113094 -0800
+@@ -757,17 +762,27 @@
+ 
+ #define LINK_START_LINUX_SPEC ""
+ 
++#define MUSL_DYNAMIC_LINKER_E ENDIAN_SELECT("","le","")
++
+ #define GLIBC_DYNAMIC_LINKER "/lib/ld.so.1"
+ #define UCLIBC_DYNAMIC_LINKER "/lib/ld-uClibc.so.0"
++#define MUSL_DYNAMIC_LINKER \
++  "/lib/ld-musl-powerpc" MUSL_DYNAMIC_LINKER_E "%{msoft-float:-sf}.so.1"
+ #if DEFAULT_LIBC == LIBC_UCLIBC
+-#define CHOOSE_DYNAMIC_LINKER(G, U) "%{mglibc:" G ";:" U "}"
++#define CHOOSE_DYNAMIC_LINKER(G, U, M) \
++  "%{mglibc:" G ";:%{mmusl:" M ";:" U "}}"
++#elif DEFAULT_LIBC == LIBC_MUSL
++#define CHOOSE_DYNAMIC_LINKER(G, U, M) \
++  "%{mglibc:" G ";:%{muclibc:" U ";:" M "}}"
+ #elif !defined (DEFAULT_LIBC) || DEFAULT_LIBC == LIBC_GLIBC
+-#define CHOOSE_DYNAMIC_LINKER(G, U) "%{muclibc:" U ";:" G "}"
++#define CHOOSE_DYNAMIC_LINKER(G, U, M) \
++  "%{muclibc:" U ";:%{mmusl:" M ";:" G "}}"
+ #else
+ #error "Unsupported DEFAULT_LIBC"
+ #endif
+ #define GNU_USER_DYNAMIC_LINKER \
+-  CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER, UCLIBC_DYNAMIC_LINKER)
++  CHOOSE_DYNAMIC_LINKER (GLIBC_DYNAMIC_LINKER, UCLIBC_DYNAMIC_LINKER, \
++			 MUSL_DYNAMIC_LINKER)
+ 
+ #define LINK_OS_LINUX_SPEC "-m elf32ppclinux %{!shared: %{!static: \
+   %{rdynamic:-export-dynamic} \
+diff -Naur gcc-5.4.0.orig/gcc/config/sh/linux.h gcc-5.4.0/gcc/config/sh/linux.h
+--- gcc-5.4.0.orig/gcc/config/sh/linux.h	2015-01-05 04:33:28.000000000 -0800
++++ gcc-5.4.0/gcc/config/sh/linux.h	2016-12-24 15:09:54.568853072 -0800
+@@ -43,6 +43,27 @@
+ 
+ #define TARGET_ASM_FILE_END file_end_indicate_exec_stack
+ 
++#if TARGET_ENDIAN_DEFAULT == MASK_LITTLE_ENDIAN
++#define MUSL_DYNAMIC_LINKER_E "%{mb:eb}"
++#else
++#define MUSL_DYNAMIC_LINKER_E "%{!ml:eb}"
++#endif
++
++#if TARGET_CPU_DEFAULT & (MASK_HARD_SH2A_DOUBLE | MASK_SH4)
++/* "-nofpu" if any nofpu option is specified.  */
++#define MUSL_DYNAMIC_LINKER_FP \
++  "%{m1|m2|m2a-nofpu|m3|m4-nofpu|m4-100-nofpu|m4-200-nofpu|m4-300-nofpu|" \
++  "m4-340|m4-400|m4-500|m4al:-nofpu}"
++#else
++/* "-nofpu" if none of the hard fpu options are specified.  */
++#define MUSL_DYNAMIC_LINKER_FP "%{m2a|m4|m4-100|m4-200|m4-300|m4a:;:-nofpu}"
++#endif
++
++#undef MUSL_DYNAMIC_LINKER
++#define MUSL_DYNAMIC_LINKER \
++  "/lib/ld-musl-sh" MUSL_DYNAMIC_LINKER_E MUSL_DYNAMIC_LINKER_FP \
++  "%{mfdpic:-fdpic}.so.1"
++
+ #define GLIBC_DYNAMIC_LINKER "/lib/ld-linux.so.2"
+ 
+ #undef SUBTARGET_LINK_EMUL_SUFFIX

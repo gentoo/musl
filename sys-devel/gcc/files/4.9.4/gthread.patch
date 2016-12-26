@@ -1,0 +1,37 @@
+diff -Naur gcc-4.9.4.orig/libgfortran/acinclude.m4 gcc-4.9.4/libgfortran/acinclude.m4
+--- gcc-4.9.4.orig/libgfortran/acinclude.m4	2016-12-24 16:16:53.481696091 -0800
++++ gcc-4.9.4/libgfortran/acinclude.m4	2016-12-24 16:42:52.045622116 -0800
+@@ -100,7 +100,7 @@
+ 	      [Define to 1 if the target supports #pragma weak])
+   fi
+   case "$host" in
+-    *-*-darwin* | *-*-hpux* | *-*-cygwin* | *-*-mingw* )
++    *-*-darwin* | *-*-hpux* | *-*-cygwin* | *-*-mingw* | *-*-musl* )
+       AC_DEFINE(GTHREAD_USE_WEAK, 0,
+ 		[Define to 0 if the target shouldn't use #pragma weak])
+       ;;
+diff -Naur gcc-4.9.4.orig/libgfortran/configure gcc-4.9.4/libgfortran/configure
+--- gcc-4.9.4.orig/libgfortran/configure	2016-12-24 16:16:53.557696818 -0800
++++ gcc-4.9.4/libgfortran/configure	2016-12-24 16:43:06.557762874 -0800
+@@ -26355,7 +26355,7 @@
+ 
+   fi
+   case "$host" in
+-    *-*-darwin* | *-*-hpux* | *-*-cygwin* | *-*-mingw* )
++    *-*-darwin* | *-*-hpux* | *-*-cygwin* | *-*-mingw* | *-*-musl* )
+ 
+ $as_echo "#define GTHREAD_USE_WEAK 0" >>confdefs.h
+ 
+diff -Naur gcc-4.9.4.orig/libstdc++-v3/config/os/generic/os_defines.h gcc-4.9.4/libstdc++-v3/config/os/generic/os_defines.h
+--- gcc-4.9.4.orig/libstdc++-v3/config/os/generic/os_defines.h	2016-12-24 16:16:55.523715643 -0800
++++ gcc-4.9.4/libstdc++-v3/config/os/generic/os_defines.h	2016-12-24 16:44:10.273380874 -0800
+@@ -33,4 +33,9 @@
+ // System-specific #define, typedefs, corrections, etc, go here.  This
+ // file will come before all others.
+ 
++// Disable the weak reference logic in gthr.h for os/generic because it
++// is broken on every platform unless there is implementation specific
++// workaround in gthr-posix.h and at link-time for static linking.
++#define _GLIBCXX_GTHREAD_USE_WEAK 0
++
+ #endif
