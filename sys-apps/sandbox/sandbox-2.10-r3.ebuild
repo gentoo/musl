@@ -34,6 +34,7 @@ sandbox_death_notice() {
 src_prepare() {
 	epatch "${FILESDIR}"/${P}-memory-corruption.patch #568714
 	epatch "${FILESDIR}"/${P}-disable-same.patch
+	epatch "${FILESDIR}"/${P}-fix-opendir.patch #553092
 	epatch "${FILESDIR}"/${PN}-2.6-musl.patch
 	epatch "${FILESDIR}"/${P}-fix-visibility-musl.patch
 	epatch_user

@@ -35,11 +35,9 @@ src_prepare() {
 	epatch "${FILESDIR}"/${P}-execvpe.patch #578516
 	epatch "${FILESDIR}"/${P}-exec-hash.patch #578524
 	epatch "${FILESDIR}"/${P}-exec-prelink.patch #599894
-
-	# Fix for MUSL
+	epatch "${FILESDIR}"/${PN}-2.10-fix-opendir.patch #553092
 	epatch "${FILESDIR}"/${P}-musl.patch
 	epatch "${FILESDIR}"/${PN}-2.10-fix-visibility-musl.patch
-
 	epatch_user
 }
 
