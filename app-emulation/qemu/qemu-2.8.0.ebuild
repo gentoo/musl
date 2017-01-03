@@ -332,10 +332,9 @@ src_prepare() {
 		Makefile Makefile.target || die
 
 	# Patching for musl
-	epatch "${FILESDIR}"/${PN}-2.0.0-F_SHLCK-and-F_EXLCK.patch
+	epatch "${FILESDIR}"/${PN}-2.8.0-F_SHLCK-and-F_EXLCK.patch
 	epatch "${FILESDIR}"/${PN}-2.0.0-linux-user-signal.c-define-__SIGRTMIN-MAX-for-non-GN.patch
 	epatch "${FILESDIR}"/${PN}-2.2.0-_sigev_un.patch
-	epatch "${FILESDIR}"/${PN}-2.7.0-configure-ifunc.patch
 
 	epatch "${FILESDIR}"/${PN}-2.5.0-cflags.patch
 	epatch "${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
