@@ -4,7 +4,7 @@
 
 EAPI="5"
 
-inherit unpacker toolchain-funcs flag-o-matic
+inherit unpacker toolchain-funcs
 
 DESCRIPTION="pax (Portable Archive eXchange) is the POSIX standard archive tool"
 HOMEPAGE="https://www.mirbsd.org/pax.htm"
@@ -37,15 +37,13 @@ src_configure() {
 }
 
 src_compile() {
-	use elibc_musl && append-ldflags "-lfts"
-
 	# We can't rely on LFS flags as it uses the fts.h interface which lacks 64-bit support.
 	set -- \
 		${CC} ${CPPFLAGS} ${CFLAGS} \
 		-DHAVE_STRLCPY -DHAVE_VIS -DHAVE_STRMODE \
 		-DLONG_OFF_T -DHAVE_LINKAT \
 		$(${PKG_CONFIG} --cflags libbsd-overlay) \
-		-Wall *.c -o ${PN} ${LDFLAGS} \
+		-Wall ${LDFLAGS} *.c -o ${PN} $(usex elibc_musl '-lfts' '')\
 		$(${PKG_CONFIG} --libs libbsd-overlay)
 	echo "$@"
 	"$@" || die
