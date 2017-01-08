@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -57,7 +57,7 @@ src_install() {
 
 	dodoc "${FILESDIR}"/README.Gentoo
 
-	newinitd "${FILESDIR}"/kexec.init-2.0.12 kexec
+	newinitd "${FILESDIR}"/kexec.init-2.0.13-r1 kexec
 	newconfd "${FILESDIR}"/kexec.conf-2.0.4 kexec
 
 	insinto /etc
