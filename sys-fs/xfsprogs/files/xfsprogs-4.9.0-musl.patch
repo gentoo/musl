@@ -1,0 +1,71 @@
+diff -Naur xfsprogs-4.9.0.orig/fsr/xfs_fsr.c xfsprogs-4.9.0/fsr/xfs_fsr.c
+--- xfsprogs-4.9.0.orig/fsr/xfs_fsr.c	2017-01-08 13:58:12.354784273 -0800
++++ xfsprogs-4.9.0/fsr/xfs_fsr.c	2017-01-08 13:58:45.262063929 -0800
+@@ -36,6 +36,9 @@
+ #define _PATH_FSRLAST		"/var/tmp/.fsrlast_xfs"
+ #define _PATH_PROC_MOUNTS	"/proc/mounts"
+ 
++#ifndef _PATH_MOUNTED
++#define _PATH_MOUNTED MOUNTED
++#endif
+ 
+ char *progname;
+ 
+diff -Naur xfsprogs-4.9.0.orig/include/linux.h xfsprogs-4.9.0/include/linux.h
+--- xfsprogs-4.9.0.orig/include/linux.h	2017-01-08 13:58:12.335784111 -0800
++++ xfsprogs-4.9.0/include/linux.h	2017-01-08 13:59:38.554516824 -0800
+@@ -40,6 +40,32 @@
+ # undef fsxattr
+ #endif
+ 
++#ifndef __uint8_t
++# define __uint8_t uint8_t
++#endif
++#ifndef __uint16_t
++# define __uint16_t uint16_t
++#endif
++#ifndef __uint32_t
++# define __uint32_t uint32_t
++#endif
++#ifndef __uint64_t
++# define __uint64_t uint64_t
++#endif
++
++#ifndef __int8_t
++# define __int8_t int8_t
++#endif
++#ifndef __int16_t
++# define __int16_t int16_t
++#endif
++#ifndef __int32_t
++# define __int32_t int32_t
++#endif
++#ifndef __int64_t
++# define __int64_t int64_t
++#endif
++ 
+ static __inline__ int xfsctl(const char *path, int fd, int cmd, void *p)
+ {
+ 	return ioctl(fd, cmd, p);
+diff -Naur xfsprogs-4.9.0.orig/io/readdir.c xfsprogs-4.9.0/io/readdir.c
+--- xfsprogs-4.9.0.orig/io/readdir.c	2017-01-08 13:58:12.357784298 -0800
++++ xfsprogs-4.9.0/io/readdir.c	2017-01-08 14:00:04.662738699 -0800
+@@ -24,6 +24,18 @@
+ #include <sys/types.h>
+ #include <dirent.h>
+ 
++#if defined (__linux__)
++# ifndef _DIRENT_HAVE_D_OFF
++#  define _DIRENT_HAVE_D_OFF
++# endif
++# ifndef _DIRENT_HAVE_D_RECLEN
++#  define _DIRENT_HAVE_D_RECLEN
++# endif
++# ifndef _DIRENT_HAVE_D_TYPE
++#  define _DIRENT_HAVE_D_TYPE
++# endif
++#endif
++
+ static struct cmdinfo readdir_cmd;
+ 
+ const char *d_type_str(unsigned int type)
