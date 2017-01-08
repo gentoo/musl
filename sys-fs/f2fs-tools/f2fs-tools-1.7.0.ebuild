@@ -7,7 +7,7 @@ EAPI="6"
 inherit multilib
 
 DESCRIPTION="Tools for Flash-Friendly File System (F2FS)"
-HOMEPAGE="https://git.kernel.org/?p=linux/kernel/git/jaegeuk/f2fs-tools.git;a=summary"
+HOMEPAGE="https://git.kernel.org/cgit/linux/kernel/git/jaegeuk/f2fs-tools.git/about/"
 SRC_URI="https://dev.gentoo.org/~blueness/f2fs-tools/${P}.tar.xz"
 
 LICENSE="GPL-2"
@@ -22,11 +22,13 @@ DEPEND="
 
 src_configure() {
 	#This is required to install to /sbin, bug #481110
-	econf --prefix=/ --includedir=/usr/include
+	econf \
+		--prefix=/ \
+		--includedir=/usr/include \
+		--disable-static
 }
 
 src_install() {
 	default
-	rm -f "${ED}"/$(get_libdir)/libf2fs.{,l}a
-	rm -f "${ED}"/$(get_libdir)/libf2fs_format.{,l}a
+	find "${D}" -name "*.la" -delete || die
 }
