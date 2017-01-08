@@ -4,7 +4,7 @@
 
 EAPI="5"
 
-inherit unpacker toolchain-funcs
+inherit eutils unpacker toolchain-funcs
 
 DESCRIPTION="pax (Portable Archive eXchange) is the POSIX standard archive tool"
 HOMEPAGE="https://www.mirbsd.org/pax.htm"
