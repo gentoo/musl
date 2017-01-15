@@ -16,7 +16,7 @@ KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86
 IUSE=""
 
 RDEPEND="dev-libs/libbsd
-elibc_musl? ( sys-libs/musl-fts )"
+elibc_musl? ( sys-libs/fts-standalone )"
 DEPEND="${RDEPEND}
 	$(unpacker_src_uri_depends)"
 
