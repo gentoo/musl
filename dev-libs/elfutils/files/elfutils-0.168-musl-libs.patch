@@ -1,0 +1,173 @@
+diff -Naur elfutils-0.168.orig/lib/error.h elfutils-0.168/lib/error.h
+--- elfutils-0.168.orig/lib/error.h	1969-12-31 16:00:00.000000000 -0800
++++ elfutils-0.168/lib/error.h	2016-12-28 11:32:13.814801412 -0800
+@@ -0,0 +1,27 @@
++#ifndef _ERROR_H_
++#define _ERROR_H_
++
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <errno.h>
++
++static unsigned int error_message_count = 0;
++
++static inline void error(int status, int errnum, const char* format, ...)
++{
++	va_list ap;
++	fprintf(stderr, "%s: ", program_invocation_name);
++	va_start(ap, format);
++	vfprintf(stderr, format, ap);
++	va_end(ap);
++	if (errnum)
++		fprintf(stderr, ": %s", strerror(errnum));
++	fprintf(stderr, "\n");
++	error_message_count++;
++	if (status)
++		exit(status);
++}
++
++#endif	/* _ERROR_H_ */
+diff -Naur elfutils-0.168.orig/lib/fixedsizehash.h elfutils-0.168/lib/fixedsizehash.h
+--- elfutils-0.168.orig/lib/fixedsizehash.h	2016-12-28 10:56:21.563727556 -0800
++++ elfutils-0.168/lib/fixedsizehash.h	2016-12-28 11:32:13.815801422 -0800
+@@ -30,7 +30,6 @@
+ #include <errno.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <sys/cdefs.h>
+ 
+ #include <system.h>
+ 
+diff -Naur elfutils-0.168.orig/lib/libeu.h elfutils-0.168/lib/libeu.h
+--- elfutils-0.168.orig/lib/libeu.h	2016-12-28 10:56:21.562727546 -0800
++++ elfutils-0.168/lib/libeu.h	2016-12-28 11:32:13.816801431 -0800
+@@ -29,6 +29,7 @@
+ #ifndef LIBEU_H
+ #define LIBEU_H
+ 
++#include "system.h"
+ #include <stddef.h>
+ #include <stdint.h>
+ 
+diff -Naur elfutils-0.168.orig/lib/system.h elfutils-0.168/lib/system.h
+--- elfutils-0.168.orig/lib/system.h	2016-12-28 10:56:21.564727565 -0800
++++ elfutils-0.168/lib/system.h	2016-12-28 11:32:13.816801431 -0800
+@@ -81,7 +81,7 @@
+      do \
+        __res = expression; \
+      while (__res == -1 && errno == EINTR); \
+-     __res; });
++     __res; })
+ #endif
+ 
+ static inline ssize_t __attribute__ ((unused))
+diff -Naur elfutils-0.168.orig/libdwfl/dwfl_build_id_find_elf.c elfutils-0.168/libdwfl/dwfl_build_id_find_elf.c
+--- elfutils-0.168.orig/libdwfl/dwfl_build_id_find_elf.c	2016-12-28 10:56:21.720729030 -0800
++++ elfutils-0.168/libdwfl/dwfl_build_id_find_elf.c	2016-12-28 11:32:13.816801431 -0800
+@@ -30,6 +30,7 @@
+ #include <inttypes.h>
+ #include <fcntl.h>
+ #include <unistd.h>
++#include "system.h"
+ 
+ 
+ int
+@@ -94,7 +95,7 @@
+ 	{
+ 	  if (*file_name != NULL)
+ 	    free (*file_name);
+-	  *file_name = canonicalize_file_name (name);
++	  *file_name = realpath (name, NULL);
+ 	  if (*file_name == NULL)
+ 	    {
+ 	      *file_name = name;
+diff -Naur elfutils-0.168.orig/libdwfl/dwfl_error.c elfutils-0.168/libdwfl/dwfl_error.c
+--- elfutils-0.168.orig/libdwfl/dwfl_error.c	2016-12-28 10:56:21.714728974 -0800
++++ elfutils-0.168/libdwfl/dwfl_error.c	2016-12-28 11:34:41.712239116 -0800
+@@ -154,7 +154,16 @@
+   switch (error &~ 0xffff)
+     {
+     case OTHER_ERROR (ERRNO):
++#if defined(__GLIBC__)
+       return strerror_r (error & 0xffff, "bad", 0);
++#else
++      {
++        static __thread char buf[128] = "";
++        if (strerror_r (error & 0xffff, buf, sizeof(buf)) == 0)
++          return buf;
++      }
++      return "strerror_r() failed";
++#endif
+     case OTHER_ERROR (LIBELF):
+       return elf_errmsg (error & 0xffff);
+     case OTHER_ERROR (LIBDW):
+diff -Naur elfutils-0.168.orig/libdwfl/dwfl_module_getdwarf.c elfutils-0.168/libdwfl/dwfl_module_getdwarf.c
+--- elfutils-0.168.orig/libdwfl/dwfl_module_getdwarf.c	2016-12-28 10:56:21.710728936 -0800
++++ elfutils-0.168/libdwfl/dwfl_module_getdwarf.c	2016-12-28 11:32:13.817801441 -0800
+@@ -33,6 +33,7 @@
+ #include <unistd.h>
+ #include "../libdw/libdwP.h"	/* DWARF_E_* values are here.  */
+ #include "../libelf/libelfP.h"
++#include "system.h"
+ 
+ static inline Dwfl_Error
+ open_elf_file (Elf **elf, int *fd, char **name)
+diff -Naur elfutils-0.168.orig/libdwfl/find-debuginfo.c elfutils-0.168/libdwfl/find-debuginfo.c
+--- elfutils-0.168.orig/libdwfl/find-debuginfo.c	2016-12-28 10:56:21.716728992 -0800
++++ elfutils-0.168/libdwfl/find-debuginfo.c	2016-12-28 11:32:13.817801441 -0800
+@@ -385,7 +385,7 @@
+       /* If FILE_NAME is a symlink, the debug file might be associated
+ 	 with the symlink target name instead.  */
+ 
+-      char *canon = canonicalize_file_name (file_name);
++      char *canon = realpath (file_name, NULL);
+       if (canon != NULL && strcmp (file_name, canon))
+ 	fd = find_debuginfo_in_path (mod, canon,
+ 				     debuglink_file, debuglink_crc,
+diff -Naur elfutils-0.168.orig/libdwfl/libdwfl_crc32_file.c elfutils-0.168/libdwfl/libdwfl_crc32_file.c
+--- elfutils-0.168.orig/libdwfl/libdwfl_crc32_file.c	2016-12-28 10:56:21.710728936 -0800
++++ elfutils-0.168/libdwfl/libdwfl_crc32_file.c	2016-12-28 11:32:13.817801441 -0800
+@@ -31,6 +31,5 @@
+ 
+ #define crc32_file attribute_hidden __libdwfl_crc32_file
+ #define crc32 __libdwfl_crc32
+-#define LIB_SYSTEM_H	1
+ #include <libdwflP.h>
+ #include "../lib/crc32_file.c"
+diff -Naur elfutils-0.168.orig/libdwfl/linux-kernel-modules.c elfutils-0.168/libdwfl/linux-kernel-modules.c
+--- elfutils-0.168.orig/libdwfl/linux-kernel-modules.c	2016-12-28 10:56:21.717729002 -0800
++++ elfutils-0.168/libdwfl/linux-kernel-modules.c	2016-12-28 11:32:13.818801450 -0800
+@@ -45,6 +45,7 @@
+ #include <sys/utsname.h>
+ #include <fcntl.h>
+ #include <unistd.h>
++#include "system.h"
+ 
+ /* If fts.h is included before config.h, its indirect inclusions may not
+    give us the right LFS aliases of these functions, so map them manually.  */
+diff -Naur elfutils-0.168.orig/libelf/elf.h elfutils-0.168/libelf/elf.h
+--- elfutils-0.168.orig/libelf/elf.h	2016-12-28 10:56:21.585727762 -0800
++++ elfutils-0.168/libelf/elf.h	2016-12-28 11:32:13.819801460 -0800
+@@ -21,7 +21,9 @@
+ 
+ #include <features.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /* Standard ELF types.  */
+ 
+@@ -3682,6 +3684,7 @@
+ #define R_BPF_NONE		0	/* No reloc */
+ #define R_BPF_MAP_FD		1	/* Map fd to pointer */
+ 
+-__END_DECLS
+-
++#ifdef __cplusplus
++}
++#endif
+ #endif	/* elf.h */
