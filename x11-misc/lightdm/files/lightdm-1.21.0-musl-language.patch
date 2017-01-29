@@ -1,0 +1,36 @@
+--- a/liblightdm-gobject/language.c
++++ b/liblightdm-gobject/language.c
+@@ -244,6 +244,7 @@
+ 
+     if (!priv->name)
+     {
++        #if HAVE_LC_IDENTIFICATION
+         gchar *locale = get_locale_name (priv->code);
+         if (locale)
+         {
+@@ -257,6 +258,8 @@
+ 
+             setlocale (LC_ALL, current);
+         }
++        #endif
++
+         if (!priv->name)
+         {
+             gchar **tokens = g_strsplit_set (priv->code, "_.@", 2);
+@@ -287,6 +290,7 @@
+ 
+     if (!priv->territory && strchr (priv->code, '_'))
+     {
++        #if HAVE_LC_IDENTITIFICATION
+         gchar *locale = get_locale_name (priv->code);
+         if (locale)
+         {
+@@ -300,6 +304,8 @@
+ 
+             setlocale (LC_ALL, current);
+         }
++        #endif
++
+         if (!priv->territory)
+         {
+             gchar **tokens = g_strsplit_set (priv->code, "_.@", 3);
