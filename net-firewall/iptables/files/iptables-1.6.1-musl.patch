@@ -1,0 +1,13 @@
+diff -Naurw iptables-1.6.0.orig/extensions/libip6t_ipv6header.c iptables-1.6.0/extensions/libip6t_ipv6header.c
+--- iptables-1.6.0.orig/extensions/libip6t_ipv6header.c	2015-12-09 04:55:06.000000000 -0800
++++ iptables-1.6.0/extensions/libip6t_ipv6header.c	2015-12-23 17:22:56.757094312 -0800
+@@ -10,6 +10,9 @@
+ #include <netdb.h>
+ #include <xtables.h>
+ #include <linux/netfilter_ipv6/ip6t_ipv6header.h>
++#ifndef IPPROTO_HOPOPTS
++#       define IPPROTO_HOPOPTS 0
++#endif
+ 
+ enum {
+ 	O_HEADER = 0,
