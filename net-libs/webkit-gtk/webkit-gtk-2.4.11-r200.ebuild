@@ -1,13 +1,12 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI="5"
-GCONF_DEBUG="no"
+EAPI="6"
 PYTHON_COMPAT=( python2_7 )
 USE_RUBY="ruby20 ruby21 ruby22 ruby23"
 
-inherit autotools check-reqs eutils flag-o-matic gnome2 pax-utils python-any-r1 ruby-single toolchain-funcs versionator virtualx
+inherit autotools check-reqs flag-o-matic gnome2 pax-utils python-any-r1 ruby-single toolchain-funcs versionator virtualx
 
 MY_P="webkitgtk-${PV}"
 DESCRIPTION="Open source web browser engine"
@@ -16,7 +15,7 @@ SRC_URI="http://www.webkitgtk.org/releases/${MY_P}.tar.xz"
 
 LICENSE="LGPL-2+ BSD"
 SLOT="2" # no usable subslot
-KEYWORDS="~alpha amd64 ~arm ~ia64 ~mips ~ppc ~ppc64 ~sparc x86 ~amd64-fbsd ~x86-fbsd ~x86-freebsd ~amd64-linux ~ia64-linux ~x86-linux ~x86-macos"
+KEYWORDS="~alpha amd64 ~arm ~ia64 ~mips ~ppc ~ppc64 ~sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x86-macos"
 
 IUSE="aqua coverage debug +egl +geoloc gles2 gnome-keyring +gstreamer +introspection +jit +opengl spell +webgl +X"
 # bugs 372493, 416331
@@ -131,7 +130,7 @@ pkg_setup() {
 src_prepare() {
 	# intermediate MacPorts hack while upstream bug is not fixed properly
 	# https://bugs.webkit.org/show_bug.cgi?id=28727
-	use aqua && epatch "${FILESDIR}"/${PN}-1.6.1-darwin-quartz.patch
+	use aqua && eapply "${FILESDIR}"/${PN}-1.6.1-darwin-quartz.patch
 
 	# Leave optimization level to user CFLAGS
 	# FORTIFY_SOURCE is enabled by default in Gentoo
@@ -140,25 +139,31 @@ src_prepare() {
 		-i Source/autotools/SetupCompilerFlags.m4 || die
 
 	# bug #459978, upstream bug #113397
-	epatch "${FILESDIR}"/${PN}-1.11.90-gtk-docize-fix.patch
+	eapply "${FILESDIR}"/${PN}-1.11.90-gtk-docize-fix.patch
 
 	# Debian patches to fix support for some arches
 	# https://bugs.webkit.org/show_bug.cgi?id=129540
-	epatch "${FILESDIR}"/${PN}-2.2.5-{hppa,ia64}-platform.patch
+	eapply "${FILESDIR}"/${PN}-2.2.5-{hppa,ia64}-platform.patch
 	# https://bugs.webkit.org/show_bug.cgi?id=129542
-	epatch "${FILESDIR}"/${PN}-2.4.1-ia64-malloc.patch
+	eapply "${FILESDIR}"/${PN}-2.4.1-ia64-malloc.patch
 
 	# Fix build with recent libjpeg, bug #481688
 	# https://bugs.webkit.org/show_bug.cgi?id=122412
-	epatch "${FILESDIR}"/${PN}-2.4.4-jpeg-9a.patch
+	eapply "${FILESDIR}"/${PN}-2.4.4-jpeg-9a.patch
 
 	# Fix building with --disable-webgl, bug #500966
 	# https://bugs.webkit.org/show_bug.cgi?id=131267
-	epatch "${FILESDIR}"/${PN}-2.4.7-disable-webgl.patch
+	eapply "${FILESDIR}"/${PN}-2.4.7-disable-webgl.patch
+
+	# https://bugs.webkit.org/show_bug.cgi?id=156510
+	eapply "${FILESDIR}"/${PN}-2.4.11-video-web-audio.patch
+
+	# https://bugs.webkit.org/show_bug.cgi?id=159124#c1
+	eapply "${FILESDIR}"/${PN}-2.4.9-gcc-6.patch
 
 	# musl patches
-	epatch "${FILESDIR}"/${PN}-2.4.9-remove-disallow_ctypes_h-braindead.patch
-	epatch "${FILESDIR}"/${PN}-2.4.9-remove-execinfo_h.patch
+	eapply "${FILESDIR}"/${PN}-2.4.9-remove-disallow_ctypes_h-braindead.patch
+	eapply "${FILESDIR}"/${PN}-2.4.9-remove-execinfo_h.patch
 
 	AT_M4DIR=Source/autotools eautoreconf
 
@@ -231,12 +236,6 @@ src_configure() {
 		${ruby_interpreter}
 }
 
-src_compile() {
-	# Try to avoid issues like bug #463960
-	unset DISPLAY
-	gnome2_src_compile
-}
-
 src_test() {
 	# Tests expect an out-of-source build in WebKitBuild
 	ln -s . WebKitBuild || die "ln failed"
@@ -244,10 +243,9 @@ src_test() {
 	# Prevents test failures on PaX systems
 	use jit && pax-mark m $(list-paxables Programs/*[Tt]ests/*) # Programs/unittests/.libs/test*
 
-	unset DISPLAY
 	# Tests need virtualx, bug #294691, bug #310695
 	# Parallel tests sometimes fail
-	Xemake -j1 check
+	virtx emake -j1 check
 }
 
 src_install() {
