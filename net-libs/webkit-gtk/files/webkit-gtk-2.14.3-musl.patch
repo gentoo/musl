@@ -1,0 +1,82 @@
+diff -Naur webkitgtk-2.14.3.orig/Source/JavaScriptCore/heap/MachineStackMarker.cpp webkitgtk-2.14.3/Source/JavaScriptCore/heap/MachineStackMarker.cpp
+--- webkitgtk-2.14.3.orig/Source/JavaScriptCore/heap/MachineStackMarker.cpp	2017-01-21 14:57:58.821113862 -0800
++++ webkitgtk-2.14.3/Source/JavaScriptCore/heap/MachineStackMarker.cpp	2017-01-21 14:59:46.889444106 -0800
+@@ -549,7 +549,7 @@
+ #error Unknown Architecture
+ #endif
+ 
+-#elif defined(__GLIBC__) && ENABLE(JIT)
++#elif OS(LINUX) && ENABLE(JIT)
+ 
+ #if CPU(X86)
+     return reinterpret_cast<void*>((uintptr_t) regs.machineContext.gregs[REG_ESP]);
+@@ -648,9 +648,8 @@
+ #error Unknown Architecture
+ #endif
+ 
+-#elif defined(__GLIBC__)
++#elif OS(LINUX)
+ 
+-// The following sequence depends on glibc's sys/ucontext.h.
+ #if CPU(X86)
+     return reinterpret_cast<void*>((uintptr_t) regs.machineContext.gregs[REG_EBP]);
+ #elif CPU(X86_64)
+@@ -730,9 +729,8 @@
+ #error Unknown Architecture
+ #endif
+ 
+-#elif defined(__GLIBC__)
++#elif OS(LINUX)
+ 
+-// The following sequence depends on glibc's sys/ucontext.h.
+ #if CPU(X86)
+     return reinterpret_cast<void*>((uintptr_t) regs.machineContext.gregs[REG_EIP]);
+ #elif CPU(X86_64)
+@@ -821,9 +819,8 @@
+ #error Unknown Architecture
+ #endif
+ 
+-#elif defined(__GLIBC__)
++#elif OS(LINUX)
+ 
+-// The following sequence depends on glibc's sys/ucontext.h.
+ #if CPU(X86)
+     return reinterpret_cast<void*>((uintptr_t) regs.machineContext.gregs[REG_ESI]);
+ #elif CPU(X86_64)
+diff -Naur webkitgtk-2.14.3.orig/Source/JavaScriptCore/inspector/JSGlobalObjectInspectorController.cpp webkitgtk-2.14.3/Source/JavaScriptCore/inspector/JSGlobalObjectInspectorController.cpp
+--- webkitgtk-2.14.3.orig/Source/JavaScriptCore/inspector/JSGlobalObjectInspectorController.cpp	2017-01-21 14:57:58.933115241 -0800
++++ webkitgtk-2.14.3/Source/JavaScriptCore/inspector/JSGlobalObjectInspectorController.cpp	2017-01-21 15:00:42.712131243 -0800
+@@ -49,7 +49,7 @@
+ #include "ScriptCallStackFactory.h"
+ #include <wtf/Stopwatch.h>
+ 
+-#if OS(DARWIN) || (OS(LINUX) && !PLATFORM(GTK))
++#if OS(DARWIN) || (OS(LINUX) && !PLATFORM(GTK) && defined(__GLIBC__) && !defined(__UCLIBC__))
+ #include <cxxabi.h>
+ #include <dlfcn.h>
+ #include <execinfo.h>
+@@ -187,7 +187,7 @@
+ 
+ void JSGlobalObjectInspectorController::appendAPIBacktrace(ScriptCallStack* callStack)
+ {
+-#if OS(DARWIN) || (OS(LINUX) && !PLATFORM(GTK))
++#if OS(DARWIN) || (OS(LINUX) && !PLATFORM(GTK) && defined(__GLIBC__) && !defined(__UCLIBC__))
+     static const int framesToShow = 31;
+     static const int framesToSkip = 3; // WTFGetBacktrace, appendAPIBacktrace, reportAPIException.
+ 
+diff -Naur webkitgtk-2.14.3.orig/Source/JavaScriptCore/runtime/Options.h webkitgtk-2.14.3/Source/JavaScriptCore/runtime/Options.h
+--- webkitgtk-2.14.3.orig/Source/JavaScriptCore/runtime/Options.h	2017-01-21 14:57:59.074116976 -0800
++++ webkitgtk-2.14.3/Source/JavaScriptCore/runtime/Options.h	2017-01-21 15:01:36.813797195 -0800
+@@ -112,9 +112,9 @@
+     \
+     v(bool, reportMustSucceedExecutableAllocations, false, Normal, nullptr) \
+     \
+-    v(unsigned, maxPerThreadStackUsage, 4 * MB, Normal, "Max allowed stack usage by the VM") \
+-    v(unsigned, softReservedZoneSize, 128 * KB, Normal, "A buffer greater than reservedZoneSize that reserves space for stringifying exceptions.") \
+-    v(unsigned, reservedZoneSize, 64 * KB, Normal, "The amount of stack space we guarantee to our clients (and to interal VM code that does not call out to clients).") \
++    v(unsigned, maxPerThreadStackUsage, 80 * KB, Normal, "Max allowed stack usage by the VM") \
++    v(unsigned, softReservedZoneSize, 32 * KB, Normal, "A buffer greater than reservedZoneSize that reserves space for stringifying exceptions.") \
++    v(unsigned, reservedZoneSize, 16 * KB, Normal, "The amount of stack space we guarantee to our clients (and to interal VM code that does not call out to clients).") \
+     \
+     v(bool, crashIfCantAllocateJITMemory, false, Normal, nullptr) \
+     v(unsigned, jitMemoryReservationSize, 0, Normal, "Set this number to change the executable allocation size in ExecutableAllocatorFixedVMPool. (In bytes.)") \
