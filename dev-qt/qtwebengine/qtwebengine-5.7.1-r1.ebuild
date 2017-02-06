@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -12,7 +12,7 @@ if [[ ${QT5_BUILD_TYPE} == release ]]; then
 	KEYWORDS="~amd64 ~x86"
 fi
 
-IUSE="bindist geolocation pax_kernel +system-ffmpeg +system-icu widgets"
+IUSE="alsa bindist geolocation pax_kernel pulseaudio +system-ffmpeg +system-icu widgets"
 
 RDEPEND="
 	app-arch/snappy
@@ -30,7 +30,6 @@ RDEPEND="
 	dev-libs/libxml2
 	dev-libs/libxslt
 	dev-libs/protobuf:=
-	media-libs/alsa-lib
 	media-libs/flac
 	media-libs/fontconfig
 	media-libs/freetype
@@ -58,7 +57,9 @@ RDEPEND="
 	x11-libs/libXrender
 	x11-libs/libXScrnSaver
 	x11-libs/libXtst
+	alsa? ( media-libs/alsa-lib )
 	geolocation? ( ~dev-qt/qtpositioning-${PV} )
+	pulseaudio? ( media-sound/pulseaudio:= )
 	system-ffmpeg? ( media-video/ffmpeg:0= )
 	system-icu? ( dev-libs/icu:= )
 	widgets? ( ~dev-qt/qtwidgets-${PV} )
@@ -73,6 +74,7 @@ DEPEND="${RDEPEND}
 "
 
 PATCHES=(
+	"${FILESDIR}/${PN}-5.7.1-fix-audio-detection.patch"
 	"${FILESDIR}/${PN}-5.7.0-fix-system-ffmpeg.patch"
 	"${FILESDIR}/${PN}-5.7.0-icu58.patch"
 
@@ -109,7 +111,9 @@ src_configure() {
 	export NINJA_PATH=/usr/bin/ninja
 
 	local myqmakeargs=(
+		$(usex alsa 'WEBENGINE_CONFIG+=use_alsa' '')
 		$(usex bindist '' 'WEBENGINE_CONFIG+=use_proprietary_codecs')
+		$(usex pulseaudio 'WEBENGINE_CONFIG+=use_pulseaudio' '')
 		$(usex system-ffmpeg 'WEBENGINE_CONFIG+=use_system_ffmpeg' '')
 		$(usex system-icu 'WEBENGINE_CONFIG+=use_system_icu' '')
 	)
