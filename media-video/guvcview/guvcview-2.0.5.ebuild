@@ -1,9 +1,9 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
 EAPI=5
-inherit autotools eutils flag-o-matic qmake-utils
+inherit autotools eutils flag-o-matic qmake-utils toolchain-funcs
 
 MY_P=${PN}-src-${PV}
 
@@ -41,8 +41,6 @@ DEPEND="${RDEPEND}
 S=${WORKDIR}/${MY_P}
 
 src_prepare() {
-	epatch "${FILESDIR}/ffmpeg3.patch"
-
 	# Fix for MUSL
 	epatch "${FILESDIR}/${PN}-2.0.4-musl.patch"
 
@@ -53,6 +51,8 @@ src_prepare() {
 src_configure() {
 	export MOC="$(qt5_get_bindir)/moc"
 	use qt5 && append-cxxflags -std=c++11
+	# 599030
+	tc-export CC CXX
 	econf \
 		--disable-debian-menu \
 		$(use_enable gsl) \
