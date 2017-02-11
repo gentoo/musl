@@ -16,7 +16,7 @@ SRC_URI="http://www.webkitgtk.org/releases/${MY_P}.tar.xz"
 
 LICENSE="LGPL-2+ BSD"
 SLOT="4/37" # soname version of libwebkit2gtk-4.0
-KEYWORDS="~alpha ~amd64 ~arm ~ia64 ~ppc ~ppc64 ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x86-macos"
+KEYWORDS="~alpha amd64 ~arm ~ia64 ~ppc ~ppc64 ~sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x86-macos"
 
 IUSE="aqua coverage doc +egl +geolocation gles2 gnome-keyring +gstreamer +introspection +jit libnotify nsplugin +opengl spell wayland +webgl X"
 
@@ -118,6 +118,21 @@ S="${WORKDIR}/${MY_P}"
 
 CHECKREQS_DISK_BUILD="18G" # and even this might not be enough, bug #417307
 
+PATCHES=(
+	# https://bugs.gentoo.org/show_bug.cgi?id=555504
+	"${FILESDIR}"/${PN}-2.8.5-fix-ia64-build.patch
+
+	# https://bugs.gentoo.org/show_bug.cgi?id=564352
+	# https://bugs.webkit.org/show_bug.cgi?id=167283
+	"${FILESDIR}"/${PN}-2.8.5-fix-alpha-build.patch
+
+	# https://bugs.webkit.org/show_bug.cgi?id=148379
+	"${FILESDIR}"/${PN}-2.8.5-webkit2gtkinjectedbundle-j1.patch
+
+	# musl and jit
+	"${FILESDIR}"/${PN}-2.14.3-musl.patch
+)
+
 pkg_pretend() {
 	if [[ ${MERGE_TYPE} != "binary" ]] ; then
 		if is-flagq "-g*" && ! is-flagq "-g*0" ; then
@@ -141,23 +156,6 @@ pkg_setup() {
 	fi
 
 	python-any-r1_pkg_setup
-}
-
-src_prepare() {
-	# https://bugs.gentoo.org/show_bug.cgi?id=555504
-	eapply "${FILESDIR}"/${PN}-2.8.5-fix-ia64-build.patch
-
-	# https://bugs.gentoo.org/show_bug.cgi?id=564352
-	# https://bugs.webkit.org/show_bug.cgi?id=167283
-	eapply "${FILESDIR}"/${PN}-2.8.5-fix-alpha-build.patch
-
-	# https://bugs.webkit.org/show_bug.cgi?id=148379
-	eapply "${FILESDIR}"/${PN}-2.8.5-webkit2gtkinjectedbundle-j1.patch
-
-	# musl and jit
-	eapply "${FILESDIR}"/${PN}-2.14.3-musl.patch
-
-	gnome2_src_prepare
 }
 
 src_configure() {
