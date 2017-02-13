@@ -17,7 +17,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
-	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
+	KEYWORDS="~amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -100,7 +100,10 @@ SOFTMMU_LIB_DEPEND="${COMMON_LIB_DEPEND}
 	iscsi? ( net-libs/libiscsi )
 	jpeg? ( virtual/jpeg:0=[static-libs(+)] )
 	lzo? ( dev-libs/lzo:2[static-libs(+)] )
-	ncurses? ( sys-libs/ncurses:0=[static-libs(+)] )
+	ncurses? (
+		sys-libs/ncurses:0=[unicode]
+		sys-libs/ncurses:0=[static-libs(+)]
+	)
 	nfs? ( >=net-fs/libnfs-1.9.3[static-libs(+)] )
 	numa? ( sys-process/numactl[static-libs(+)] )
 	opengl? (
@@ -598,7 +601,7 @@ src_install() {
 		[[ -e check-report.html ]] && dohtml check-report.html
 
 		if use kernel_linux; then
-			udev_dorules "${FILESDIR}"/65-kvm.rules
+			udev_newrules "${FILESDIR}"/65-kvm.rules-r1 65-kvm.rules
 		fi
 
 		if use python; then
