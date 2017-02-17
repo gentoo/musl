@@ -12,7 +12,7 @@ SRC_URI="https://github.com/rhinstaller/efivar/archive/${PV}.tar.gz -> ${P}.tar.
 
 LICENSE="GPL-2"
 SLOT="0/1"
-KEYWORDS="amd64 ~arm64 ~ia64 x86"
+KEYWORDS="~amd64 ~arm64 ~ia64 ~x86"
 
 RDEPEND="dev-libs/popt"
 DEPEND="${RDEPEND}
@@ -27,24 +27,7 @@ src_prepare() {
 
 src_configure() {
 	tc-export CC
-
-	# https://github.com/rhinstaller/efivar/issues/64
-	append-cflags -flto
-
 	tc-ld-disable-gold
 	export libdir="/usr/$(get_libdir)"
 	unset LIBS # Bug 562004
-}
-
-src_compile() {
-	# Avoid building static binary/libs
-	opts=(
-		BINTARGETS=efivar
-		STATICLIBTARGETS=
-	)
-	emake "${opts[@]}"
-}
-
-src_install() {
-	emake "${opts[@]}" DESTDIR="${D}" install
 }
