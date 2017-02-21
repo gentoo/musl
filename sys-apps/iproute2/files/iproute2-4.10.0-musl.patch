@@ -1,6 +1,6 @@
 diff -Naur iproute2-4.10.0.orig/bridge/link.c iproute2-4.10.0/bridge/link.c
---- iproute2-4.10.0.orig/bridge/link.c	2017-02-21 11:03:07.250296219 -0800
-+++ iproute2-4.10.0/bridge/link.c	2017-02-21 11:42:30.538120752 -0800
+--- iproute2-4.10.0.orig/bridge/link.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/bridge/link.c	2017-02-21 12:17:02.219298749 -0800
 @@ -3,10 +3,10 @@
  #include <stdlib.h>
  #include <unistd.h>
@@ -13,20 +13,9 @@ diff -Naur iproute2-4.10.0.orig/bridge/link.c iproute2-4.10.0/bridge/link.c
  #include <linux/if_bridge.h>
  #include <string.h>
  #include <stdbool.h>
-diff -Naur iproute2-4.10.0.orig/include/libiptc/ipt_kernel_headers.h iproute2-4.10.0/include/libiptc/ipt_kernel_headers.h
---- iproute2-4.10.0.orig/include/libiptc/ipt_kernel_headers.h	2017-02-21 11:03:07.252296243 -0800
-+++ iproute2-4.10.0/include/libiptc/ipt_kernel_headers.h	2017-02-21 11:03:17.451420794 -0800
-@@ -6,7 +6,6 @@
- #include <limits.h>
- 
- #include <netinet/ip.h>
--#include <netinet/in.h>
- #include <netinet/ip_icmp.h>
- #include <netinet/tcp.h>
- #include <netinet/udp.h>
 diff -Naur iproute2-4.10.0.orig/include/linux/if_bridge.h iproute2-4.10.0/include/linux/if_bridge.h
---- iproute2-4.10.0.orig/include/linux/if_bridge.h	2017-02-21 11:03:07.263296377 -0800
-+++ iproute2-4.10.0/include/linux/if_bridge.h	2017-02-21 11:03:27.903548436 -0800
+--- iproute2-4.10.0.orig/include/linux/if_bridge.h	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/include/linux/if_bridge.h	2017-02-21 12:28:42.531792431 -0800
 @@ -15,7 +15,6 @@
  
  #include <linux/types.h>
@@ -36,8 +25,8 @@ diff -Naur iproute2-4.10.0.orig/include/linux/if_bridge.h iproute2-4.10.0/includ
  #define SYSFS_BRIDGE_ATTR	"bridge"
  #define SYSFS_BRIDGE_FDB	"brforward"
 diff -Naur iproute2-4.10.0.orig/include/linux/if_tunnel.h iproute2-4.10.0/include/linux/if_tunnel.h
---- iproute2-4.10.0.orig/include/linux/if_tunnel.h	2017-02-21 11:03:07.260296341 -0800
-+++ iproute2-4.10.0/include/linux/if_tunnel.h	2017-02-21 11:03:38.648679655 -0800
+--- iproute2-4.10.0.orig/include/linux/if_tunnel.h	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/include/linux/if_tunnel.h	2017-02-21 12:26:13.871203393 -0800
 @@ -2,9 +2,7 @@
  #define _IF_TUNNEL_H_
  
@@ -49,20 +38,21 @@ diff -Naur iproute2-4.10.0.orig/include/linux/if_tunnel.h iproute2-4.10.0/includ
  
  
 diff -Naur iproute2-4.10.0.orig/include/linux/l2tp.h iproute2-4.10.0/include/linux/l2tp.h
---- iproute2-4.10.0.orig/include/linux/l2tp.h	2017-02-21 11:03:07.259296328 -0800
-+++ iproute2-4.10.0/include/linux/l2tp.h	2017-02-21 11:04:48.101527812 -0800
-@@ -9,8 +9,6 @@
+--- iproute2-4.10.0.orig/include/linux/l2tp.h	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/include/linux/l2tp.h	2017-02-21 12:17:02.220298759 -0800
+@@ -9,8 +9,7 @@
  
  #include <linux/types.h>
  #include <linux/socket.h>
 -#include <linux/in.h>
 -#include <linux/in6.h>
++#include <netinet/in.h>
  
  #define IPPROTO_L2TP		115
  
 diff -Naur iproute2-4.10.0.orig/include/linux/netfilter.h iproute2-4.10.0/include/linux/netfilter.h
---- iproute2-4.10.0.orig/include/linux/netfilter.h	2017-02-21 11:03:07.257296304 -0800
-+++ iproute2-4.10.0/include/linux/netfilter.h	2017-02-21 11:03:48.968805684 -0800
+--- iproute2-4.10.0.orig/include/linux/netfilter.h	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/include/linux/netfilter.h	2017-02-21 12:30:04.969673613 -0800
 @@ -4,8 +4,6 @@
  #include <linux/types.h>
  
@@ -73,8 +63,8 @@ diff -Naur iproute2-4.10.0.orig/include/linux/netfilter.h iproute2-4.10.0/includ
  /* Responses from hook functions. */
  #define NF_DROP 0
 diff -Naur iproute2-4.10.0.orig/include/linux/xfrm.h iproute2-4.10.0/include/linux/xfrm.h
---- iproute2-4.10.0.orig/include/linux/xfrm.h	2017-02-21 11:03:07.262296365 -0800
-+++ iproute2-4.10.0/include/linux/xfrm.h	2017-02-21 11:03:59.822938235 -0800
+--- iproute2-4.10.0.orig/include/linux/xfrm.h	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/include/linux/xfrm.h	2017-02-21 12:27:48.169211348 -0800
 @@ -1,7 +1,6 @@
  #ifndef _LINUX_XFRM_H
  #define _LINUX_XFRM_H
@@ -83,20 +73,9 @@ diff -Naur iproute2-4.10.0.orig/include/linux/xfrm.h iproute2-4.10.0/include/lin
  #include <linux/types.h>
  
  /* All of the structures in this file may not change size as they are
-diff -Naur iproute2-4.10.0.orig/include/xtables.h iproute2-4.10.0/include/xtables.h
---- iproute2-4.10.0.orig/include/xtables.h	2017-02-21 11:03:07.268296438 -0800
-+++ iproute2-4.10.0/include/xtables.h	2017-02-21 11:04:14.113112746 -0800
-@@ -13,7 +13,6 @@
- #include <stddef.h>
- #include <stdint.h>
- #include <netinet/in.h>
--#include <net/if.h>
- #include <linux/types.h>
- #include <linux/netfilter.h>
- #include <linux/netfilter/x_tables.h>
 diff -Naur iproute2-4.10.0.orig/ip/ip6tunnel.c iproute2-4.10.0/ip/ip6tunnel.c
---- iproute2-4.10.0.orig/ip/ip6tunnel.c	2017-02-21 11:03:07.293296744 -0800
-+++ iproute2-4.10.0/ip/ip6tunnel.c	2017-02-21 11:25:56.151628761 -0800
+--- iproute2-4.10.0.orig/ip/ip6tunnel.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/ip6tunnel.c	2017-02-21 12:23:12.679266625 -0800
 @@ -23,13 +23,13 @@
  #include <string.h>
  #include <stdlib.h>
@@ -114,8 +93,8 @@ diff -Naur iproute2-4.10.0.orig/ip/ip6tunnel.c iproute2-4.10.0/ip/ip6tunnel.c
  #include <linux/ip6_tunnel.h>
  
 diff -Naur iproute2-4.10.0.orig/ip/ipaddress.c iproute2-4.10.0/ip/ipaddress.c
---- iproute2-4.10.0.orig/ip/ipaddress.c	2017-02-21 11:03:07.291296719 -0800
-+++ iproute2-4.10.0/ip/ipaddress.c	2017-02-21 11:23:33.232950712 -0800
+--- iproute2-4.10.0.orig/ip/ipaddress.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/ipaddress.c	2017-02-21 12:17:02.221298770 -0800
 @@ -16,18 +16,18 @@
  #include <syslog.h>
  #include <inttypes.h>
@@ -138,8 +117,8 @@ diff -Naur iproute2-4.10.0.orig/ip/ipaddress.c iproute2-4.10.0/ip/ipaddress.c
  #include <linux/net_namespace.h>
  
 diff -Naur iproute2-4.10.0.orig/ip/ipl2tp.c iproute2-4.10.0/ip/ipl2tp.c
---- iproute2-4.10.0.orig/ip/ipl2tp.c	2017-02-21 11:03:07.293296744 -0800
-+++ iproute2-4.10.0/ip/ipl2tp.c	2017-02-21 11:31:27.873494720 -0800
+--- iproute2-4.10.0.orig/ip/ipl2tp.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/ipl2tp.c	2017-02-21 12:17:02.222298781 -0800
 @@ -19,8 +19,6 @@
  #include <sys/socket.h>
  #include <arpa/inet.h>
@@ -150,8 +129,8 @@ diff -Naur iproute2-4.10.0.orig/ip/ipl2tp.c iproute2-4.10.0/ip/ipl2tp.c
  
  #include <linux/genetlink.h>
 diff -Naur iproute2-4.10.0.orig/ip/ipmaddr.c iproute2-4.10.0/ip/ipmaddr.c
---- iproute2-4.10.0.orig/ip/ipmaddr.c	2017-02-21 11:03:07.290296707 -0800
-+++ iproute2-4.10.0/ip/ipmaddr.c	2017-02-21 11:28:36.392504858 -0800
+--- iproute2-4.10.0.orig/ip/ipmaddr.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/ipmaddr.c	2017-02-21 12:17:02.222298781 -0800
 @@ -15,15 +15,13 @@
  #include <unistd.h>
  #include <syslog.h>
@@ -170,8 +149,8 @@ diff -Naur iproute2-4.10.0.orig/ip/ipmaddr.c iproute2-4.10.0/ip/ipmaddr.c
  
  #include "rt_names.h"
 diff -Naur iproute2-4.10.0.orig/ip/ipmroute.c iproute2-4.10.0/ip/ipmroute.c
---- iproute2-4.10.0.orig/ip/ipmroute.c	2017-02-21 11:03:07.290296707 -0800
-+++ iproute2-4.10.0/ip/ipmroute.c	2017-02-21 11:27:16.582572938 -0800
+--- iproute2-4.10.0.orig/ip/ipmroute.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/ipmroute.c	2017-02-21 12:17:02.223298792 -0800
 @@ -22,9 +22,6 @@
  #include <arpa/inet.h>
  #include <string.h>
@@ -183,8 +162,8 @@ diff -Naur iproute2-4.10.0.orig/ip/ipmroute.c iproute2-4.10.0/ip/ipmroute.c
  
  #include <rt_names.h>
 diff -Naur iproute2-4.10.0.orig/ip/iprule.c iproute2-4.10.0/ip/iprule.c
---- iproute2-4.10.0.orig/ip/iprule.c	2017-02-21 11:03:07.287296670 -0800
-+++ iproute2-4.10.0/ip/iprule.c	2017-02-21 11:22:23.660130756 -0800
+--- iproute2-4.10.0.orig/ip/iprule.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/iprule.c	2017-02-21 12:17:02.223298792 -0800
 @@ -15,12 +15,12 @@
  #include <unistd.h>
  #include <syslog.h>
@@ -200,8 +179,8 @@ diff -Naur iproute2-4.10.0.orig/ip/iprule.c iproute2-4.10.0/ip/iprule.c
  #include <errno.h>
  
 diff -Naur iproute2-4.10.0.orig/ip/iptoken.c iproute2-4.10.0/ip/iptoken.c
---- iproute2-4.10.0.orig/ip/iptoken.c	2017-02-21 11:03:07.288296683 -0800
-+++ iproute2-4.10.0/ip/iptoken.c	2017-02-21 11:29:24.307060858 -0800
+--- iproute2-4.10.0.orig/ip/iptoken.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/iptoken.c	2017-02-21 12:17:02.224298802 -0800
 @@ -16,12 +16,12 @@
  #include <syslog.h>
  #include <fcntl.h>
@@ -217,8 +196,8 @@ diff -Naur iproute2-4.10.0.orig/ip/iptoken.c iproute2-4.10.0/ip/iptoken.c
  #include "rt_names.h"
  #include "utils.h"
 diff -Naur iproute2-4.10.0.orig/ip/iptuntap.c iproute2-4.10.0/ip/iptuntap.c
---- iproute2-4.10.0.orig/ip/iptuntap.c	2017-02-21 11:03:07.293296744 -0800
-+++ iproute2-4.10.0/ip/iptuntap.c	2017-02-21 11:27:54.528018380 -0800
+--- iproute2-4.10.0.orig/ip/iptuntap.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/iptuntap.c	2017-02-21 12:17:02.224298802 -0800
 @@ -14,11 +14,11 @@
  #include <stdlib.h>
  #include <string.h>
@@ -233,8 +212,8 @@ diff -Naur iproute2-4.10.0.orig/ip/iptuntap.c iproute2-4.10.0/ip/iptuntap.c
  #include <pwd.h>
  #include <grp.h>
 diff -Naur iproute2-4.10.0.orig/ip/tcp_metrics.c iproute2-4.10.0/ip/tcp_metrics.c
---- iproute2-4.10.0.orig/ip/tcp_metrics.c	2017-02-21 11:03:07.294296756 -0800
-+++ iproute2-4.10.0/ip/tcp_metrics.c	2017-02-21 11:32:07.345952757 -0800
+--- iproute2-4.10.0.orig/ip/tcp_metrics.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/tcp_metrics.c	2017-02-21 12:17:02.224298802 -0800
 @@ -17,7 +17,6 @@
  #include <sys/socket.h>
  #include <arpa/inet.h>
@@ -244,8 +223,8 @@ diff -Naur iproute2-4.10.0.orig/ip/tcp_metrics.c iproute2-4.10.0/ip/tcp_metrics.
  #include <linux/genetlink.h>
  #include <linux/tcp_metrics.h>
 diff -Naur iproute2-4.10.0.orig/ip/tunnel.c iproute2-4.10.0/ip/tunnel.c
---- iproute2-4.10.0.orig/ip/tunnel.c	2017-02-21 11:03:07.293296744 -0800
-+++ iproute2-4.10.0/ip/tunnel.c	2017-02-21 11:25:12.085111465 -0800
+--- iproute2-4.10.0.orig/ip/tunnel.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/ip/tunnel.c	2017-02-21 12:22:52.571051688 -0800
 @@ -26,11 +26,11 @@
  #include <string.h>
  #include <unistd.h>
@@ -260,8 +239,8 @@ diff -Naur iproute2-4.10.0.orig/ip/tunnel.c iproute2-4.10.0/ip/tunnel.c
  #include <linux/if_tunnel.h>
  
 diff -Naur iproute2-4.10.0.orig/lib/ll_addr.c iproute2-4.10.0/lib/ll_addr.c
---- iproute2-4.10.0.orig/lib/ll_addr.c	2017-02-21 11:03:07.271296475 -0800
-+++ iproute2-4.10.0/lib/ll_addr.c	2017-02-21 11:20:26.002744097 -0800
+--- iproute2-4.10.0.orig/lib/ll_addr.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/lib/ll_addr.c	2017-02-21 12:17:02.225298813 -0800
 @@ -14,6 +14,7 @@
  #include <unistd.h>
  #include <syslog.h>
@@ -280,8 +259,8 @@ diff -Naur iproute2-4.10.0.orig/lib/ll_addr.c iproute2-4.10.0/lib/ll_addr.c
  
  #include "rt_names.h"
 diff -Naur iproute2-4.10.0.orig/lib/ll_proto.c iproute2-4.10.0/lib/ll_proto.c
---- iproute2-4.10.0.orig/lib/ll_proto.c	2017-02-21 11:03:07.272296487 -0800
-+++ iproute2-4.10.0/lib/ll_proto.c	2017-02-21 11:19:45.641268414 -0800
+--- iproute2-4.10.0.orig/lib/ll_proto.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/lib/ll_proto.c	2017-02-21 12:17:02.225298813 -0800
 @@ -14,15 +14,15 @@
  #include <unistd.h>
  #include <syslog.h>
@@ -301,8 +280,8 @@ diff -Naur iproute2-4.10.0.orig/lib/ll_proto.c iproute2-4.10.0/lib/ll_proto.c
  
  #include "utils.h"
 diff -Naur iproute2-4.10.0.orig/lib/ll_types.c iproute2-4.10.0/lib/ll_types.c
---- iproute2-4.10.0.orig/lib/ll_types.c	2017-02-21 11:03:07.272296487 -0800
-+++ iproute2-4.10.0/lib/ll_types.c	2017-02-21 11:19:53.585362039 -0800
+--- iproute2-4.10.0.orig/lib/ll_types.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/lib/ll_types.c	2017-02-21 12:17:02.225298813 -0800
 @@ -14,6 +14,7 @@
  #include <unistd.h>
  #include <syslog.h>
@@ -321,8 +300,8 @@ diff -Naur iproute2-4.10.0.orig/lib/ll_types.c iproute2-4.10.0/lib/ll_types.c
  
  #include "rt_names.h"
 diff -Naur iproute2-4.10.0.orig/lib/utils.c iproute2-4.10.0/lib/utils.c
---- iproute2-4.10.0.orig/lib/utils.c	2017-02-21 11:03:07.272296487 -0800
-+++ iproute2-4.10.0/lib/utils.c	2017-02-21 11:20:03.213475512 -0800
+--- iproute2-4.10.0.orig/lib/utils.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/lib/utils.c	2017-02-21 12:17:02.225298813 -0800
 @@ -17,6 +17,7 @@
  #include <syslog.h>
  #include <fcntl.h>
@@ -340,8 +319,8 @@ diff -Naur iproute2-4.10.0.orig/lib/utils.c iproute2-4.10.0/lib/utils.c
  #include <time.h>
  #include <sys/time.h>
 diff -Naur iproute2-4.10.0.orig/misc/arpd.c iproute2-4.10.0/misc/arpd.c
---- iproute2-4.10.0.orig/misc/arpd.c	2017-02-21 11:03:07.311296964 -0800
-+++ iproute2-4.10.0/misc/arpd.c	2017-02-21 11:51:14.089070684 -0800
+--- iproute2-4.10.0.orig/misc/arpd.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/misc/arpd.c	2017-02-21 12:17:02.226298824 -0800
 @@ -18,18 +18,18 @@
  #include <netdb.h>
  #include <db_185.h>
@@ -366,8 +345,8 @@ diff -Naur iproute2-4.10.0.orig/misc/arpd.c iproute2-4.10.0/misc/arpd.c
  #include <linux/if_packet.h>
  #include <linux/filter.h>
 diff -Naur iproute2-4.10.0.orig/misc/ifstat.c iproute2-4.10.0/misc/ifstat.c
---- iproute2-4.10.0.orig/misc/ifstat.c	2017-02-21 11:03:07.310296951 -0800
-+++ iproute2-4.10.0/misc/ifstat.c	2017-02-21 11:51:21.050149031 -0800
+--- iproute2-4.10.0.orig/misc/ifstat.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/misc/ifstat.c	2017-02-21 12:17:02.226298824 -0800
 @@ -21,7 +21,7 @@
  #include <sys/file.h>
  #include <sys/socket.h>
@@ -378,8 +357,8 @@ diff -Naur iproute2-4.10.0.orig/misc/ifstat.c iproute2-4.10.0/misc/ifstat.c
  #include <sys/stat.h>
  #include <signal.h>
 diff -Naur iproute2-4.10.0.orig/misc/nstat.c iproute2-4.10.0/misc/nstat.c
---- iproute2-4.10.0.orig/misc/nstat.c	2017-02-21 11:03:07.311296964 -0800
-+++ iproute2-4.10.0/misc/nstat.c	2017-02-21 11:51:27.410220614 -0800
+--- iproute2-4.10.0.orig/misc/nstat.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/misc/nstat.c	2017-02-21 12:17:02.227298835 -0800
 @@ -21,7 +21,7 @@
  #include <sys/file.h>
  #include <sys/socket.h>
@@ -390,8 +369,8 @@ diff -Naur iproute2-4.10.0.orig/misc/nstat.c iproute2-4.10.0/misc/nstat.c
  #include <sys/stat.h>
  #include <signal.h>
 diff -Naur iproute2-4.10.0.orig/misc/rtacct.c iproute2-4.10.0/misc/rtacct.c
---- iproute2-4.10.0.orig/misc/rtacct.c	2017-02-21 11:03:07.310296951 -0800
-+++ iproute2-4.10.0/misc/rtacct.c	2017-02-21 11:51:35.029306367 -0800
+--- iproute2-4.10.0.orig/misc/rtacct.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/misc/rtacct.c	2017-02-21 12:17:02.227298835 -0800
 @@ -22,7 +22,7 @@
  #include <sys/file.h>
  #include <sys/socket.h>
@@ -402,8 +381,8 @@ diff -Naur iproute2-4.10.0.orig/misc/rtacct.c iproute2-4.10.0/misc/rtacct.c
  #include <sys/stat.h>
  #include <sys/mman.h>
 diff -Naur iproute2-4.10.0.orig/misc/ss.c iproute2-4.10.0/misc/ss.c
---- iproute2-4.10.0.orig/misc/ss.c	2017-02-21 11:03:07.310296951 -0800
-+++ iproute2-4.10.0/misc/ss.c	2017-02-21 11:47:39.236637197 -0800
+--- iproute2-4.10.0.orig/misc/ss.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/misc/ss.c	2017-02-21 12:17:02.228298845 -0800
 @@ -14,6 +14,7 @@
  #include <unistd.h>
  #include <syslog.h>
@@ -421,8 +400,8 @@ diff -Naur iproute2-4.10.0.orig/misc/ss.c iproute2-4.10.0/misc/ss.c
  #include <linux/packet_diag.h>
  #include <linux/netlink_diag.h>
 diff -Naur iproute2-4.10.0.orig/tc/f_basic.c iproute2-4.10.0/tc/f_basic.c
---- iproute2-4.10.0.orig/tc/f_basic.c	2017-02-21 11:03:07.307296915 -0800
-+++ iproute2-4.10.0/tc/f_basic.c	2017-02-21 11:33:07.491644936 -0800
+--- iproute2-4.10.0.orig/tc/f_basic.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/tc/f_basic.c	2017-02-21 12:17:02.228298845 -0800
 @@ -19,7 +19,6 @@
  #include <netinet/in.h>
  #include <arpa/inet.h>
@@ -432,8 +411,8 @@ diff -Naur iproute2-4.10.0.orig/tc/f_basic.c iproute2-4.10.0/tc/f_basic.c
  #include "utils.h"
  #include "tc_util.h"
 diff -Naur iproute2-4.10.0.orig/tc/f_fw.c iproute2-4.10.0/tc/f_fw.c
---- iproute2-4.10.0.orig/tc/f_fw.c	2017-02-21 11:03:07.303296866 -0800
-+++ iproute2-4.10.0/tc/f_fw.c	2017-02-21 11:37:50.341899304 -0800
+--- iproute2-4.10.0.orig/tc/f_fw.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/tc/f_fw.c	2017-02-21 12:17:02.229298856 -0800
 @@ -15,11 +15,11 @@
  #include <unistd.h>
  #include <syslog.h>
@@ -448,8 +427,8 @@ diff -Naur iproute2-4.10.0.orig/tc/f_fw.c iproute2-4.10.0/tc/f_fw.c
  #include "tc_util.h"
  
 diff -Naur iproute2-4.10.0.orig/tc/f_matchall.c iproute2-4.10.0/tc/f_matchall.c
---- iproute2-4.10.0.orig/tc/f_matchall.c	2017-02-21 11:03:07.306296902 -0800
-+++ iproute2-4.10.0/tc/f_matchall.c	2017-02-21 11:33:23.186825281 -0800
+--- iproute2-4.10.0.orig/tc/f_matchall.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/tc/f_matchall.c	2017-02-21 12:17:02.229298856 -0800
 @@ -19,7 +19,6 @@
  #include <netinet/in.h>
  #include <arpa/inet.h>
@@ -459,8 +438,8 @@ diff -Naur iproute2-4.10.0.orig/tc/f_matchall.c iproute2-4.10.0/tc/f_matchall.c
  #include "utils.h"
  #include "tc_util.h"
 diff -Naur iproute2-4.10.0.orig/tc/f_u32.c iproute2-4.10.0/tc/f_u32.c
---- iproute2-4.10.0.orig/tc/f_u32.c	2017-02-21 11:03:07.301296841 -0800
-+++ iproute2-4.10.0/tc/f_u32.c	2017-02-21 11:37:37.844754977 -0800
+--- iproute2-4.10.0.orig/tc/f_u32.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/tc/f_u32.c	2017-02-21 12:17:02.229298856 -0800
 @@ -16,12 +16,12 @@
  #include <unistd.h>
  #include <syslog.h>
@@ -477,8 +456,8 @@ diff -Naur iproute2-4.10.0.orig/tc/f_u32.c iproute2-4.10.0/tc/f_u32.c
  #include "utils.h"
  #include "tc_util.h"
 diff -Naur iproute2-4.10.0.orig/tc/m_ife.c iproute2-4.10.0/tc/m_ife.c
---- iproute2-4.10.0.orig/tc/m_ife.c	2017-02-21 11:03:07.302296854 -0800
-+++ iproute2-4.10.0/tc/m_ife.c	2017-02-21 11:41:30.971442081 -0800
+--- iproute2-4.10.0.orig/tc/m_ife.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/tc/m_ife.c	2017-02-21 12:17:02.230298867 -0800
 @@ -17,9 +17,9 @@
  #include <fcntl.h>
  #include <sys/socket.h>
@@ -491,8 +470,8 @@ diff -Naur iproute2-4.10.0.orig/tc/m_ife.c iproute2-4.10.0/tc/m_ife.c
  #include "rt_names.h"
  #include "utils.h"
 diff -Naur iproute2-4.10.0.orig/tc/m_xt.c iproute2-4.10.0/tc/m_xt.c
---- iproute2-4.10.0.orig/tc/m_xt.c	2017-02-21 11:03:07.302296854 -0800
-+++ iproute2-4.10.0/tc/m_xt.c	2017-02-21 11:39:51.918303374 -0800
+--- iproute2-4.10.0.orig/tc/m_xt.c	2017-02-20 08:47:52.000000000 -0800
++++ iproute2-4.10.0/tc/m_xt.c	2017-02-21 12:17:02.230298867 -0800
 @@ -14,10 +14,9 @@
  #include <sys/socket.h>
  #include <netinet/in.h>
