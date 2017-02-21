@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -11,7 +11,7 @@ if [[ ${PV} == "9999" ]] ; then
 	inherit git-2
 else
 	SRC_URI="mirror://kernel/linux/utils/net/${PN}/${P}.tar.xz"
-	KEYWORDS="alpha amd64 arm arm64 hppa ia64 ~m68k ~mips ppc ppc64 ~s390 ~sh sparc x86"
+	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
 fi
 
 DESCRIPTION="kernel routing and traffic control utilities"
@@ -37,14 +37,22 @@ DEPEND="${RDEPEND}
 	>=sys-kernel/linux-headers-3.16
 	elibc_glibc? ( >=sys-libs/glibc-2.7 )"
 
+PATCHES=(
+	"${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
+	"${FILESDIR}"/${PN}-4.8.0-musl.patch
+)
+
 src_prepare() {
-	epatch "${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
-	use ipv6 || epatch "${FILESDIR}"/${PN}-4.2.0-no-ipv6.patch #326849
-	epatch "${FILESDIR}"/${PN}-4.3.0-musl.patch
-	epatch "${FILESDIR}"/${PN}-4.3.0-musl-noiptables.patch
+	if ! use ipv6 ; then
+		PATCHES+=(
+			"${FILESDIR}"/${PN}-4.2.0-no-ipv6.patch #326849
+		)
+	fi
+
+	epatch "${PATCHES[@]}"
 
 	sed -i \
-		-e '/^CC =/d' \
+		-e '/^CC :=/d' \
 		-e "/^LIBDIR/s:=.*:=/$(get_libdir):" \
 		-e "s:-O2:${CFLAGS} ${CPPFLAGS}:" \
 		-e "/^HOSTCC/s:=.*:= $(tc-getBUILD_CC):" \
@@ -71,15 +79,16 @@ src_configure() {
 	# This sure is ugly.  Should probably move into toolchain-funcs at some point.
 	local setns
 	pushd "${T}" >/dev/null
-	echo 'main(){return setns();};' > test.c
-	${CC} ${CFLAGS} ${LDFLAGS} test.c >&/dev/null && setns=y || setns=n
-	echo 'main(){};' > test.c
-	${CC} ${CFLAGS} ${LDFLAGS} test.c -lresolv >&/dev/null || sed -i '/^LDLIBS/s:-lresolv::' "${S}"/Makefile
+	printf '#include <sched.h>\nint main(){return setns(0, 0);}\n' > test.c
+	${CC} ${CFLAGS} ${CPPFLAGS} -D_GNU_SOURCE ${LDFLAGS} test.c >&/dev/null && setns=y || setns=n
+	echo 'int main(){return 0;}' > test.c
+	${CC} ${CFLAGS} ${CPPFLAGS} ${LDFLAGS} test.c -lresolv >&/dev/null || sed -i '/^LDLIBS/s:-lresolv::' "${S}"/Makefile
 	popd >/dev/null
 
 	cat <<-EOF > Config
 	TC_CONFIG_ATM := $(usex atm y n)
 	TC_CONFIG_XT  := $(usex iptables y n)
+	TC_CONFIG_NO_XT := $(usex iptables n y)
 	# We've locked in recent enough kernel headers #549948
 	TC_CONFIG_IPSET := y
 	HAVE_BERKELEY_DB := $(usex berkdb y n)
