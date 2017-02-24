@@ -1,6 +1,6 @@
-diff -Naurw systemtap-2.9.orig/buildrun.cxx systemtap-2.9/buildrun.cxx
---- systemtap-2.9.orig/buildrun.cxx	2016-02-03 17:29:35.158854189 -0800
-+++ systemtap-2.9/buildrun.cxx	2016-02-03 17:29:45.349853899 -0800
+diff -Naur systemtap-2.9.orig/buildrun.cxx systemtap-2.9/buildrun.cxx
+--- systemtap-2.9.orig/buildrun.cxx	2017-02-24 10:47:12.478787249 -0800
++++ systemtap-2.9/buildrun.cxx	2017-02-24 10:47:56.414162998 -0800
 @@ -788,13 +788,14 @@
    if (s.need_uprobes && !kernel_built_uprobes(s))
      {
@@ -17,9 +17,9 @@ diff -Naurw systemtap-2.9.orig/buildrun.cxx systemtap-2.9/buildrun.cxx
          }
        staprun_cmd.push_back(opt_u);
      }
-diff -Naurw systemtap-2.9.orig/configure.ac systemtap-2.9/configure.ac
---- systemtap-2.9.orig/configure.ac	2016-02-03 17:29:35.161854189 -0800
-+++ systemtap-2.9/configure.ac	2016-02-03 17:45:48.771826500 -0800
+diff -Naur systemtap-2.9.orig/configure.ac systemtap-2.9/configure.ac
+--- systemtap-2.9.orig/configure.ac	2017-02-24 10:47:12.480787266 -0800
++++ systemtap-2.9/configure.ac	2017-02-24 10:48:24.679405813 -0800
 @@ -443,6 +443,50 @@
    fi
  fi
@@ -71,9 +71,9 @@ diff -Naurw systemtap-2.9.orig/configure.ac systemtap-2.9/configure.ac
  AC_SUBST(stap_LIBS)
  AC_MSG_NOTICE([stap will link $stap_LIBS])
  
-diff -Naurw systemtap-2.9.orig/csclient.cxx systemtap-2.9/csclient.cxx
---- systemtap-2.9.orig/csclient.cxx	2016-02-03 17:29:35.161854189 -0800
-+++ systemtap-2.9/csclient.cxx	2016-02-03 17:29:45.353853899 -0800
+diff -Naur systemtap-2.9.orig/csclient.cxx systemtap-2.9/csclient.cxx
+--- systemtap-2.9.orig/csclient.cxx	2017-02-24 10:47:12.481787274 -0800
++++ systemtap-2.9/csclient.cxx	2017-02-24 10:48:59.261702894 -0800
 @@ -75,6 +75,10 @@
  
  #define MOK_PUBLIC_CERT_NAME "signing_key.x509"
@@ -94,43 +94,40 @@ diff -Naurw systemtap-2.9.orig/csclient.cxx systemtap-2.9/csclient.cxx
    if (! cpath)
      {
        // It can not be canonicalized. Use the name relative to
-diff -Naurw systemtap-2.9.orig/loc2c-test.c systemtap-2.9/loc2c-test.c
---- systemtap-2.9.orig/loc2c-test.c	2016-02-03 17:29:35.222854187 -0800
-+++ systemtap-2.9/loc2c-test.c	2016-02-03 17:29:45.354853899 -0800
-@@ -11,7 +11,8 @@
- #include <stdio_ext.h>
- #include <stdlib.h>
- #include <string.h>
--#include <error.h>
-+#include <err.h>
-+#define error err
- #if ENABLE_NLS
- #include <locale.h>
- #endif
-@@ -519,7 +520,7 @@
- 	    }
- 	  else
- 	    {
--	      error (2, 0, "Error, dwarf_entry_breakpoints returned an error( %s )\n",
-+	      error (2, 0, "Error, dwarf_entry_breakpoints returned an err( %s )\n",
- 		     dwarf_errmsg (result));
- 	    }
- 	}
-diff -Naurw systemtap-2.9.orig/loc2c.c systemtap-2.9/loc2c.c
---- systemtap-2.9.orig/loc2c.c	2016-02-03 17:29:35.222854187 -0800
-+++ systemtap-2.9/loc2c.c	2016-02-03 17:51:01.664817602 -0800
-@@ -12,7 +12,7 @@
- #include <obstack.h>
- #include <stdio.h>
- #include <stdlib.h>
--#include <error.h>
-+#include <err.h>
- #include <dwarf.h>
- #include <elfutils/libdw.h>
- #include <elfutils/version.h>
-diff -Naurw systemtap-2.9.orig/remote.cxx systemtap-2.9/remote.cxx
---- systemtap-2.9.orig/remote.cxx	2016-02-03 17:29:35.239854186 -0800
-+++ systemtap-2.9/remote.cxx	2016-02-03 17:29:45.359853899 -0800
+diff -Naur systemtap-2.9.orig/error.h systemtap-2.9/error.h
+--- systemtap-2.9.orig/error.h	1969-12-31 16:00:00.000000000 -0800
++++ systemtap-2.9/error.h	2017-02-24 10:49:03.823742085 -0800
+@@ -0,0 +1,27 @@
++#ifndef _ERROR_H_
++#define _ERROR_H_
++
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <errno.h>
++
++static unsigned int error_message_count = 0;
++
++static inline void error(int status, int errnum, const char* format, ...)
++{
++	va_list ap;
++	fprintf(stderr, "%s: ", program_invocation_name);
++	va_start(ap, format);
++	vfprintf(stderr, format, ap);
++	va_end(ap);
++	if (errnum)
++		fprintf(stderr, ": %s", strerror(errnum));
++	fprintf(stderr, "\n");
++	error_message_count++;
++	if (status)
++		exit(status);
++}
++
++#endif	/* _ERROR_H_ */
+diff -Naur systemtap-2.9.orig/remote.cxx systemtap-2.9/remote.cxx
+--- systemtap-2.9.orig/remote.cxx	2017-02-24 10:47:12.532787709 -0800
++++ systemtap-2.9/remote.cxx	2017-02-24 10:49:25.245926113 -0800
 @@ -459,7 +459,8 @@
  
          if (!s->uprobes_path.empty())
@@ -141,9 +138,9 @@ diff -Naurw systemtap-2.9.orig/remote.cxx systemtap-2.9/remote.cxx
              if ((rc = send_file(s->uprobes_path, remoteuprobes)))
                return rc;
  
-diff -Naurw systemtap-2.9.orig/sdt_types.h systemtap-2.9/sdt_types.h
---- systemtap-2.9.orig/sdt_types.h	2016-02-03 17:29:35.301854185 -0800
-+++ systemtap-2.9/sdt_types.h	2016-02-03 17:29:45.360853899 -0800
+diff -Naur systemtap-2.9.orig/sdt_types.h systemtap-2.9/sdt_types.h
+--- systemtap-2.9.orig/sdt_types.h	2017-02-24 10:47:12.572788050 -0800
++++ systemtap-2.9/sdt_types.h	2017-02-24 10:49:42.865077472 -0800
 @@ -10,6 +10,13 @@
  #define UPROBE2_TYPE 0x32425055 /* "UPB2" */
  #define UPROBE3_TYPE 0x33425055 /* "UPB3" */
@@ -158,9 +155,9 @@ diff -Naurw systemtap-2.9.orig/sdt_types.h systemtap-2.9/sdt_types.h
  typedef enum
    {
      uprobe1_type = UPROBE1_TYPE,
-diff -Naurw systemtap-2.9.orig/session.cxx systemtap-2.9/session.cxx
---- systemtap-2.9.orig/session.cxx	2016-02-03 17:29:35.301854185 -0800
-+++ systemtap-2.9/session.cxx	2016-02-03 17:29:45.362853899 -0800
+diff -Naur systemtap-2.9.orig/session.cxx systemtap-2.9/session.cxx
+--- systemtap-2.9.orig/session.cxx	2017-02-24 10:47:12.572788050 -0800
++++ systemtap-2.9/session.cxx	2017-02-24 10:49:56.716196203 -0800
 @@ -1329,7 +1329,7 @@
  	      cerr << "ERROR: multiple --sysroot options not supported" << endl;
  	      return 1;
@@ -170,17 +167,16 @@ diff -Naurw systemtap-2.9.orig/session.cxx systemtap-2.9/session.cxx
  	      if (spath == NULL) {
  		  cerr << _F("ERROR: %s is an invalid directory for --sysroot", optarg) << endl;
  		  return 1;
-diff -Naurw systemtap-2.9.orig/staprun/staprun.h systemtap-2.9/staprun/staprun.h
---- systemtap-2.9.orig/staprun/staprun.h	2016-02-03 17:29:35.312854184 -0800
-+++ systemtap-2.9/staprun/staprun.h	2016-02-03 17:29:45.363853898 -0800
-@@ -48,6 +48,10 @@
+diff -Naur systemtap-2.9.orig/staprun/staprun.h systemtap-2.9/staprun/staprun.h
+--- systemtap-2.9.orig/staprun/staprun.h	2017-02-24 10:47:12.581788127 -0800
++++ systemtap-2.9/staprun/staprun.h	2017-02-24 10:50:18.951386526 -0800
+@@ -47,6 +47,9 @@
+ #include <locale.h>
  #endif
- 
  
 +#ifndef __off_t
 +#define __off_t off_t
 +#endif
-+
+ 
  /* define gettext options if NLS is set */
  #if ENABLE_NLS
- #define _(string) gettext(string)
