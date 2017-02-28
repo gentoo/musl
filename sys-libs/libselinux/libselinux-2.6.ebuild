@@ -1,9 +1,9 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
 EAPI="6"
-PYTHON_COMPAT=( python2_7 python3_4 python3_5 )
+PYTHON_COMPAT=( python2_7 python3_4 python3_5 python3_6 )
 USE_RUBY="ruby21 ruby22 ruby23"
 
 # No, I am not calling ruby-ng
@@ -72,7 +72,7 @@ multilib_src_compile() {
 			python_export PYTHON_INCLUDEDIR PYTHON_LIBPATH
 			emake \
 				PYINC="-I${PYTHON_INCLUDEDIR}" \
-				LDFLAGS="-fPIC ${LDFLAGS} -pthread" \
+				LDFLAGS="-fPIC ${LDFLAGS} -lpthread" \
 				FTS_LDFLAGS="$(usex elibc_musl '-lfts' '')" \
 				LIBDIR="\$(PREFIX)/$(get_libdir)" \
 				SHLIBDIR="\$(DESTDIR)/$(get_libdir)" \
@@ -89,7 +89,7 @@ multilib_src_compile() {
 			rm -f src/selinuxswig_ruby_wrap.lo || die
 			emake \
 				RUBY=${1} \
-				LDFLAGS="-fPIC ${LDFLAGS} -pthread" \
+				LDFLAGS="-fPIC ${LDFLAGS} -lpthread" \
 				FTS_LDFLAGS="$(usex elibc_musl '-lfts' '')" \
 				LIBDIR="\$(PREFIX)/$(get_libdir)" \
 				SHLIBDIR="\$(DESTDIR)/$(get_libdir)" \
