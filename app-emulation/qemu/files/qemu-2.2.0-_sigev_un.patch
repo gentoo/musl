@@ -1,6 +1,6 @@
-diff -ur a/qemu-2.2.0/linux-user/syscall.c b/qemu-2.2.0/linux-user/syscall.c
---- a/qemu-2.2.0/linux-user/syscall.c	2014-12-09 15:45:43.000000000 -0100
-+++ b/qemu-2.2.0/linux-user/syscall.c	2015-03-16 19:09:49.050386155 -0100
+diff -ur qemu-2.2.0.orig/linux-user/syscall.c qemu-2.2.0/linux-user/syscall.c
+--- qemu-2.2.0.orig/linux-user/syscall.c	2014-12-09 15:45:43.000000000 -0100
++++ qemu-2.2.0/linux-user/syscall.c	2015-03-16 19:09:49.050386155 -0100
 @@ -5033,7 +5033,7 @@
      host_sevp->sigev_signo =
          target_to_host_signal(tswap32(target_sevp->sigev_signo));
