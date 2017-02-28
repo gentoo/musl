@@ -6,10 +6,10 @@ diff -Naur sessreg-1.1.0.orig/sessreg.h sessreg-1.1.0/sessreg.h
  #endif
  
 +#ifndef _PATH_WTMPX
-+# define _PATH_WTMPX	"/var/log/wtmp"
++# define _PATH_WTMPX	_PATH_WTMP
 +#endif
 +#ifndef _PATH_UTMPX
-+# define _PATH_UTMPX	"/var/log/utmp"
++# define _PATH_UTMPX	_PATH_UTMP
 +#endif
 +
  #ifndef WTMPX_FILE
