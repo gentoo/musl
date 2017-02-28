@@ -16,8 +16,7 @@
 	format to another. FontForge has support for many macintosh font formats.
 	</longdescription>
 	<use>
-		<flag name="truetype-debugger">Enable truetype debugger in
-	fontforge</flag>
+		<flag name="truetype-debugger">Enable truetype debugger in fontforge</flag>
 	</use>
 	<upstream>
 		<remote-id type="github">troydhanson/uthash</remote-id>
