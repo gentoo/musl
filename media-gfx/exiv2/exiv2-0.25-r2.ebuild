@@ -1,9 +1,9 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
 EAPI=5
-PYTHON_COMPAT=( python{2_7,3_3,3_4} )
+PYTHON_COMPAT=( python{2_7,3_4} )
 
 inherit eutils cmake-multilib python-any-r1
 
@@ -13,13 +13,12 @@ SRC_URI="http://www.exiv2.org/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0/14"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="alpha amd64 arm hppa ia64 ~mips ppc ppc64 ~s390 ~sh sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x64-solaris ~x86-solaris"
 IUSE_LINGUAS="bs de es fi fr gl ms pl pt ru sk sv ug uk vi"
 IUSE="doc examples nls png webready xmp $(printf 'linguas_%s ' ${IUSE_LINGUAS})"
 
 RDEPEND="
 	>=virtual/libiconv-0-r1[${MULTILIB_USEDEP}]
-	dev-libs/icu[${MULTILIB_USEDEP}]
 	nls? ( >=virtual/libintl-0-r1[${MULTILIB_USEDEP}] )
 	png? ( >=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}] )
 	webready? (
@@ -78,7 +77,7 @@ src_prepare() {
 	local i
 	for i in doc/cmd.txt; do
 		einfo "Converting "${i}" to UTF-8"
-		uconv -f LATIN1 -t UTF-8 "${i}" > "${i}.tmp" || die
+		iconv -f LATIN1 -t UTF-8 "${i}" > "${i}.tmp" || die
 		mv -f "${i}.tmp" "${i}" || die
 	done
 
