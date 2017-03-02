@@ -1,8 +1,8 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=6
+EAPI="6"
 
 inherit autotools eutils linux-info systemd
 
@@ -10,11 +10,6 @@ DESCRIPTION="An enhanced multi-threaded syslogd with database support and more"
 HOMEPAGE="http://www.rsyslog.com/"
 
 BRANCH="8-stable"
-
-PATCHES=(
-	"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-fix.patch"
-	"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-imptcp-queue.patch"
-)
 
 if [[ ${PV} == "9999" ]]; then
 	EGIT_REPO_URI="
@@ -62,7 +57,7 @@ fi
 
 LICENSE="GPL-3 LGPL-3 Apache-2.0"
 SLOT="0"
-IUSE="dbi debug doc elasticsearch +gcrypt grok jemalloc kafka kerberos libressl mongodb mysql normalize omhttpfs"
+IUSE="dbi debug doc elasticsearch +gcrypt grok jemalloc kafka kerberos libressl mdblookup mongodb mysql normalize omhttpfs"
 IUSE+=" omudpspoof postgres rabbitmq redis relp rfc3195 rfc5424hmac snmp ssl systemd test usertools +uuid zeromq"
 
 RDEPEND="
@@ -77,6 +72,7 @@ RDEPEND="
 	jemalloc? ( >=dev-libs/jemalloc-3.3.1:= )
 	kafka? ( >=dev-libs/librdkafka-0.9.0.99:= )
 	kerberos? ( virtual/krb5 )
+	mdblookup? ( dev-libs/libmaxminddb:= )
 	mongodb? ( >=dev-libs/libmongo-client-0.1.4 )
 	mysql? ( virtual/mysql )
 	normalize? (
@@ -87,7 +83,7 @@ RDEPEND="
 	omudpspoof? ( >=net-libs/libnet-1.1.6 )
 	postgres? ( >=dev-db/postgresql-8.4.20:= )
 	rabbitmq? ( >=net-libs/rabbitmq-c-0.3.0:= )
-	redis? ( >=dev-libs/hiredis-0.11.0 )
+	redis? ( >=dev-libs/hiredis-0.11.0:= )
 	relp? ( >=dev-libs/librelp-1.2.12:= )
 	rfc3195? ( >=dev-libs/liblogging-1.0.1:=[rfc3195] )
 	rfc5424hmac? (
@@ -113,6 +109,11 @@ if [[ ${PV} == "9999" ]]; then
 	DEPEND+=" >=sys-devel/bison-2.4.3"
 	DEPEND+=" >=dev-python/docutils-0.12"
 fi
+
+PATCHES=(
+	"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-fix.patch"
+	"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-imptcp-queue.patch"
+)
 
 CONFIG_CHECK="~INOTIFY_USER"
 WARNING_INOTIFY_USER="CONFIG_INOTIFY_USER isn't set. Imfile module on this system will only support polling mode!"
@@ -223,6 +224,7 @@ src_configure() {
 		$(use_enable kafka omkafka)
 		$(use_enable kerberos gssapi-krb5)
 		$(use_enable normalize mmnormalize)
+		$(use_enable mdblookup mmdblookup)
 		$(use_enable grok mmgrok)
 		$(use_enable omhttpfs)
 		$(use_enable omudpspoof)
