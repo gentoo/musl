@@ -1,19 +1,18 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=5
 
 inherit libtool eutils texlive-common
 
-DESCRIPTION="An extended version of pdfTeX using Lua as an embedded scripting language."
+DESCRIPTION="An extended version of pdfTeX using Lua as an embedded scripting language"
 HOMEPAGE="http://www.luatex.org/"
 SRC_URI="http://foundry.supelec.fr/gf/download/frsrelease/392/1730/${PN}-beta-${PV}.tar.bz2
 	http://foundry.supelec.fr/gf/download/frsrelease/392/1732/${PN}-beta-${PV}-doc.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="alpha amd64 arm hppa ia64 ~mips ppc ppc64 s390 sh sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
 IUSE="doc"
 
 RDEPEND="dev-libs/zziplib
@@ -33,6 +32,7 @@ src_prepare() {
 	has_version '>=app-text/poppler-0.18.0:0' && epatch "${FILESDIR}/poppler018.patch"
 	has_version '>=app-text/poppler-0.20.0:0' && epatch "${FILESDIR}/poppler020.patch"
 	has_version '>=app-text/poppler-0.22.0:0' && epatch "${FILESDIR}/poppler022.patch"
+	has_version '>=app-text/poppler-0.26.0:0' && epatch "${FILESDIR}/poppler026-backport.patch"
 	epatch "${FILESDIR}/kpathsea2012.patch" \
 		"${FILESDIR}/remove-zlib-version-check.patch" \
 		"${FILESDIR}/jmpbuf.patch"
