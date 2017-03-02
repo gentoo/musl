@@ -1,6 +1,5 @@
 # Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI="5"
 
@@ -122,7 +121,7 @@ SRC_URI="https://alioth.debian.org/frs/download.php/file/3958/${P}.tar.gz"
 
 LICENSE="GPL-2 public-domain"
 SLOT="0"
-KEYWORDS="amd64 arm x86"
+KEYWORDS="alpha amd64 arm hppa ia64 ppc ppc64 sparc x86 ~x86-fbsd ~amd64-linux ~x86-linux"
 
 RDEPEND="
 	sane_backends_dc210? ( >=virtual/jpeg-0-r2[${MULTILIB_USEDEP}] )
@@ -184,6 +183,7 @@ src_prepare() {
 		"${FILESDIR}"/${P}-systemd_pkgconfig.patch \
 		"${FILESDIR}"/${P}-kodakaio_avahi.patch \
 		"${FILESDIR}"/${P}-saned_pidfile_location.patch \
+		"${FILESDIR}"/${P}-cross-compile.patch \
 		"${FILESDIR}"/${P}-u_char.patch
 	# Fix for "make check".
 	sed -i -e 's/sane-backends 1.0.24git/sane-backends 1.0.24/' testsuite/tools/data/html*
