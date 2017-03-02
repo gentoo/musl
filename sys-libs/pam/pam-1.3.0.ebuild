@@ -15,7 +15,7 @@ SRC_URI="http://www.linux-pam.org/library/${MY_P}.tar.bz2
 
 LICENSE="|| ( BSD GPL-2 )"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-linux ~x86-linux"
 IUSE="audit berkdb cracklib debug nis nls +pie selinux test vim-syntax"
 
 RDEPEND="nls? ( >=virtual/libintl-0-r1[${MULTILIB_USEDEP}] )
@@ -88,7 +88,6 @@ src_prepare() {
 		configure || die
 
 	epatch "${FILESDIR}"/${PN}-1.2.1-fix-compat.patch
-#	epatch "${FILESDIR}"/${PN}-1.2.1-innetgr.patch
 	epatch "${FILESDIR}"/${PN}-1.2.1-no-strndupa.patch
 
 	# disable insecure modules (musl-libc doesn't implement the functions anyway)
