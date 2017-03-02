@@ -1,6 +1,5 @@
 # Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI="5"
 
@@ -64,9 +63,13 @@ set_opt() {
 
 src_prepare() {
 	epatch "${FILESDIR}"/${PN}-fix-headers.patch
+	epatch "${FILESDIR}/${P}-fix-building-w-older-linux-headers.patch"
 }
 
 src_configure() {
+	# Clear out env vars from the user. #599602
+	unset BASEDIR BINDIR SBINDIR
+
 	set_opt I18N use nls
 	set_opt HAVE_AFINET6 use ipv6
 	set_opt HAVE_HWIB has_version '>=sys-kernel/linux-headers-2.6'
