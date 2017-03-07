@@ -1,6 +1,5 @@
-diff -ur a/vte-0.28.2/config.h.in b/vte-0.28.2/config.h.in
---- a/vte-0.28.2/config.h.in	2015-07-10 20:49:18.179999269 -0200
-+++ b/vte-0.28.2/config.h.in	2011-08-28 23:33:19.000000000 -0200
+--- vte-0.28.2.orig/config.h.in
++++ vte-0.28.2/config.h.in
 @@ -82,6 +82,9 @@
  /* Define if you have the recvmsg function. */
  #undef HAVE_RECVMSG
