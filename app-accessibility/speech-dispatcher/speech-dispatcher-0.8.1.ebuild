@@ -1,10 +1,9 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=5
 
-PYTHON_COMPAT=( python3_3 python3_4 python3_5 )
+PYTHON_COMPAT=( python3_4 python3_5 )
 PYTHON_REQ_USE="threads(+)"
 
 inherit eutils python-r1
