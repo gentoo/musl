@@ -36,6 +36,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${P}-exec-hash.patch #578524
 	epatch "${FILESDIR}"/${P}-exec-prelink.patch #599894
 	epatch "${FILESDIR}"/${PN}-2.10-fix-opendir.patch #553092
+	epatch "${FILESDIR}"/${P}-symlinkat-renameat.patch #612202
 	epatch "${FILESDIR}"/${P}-musl.patch
 	epatch "${FILESDIR}"/${PN}-2.10-fix-visibility-musl.patch
 	epatch_user
