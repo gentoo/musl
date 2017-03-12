@@ -1,6 +1,5 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 # See `man savedconfig.eclass` for info on how to use USE=savedconfig.
 
@@ -16,7 +15,7 @@ if [[ ${PV} == "9999" ]] ; then
 else
 	MY_P=${PN}-${PV/_/-}
 	SRC_URI="https://www.busybox.net/downloads/${MY_P}.tar.bz2"
-	KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-linux ~arm-linux ~x86-linux"
 fi
 
 LICENSE="GPL-2" # GPL-2 only
@@ -37,17 +36,19 @@ S=${WORKDIR}/${MY_P}
 
 busybox_config_option() {
 	local flag=$1 ; shift
-	if [[ ${flag} != [yn] ]] ; then
+	if [[ ${flag} != [yn] && ${flag} != \"* ]] ; then
 		busybox_config_option $(usex ${flag} y n) "$@"
 		return
 	fi
+	local expr
 	while [[ $# -gt 0 ]] ; do
-		if [[ ${flag} == "y" ]] ; then
-			sed -i -e "s:.*\<CONFIG_$1\>.*set:CONFIG_$1=y:g" .config
-		else
-			sed -i -e "s:CONFIG_$1=y:# CONFIG_$1 is not set:g" .config
-		fi
-		einfo $(grep "CONFIG_$1[= ]" .config || echo Could not find CONFIG_$1 ...)
+		case ${flag} in
+		y) expr="s:.*\<CONFIG_$1\>.*set:CONFIG_$1=y:g" ;;
+		n) expr="s:CONFIG_$1=y:# CONFIG_$1 is not set:g" ;;
+		*) expr="s:.*\<CONFIG_$1\>.*:CONFIG_$1=${flag}:g" ;;
+		esac
+		sed -i -e "${expr}" .config || die
+		einfo "$(grep "CONFIG_$1[= ]" .config || echo "Could not find CONFIG_$1 ...")"
 		shift
 	done
 }
@@ -111,6 +112,7 @@ src_configure() {
 
 	# now turn off stuff we really don't want
 	busybox_config_option n DMALLOC
+	busybox_config_option n FEATURE_2_4_MODULES #607548
 	busybox_config_option n FEATURE_SUID_CONFIG
 	busybox_config_option n BUILD_AT_ONCE
 	busybox_config_option n BUILD_LIBBUSYBOX
@@ -121,7 +123,7 @@ src_configure() {
 	# triming the BSS size may be dangerous
 	busybox_config_option n FEATURE_USE_BSS_TAIL
 
-	# These causes trouble with musl.  Since we don't really
+	# These cause trouble with musl.  Since we don't really
 	# depend on busybox for most of the musl work, we'll lazily
 	# just turn them off.
 	busybox_config_option n FEATURE_UTMP
@@ -133,6 +135,9 @@ src_configure() {
 	busybox_config_option y ASH
 	busybox_config_option n HUSH
 
+	busybox_config_option '"/run"' PID_FILE_PATH
+	busybox_config_option '"/run/ifstate"' IFUPDOWN_IFSTATE_PATH
+
 	# disable ipv6 applets
 	if ! use ipv6; then
 		busybox_config_option n FEATURE_IPV6
@@ -141,7 +146,7 @@ src_configure() {
 		busybox_config_option n UDHCPC6
 	fi
 
-	busybox_config_option $(usex static n pam) PAM
+	busybox_config_option pam PAM
 	busybox_config_option static STATIC
 	busybox_config_option syslog {K,SYS}LOGD LOGGER
 	busybox_config_option systemd FEATURE_SYSTEMD

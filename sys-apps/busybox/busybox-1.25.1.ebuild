@@ -1,6 +1,5 @@
 # Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 # See `man savedconfig.eclass` for info on how to use USE=savedconfig.
 
@@ -16,7 +15,7 @@ if [[ ${PV} == "9999" ]] ; then
 else
 	MY_P=${PN}-${PV/_/-}
 	SRC_URI="https://www.busybox.net/downloads/${MY_P}.tar.bz2"
-	KEYWORDS="amd64 arm ~mips ppc x86"
+	KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~amd64-linux ~arm-linux ~x86-linux"
 fi
 
 LICENSE="GPL-2" # GPL-2 only
@@ -68,7 +67,7 @@ src_prepare() {
 
 	# patches go here!
 	epatch "${FILESDIR}"/${PN}-1.19.0-bb.patch
-#	epatch "${FILESDIR}"/${P}-*.patch
+	epatch "${FILESDIR}"/${P}-*.patch
 	cp "${FILESDIR}"/ginit.c init/ || die
 
 	# flag cleanup
@@ -121,7 +120,7 @@ src_configure() {
 	# triming the BSS size may be dangerous
 	busybox_config_option n FEATURE_USE_BSS_TAIL
 
-	# These causes trouble with musl.  Since we don't really
+	# These cause trouble with musl.  Since we don't really
 	# depend on busybox for most of the musl work, we'll lazily
 	# just turn them off.
 	busybox_config_option n FEATURE_UTMP
@@ -141,7 +140,7 @@ src_configure() {
 		busybox_config_option n UDHCPC6
 	fi
 
-	busybox_config_option $(usex static n pam) PAM
+	busybox_config_option pam PAM
 	busybox_config_option static STATIC
 	busybox_config_option syslog {K,SYS}LOGD LOGGER
 	busybox_config_option systemd FEATURE_SYSTEMD
