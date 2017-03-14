@@ -1,6 +1,6 @@
-diff -Naur openmp-3.9.0.orig/runtime/src/kmp_str.c openmp-3.9.0/runtime/src/kmp_str.c
---- openmp-3.9.0.orig/runtime/src/kmp_str.c	2016-11-01 12:48:23.089878111 -0700
-+++ openmp-3.9.0/runtime/src/kmp_str.c	2016-11-01 12:49:43.043419074 -0700
+diff -Naur openmp-4.0.0.src.orig/runtime/src/kmp_str.cpp openmp-4.0.0.src/runtime/src/kmp_str.cpp
+--- openmp-4.0.0.src.orig/runtime/src/kmp_str.cpp	2017-03-13 16:59:41.294879402 -0700
++++ openmp-4.0.0.src/runtime/src/kmp_str.cpp	2017-03-13 17:00:40.521420835 -0700
 @@ -208,7 +208,7 @@
  
              #if ! KMP_OS_WINDOWS
