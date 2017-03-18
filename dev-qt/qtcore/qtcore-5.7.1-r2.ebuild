@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 QT5_MODULE="qtbase"
@@ -14,8 +13,8 @@ fi
 
 IUSE="icu systemd"
 
-# TODO after bug 581054: dev-libs/double-conversion:=
 DEPEND="
+	dev-libs/double-conversion:=
 	dev-libs/glib:2
 	>=dev-libs/libpcre-8.38[pcre16,unicode]
 	>=sys-libs/zlib-1.2.5
