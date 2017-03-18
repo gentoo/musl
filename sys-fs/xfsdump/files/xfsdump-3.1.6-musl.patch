@@ -1,0 +1,82 @@
+diff -Naur xfsdump-3.1.6.orig/common/drive.c xfsdump-3.1.6/common/drive.c
+--- xfsdump-3.1.6.orig/common/drive.c	2017-03-18 10:15:09.015308629 -0700
++++ xfsdump-3.1.6/common/drive.c	2017-03-18 10:19:56.248906871 -0700
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <unistd.h>
+ #include <sys/stat.h>
+ #include <time.h>
+diff -Naur xfsdump-3.1.6.orig/common/main.c xfsdump-3.1.6/common/main.c
+--- xfsdump-3.1.6.orig/common/main.c	2017-03-18 10:15:09.012308611 -0700
++++ xfsdump-3.1.6/common/main.c	2017-03-18 10:20:21.938159790 -0700
+@@ -55,6 +55,10 @@
+ #include "content.h"
+ #include "inventory.h"
+ 
++#ifndef RLIM64_INFINITY
++#define RLIM64_INFINITY (~0ULL)
++#endif
++
+ #ifdef DUMP
+ /* main.c - main for dump
+  */
+@@ -2225,7 +2229,10 @@
+ 	{SIGTERM,	"SIGTERM"},
+ 	{SIGUSR1,	"SIGUSR1"},
+ 	{SIGUSR2,	"SIGUSR2"},
++	{SIGCHLD,	"SIGCHLD"},
++#ifdef SIGCLD
+ 	{SIGCLD,	"SIGCLD"},
++#endif
+ 	{SIGPWR,	"SIGPWR"},
+ 	{SIGURG,	"SIGURG"},
+ 	{SIGPOLL,	"SIGPOLL"},
+diff -Naur xfsdump-3.1.6.orig/common/types.h xfsdump-3.1.6/common/types.h
+--- xfsdump-3.1.6.orig/common/types.h	2017-03-18 10:15:09.011308605 -0700
++++ xfsdump-3.1.6/common/types.h	2017-03-18 10:19:43.429780663 -0700
+@@ -47,6 +47,9 @@
+ /* integers
+  */
+ typedef uint32_t size32_t;
++#ifndef __uint32_t
++#define __uint32_t uint32_t
++#endif
+ typedef uint64_t size64_t;
+ typedef char char_t;
+ typedef unsigned char u_char_t;
+diff -Naur xfsdump-3.1.6.orig/dump/content.c xfsdump-3.1.6/dump/content.c
+--- xfsdump-3.1.6.orig/dump/content.c	2017-03-18 10:15:09.036308756 -0700
++++ xfsdump-3.1.6/dump/content.c	2017-03-18 10:20:21.940159810 -0700
+@@ -37,6 +37,7 @@
+ #include <xfs/jdm.h>
+ #ifdef linux
+ #include <xfs/xqm.h>
++#include <linux/limits.h>
+ #endif
+ 
+ #include <attr/attributes.h>
+diff -Naur xfsdump-3.1.6.orig/dump/var.c xfsdump-3.1.6/dump/var.c
+--- xfsdump-3.1.6.orig/dump/var.c	2017-03-18 10:15:09.036308756 -0700
++++ xfsdump-3.1.6/dump/var.c	2017-03-18 10:23:04.657759448 -0700
+@@ -16,6 +16,7 @@
+  * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ 
++#include <limits.h>
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <sys/stat.h>
+diff -Naur xfsdump-3.1.6.orig/invutil/invidx.c xfsdump-3.1.6/invutil/invidx.c
+--- xfsdump-3.1.6.orig/invutil/invidx.c	2017-03-18 10:15:09.029308713 -0700
++++ xfsdump-3.1.6/invutil/invidx.c	2017-03-18 10:16:19.135769322 -0700
+@@ -19,6 +19,7 @@
+ #include <xfs/xfs.h>
+ #include <xfs/jdm.h>
+ 
++#include <fcntl.h>
+ #include <stdio.h>
+ #include <unistd.h>
+ #include <stdlib.h>

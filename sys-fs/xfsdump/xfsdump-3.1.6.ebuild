@@ -38,7 +38,7 @@ src_prepare() {
 	epatch "${FILESDIR}"/${PN}-3.0.5-prompt-overflow.patch #335115
 	epatch "${FILESDIR}"/${PN}-3.0.4-no-symlink.patch #311881
 	epatch "${FILESDIR}"/${PN}-3.1.6-linguas.patch #561664
-	epatch "${FILESDIR}"/${PN}-3.1.4-compat-musl.patch #549116
+	epatch "${FILESDIR}"/${PN}-3.1.6-musl.patch #549116
 }
 
 src_configure() {
