@@ -1,0 +1,11 @@
+diff -Naur portage-2.3.5.orig/src/portage_util_file_copy_reflink_linux.c portage-2.3.5/src/portage_util_file_copy_reflink_linux.c
+--- portage-2.3.5.orig/src/portage_util_file_copy_reflink_linux.c	2017-03-17 17:34:29.300177738 -0700
++++ portage-2.3.5/src/portage_util_file_copy_reflink_linux.c	2017-03-17 17:35:26.802723400 -0700
+@@ -4,6 +4,7 @@
+ 
+ #include <Python.h>
+ #include <errno.h>
++#include <fcntl.h>
+ #include <stdlib.h>
+ #include <ctype.h>
+ #include <sys/sendfile.h>
