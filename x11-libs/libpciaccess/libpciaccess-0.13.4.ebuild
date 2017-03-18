@@ -1,6 +1,5 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=5
 
@@ -8,7 +7,7 @@ XORG_MULTILIB=yes
 inherit xorg-2
 
 DESCRIPTION="Library providing generic access to the PCI bus and devices"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 ~mips ppc ppc64 ~s390 ~sh sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux ~sparc-solaris ~x64-solaris ~x86-solaris"
 IUSE="zlib"
 
 DEPEND="!<x11-base/xorg-server-1.5
@@ -19,7 +18,7 @@ RDEPEND="${DEPEND}
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.13.2-limits.patch
 	"${FILESDIR}"/${PN}-0.13.2-arm.patch
- )
+)
 
 pkg_setup() {
 	xorg-2_pkg_setup
