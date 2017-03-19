@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 
@@ -12,15 +11,18 @@ SRC_URI="https://github.com/rhinstaller/efivar/archive/${PV}.tar.gz -> ${P}.tar.
 
 LICENSE="GPL-2"
 SLOT="0/1"
-KEYWORDS="amd64 ~arm64 ~ia64 x86"
+KEYWORDS="amd64 ~arm64 ia64 x86"
 
 RDEPEND="dev-libs/popt"
 DEPEND="${RDEPEND}
 	>=sys-kernel/linux-headers-3.18"
 
+PATCHES=(
+	"${FILESDIR}/0.23-musl.patch"
+	"${FILESDIR}/27-strndupa.patch"
+)
+
 src_prepare() {
-	eapply "${FILESDIR}/0.23-musl.patch"
-	eapply "${FILESDIR}/27-strndupa.patch"
 	default
 	sed -i -e s/-Werror// gcc.specs || die
 }
