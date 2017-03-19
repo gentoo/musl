@@ -21,7 +21,7 @@ DEPEND="${RDEPEND}"
 src_prepare() {
 	default
 	sed -i -e s/-Werror// Make.defaults || die
-	epatch ${FILESDIR}/musl.patch
+	epatch "${FILESDIR}"/musl.patch
 }
 
 src_configure() {
