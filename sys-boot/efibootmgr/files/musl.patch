@@ -5,7 +5,7 @@ index c7b734a..7f2f657 100644
 @@ -26,7 +26,7 @@ clang_cflags =
  gcc_cflags =
  cflags	= $(CFLAGS) $(SUBDIR_CFLAGS) \
- 	 -Wall -Wextra -Wsign-compare -Wstrict-aliasing \
+ 	-Werror -Wall -Wextra -Wsign-compare -Wstrict-aliasing \
 -	-std=gnu11 -fshort-wchar -fPIC \
 +	-std=gnu11 -fPIC \
  	-D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -DLOCALEDIR=\"$(localedir)\" \
