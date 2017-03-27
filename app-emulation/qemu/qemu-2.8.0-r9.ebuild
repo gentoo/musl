@@ -20,6 +20,10 @@ else
 	KEYWORDS="~amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
 fi
 
+# bug #606088
+SRC_URI+="
+	https://dev.gentoo.org/~tamiko/distfiles/${P}-CVE-2016-9602-patches.tar.xz"
+
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
 HOMEPAGE="http://www.qemu.org http://www.linux-kvm.org"
 
@@ -77,7 +81,10 @@ TARGETS_DEPEND="
 	>=dev-libs/glib-2.0[static-libs(+)]
 	>=x11-libs/pixman-0.28.0[static-libs(+)]
 	sys-libs/zlib[static-libs(+)]
-	accessibility? ( app-accessibility/brltty[static-libs(+)] )
+	accessibility? (
+		app-accessibility/brltty[api]
+		app-accessibility/brltty[static-libs(+)]
+	)
 	aio? ( dev-libs/libaio[static-libs(+)] )
 	alsa? ( >=media-libs/alsa-lib-1.0.13 )
 	bluetooth? ( net-wireless/bluez )
@@ -212,6 +219,8 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5987.patch   #609398
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-6058.patch   #609638
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-2620.patch   #609206
+	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-6505.patch   #612220
+	"${S}-CVE-2016-9602-patches"
 )
 
 STRIP_MASK="/usr/share/qemu/palcode-clipper"
