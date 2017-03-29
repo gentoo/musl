@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 # Until bug #537330 glib is a reverse dependency of pkgconfig and, then
 # adding new dependencies end up making stage3 to grow. Every addition needs
@@ -84,7 +83,8 @@ pkg_setup() {
 
 src_prepare() {
 	# Fix for MUSL
-	epatch "${FILESDIR}"/${P}-musl-glibmm.patch
+	eapply "${FILESDIR}"/quark_init_on_demand.patch
+	eapply "${FILESDIR}"/gobject_init_on_demand.patch
 
 	# Prevent build failure in stage3 where pkgconfig is not available, bug #481056
 	mv -f "${WORKDIR}"/pkg-config-*/pkg.m4 "${S}"/m4macros/ || die
@@ -115,6 +115,8 @@ src_prepare() {
 		# Don't build tests, also prevents extra deps, bug #512022
 		sed -i -e 's/ tests//' {.,gio,glib}/Makefile.am || die
 	fi
+
+	eapply "${FILESDIR}"/${PN}-2.50.3-fix-gdatetime-tests.patch
 
 	# gdbus-codegen is a separate package
 	eapply "${FILESDIR}"/${PN}-2.40.0-external-gdbus-codegen.patch
