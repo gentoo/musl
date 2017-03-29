@@ -12,7 +12,7 @@ PYTHON_COMPAT=( python2_7 )
 # pkg-config
 GNOME2_LA_PUNT="yes"
 
-inherit autotools bash-completion-r1 eutils flag-o-matic gnome2 libtool linux-info \
+inherit autotools bash-completion-r1 flag-o-matic gnome2 libtool linux-info \
 	multilib multilib-minimal pax-utils python-r1  toolchain-funcs versionator virtualx
 
 DESCRIPTION="The GLib library of C routines"
@@ -84,7 +84,8 @@ pkg_setup() {
 
 src_prepare() {
 	# Fix for MUSL
-	epatch "${FILESDIR}"/${P}-musl-glibmm.patch
+	eapply "${FILESDIR}"/quark_init_on_demand.patch
+	eapply "${FILESDIR}"/gobject_init_on_demand.patch
 
 	# Prevent build failure in stage3 where pkgconfig is not available, bug #481056
 	mv -f "${WORKDIR}"/pkg-config-*/pkg.m4 "${S}"/m4macros/ || die

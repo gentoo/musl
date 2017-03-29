@@ -1,0 +1,77 @@
+musl does not run ctors in the assumed order that glib-2.46 expects.
+Call g_quark_init() where it is expected to have been called.
+
+
+--- a/glib/gquark.c	2016-08-17 17:20:47.000000000 +0200
++++ b/glib/gquark.c	2016-08-30 07:49:13.298234757 +0200
+@@ -57,6 +57,9 @@
+ void
+ g_quark_init (void)
+ {
++  if (quark_ht)
++    return;
++
+   g_assert (quark_seq_id == 0);
+   quark_ht = g_hash_table_new (g_str_hash, g_str_equal);
+   quarks = g_new (gchar*, QUARK_BLOCK_SIZE);
+@@ -138,9 +141,12 @@
+     return 0;
+ 
+   G_LOCK (quark_global);
++#if !defined(__GLIBC__)
++  g_quark_init ();
++#endif
+   quark = GPOINTER_TO_UINT (g_hash_table_lookup (quark_ht, string));
+   G_UNLOCK (quark_global);
+
+   return quark;
+ }
+ 
+@@ -209,6 +213,9 @@
+     return 0;
+ 
+   G_LOCK (quark_global);
++#if !defined(__GLIBC__)
++  g_quark_init ();
++#endif
+   quark = quark_from_string (string, TRUE);
+   G_UNLOCK (quark_global);
+ 
+@@ -243,6 +248,9 @@
+     return 0;
+ 
+   G_LOCK (quark_global);
++#if !defined(__GLIBC__)
++  g_quark_init ();
++#endif
+   quark = quark_from_string (string, FALSE);
+   G_UNLOCK (quark_global);
+ 
+@@ -280,6 +286,7 @@
+   GQuark quark;
+   gchar **quarks_new;
+ 
++  g_quark_init ();
+   if (quark_seq_id % QUARK_BLOCK_SIZE == 0)
+     {
+       quarks_new = g_new (gchar*, quark_seq_id + QUARK_BLOCK_SIZE);
+@@ -323,6 +330,9 @@
+     return NULL;
+ 
+   G_LOCK (quark_global);
++#if !defined(__GLIBC__)
++  g_quark_init ();
++#endif
+   quark = quark_from_string (string, TRUE);
+   result = quarks[quark];
+   G_UNLOCK (quark_global);
+@@ -353,6 +361,9 @@
+     return NULL;
+ 
+   G_LOCK (quark_global);
++#if !defined(__GLIBC__)
++  g_quark_init ();
++#endif
+   quark = quark_from_string (string, FALSE);
+   result = quarks[quark];
+   G_UNLOCK (quark_global);
