@@ -1,9 +1,7 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
-EAPI="5"
-GCONF_DEBUG="yes" # Not gnome macro but similar
+EAPI=6
 GNOME2_LA_PUNT="yes"
 PYTHON_COMPAT=( python2_7 )
 
@@ -14,25 +12,21 @@ HOMEPAGE="https://wiki.gnome.org/Projects/GnomeKeyring"
 
 LICENSE="GPL-2+ LGPL-2+"
 SLOT="0"
-IUSE="+caps debug pam selinux +ssh-agent test"
-KEYWORDS="amd64 arm ~mips ~ppc x86"
+IUSE="+caps pam selinux +ssh-agent test"
+KEYWORDS="alpha amd64 arm ~arm64 ia64 ~mips ppc ppc64 ~sh sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux ~sparc-solaris ~x86-solaris"
 
 # Replace gkd gpg-agent with pinentry[gnome-keyring] one, bug #547456
-COMMON_DEPEND="
+RDEPEND="
 	>=app-crypt/gcr-3.5.3:=[gtk]
 	>=dev-libs/glib-2.38:2
 	app-misc/ca-certificates
 	>=dev-libs/libgcrypt-1.2.2:0=
-	>=sys-apps/dbus-1.1.1
 	caps? ( sys-libs/libcap-ng )
 	pam? ( virtual/pam )
-
-	>=app-crypt/gnupg-2.0.28
+	selinux? ( sec-policy/selinux-gnome )
+	>=app-crypt/gnupg-2.0.28:=
 "
-RDEPEND="${COMMON_DEPEND}
-	app-crypt/pinentry[gnome-keyring]
-"
-DEPEND="${COMMON_DEPEND}
+DEPEND="${RDEPEND}
 	>=app-eselect/eselect-pinentry-0.5
 	app-text/docbook-xml-dtd:4.3
 	dev-libs/libxslt
@@ -41,15 +35,15 @@ DEPEND="${COMMON_DEPEND}
 	virtual/pkgconfig
 	test? ( ${PYTHON_DEPS} )
 "
+PDEPEND="app-crypt/pinentry[gnome-keyring]" #570512
+PATCHES=( "${FILESDIR}/${PN}-3.14.0-musl-add-sys_select_h.patch" )
 
 pkg_setup() {
 	use test && python-any-r1_pkg_setup
 }
 
 src_prepare() {
-	epatch "${FILESDIR}"/${PN}-3.14.0-musl-add-sys_select_h.patch
-
-	# Disable stupid CFLAGS
+	# Disable stupid CFLAGS with debug enabled
 	sed -e 's/CFLAGS="$CFLAGS -g"//' \
 		-e 's/CFLAGS="$CFLAGS -O0"//' \
 		-i configure.ac configure || die
@@ -58,23 +52,18 @@ src_prepare() {
 }
 
 src_configure() {
-	# --disable-gpg-agent, bug #547456
 	gnome2_src_configure \
 		$(use_with caps libcap-ng) \
 		$(use_enable pam) \
 		$(use_with pam pam-dir $(getpam_mod_dir)) \
 		$(use_enable selinux) \
 		$(use_enable ssh-agent) \
-		--enable-doc \
-		--disable-gpg-agent
+		--enable-doc
 }
 
 src_test() {
-	 # FIXME: this should be handled at eclass level
 	 "${EROOT}${GLIB_COMPILE_SCHEMAS}" --allow-any-name "${S}/schema" || die
-
-	 unset DBUS_SESSION_BUS_ADDRESS
-	 GSETTINGS_SCHEMA_DIR="${S}/schema" Xemake check
+	 GSETTINGS_SCHEMA_DIR="${S}/schema" virtx emake check
 }
 
 pkg_postinst() {
