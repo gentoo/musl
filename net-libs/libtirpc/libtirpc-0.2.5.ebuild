@@ -1,6 +1,5 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI="4"
 
@@ -13,7 +12,7 @@ SRC_URI="mirror://sourceforge/${PN}/${P}.tar.bz2
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="alpha amd64 arm arm64 hppa ia64 ~mips ppc ppc64 s390 sh sparc x86"
 IUSE="ipv6 kerberos static-libs"
 
 RDEPEND="kerberos? ( >=virtual/krb5-0-r1[${MULTILIB_USEDEP}] )"
@@ -56,7 +55,7 @@ multilib_src_install() {
 	default
 
 	# libtirpc replaces rpc support in glibc, so we need it in /
-	multilib_is_native_abi && gen_usr_ldscript -a tirpc
+	gen_usr_ldscript -a tirpc
 }
 
 multilib_src_install_all() {
