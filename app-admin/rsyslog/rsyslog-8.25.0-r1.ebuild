@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI="6"
 
@@ -53,6 +52,12 @@ else
 		http://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-${MY_PV}.tar.gz -> ${MY_FILENAME}
 		doc? ( http://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-doc-${MY_PV}.tar.gz -> ${MY_FILENAME_DOCS} )
 	"
+
+	PATCHES=(
+		"${FILESDIR}/8-stable/${PN}-8.24.0-fix-tcpflood-without-librelp.patch"
+		"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-fix.patch"
+		"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-imptcp-queue.patch"
+	)
 fi
 
 LICENSE="GPL-3 LGPL-3 Apache-2.0"
@@ -109,11 +114,6 @@ if [[ ${PV} == "9999" ]]; then
 	DEPEND+=" >=sys-devel/bison-2.4.3"
 	DEPEND+=" >=dev-python/docutils-0.12"
 fi
-
-PATCHES=(
-	"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-fix.patch"
-	"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-imptcp-queue.patch"
-)
 
 CONFIG_CHECK="~INOTIFY_USER"
 WARNING_INOTIFY_USER="CONFIG_INOTIFY_USER isn't set. Imfile module on this system will only support polling mode!"
