@@ -28,6 +28,7 @@ src_unpack() {
 src_prepare() {
 	default
 	# Musl fixes
+	epatch "${FILESDIR}"/0006-fix_queue_h_include.patch
 	epatch "${FILESDIR}"/git.patch
 }
 
