@@ -17,6 +17,7 @@ IUSE="ipv6 kerberos static-libs"
 
 RDEPEND="kerberos? ( >=virtual/krb5-0-r1[${MULTILIB_USEDEP}] )"
 DEPEND="${RDEPEND}
+	elibc_musl? ( sys-libs/queue )
 	app-arch/xz-utils
 	>=virtual/pkgconfig-0-r1[${MULTILIB_USEDEP}]"
 
@@ -28,7 +29,6 @@ src_unpack() {
 src_prepare() {
 	default
 	# Musl fixes
-	epatch "${FILESDIR}"/0006-fix_queue_h_include.patch
 	epatch "${FILESDIR}"/git.patch
 }
 

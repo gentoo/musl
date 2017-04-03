@@ -17,6 +17,7 @@ IUSE="ipv6 kerberos static-libs"
 
 RDEPEND="kerberos? ( >=virtual/krb5-0-r1[${MULTILIB_USEDEP}] )"
 DEPEND="${RDEPEND}
+	elibc_musl? ( sys-libs/queue )
 	app-arch/xz-utils
 	>=virtual/pkgconfig-0-r1[${MULTILIB_USEDEP}]"
 RDEPEND="${RDEPEND}
@@ -37,7 +38,6 @@ src_prepare() {
 	epatch "${FILESDIR}"/0003-fix_cdefs_h_include.patch
 	epatch "${FILESDIR}"/0004-fix_DECLS.patch
 	epatch "${FILESDIR}"/0005-fix_remaining_issues.patch
-	epatch "${FILESDIR}"/0006-fix_queue_h_include.patch
 	epatch "${FILESDIR}"/0007-no-des.patch
 	eautoconf
 	eautoreconf
