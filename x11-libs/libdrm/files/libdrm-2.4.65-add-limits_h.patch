@@ -1,0 +1,26 @@
+From 4031dc17bb728850c9b079c8d5f9cc0a379b9d46 Mon Sep 17 00:00:00 2001
+From: Felix Janda <felix.janda@posteo.de>
+Date: Sat, 26 Sep 2015 08:08:43 +0200
+Subject: xf86drm: include <limits.h> for PATH_MAX
+
+fixes compilation error with musl libc and Solaris based platforms.
+
+Bugzilla: https://bugs.freedesktop.org/show_bug.cgi?id=92082
+Signed-off-by: Felix Janda <felix.janda@posteo.de>
+Reviewed-by: Emil Velikov <emil.l.velikov@gmail.com>
+
+diff --git a/xf86drm.c b/xf86drm.c
+index a9f5c29..c1cab1b 100644
+--- a/xf86drm.c
++++ b/xf86drm.c
+@@ -45,6 +45,7 @@
+ #include <stddef.h>
+ #include <fcntl.h>
+ #include <errno.h>
++#include <limits.h>
+ #include <signal.h>
+ #include <time.h>
+ #include <sys/types.h>
+-- 
+cgit v0.10.2
+
