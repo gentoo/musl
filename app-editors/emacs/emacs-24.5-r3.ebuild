@@ -212,6 +212,9 @@ src_configure() {
 }
 
 src_compile() {
+	# compile preload hack
+	$(tc-getCC) -shared -fPIC -o preload.so "${FILESDIR}/preload.c" || die
+
 	export SANDBOX_ON=0			# for the unbelievers, see Bug #131505
 	emake
 }
