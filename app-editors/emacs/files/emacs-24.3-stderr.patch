@@ -1,5 +1,5 @@
---- a/emacs-24.3/src/print.c
-+++ b/emacs-24.3/src/print.c
+--- emacs-24.3.orig/src/print.c
++++ emacs-24.3/src/print.c
 @@ -733,7 +733,7 @@
    print_output_debug_flag = x;
  }
