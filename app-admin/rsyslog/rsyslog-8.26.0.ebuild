@@ -54,7 +54,6 @@ else
 	"
 
 	PATCHES=(
-		"${FILESDIR}/8-stable/${PN}-8.24.0-fix-tcpflood-without-librelp-r1.patch"
 		"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-fix.patch"
 	)
 fi
@@ -81,7 +80,7 @@ RDEPEND="
 	mysql? ( virtual/mysql )
 	normalize? (
 		>=dev-libs/libee-0.4.0
-		>=dev-libs/liblognorm-2.0.1:=
+		>=dev-libs/liblognorm-2.0.3:=
 	)
 	omhttpfs? ( >=net-misc/curl-7.35.0 )
 	omudpspoof? ( >=net-libs/libnet-1.1.6 )
