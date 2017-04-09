@@ -15,7 +15,7 @@ SRC_URI="http://www.webkitgtk.org/releases/${MY_P}.tar.xz"
 
 LICENSE="LGPL-2+ BSD"
 SLOT="4/37" # soname version of libwebkit2gtk-4.0
-KEYWORDS="~alpha amd64 ~arm ~ia64 ~ppc ~ppc64 ~sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x86-macos"
+KEYWORDS="~alpha ~amd64 ~arm ~ia64 ~ppc ~ppc64 ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x86-macos"
 
 IUSE="aqua coverage doc +egl +geolocation gles2 gnome-keyring +gstreamer +introspection +jit libnotify nsplugin +opengl spell wayland +webgl X"
 
@@ -48,10 +48,10 @@ RDEPEND="
 	>=dev-libs/libxslt-1.1.7
 	>=media-libs/fontconfig-2.8:1.0
 	>=media-libs/freetype-2.4.2:2
-	>=media-libs/harfbuzz-0.9.18:=[icu(+)]
+	>=media-libs/harfbuzz-1.3.3:=[icu(+)]
 	>=media-libs/libpng-1.4:0=
 	media-libs/libwebp:=
-	>=net-libs/gnutls-3
+	dev-libs/libgcrypt:0=
 	>=net-libs/libsoup-2.42:2.4[introspection?]
 	>=x11-libs/cairo-1.10.2:=
 	>=x11-libs/gtk+-3.14:3[introspection?]
@@ -64,8 +64,8 @@ RDEPEND="
 	gles2? ( media-libs/mesa[gles2] )
 	gnome-keyring? ( app-crypt/libsecret )
 	gstreamer? (
-		>=media-libs/gstreamer-1.2:1.0
-		>=media-libs/gst-plugins-base-1.2:1.0
+		>=media-libs/gstreamer-1.2.3:1.0
+		>=media-libs/gst-plugins-base-1.2.3:1.0
 		>=media-libs/gst-plugins-bad-1.8:1.0[opengl?] )
 	introspection? ( >=dev-libs/gobject-introspection-1.32.0:= )
 	libnotify? ( x11-libs/libnotify )
@@ -98,10 +98,13 @@ DEPEND="${RDEPEND}
 	>=dev-util/gtk-doc-am-1.10
 	>=dev-util/gperf-3.0.1
 	>=sys-devel/bison-2.4.3
-	>=sys-devel/flex-2.5.34
 	|| ( >=sys-devel/gcc-4.9 >=sys-devel/clang-3.3 )
 	sys-devel/gettext
 	virtual/pkgconfig
+
+	dev-lang/perl
+	virtual/perl-Data-Dumper
+	virtual/perl-Carp
 
 	doc? ( >=dev-util/gtk-doc-1.10 )
 	geolocation? ( dev-util/gdbus-codegen )
@@ -125,8 +128,8 @@ PATCHES=(
 	# https://bugs.webkit.org/show_bug.cgi?id=167283
 	"${FILESDIR}"/${PN}-2.8.5-fix-alpha-build.patch
 
-	# https://bugs.webkit.org/show_bug.cgi?id=148379
-	"${FILESDIR}"/${PN}-2.8.5-webkit2gtkinjectedbundle-j1.patch
+	# Avoid perl[ithreads] build time requirement as that would be very very messy
+	"${FILESDIR}"/${PV}-avoid-perl-ithreads.patch
 
 	# musl and jit
 	"${FILESDIR}"/${PN}-2.14.3-musl.patch
@@ -237,12 +240,12 @@ src_configure() {
 		-DENABLE_GEOLOCATION=$(usex geolocation)
 		$(cmake-utils_use_find_package gles2 OpenGLES2)
 		-DENABLE_GLES2=$(usex gles2)
-		-DENABLE_CREDENTIAL_STORAGE=$(usex gnome-keyring)
 		-DENABLE_VIDEO=$(usex gstreamer)
 		-DENABLE_WEB_AUDIO=$(usex gstreamer)
 		-DENABLE_INTROSPECTION=$(usex introspection)
 		-DENABLE_JIT=$(usex jit)
 		-DUSE_LIBNOTIFY=$(usex libnotify)
+		-DUSE_LIBSECRET=$(usex gnome-keyring)
 		-DENABLE_PLUGIN_PROCESS_GTK2=$(usex nsplugin)
 		-DENABLE_SPELLCHECK=$(usex spell)
 		-DENABLE_WAYLAND_TARGET=$(usex wayland)
