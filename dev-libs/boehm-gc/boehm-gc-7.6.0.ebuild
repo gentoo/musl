@@ -22,8 +22,8 @@ DEPEND=">=dev-libs/libatomic_ops-7.4
 S="${WORKDIR}/${MY_P}"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-7.4.2-getcontext.patch
 	"${FILESDIR}"/${PN}-7.4.2-testsuite.patch
+	"${FILESDIR}"/${PN}-7.6.0-sys_select.patch
 )
 
 src_configure() {

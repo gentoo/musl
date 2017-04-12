@@ -1,0 +1,11 @@
+diff -Naur a/pthread_stop_world.c b/pthread_stop_world.c
+--- a/pthread_stop_world.c	2017-04-12 09:02:09.320950067 -0700
++++ b/pthread_stop_world.c	2017-04-12 09:13:10.973562426 -0700
+@@ -41,6 +41,7 @@
+ 
+ #else /* !GC_OPENBSD_UTHREADS && !NACL */
+ 
++#include <sys/select.h>
+ #include <signal.h>
+ #include <semaphore.h>
+ #include <errno.h>
