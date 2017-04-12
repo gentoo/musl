@@ -17,7 +17,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
-	KEYWORDS="~amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
+	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 x86 ~x86-fbsd"
 fi
 
 # bug #606088
@@ -753,7 +753,6 @@ src_install() {
 
 pkg_postinst() {
 	DISABLE_AUTOFORMATTING=true
-	FORCE_PRINT_ELOG=1 # remove for next version bump
 	readme.gentoo_print_elog
 
 	if [[ -n ${softmmu_targets} ]] && use kernel_linux; then
