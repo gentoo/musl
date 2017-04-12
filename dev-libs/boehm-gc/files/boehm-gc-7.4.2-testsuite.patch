@@ -1,7 +1,7 @@
 Fix wrong assumption on default stack size
 
---- a/gc-7.4.2/tests/test.c
-+++ b/gc-7.4.2/tests/test.c
+--- a/tests/test.c
++++ b/tests/test.c
 @@ -588,7 +588,7 @@
  #   elif defined(__MACH__) && defined(__ppc64__)
  #     define BIG 2500
