@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 
@@ -16,7 +15,8 @@ DOC_P="${PN}-${DOC_PV}"
 
 DESCRIPTION="Fast array and numerical python library"
 HOMEPAGE="http://www.numpy.org/"
-SRC_URI="mirror://pypi/${PN:0:1}/${PN}/${P}.tar.gz
+SRC_URI="
+	mirror://pypi/${PN:0:1}/${PN}/${P}.zip
 	doc? (
 		http://docs.scipy.org/doc/${DOC_P}/${PN}-html-${DOC_PV}.zip
 		http://docs.scipy.org/doc/${DOC_P}/${PN}-ref-${DOC_PV}.pdf
@@ -36,12 +36,9 @@ DEPEND="${RDEPEND}
 	test? ( >=dev-python/nose-1.0[${PYTHON_USEDEP}] )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-1.11.1-no-hardcode-blas.patch
+	"${FILESDIR}"/${P}-no-hardcode-blas.patch
 	"${FILESDIR}"/${PN}-1.11.2-blas_rec_inc_dir.patch
 	"${FILESDIR}"/${PN}-1.11.1-no-xlocale.patch
-	# This has been fixed upstream but no new release yet
-	# https://github.com/numpy/numpy/commit/5d0ce36e5be134bb5ead03cab1edeaa60fa355aa
-	"${FILESDIR}"/${P}-import-module-fix.patch
 )
 
 src_unpack() {
