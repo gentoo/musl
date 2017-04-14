@@ -1,7 +1,6 @@
 #!/sbin/openrc-run
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 # Set up some defaults.
 : "${LOAD_DURING_SHUTDOWN:=yes}"
@@ -70,7 +69,7 @@ initrd_path() {
 		"initrd-${kver}.img" \
 		"initrd-${kver}" \
 		"initramfs-${kver}.img" \
-		"initramfs-genkernel-${karch}-${kver}"; do
+		"initramfs-genkernel-${karch}-${kver}" \
 		"initramfs-genkernel-${gkarch}-${kver}"; do
 		if [ -e "${BOOTPART}/${x}" ]; then
 			echo "${BOOTPART}/${x}"
