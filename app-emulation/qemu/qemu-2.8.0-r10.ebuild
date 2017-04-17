@@ -17,8 +17,12 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
-	KEYWORDS="~amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
+	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 x86 ~x86-fbsd"
 fi
+
+# bug #606088
+SRC_URI+="
+	https://dev.gentoo.org/~tamiko/distfiles/${P}-CVE-2016-9602-patches.tar.xz"
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
 HOMEPAGE="http://www.qemu.org http://www.linux-kvm.org"
@@ -201,18 +205,25 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2016-9912.patch   #602630
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2016-10028.patch  #603444
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2016-10155.patch  #606720
+	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-2615.patch   #608034
+	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-2630.patch   #609396
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5525-1.patch #606264
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5525-2.patch
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5552.patch   #606722
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5578.patch   #607000
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5579.patch   #607100
+	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5667.patch   #607766
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5856.patch   #608036
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5857.patch   #608038
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5898.patch   #608520
+	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5931.patch   #608728
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5973.patch   #609334
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-5987.patch   #609398
+	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-6058.patch   #609638
+	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-2620.patch   #609206
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-6505.patch   #612220
 	"${FILESDIR}"/${PN}-2.8.0-CVE-2017-7377.patch   #614744
+	"${S}-CVE-2016-9602-patches"
 )
 
 STRIP_MASK="/usr/share/qemu/palcode-clipper"
