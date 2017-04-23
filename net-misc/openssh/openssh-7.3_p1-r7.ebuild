@@ -3,7 +3,7 @@
 
 EAPI="5"
 
-inherit eutils user flag-o-matic multilib autotools pam systemd versionator
+inherit eutils user flag-o-matic multilib autotools pam systemd versionator toolchain-funcs
 
 # Make it more portable between straight releases
 # and _p? releases.
@@ -196,7 +196,6 @@ src_configure() {
 	use static && append-ldflags -static
 
 	local myconf=(
-		--without-stackprotect
 		--with-ldflags="${LDFLAGS}"
 		--disable-strip
 		--with-pid-dir="${EPREFIX}"$(usex kernel_linux '' '/var')/run
@@ -221,6 +220,10 @@ src_configure() {
 		$(use_with ssl md5-passwords)
 		$(use_with ssl ssl-engine)
 	)
+
+	if [[ $(tc-arch) == x86 ]]; then
+		myconf+=( --without-stackprotect)
+	fi
 
 	# The seccomp sandbox is broken on x32, so use the older method for now. #553748
 	use amd64 && [[ ${ABI} == "x32" ]] && myconf+=( --with-sandbox=rlimit )
