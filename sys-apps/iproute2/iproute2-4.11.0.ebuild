@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI="5"
 
@@ -39,13 +38,13 @@ DEPEND="${RDEPEND}
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
-	"${FILESDIR}"/${PN}-4.10.0-musl.patch
+	"${FILESDIR}"/${PN}-4.11.0-musl.patch
 )
 
 src_prepare() {
 	if ! use ipv6 ; then
 		PATCHES+=(
-			"${FILESDIR}"/${PN}-4.2.0-no-ipv6.patch #326849
+			"${FILESDIR}"/${PN}-4.11.0-no-ipv6.patch #326849
 		)
 	fi
 
