@@ -40,7 +40,7 @@ DOCS=(
 	ChangeLog
 )
 
-PATCHES=( "${FILESDIR}"/${P}-musl.patch )
+PATCHES=( "${FILESDIR}"/${PN}-3.3.0_rc1-musl.patch )
 
 S=${WORKDIR}/${LIBNL_P}
 
