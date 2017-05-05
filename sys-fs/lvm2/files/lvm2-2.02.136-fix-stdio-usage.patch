@@ -1,0 +1,112 @@
+diff -Naurw LVM2.2.02.136.orig/lib/commands/toolcontext.c LVM2.2.02.136/lib/commands/toolcontext.c
+--- LVM2.2.02.136.orig/lib/commands/toolcontext.c	2015-11-27 17:29:19.000000000 -0800
++++ LVM2.2.02.136/lib/commands/toolcontext.c	2015-12-03 09:12:38.501331770 -0800
+@@ -1637,7 +1637,9 @@
+ /*
+  * Close and reopen stream on file descriptor fd.
+  */
+-static int _reopen_stream(FILE *stream, int fd, const char *mode, const char *name, FILE **new_stream)
++#if defined(__GLIBC__)
++#define _reopen_stream(stream, fd, mode, name) __reopen_stream(stream, fd, mode, name, &stream)
++static int __reopen_stream(FILE *stream, int fd, const char *mode, const char *name, FILE **new_stream)
+ {
+ 	int fd_copy, new_fd;
+ 
+@@ -1664,6 +1666,9 @@
+ 
+ 	return 1;
+ }
++#else
++#define _reopen_stream(stream, fd, mode, name) (freopen(NULL, mode, stream) != NULL)
++#endif
+ 
+ static int _init_lvmetad(struct cmd_context *cmd)
+ {
+@@ -1741,7 +1746,6 @@
+ 				       unsigned set_filters)
+ {
+ 	struct cmd_context *cmd;
+-	FILE *new_stream;
+ 	int flags;
+ 
+ #ifdef M_MMAP_MAX
+@@ -1791,9 +1795,8 @@
+ 		if (is_valid_fd(STDIN_FILENO) &&
+ 		    ((flags = fcntl(STDIN_FILENO, F_GETFL)) > 0) &&
+ 		    (flags & O_ACCMODE) != O_WRONLY) {
+-			if (!_reopen_stream(stdin, STDIN_FILENO, "r", "stdin", &new_stream))
++			if (!_reopen_stream(stdin, STDIN_FILENO, "r", "stdin"))
+ 				goto_out;
+-			stdin = new_stream;
+ 			if (setvbuf(stdin, cmd->linebuffer, _IOLBF, linebuffer_size)) {
+ 				log_sys_error("setvbuf", "");
+ 				goto out;
+@@ -1803,9 +1806,8 @@
+ 		if (is_valid_fd(STDOUT_FILENO) &&
+ 		    ((flags = fcntl(STDOUT_FILENO, F_GETFL)) > 0) &&
+ 		    (flags & O_ACCMODE) != O_RDONLY) {
+-			if (!_reopen_stream(stdout, STDOUT_FILENO, "w", "stdout", &new_stream))
++			if (!_reopen_stream(stdout, STDOUT_FILENO, "w", "stdout"))
+ 				goto_out;
+-			stdout = new_stream;
+ 			if (setvbuf(stdout, cmd->linebuffer + linebuffer_size,
+ 				     _IOLBF, linebuffer_size)) {
+ 				log_sys_error("setvbuf", "");
+@@ -2131,7 +2133,6 @@
+ void destroy_toolcontext(struct cmd_context *cmd)
+ {
+ 	struct dm_config_tree *cft_cmdline;
+-	FILE *new_stream;
+ 	int flags;
+ 
+ 	if (cmd->dump_filter && cmd->filter && cmd->filter->dump &&
+@@ -2167,8 +2168,7 @@
+ 		if (is_valid_fd(STDIN_FILENO) &&
+ 		    ((flags = fcntl(STDIN_FILENO, F_GETFL)) > 0) &&
+ 		    (flags & O_ACCMODE) != O_WRONLY) {
+-			if (_reopen_stream(stdin, STDIN_FILENO, "r", "stdin", &new_stream)) {
+-				stdin = new_stream;
++			if (_reopen_stream(stdin, STDIN_FILENO, "r", "stdin")) {
+ 				setlinebuf(stdin);
+ 			} else
+ 				cmd->linebuffer = NULL;	/* Leave buffer in place (deliberate leak) */
+@@ -2177,8 +2177,7 @@
+ 		if (is_valid_fd(STDOUT_FILENO) &&
+ 		    ((flags = fcntl(STDOUT_FILENO, F_GETFL)) > 0) &&
+ 		    (flags & O_ACCMODE) != O_RDONLY) {
+-			if (_reopen_stream(stdout, STDOUT_FILENO, "w", "stdout", &new_stream)) {
+-				stdout = new_stream;
++			if (_reopen_stream(stdout, STDOUT_FILENO, "w", "stdout")) {
+ 				setlinebuf(stdout);
+ 			} else
+ 				cmd->linebuffer = NULL;	/* Leave buffer in place (deliberate leak) */
+diff -Naurw LVM2.2.02.136.orig/tools/lvmcmdline.c LVM2.2.02.136/tools/lvmcmdline.c
+--- LVM2.2.02.136.orig/tools/lvmcmdline.c	2015-11-27 17:29:22.000000000 -0800
++++ LVM2.2.02.136/tools/lvmcmdline.c	2015-12-03 09:14:19.984668128 -0800
+@@ -1744,7 +1744,7 @@
+ 	int err = is_valid_fd(STDERR_FILENO);
+ 
+ 	if (!is_valid_fd(STDIN_FILENO) &&
+-	    !(stdin = fopen(_PATH_DEVNULL, "r"))) {
++	    !freopen(_PATH_DEVNULL, "r", stdin)) {
+ 		if (err)
+ 			perror("stdin stream open");
+ 		else
+@@ -1754,7 +1754,7 @@
+ 	}
+ 
+ 	if (!is_valid_fd(STDOUT_FILENO) &&
+-	    !(stdout = fopen(_PATH_DEVNULL, "w"))) {
++	    !freopen(_PATH_DEVNULL, "w", stdout)) {
+ 		if (err)
+ 			perror("stdout stream open");
+ 		/* else no stdout */
+@@ -1762,7 +1762,7 @@
+ 	}
+ 
+ 	if (!is_valid_fd(STDERR_FILENO) &&
+-	    !(stderr = fopen(_PATH_DEVNULL, "w"))) {
++	    !freopen(_PATH_DEVNULL, "w", stderr)) {
+ 		printf("stderr stream open: %s\n",
+ 		       strerror(errno));
+ 		return 0;

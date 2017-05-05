@@ -1,5 +1,5 @@
 #!/sbin/openrc-run
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 _get_lvm_path() {
@@ -17,12 +17,6 @@ _need_lvmetad()
 	${lvm_path} dumpconfig global 2>/dev/null | grep -q 'use_lvmetad=1'
 }
 
-_need_lvmlockd()
-{
-	local lvm_path="$(_get_lvm_path)"
-	[ ! -x "${lvm_path}" ] && return 1
-	${lvm_path} dumpconfig global 2>/dev/null | grep -q 'use_lvmlockd=1'
-}
 depend() {
 	before checkfs fsck
 	after modules device-mapper
@@ -37,9 +31,6 @@ depend() {
 	else
 		if _need_lvmetad; then
 			_need="${_need} lvmetad"
-		fi
-		if _need_lvmlockd; then
-			_need="${_need} lvmlockd"
 		fi
 	fi
 	need sysfs ${_need}
@@ -85,10 +76,6 @@ start() {
 			lvm_commands="${lvm_commands}vgscan --mknodes\n"
 			# And turn them on!
 			lvm_commands="${lvm_commands}vgchange --sysinit -a ly\n"
-			if _need_lvmlockd; then
-				# Start lockd VGs as required
-				lvm_commands="${lvm_commands}vgchange --lock-start --lock-opt auto\n"
-			fi
 			# Order of this is important, have to work around dash and LVM readline
 			printf "%b\n" "${lvm_commands}" | $lvm_path /proc/self/fd/0 --config "${config}" >/dev/null
 			eend $? "Failed to setup the LVM"
