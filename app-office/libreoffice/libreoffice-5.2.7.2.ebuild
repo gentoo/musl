@@ -83,12 +83,12 @@ $(printf 'libreoffice_extensions_%s ' ${LO_EXTS})"
 LICENSE="|| ( LGPL-3 MPL-1.1 )"
 SLOT="0"
 [[ ${PV} == *9999* ]] || \
-KEYWORDS="amd64 ~arm x86 ~amd64-linux ~x86-linux"
+KEYWORDS="~amd64 ~arm ~x86 ~amd64-linux ~x86-linux"
 
 COMMON_DEPEND="${PYTHON_DEPS}
 	app-arch/unzip
 	app-arch/zip
-	app-text/hunspell
+	app-text/hunspell:=
 	>=app-text/libabw-0.1.0
 	>=app-text/libebook-0.1
 	>=app-text/libetonyek-0.1
@@ -245,10 +245,14 @@ PATCHES=(
 	# not upstreamable stuff
 	"${FILESDIR}/${PN}-5.2-system-pyuno.patch"
 
+	# TODO: upstream
+	"${FILESDIR}/${PN}-5.2.5.1-glibc-2.24.patch"
+
 	# musl patches
 	"${FILESDIR}/${PN}-4.4.1.2-musl-fix-execinfo.patch"
 	"${FILESDIR}/${PN}-5.0.5.2-linux-musl.patch"
 	"${FILESDIR}/${PN}-5.2.3.3-fix-includes.patch"
+	"${FILESDIR}/${PN}-5.2.5.1-musl-vlc.patch"
 )
 
 pkg_pretend() {
@@ -265,7 +269,7 @@ pkg_pretend() {
 		fi
 		check-reqs_pkg_pretend
 
-		if ! $(tc-is-clang) && [[ $(gcc-major-version) -lt 4 ]] || {
+		if ! $(tc-is-clang) && { [[ $(gcc-major-version) -lt 4 ]] ||
 				[[ $(gcc-major-version) -eq 4 && $(gcc-minor-version) -lt 7 ]]; } then
 			eerror "Compilation with gcc older than 4.7 is not supported"
 			die "Too old gcc found."
@@ -360,6 +364,14 @@ src_prepare() {
 	if use branding; then
 		# hack...
 		mv -v "${WORKDIR}/branding-intro.png" "${S}/icon-themes/galaxy/brand/intro.png" || die
+	fi
+
+	# Don't list pdfimport support in desktop when built with none, bug # 605464
+	if ! use pdfimport; then
+		sed -i \
+			-e ":MimeType: s:application/pdf;::" \
+			-e ":Keywords: s:pdf;::" \
+			sysui/desktop/menus/draw.desktop || die
 	fi
 }
 
