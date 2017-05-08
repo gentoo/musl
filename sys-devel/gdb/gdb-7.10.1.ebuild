@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI="5"
 PYTHON_COMPAT=( python{2_7,3_4,3_5} )
@@ -77,6 +76,7 @@ RDEPEND="server? ( !dev-util/gdbserver )
 	)"
 DEPEND="${RDEPEND}
 	app-arch/xz-utils
+	sys-apps/texinfo
 	client? (
 		virtual/yacc
 		test? ( dev-util/dejagnu )
