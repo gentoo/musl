@@ -64,6 +64,7 @@ multilib_src_configure() {
 		--enable-rawmidi \
 		--enable-seq \
 		--enable-aload \
+		--without-versioned \
 		$(use_with debug) \
 		$(use_enable alisp) \
 		${myconf}
