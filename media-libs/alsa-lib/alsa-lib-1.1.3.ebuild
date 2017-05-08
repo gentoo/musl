@@ -1,6 +1,5 @@
 # Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 
@@ -28,7 +27,10 @@ DEPEND="${RDEPEND}
 
 REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 
-PATCHES=( "${FILESDIR}"/${P}-missing-limits.patch )
+PATCHES=(
+	"${FILESDIR}"/${P}-missing-limits.patch
+	"${FILESDIR}"/${P}-stdint.patch
+)
 
 pkg_setup() {
 	use python && python-single-r1_pkg_setup
