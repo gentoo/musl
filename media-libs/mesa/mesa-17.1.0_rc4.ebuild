@@ -200,6 +200,7 @@ pkg_setup() {
 src_prepare() {
 	eapply "${FILESDIR}"/${PN}-11-execinfo.patch
 	eapply "${FILESDIR}"/${PN}-13-musl_endian.patch
+	eapply "${FILESDIR}"/${PN}-17-missing-fcntl_h.patch
 
 	eautoreconf
 
