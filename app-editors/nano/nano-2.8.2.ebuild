@@ -10,7 +10,7 @@ if [[ ${PV} == "9999" ]] ; then
 else
 	MY_P=${PN}-${PV/_}
 	SRC_URI="https://www.nano-editor.org/dist/v${PV:0:3}/${MY_P}.tar.gz"
-	KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+	KEYWORDS="amd64 arm ~mips ppc x86"
 fi
 
 DESCRIPTION="GNU GPL'd Pico clone with more functionality"
