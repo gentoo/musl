@@ -28,7 +28,6 @@ DEPEND="${RDEPEND}
 REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-1.1.3-missing-limits.patch
 	"${FILESDIR}"/${PN}-1.1.3-stdint.patch
 )
 
