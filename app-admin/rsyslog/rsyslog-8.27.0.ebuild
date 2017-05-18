@@ -54,7 +54,9 @@ else
 	"
 
 	PATCHES=(
-		"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-fix.patch"
+		"${FILESDIR}"/8-stable/${PN}-8.26.0-fix-zmq3-format-security.patch
+		"${FILESDIR}"/8-stable/${PN}-8.27.0-fix-librdkafka-detection.patch
+		"${FILESDIR}"/8-stable/50-${PN}-8.18.0-musl-fix.patch
 	)
 fi
 
@@ -220,6 +222,7 @@ src_configure() {
 		$(use_enable elasticsearch)
 		$(use_enable gcrypt libgcrypt)
 		$(use_enable jemalloc)
+		$(use_enable kafka imkafka)
 		$(use_enable kafka omkafka)
 		$(use_enable kerberos gssapi-krb5)
 		$(use_enable normalize mmnormalize)
