@@ -8,8 +8,6 @@ PYTHON_REQ_USE="ncurses,readline"
 
 PLOCALES="bg de_DE fr_FR hu it tr zh_CN"
 
-FIRMWARE_ABI_VERSION="2.9.0-r52"
-
 inherit eutils flag-o-matic linux-info toolchain-funcs multilib python-r1 \
 	user udev fcaps readme.gentoo-r1 pax-utils l10n
 
@@ -19,7 +17,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
-	KEYWORDS="~amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
+	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -152,17 +150,16 @@ SOFTMMU_TOOLS_DEPEND="
 	xfs? ( sys-fs/xfsprogs[static-libs(+)] )"
 
 X86_FIRMWARE_DEPEND="
+	>=sys-firmware/ipxe-1.0.0_p20130624
 	pin-upstream-blobs? (
-		~sys-firmware/edk2-ovmf-2017_pre20170505[binary]
-		~sys-firmware/ipxe-1.0.0_p20160620
-		~sys-firmware/seabios-1.10.2[binary,seavgabios]
+		~sys-firmware/seabios-1.10.1
 		~sys-firmware/sgabios-0.1_pre8
+		~sys-firmware/vgabios-0.7a
 	)
 	!pin-upstream-blobs? (
-		sys-firmware/edk2-ovmf
-		sys-firmware/ipxe
-		>=sys-firmware/seabios-1.10.2[seavgabios]
+		sys-firmware/seabios
 		sys-firmware/sgabios
+		sys-firmware/vgabios
 	)"
 
 CDEPEND="
@@ -200,10 +197,11 @@ PATCHES=(
 	# gentoo patches
 	"${FILESDIR}"/${PN}-2.5.0-cflags.patch
 	"${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
-	"${FILESDIR}"/${PN}-2.9.0-bug616870.patch
-	"${FILESDIR}"/${PN}-2.9.0-bug616872.patch
-	"${FILESDIR}"/${PN}-2.9.0-bug616874.patch
-	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8112.patch
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8309.patch # bug 616870
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8379.patch # bug 616872
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8380.patch # bug 616874
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8112.patch # bug 616636
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-7493.patch # bug 618808
 )
 
 STRIP_MASK="/usr/share/qemu/palcode-clipper"
@@ -691,26 +689,22 @@ src_install() {
 	if [[ -n ${softmmu_targets} ]]; then
 		# Remove SeaBIOS since we're using the SeaBIOS packaged one
 		rm "${ED}/usr/share/qemu/bios.bin"
-		rm "${ED}/usr/share/qemu/bios-256k.bin"
 		if use qemu_softmmu_targets_x86_64 || use qemu_softmmu_targets_i386; then
 			dosym ../seabios/bios.bin /usr/share/qemu/bios.bin
-			dosym ../seabios/bios-256k.bin /usr/share/qemu/bios-256k.bin
 		fi
 
-		# Remove vgabios since we're using the seavgabios packaged one
+		# Remove vgabios since we're using the vgabios packaged one
 		rm "${ED}/usr/share/qemu/vgabios.bin"
 		rm "${ED}/usr/share/qemu/vgabios-cirrus.bin"
 		rm "${ED}/usr/share/qemu/vgabios-qxl.bin"
 		rm "${ED}/usr/share/qemu/vgabios-stdvga.bin"
-		rm "${ED}/usr/share/qemu/vgabios-virtio.bin"
 		rm "${ED}/usr/share/qemu/vgabios-vmware.bin"
 		if use qemu_softmmu_targets_x86_64 || use qemu_softmmu_targets_i386; then
-			dosym ../seavgabios/vgabios-isavga.bin /usr/share/qemu/vgabios.bin
-			dosym ../seavgabios/vgabios-cirrus.bin /usr/share/qemu/vgabios-cirrus.bin
-			dosym ../seavgabios/vgabios-qxl.bin /usr/share/qemu/vgabios-qxl.bin
-			dosym ../seavgabios/vgabios-stdvga.bin /usr/share/qemu/vgabios-stdvga.bin
-			dosym ../seavgabios/vgabios-virtio.bin /usr/share/qemu/vgabios-virtio.bin
-			dosym ../seavgabios/vgabios-vmware.bin /usr/share/qemu/vgabios-vmware.bin
+			dosym ../vgabios/vgabios.bin /usr/share/qemu/vgabios.bin
+			dosym ../vgabios/vgabios-cirrus.bin /usr/share/qemu/vgabios-cirrus.bin
+			dosym ../vgabios/vgabios-qxl.bin /usr/share/qemu/vgabios-qxl.bin
+			dosym ../vgabios/vgabios-stdvga.bin /usr/share/qemu/vgabios-stdvga.bin
+			dosym ../vgabios/vgabios-vmware.bin /usr/share/qemu/vgabios-vmware.bin
 		fi
 
 		# Remove sgabios since we're using the sgabios packaged one
@@ -735,50 +729,20 @@ src_install() {
 	readme.gentoo_create_doc
 }
 
-firmware_abi_change() {
-	local pv
-	for pv in ${REPLACING_VERSIONS}; do
-		if ! version_is_at_least ${FIRMWARE_ABI_VERSION} ${pv}; then
-			return 0
-		fi
-	done
-	return 1
-}
-
 pkg_postinst() {
+	DISABLE_AUTOFORMATTING=true
+	readme.gentoo_print_elog
+
 	if [[ -n ${softmmu_targets} ]] && use kernel_linux; then
 		udev_reload
 	fi
 
 	fcaps cap_net_admin /usr/libexec/qemu-bridge-helper
-
-	DISABLE_AUTOFORMATTING=true
-	readme.gentoo_print_elog
-
-	if use pin-upstream-blobs && firmware_abi_change; then
-		ewarn "This version of qemu pins new versions of firmware blobs:"
-		ewarn "	$(best_version sys-firmware/edk2-ovmf)"
-		ewarn "	$(best_version sys-firmware/ipxe)"
-		ewarn "	$(best_version sys-firmware/seabios)"
-		ewarn "	$(best_version sys-firmware/sgabios)"
-		ewarn "This might break resume of hibernated guests (started with a different"
-		ewarn "firmware version) and live migration to/from qemu versions with different"
-		ewarn "firmware. Please (cold) restart all running guests. For functional"
-		ewarn "guest migration ensure that all"
-		ewarn "hosts run at least"
-		ewarn "	app-emulation/qemu-${FIRMWARE_ABI_VERSION}."
-	fi
 }
 
 pkg_info() {
 	echo "Using:"
 	echo "  $(best_version app-emulation/spice-protocol)"
-	echo "  $(best_version sys-firmware/edk2-ovmf)"
-	if has_version 'sys-firmware/edk2-ovmf[binary]'; then
-		echo "    USE=binary"
-	else
-		echo "    USE=''"
-	fi
 	echo "  $(best_version sys-firmware/ipxe)"
 	echo "  $(best_version sys-firmware/seabios)"
 	if has_version 'sys-firmware/seabios[binary]'; then
@@ -786,5 +750,5 @@ pkg_info() {
 	else
 		echo "    USE=''"
 	fi
-	echo "  $(best_version sys-firmware/sgabios)"
+	echo "  $(best_version sys-firmware/vgabios)"
 }
