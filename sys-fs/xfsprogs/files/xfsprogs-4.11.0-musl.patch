@@ -1,6 +1,6 @@
-diff -Naur xfsprogs-4.9.0.orig/fsr/xfs_fsr.c xfsprogs-4.9.0/fsr/xfs_fsr.c
---- xfsprogs-4.9.0.orig/fsr/xfs_fsr.c	2017-01-08 13:58:12.354784273 -0800
-+++ xfsprogs-4.9.0/fsr/xfs_fsr.c	2017-01-08 13:58:45.262063929 -0800
+diff -Naur xfsprogs-4.11.0.orig/fsr/xfs_fsr.c xfsprogs-4.11.0/fsr/xfs_fsr.c
+--- xfsprogs-4.11.0.orig/fsr/xfs_fsr.c	2017-05-05 11:47:11.000000000 -0700
++++ xfsprogs-4.11.0/fsr/xfs_fsr.c	2017-05-19 09:33:36.408832645 -0700
 @@ -36,6 +36,9 @@
  #define _PATH_FSRLAST		"/var/tmp/.fsrlast_xfs"
  #define _PATH_PROC_MOUNTS	"/proc/mounts"
@@ -11,9 +11,9 @@ diff -Naur xfsprogs-4.9.0.orig/fsr/xfs_fsr.c xfsprogs-4.9.0/fsr/xfs_fsr.c
  
  char *progname;
  
-diff -Naur xfsprogs-4.9.0.orig/include/linux.h xfsprogs-4.9.0/include/linux.h
---- xfsprogs-4.9.0.orig/include/linux.h	2017-01-08 13:58:12.335784111 -0800
-+++ xfsprogs-4.9.0/include/linux.h	2017-01-08 13:59:38.554516824 -0800
+diff -Naur xfsprogs-4.11.0.orig/include/linux.h xfsprogs-4.11.0/include/linux.h
+--- xfsprogs-4.11.0.orig/include/linux.h	2017-05-05 11:47:11.000000000 -0700
++++ xfsprogs-4.11.0/include/linux.h	2017-05-19 09:33:36.409832654 -0700
 @@ -40,6 +40,32 @@
  # undef fsxattr
  #endif
@@ -47,9 +47,9 @@ diff -Naur xfsprogs-4.9.0.orig/include/linux.h xfsprogs-4.9.0/include/linux.h
  static __inline__ int xfsctl(const char *path, int fd, int cmd, void *p)
  {
  	return ioctl(fd, cmd, p);
-diff -Naur xfsprogs-4.9.0.orig/io/readdir.c xfsprogs-4.9.0/io/readdir.c
---- xfsprogs-4.9.0.orig/io/readdir.c	2017-01-08 13:58:12.357784298 -0800
-+++ xfsprogs-4.9.0/io/readdir.c	2017-01-08 14:00:04.662738699 -0800
+diff -Naur xfsprogs-4.11.0.orig/io/readdir.c xfsprogs-4.11.0/io/readdir.c
+--- xfsprogs-4.11.0.orig/io/readdir.c	2017-05-05 11:47:11.000000000 -0700
++++ xfsprogs-4.11.0/io/readdir.c	2017-05-19 09:34:45.156466211 -0700
 @@ -24,6 +24,18 @@
  #include <sys/types.h>
  #include <dirent.h>
@@ -66,6 +66,6 @@ diff -Naur xfsprogs-4.9.0.orig/io/readdir.c xfsprogs-4.9.0/io/readdir.c
 +# endif
 +#endif
 +
- static struct cmdinfo readdir_cmd;
- 
- const char *d_type_str(unsigned int type)
+ #ifndef _DIRENT_HAVE_D_RECLEN
+ #include <string.h>
+ #endif
