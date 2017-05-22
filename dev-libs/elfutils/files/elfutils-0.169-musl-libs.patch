@@ -1,0 +1,110 @@
+diff -Naur elfutils-0.169.orig/lib/error.h elfutils-0.169/lib/error.h
+--- elfutils-0.169.orig/lib/error.h	1969-12-31 16:00:00.000000000 -0800
++++ elfutils-0.169/lib/error.h	2017-05-22 11:46:56.303656762 -0700
+@@ -0,0 +1,27 @@
++#ifndef _ERROR_H_
++#define _ERROR_H_
++
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <errno.h>
++
++static unsigned int error_message_count = 0;
++
++static inline void error(int status, int errnum, const char* format, ...)
++{
++	va_list ap;
++	fprintf(stderr, "%s: ", program_invocation_name);
++	va_start(ap, format);
++	vfprintf(stderr, format, ap);
++	va_end(ap);
++	if (errnum)
++		fprintf(stderr, ": %s", strerror(errnum));
++	fprintf(stderr, "\n");
++	error_message_count++;
++	if (status)
++		exit(status);
++}
++
++#endif	/* _ERROR_H_ */
+diff -Naur elfutils-0.169.orig/lib/fixedsizehash.h elfutils-0.169/lib/fixedsizehash.h
+--- elfutils-0.169.orig/lib/fixedsizehash.h	2017-05-22 11:45:32.228023470 -0700
++++ elfutils-0.169/lib/fixedsizehash.h	2017-05-22 11:47:08.380737748 -0700
+@@ -30,7 +30,6 @@
+ #include <errno.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <sys/cdefs.h>
+ 
+ #include <system.h>
+ 
+diff -Naur elfutils-0.169.orig/libdwfl/dwfl_build_id_find_elf.c elfutils-0.169/libdwfl/dwfl_build_id_find_elf.c
+--- elfutils-0.169.orig/libdwfl/dwfl_build_id_find_elf.c	2017-05-22 11:45:32.397025345 -0700
++++ elfutils-0.169/libdwfl/dwfl_build_id_find_elf.c	2017-05-22 11:48:25.398377146 -0700
+@@ -99,7 +99,7 @@
+ 	{
+ 	  if (*file_name != NULL)
+ 	    free (*file_name);
+-	  *file_name = canonicalize_file_name (name);
++	  *file_name = realpath (name, NULL);
+ 	  if (*file_name == NULL)
+ 	    {
+ 	      *file_name = name;
+diff -Naur elfutils-0.169.orig/libdwfl/dwfl_error.c elfutils-0.169/libdwfl/dwfl_error.c
+--- elfutils-0.169.orig/libdwfl/dwfl_error.c	2017-05-22 11:45:32.391025278 -0700
++++ elfutils-0.169/libdwfl/dwfl_error.c	2017-05-22 11:48:49.678619010 -0700
+@@ -154,7 +154,16 @@
+   switch (error &~ 0xffff)
+     {
+     case OTHER_ERROR (ERRNO):
++#if defined(__GLIBC__)
+       return strerror_r (error & 0xffff, "bad", 0);
++#else
++      {
++        static __thread char buf[128] = "";
++        if (strerror_r (error & 0xffff, buf, sizeof(buf)) == 0)
++          return buf;
++      }
++      return "strerror_r() failed";
++#endif
+     case OTHER_ERROR (LIBELF):
+       return elf_errmsg (error & 0xffff);
+     case OTHER_ERROR (LIBDW):
+diff -Naur elfutils-0.169.orig/libdwfl/find-debuginfo.c elfutils-0.169/libdwfl/find-debuginfo.c
+--- elfutils-0.169.orig/libdwfl/find-debuginfo.c	2017-05-22 11:45:32.393025301 -0700
++++ elfutils-0.169/libdwfl/find-debuginfo.c	2017-05-22 11:49:16.492886117 -0700
+@@ -389,7 +389,7 @@
+       /* If FILE_NAME is a symlink, the debug file might be associated
+ 	 with the symlink target name instead.  */
+ 
+-      char *canon = canonicalize_file_name (file_name);
++      char *canon = realpath (file_name, NULL);
+       if (canon != NULL && strcmp (file_name, canon))
+ 	fd = find_debuginfo_in_path (mod, canon,
+ 				     debuglink_file, debuglink_crc,
+diff -Naur elfutils-0.169.orig/libelf/elf.h elfutils-0.169/libelf/elf.h
+--- elfutils-0.169.orig/libelf/elf.h	2017-05-22 11:45:32.267023903 -0700
++++ elfutils-0.169/libelf/elf.h	2017-05-22 11:50:20.851532624 -0700
+@@ -21,7 +21,9 @@
+ 
+ #include <features.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /* Standard ELF types.  */
+ 
+@@ -3683,6 +3685,8 @@
+ #define R_BPF_NONE		0	/* No reloc */
+ #define R_BPF_MAP_FD		1	/* Map fd to pointer */
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif	/* elf.h */

@@ -1,7 +1,7 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI=6
 
 inherit autotools eutils flag-o-matic multilib-minimal
 
@@ -29,17 +29,20 @@ DEPEND="${RDEPEND}
 	)"
 
 src_prepare() {
+	default
 	epatch "${FILESDIR}"/${PN}-0.118-PaX-support.patch
 
 	# Add MUSL patches
-	epatch "${FILESDIR}"/${P}-musl-obstack-fts.patch
+	epatch "${FILESDIR}"/${PN}-0.168-musl-obstack-fts.patch
 	epatch "${FILESDIR}"/${P}-musl-libs.patch
-	epatch "${FILESDIR}"/${P}-musl-utils.patch
+	epatch "${FILESDIR}"/${PN}-0.168-musl-utils.patch
 
 	eautoreconf
 
-	use static-libs || sed -i -e '/^lib_LIBRARIES/s:=.*:=:' -e '/^%.os/s:%.o$::' lib{asm,dw,elf}/Makefile.in
-	sed -i 's:-Werror::' */Makefile.in
+	if use static-libs; then
+		sed -i -e '/^lib_LIBRARIES/s:=.*:=:' -e '/^%.os/s:%.o$::' lib{asm,dw,elf}/Makefile.in || die
+	fi
+	sed -i 's:-Werror::' */Makefile.in || die
 }
 
 src_configure() {
@@ -69,5 +72,7 @@ multilib_src_install_all() {
 	dodoc NOTES
 	# These build quick, and are needed for most tests, so don't
 	# disable their building when the USE flag is disabled.
-	use utils || rm -rf "${ED}"/usr/bin
+	if use utils; then
+		rm -rf "${ED}"/usr/bin || die
+	fi
 }
