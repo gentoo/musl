@@ -32,6 +32,7 @@ MULTILIB_CHOST_TOOLS=(
 PATCHES=(
 	"${FILESDIR}/${PN}-58.1-remove-bashisms.patch"
 	"${FILESDIR}/${PN}-58.1-iterator.patch"
+	"${FILESDIR}/${PN}-58.2-CVE-2017-7867.patch"
 	"${FILESDIR}/${PN}-58.2-no-xlocale.patch"
 )
 
