@@ -72,7 +72,7 @@ multilib_src_install_all() {
 	dodoc NOTES
 	# These build quick, and are needed for most tests, so don't
 	# disable their building when the USE flag is disabled.
-	if use utils; then
+	if ! use utils; then
 		rm -rf "${ED}"/usr/bin || die
 	fi
 }
