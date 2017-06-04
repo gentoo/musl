@@ -1,0 +1,10 @@
+--- src/util.c	2016-07-05 17:37:51.183182739 +0000
++++ src/util.c	2016-08-25 18:55:23.539558864 +0000
+@@ -41,7 +41,6 @@
+ 
+ #include <sys/types.h>
+ #include <sys/socket.h>
+-#include <sys/queue.h>
+ #include <net/if.h>
+ #include <netinet/in.h>
+ #include <ifaddrs.h>
