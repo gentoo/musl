@@ -4,10 +4,10 @@ sense of standards-conformance and safety.
 
 http://www.musl-libc.org/
 
-MAINTAINERS:
-Anthony G. Basile <blueness@gentoo.org>
-Aric Belsito <lluixhi@gmail.com>
-Felix Janda <felix.janda@posteo.de>
+### Maintainers
+* Anthony G. Basile <blueness@gentoo.org>
+* Aric Belsito <lluixhi@gmail.com>
+* Felix Janda <felix.janda@posteo.de>
 
-## Repoman status
+## Repoman Status
 [![Repoman Status](https://travis-ci.org/gentoo/musl.png)](https://travis-ci.org/gentoo/musl)
