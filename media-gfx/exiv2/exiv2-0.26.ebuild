@@ -1,18 +1,19 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
+EAPI=6
+
 PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
 
-inherit eutils cmake-multilib python-any-r1
+inherit cmake-multilib python-any-r1
 
 DESCRIPTION="EXIF, IPTC and XMP metadata C++ library and command line utility"
 HOMEPAGE="http://www.exiv2.org/"
-SRC_URI="http://www.exiv2.org/${P}.tar.gz"
+SRC_URI="http://www.exiv2.org/builds/${P}-trunk.tar.gz"
 
 LICENSE="GPL-2"
-SLOT="0/14"
-KEYWORDS="alpha amd64 arm hppa ia64 ~mips ppc ppc64 ~s390 ~sh sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x64-solaris ~x86-solaris"
+SLOT="0/26"
+KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x64-solaris ~x86-solaris"
 IUSE_LINGUAS="bs de es fi fr gl ms pl pt ru sk sv ug uk vi"
 IUSE="doc examples nls png webready xmp $(printf 'linguas_%s ' ${IUSE_LINGUAS})"
 
@@ -31,8 +32,8 @@ DEPEND="${RDEPEND}
 	doc? (
 		app-doc/doxygen
 		dev-libs/libxslt
-		virtual/pkgconfig
 		media-gfx/graphviz
+		virtual/pkgconfig
 		${PYTHON_DEPS}
 	)
 	nls? ( sys-devel/gettext )
@@ -41,29 +42,37 @@ DEPEND="${RDEPEND}
 DOCS=( README doc/ChangeLog doc/cmd.txt )
 
 PATCHES=(
-	"${FILESDIR}/${PN}-0.25-fix-install-dirs.patch"
-	"${FILESDIR}/${PN}-0.25-fix-without-zlib.patch"
-	"${FILESDIR}/${PN}-0.25-hide-symbols.patch"
-	"${FILESDIR}/${PN}-0.25-fvisibility-hidden.patch"
-	"${FILESDIR}/${PN}-0.25-musl.patch"
+	"${FILESDIR}"/${P}-cmake{1,2,3,4,5,6,7}.patch
+	"${FILESDIR}"/${P}-CVE-2017-9239.patch
+	"${FILESDIR}"/${PN}-0.25-musl.patch
 	# TODO: Take to upstream
-	"${FILESDIR}/${PN}-0.25-fix-docs.patch"
-	"${FILESDIR}/${PN}-0.25-tools-optional.patch"
+	"${FILESDIR}"/${P}-fix-docs.patch
+	"${FILESDIR}"/${P}-tools-optional.patch
 )
 
 pkg_setup() {
 	use doc && python-any-r1_pkg_setup
 }
 
-src_prepare() {
-	rm -r msvc* build || die "Failed to remove msvc dirs"
+src_unpack() {
+	# FIXME @upstream: MacOS cruft is breaking the buildsystem, so don't let it in...
+	tar -C "${WORKDIR}" --exclude=.* -xpf "${DISTDIR}/${A}" --gz 2> /dev/null ||
+		elog "${my_tar}: tar extract command failed at least partially - continuing"
+	mv "${PN}-trunk" "${S}" || die "Failed to create source dir ${S}"
+}
 
+src_prepare() {
 	if [[ ${PV} != *9999 ]] ; then
 		if [[ -d po ]] ; then
 			pushd po > /dev/null || die
+			local lang
 			for lang in *.po; do
-				if ! has ${lang%.po} ${LINGUAS} ; then
-					rm -rf ${lang} || die
+				if [[ -e ${lang} ]] && ! has ${lang/.po/} ${LINGUAS} ; then
+					case ${lang} in
+						CMakeLists.txt | \
+						${PN}.pot)      ;;
+						*) rm -r ${lang} || die ;;
+					esac
 				fi
 			done
 			popd > /dev/null || die
@@ -72,13 +81,10 @@ src_prepare() {
 		fi
 	fi
 
-	# convert docs to UTF-8
-	local i
-	for i in doc/cmd.txt; do
-		einfo "Converting "${i}" to UTF-8"
-		iconv -f LATIN1 -t UTF-8 "${i}" > "${i}.tmp" || die
-		mv -f "${i}.tmp" "${i}" || die
-	done
+	# FIXME @upstream:
+	einfo "Converting doc/cmd.txt to UTF-8"
+	iconv -f LATIN1 -t UTF-8 doc/cmd.txt > doc/cmd.txt.tmp || die
+	mv -f doc/cmd.txt.tmp doc/cmd.txt || die
 
 	if use doc; then
 		einfo "Updating doxygen config"
@@ -92,9 +98,9 @@ multilib_src_configure() {
 	local mycmakeargs=(
 		-DEXIV2_ENABLE_BUILD_PO=YES
 		-DEXIV2_ENABLE_BUILD_SAMPLES=NO
-		-DEXIV2_ENABLE_CURL=$(usex webready)
 		-DEXIV2_ENABLE_NLS=$(usex nls)
 		-DEXIV2_ENABLE_PNG=$(usex png)
+		-DEXIV2_ENABLE_CURL=$(usex webready)
 		-DEXIV2_ENABLE_SSH=$(usex webready)
 		-DEXIV2_ENABLE_WEBREADY=$(usex webready)
 		-DEXIV2_ENABLE_XMP=$(usex xmp)
@@ -115,11 +121,11 @@ multilib_src_compile() {
 }
 
 multilib_src_install_all() {
-	einstalldocs
-	prune_libtool_files --all
+	use xmp && DOCS+=( doc/{COPYING-XMPSDK,README-XMP,cmdxmp.txt} )
+	use doc && HTML_DOCS=( "${S}"/doc/html/. )
 
-	use xmp && dodoc doc/{COPYING-XMPSDK,README-XMP,cmdxmp.txt}
-	use doc && dodoc -r "${S}"/doc/html
+	einstalldocs
+	find "${D}" -name '*.la' -delete || die
 
 	if use examples; then
 		docinto examples
