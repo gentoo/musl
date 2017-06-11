@@ -1,7 +1,7 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI="6"
 PYTHON_COMPAT=( python{2_7,3_4,3_5} )
 
 inherit flag-o-matic eutils python-single-r1
@@ -57,7 +57,7 @@ LICENSE="GPL-2 LGPL-2"
 SLOT="0"
 if [[ ${PV} != 9999* ]] ; then
 	# alpha #562128
-	KEYWORDS="-alpha amd64 ~arm ~arm64 ~hppa ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 sparc x86 ~ppc-aix ~x64-cygwin ~amd64-fbsd ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
+	KEYWORDS="-alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86 ~ppc-aix ~x64-cygwin ~amd64-fbsd ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux ~x64-macos ~x86-macos ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
 fi
 IUSE="+client lzma multitarget nls +python +server test vanilla xml"
 REQUIRED_USE="
@@ -83,6 +83,11 @@ DEPEND="${RDEPEND}
 		nls? ( sys-devel/gettext )
 	)"
 
+PATCHES=(
+	"${FILESDIR}"/${PN}-7.11-linux_nat.patch
+	"${FILESDIR}"/${PN}-7.11-missing-stat_h.patch
+)
+
 S=${WORKDIR}/${PN}-${MY_PV}
 
 pkg_setup() {
@@ -93,10 +98,8 @@ src_prepare() {
 	[[ -n ${RPM} ]] && rpm_spec_epatch "${WORKDIR}"/gdb.spec
 	! use vanilla && [[ -n ${PATCH_VER} ]] && EPATCH_SUFFIX="patch" epatch "${WORKDIR}"/patch
 
-	epatch "${FILESDIR}"/${PN}-7.11-linux_nat.patch
-	epatch "${FILESDIR}"/${PN}-7.11-missing-stat_h.patch
+	default
 
-	epatch_user
 	strip-linguas -u bfd/po opcodes/po
 }
 
