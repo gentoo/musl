@@ -1,0 +1,102 @@
+diff -Naur libsepol-2.7-rc1.orig/include/sepol/ibendport_record.h libsepol-2.7-rc1/include/sepol/ibendport_record.h
+--- libsepol-2.7-rc1.orig/include/sepol/ibendport_record.h	2017-06-13 10:21:05.311417509 -0700
++++ libsepol-2.7-rc1/include/sepol/ibendport_record.h	2017-06-13 10:21:43.258706824 -0700
+@@ -4,9 +4,10 @@
+ #include <stddef.h>
+ #include <sepol/context_record.h>
+ #include <sepol/handle.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ struct sepol_ibendport;
+ struct sepol_ibendport_key;
+@@ -64,5 +65,7 @@
+ 
+ extern void sepol_ibendport_free(sepol_ibendport_t *ibendport);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ #endif
+diff -Naur libsepol-2.7-rc1.orig/include/sepol/ibendports.h libsepol-2.7-rc1/include/sepol/ibendports.h
+--- libsepol-2.7-rc1.orig/include/sepol/ibendports.h	2017-06-13 10:21:05.311417509 -0700
++++ libsepol-2.7-rc1/include/sepol/ibendports.h	2017-06-13 10:22:08.981902844 -0700
+@@ -4,9 +4,10 @@
+ #include <sepol/handle.h>
+ #include <sepol/policydb.h>
+ #include <sepol/ibendport_record.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /* Return the number of ibendports */
+ extern int sepol_ibendport_count(sepol_handle_t *handle,
+@@ -41,5 +42,7 @@
+ 				   int (*fn)(const sepol_ibendport_t *ibendport,
+ 					     void *fn_arg), void *arg);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ #endif
+diff -Naur libsepol-2.7-rc1.orig/include/sepol/ibpkey_record.h libsepol-2.7-rc1/include/sepol/ibpkey_record.h
+--- libsepol-2.7-rc1.orig/include/sepol/ibpkey_record.h	2017-06-13 10:21:05.311417509 -0700
++++ libsepol-2.7-rc1/include/sepol/ibpkey_record.h	2017-06-13 10:22:35.060090318 -0700
+@@ -5,11 +5,12 @@
+ #include <stdint.h>
+ #include <sepol/context_record.h>
+ #include <sepol/handle.h>
+-#include <sys/cdefs.h>
+ 
+ #define INET6_ADDRLEN 16
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ struct sepol_ibpkey;
+ struct sepol_ibpkey_key;
+@@ -71,5 +72,7 @@
+ 
+ extern void sepol_ibpkey_free(sepol_ibpkey_t *ibpkey);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ #endif
+diff -Naur libsepol-2.7-rc1.orig/include/sepol/ibpkeys.h libsepol-2.7-rc1/include/sepol/ibpkeys.h
+--- libsepol-2.7-rc1.orig/include/sepol/ibpkeys.h	2017-06-13 10:21:05.311417509 -0700
++++ libsepol-2.7-rc1/include/sepol/ibpkeys.h	2017-06-13 10:22:58.990257871 -0700
+@@ -4,9 +4,10 @@
+ #include <sepol/handle.h>
+ #include <sepol/policydb.h>
+ #include <sepol/ibpkey_record.h>
+-#include <sys/cdefs.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /* Return the number of ibpkeys */
+ extern int sepol_ibpkey_count(sepol_handle_t *handle,
+@@ -40,5 +41,7 @@
+ 				int (*fn)(const sepol_ibpkey_t *ibpkey,
+ 					  void *fn_arg), void *arg);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ #endif
