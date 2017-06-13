@@ -10,7 +10,7 @@ inherit multilib python-r1 toolchain-funcs multilib-minimal
 
 MY_P="${P//_/-}"
 SEPOL_VER="${PV}"
-MY_RELEASEDATE="20161014"
+MY_RELEASEDATE="20170609"
 
 DESCRIPTION="SELinux userland library"
 HOMEPAGE="https://github.com/SELinuxProject/selinux/wiki"
@@ -21,7 +21,7 @@ if [[ ${PV} == 9999 ]] ; then
 	S="${WORKDIR}/${MY_P}/${PN}"
 else
 	SRC_URI="https://raw.githubusercontent.com/wiki/SELinuxProject/selinux/files/releases/${MY_RELEASEDATE}/${MY_P}.tar.gz"
-	KEYWORDS="amd64 ~arm ~arm64 ~mips x86"
+	KEYWORDS="~amd64 ~arm ~arm64 ~mips ~x86"
 	S="${WORKDIR}/${MY_P}"
 fi
 
@@ -47,7 +47,7 @@ DEPEND="${RDEPEND}
 src_prepare() {
 	if [[ ${PV} != 9999 ]] ; then
 		# If needed for live builds, place them in /etc/portage/patches
-		eapply "${FILESDIR}/libselinux-2.6-0007-build-related-fixes-bug-500674.patch"
+		eapply "${FILESDIR}/libselinux-2.7-fts_ldlibs.patch"
 	fi
 
 	eapply_user
@@ -63,16 +63,14 @@ multilib_src_compile() {
 		SHLIBDIR="\$(DESTDIR)/$(get_libdir)" \
 		LDFLAGS="-fPIC ${LDFLAGS} -pthread" \
 		USE_PCRE2="$(usex pcre2 y n)" \
-		FTS_LDFLAGS="$(usex elibc_musl '-lfts' '')" \
+		FTS_LDLIBS="$(usex elibc_musl '-lfts' '')" \
 		all
 
 	if multilib_is_native_abi && use python; then
 		building() {
-			python_export PYTHON_INCLUDEDIR PYTHON_LIBPATH
 			emake \
-				PYINC="-I${PYTHON_INCLUDEDIR}" \
 				LDFLAGS="-fPIC ${LDFLAGS} -lpthread" \
-				FTS_LDFLAGS="$(usex elibc_musl '-lfts' '')" \
+				FTS_LDLIBS="$(usex elibc_musl '-lfts' '')" \
 				LIBDIR="\$(PREFIX)/$(get_libdir)" \
 				SHLIBDIR="\$(DESTDIR)/$(get_libdir)" \
 				USE_PCRE2="$(usex pcre2 y n)" \
@@ -89,7 +87,7 @@ multilib_src_compile() {
 			emake \
 				RUBY=${1} \
 				LDFLAGS="-fPIC ${LDFLAGS} -lpthread" \
-				FTS_LDFLAGS="$(usex elibc_musl '-lfts' '')" \
+				FTS_LDLIBS="$(usex elibc_musl '-lfts' '')" \
 				LIBDIR="\$(PREFIX)/$(get_libdir)" \
 				SHLIBDIR="\$(DESTDIR)/$(get_libdir)" \
 				USE_PCRE2="$(usex pcre2 y n)" \
@@ -104,16 +102,18 @@ multilib_src_compile() {
 }
 
 multilib_src_install() {
-		emake DESTDIR="${D}" \
-			LIBDIR="\$(PREFIX)/$(get_libdir)" \
-			SHLIBDIR="\$(DESTDIR)/$(get_libdir)" \
-			USE_PCRE2="$(usex pcre2 y n)" \
-			install
+	emake DESTDIR="${D}" \
+		LIBDIR="\$(PREFIX)/$(get_libdir)" \
+		SHLIBDIR="\$(DESTDIR)/$(get_libdir)" \
+		LIBSEPOLA="/usr/$(get_libdir)/libsepol.a" \
+		USE_PCRE2="$(usex pcre2 y n)" \
+		install
 
 	if multilib_is_native_abi && use python; then
 		installation() {
 			emake DESTDIR="${D}" \
 				LIBDIR="\$(PREFIX)/$(get_libdir)" \
+				LIBSEPOLA="/usr/$(get_libdir)/libsepol.a" \
 				USE_PCRE2="$(usex pcre2 y n)" \
 				install-pywrap
 			python_optimize # bug 531638
@@ -128,6 +128,7 @@ multilib_src_install() {
 			rm src/selinuxswig_ruby_wrap.lo
 			emake DESTDIR="${D}" \
 				LIBDIR="\$(PREFIX)/$(get_libdir)" \
+				LIBSEPOLA="/usr/$(get_libdir)/libsepol.a" \
 				RUBY=${1} \
 				USE_PCRE2="$(usex pcre2 y n)" \
 				install-rubywrap
