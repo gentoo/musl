@@ -23,7 +23,7 @@ SRC_URI="http://www.sudo.ws/sudo/dist/${uri_prefix}${MY_P}.tar.gz
 LICENSE="ISC BSD"
 SLOT="0"
 if [[ ${PV} != *_beta* ]] && [[ ${PV} != *_rc* ]] ; then
-	KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+	KEYWORDS="amd64 arm ~mips ppc x86"
 fi
 IUSE="gcrypt ldap nls pam offensive openssl selinux skey +sendmail"
 
