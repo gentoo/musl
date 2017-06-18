@@ -1,0 +1,181 @@
+diff -Naur libbsd-0.8.3.orig/include/bsd/libutil.h libbsd-0.8.3/include/bsd/libutil.h
+--- libbsd-0.8.3.orig/include/bsd/libutil.h	2016-08-10 13:54:09.060111735 -0700
++++ libbsd-0.8.3/include/bsd/libutil.h	2016-08-10 13:54:23.477266978 -0700
+@@ -40,7 +40,7 @@
+ #define _LIBUTIL_H_
+ 
+ #include <features.h>
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <sys/types.h>
+ #include <stdint.h>
+ #include <stdio.h>
+diff -Naur libbsd-0.8.3.orig/include/bsd/md5.h libbsd-0.8.3/include/bsd/md5.h
+--- libbsd-0.8.3.orig/include/bsd/md5.h	2016-08-10 13:54:09.060111735 -0700
++++ libbsd-0.8.3/include/bsd/md5.h	2016-08-10 13:58:16.336688012 -0700
+@@ -27,7 +27,7 @@
+ 	uint8_t buffer[MD5_BLOCK_LENGTH];	/* input buffer */
+ } MD5_CTX;
+ 
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
+diff -Naur libbsd-0.8.3.orig/include/bsd/nlist.h libbsd-0.8.3/include/bsd/nlist.h
+--- libbsd-0.8.3.orig/include/bsd/nlist.h	2016-08-10 13:54:09.060111735 -0700
++++ libbsd-0.8.3/include/bsd/nlist.h	2016-08-10 13:54:42.174468307 -0700
+@@ -27,8 +27,8 @@
+ #ifndef LIBBSD_NLIST_H
+ #define LIBBSD_NLIST_H
+ 
+-#include <sys/cdefs.h>
+-#include <a.out.h>
++#include "sys/cdefs.h"
++#include <linux/a.out.h>
+ 
+ __BEGIN_DECLS
+ extern int nlist(const char *filename, struct nlist *list);
+diff -Naur libbsd-0.8.3.orig/include/bsd/readpassphrase.h libbsd-0.8.3/include/bsd/readpassphrase.h
+--- libbsd-0.8.3.orig/include/bsd/readpassphrase.h	2016-08-10 13:54:09.057111703 -0700
++++ libbsd-0.8.3/include/bsd/readpassphrase.h	2016-08-10 13:55:12.343793168 -0700
+@@ -31,7 +31,7 @@
+ #define RPP_SEVENBIT    0x10		/* Strip the high bit from input. */
+ #define RPP_STDIN       0x20		/* Read from stdin, not /dev/tty */
+ 
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
+diff -Naur libbsd-0.8.3.orig/include/bsd/stdio.h libbsd-0.8.3/include/bsd/stdio.h
+--- libbsd-0.8.3.orig/include/bsd/stdio.h	2016-08-10 13:54:09.057111703 -0700
++++ libbsd-0.8.3/include/bsd/stdio.h	2016-08-10 13:55:28.476966889 -0700
+@@ -38,7 +38,7 @@
+ #ifndef LIBBSD_STDIO_H
+ #define LIBBSD_STDIO_H
+ 
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
+diff -Naur libbsd-0.8.3.orig/include/bsd/stdlib.h libbsd-0.8.3/include/bsd/stdlib.h
+--- libbsd-0.8.3.orig/include/bsd/stdlib.h	2016-08-10 13:54:09.059111724 -0700
++++ libbsd-0.8.3/include/bsd/stdlib.h	2016-08-10 13:55:45.418149310 -0700
+@@ -42,7 +42,7 @@
+ #ifndef LIBBSD_STDLIB_H
+ #define LIBBSD_STDLIB_H
+ 
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <sys/stat.h>
+ #include <stdint.h>
+ 
+diff -Naur libbsd-0.8.3.orig/include/bsd/string.h libbsd-0.8.3/include/bsd/string.h
+--- libbsd-0.8.3.orig/include/bsd/string.h	2016-08-10 13:54:09.059111724 -0700
++++ libbsd-0.8.3/include/bsd/string.h	2016-08-10 13:55:58.746292826 -0700
+@@ -33,7 +33,7 @@
+ #ifndef LIBBSD_STRING_H
+ #define LIBBSD_STRING_H
+ 
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
+diff -Naur libbsd-0.8.3.orig/include/bsd/stringlist.h libbsd-0.8.3/include/bsd/stringlist.h
+--- libbsd-0.8.3.orig/include/bsd/stringlist.h	2016-08-10 13:54:09.059111724 -0700
++++ libbsd-0.8.3/include/bsd/stringlist.h	2016-08-10 13:56:10.166408777 -0700
+@@ -31,7 +31,7 @@
+ 
+ #ifndef _STRINGLIST_H
+ #define _STRINGLIST_H
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <sys/types.h>
+ 
+ /*
+diff -Naur libbsd-0.8.3.orig/include/bsd/sys/cdefs.h libbsd-0.8.3/include/bsd/sys/cdefs.h
+--- libbsd-0.8.3.orig/include/bsd/sys/cdefs.h	2016-08-10 13:54:09.059111724 -0700
++++ libbsd-0.8.3/include/bsd/sys/cdefs.h	2016-08-10 14:01:27.929630564 -0700
+@@ -24,11 +24,19 @@
+  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#if defined(__GLIBC__) || !defined(__linux__)
+ #ifdef LIBBSD_OVERLAY
+ #include_next <sys/cdefs.h>
+ #else
+ #include <sys/cdefs.h>
+ #endif
++#elif defined(__cplusplus)
++#define __BEGIN_DECLS extern "C" {
++#define __END_DECLS }
++#else
++#define __BEGIN_DECLS
++#define __END_DECLS
++#endif
+ 
+ #ifndef LIBBSD_SYS_CDEFS_H
+ #define LIBBSD_SYS_CDEFS_H
+diff -Naur libbsd-0.8.3.orig/include/bsd/sys/queue.h libbsd-0.8.3/include/bsd/sys/queue.h
+--- libbsd-0.8.3.orig/include/bsd/sys/queue.h	2016-08-10 13:54:09.058111714 -0700
++++ libbsd-0.8.3/include/bsd/sys/queue.h	2016-08-10 14:00:18.062922188 -0700
+@@ -33,7 +33,7 @@
+ #ifndef _SYS_QUEUE_H_
+ #define	_SYS_QUEUE_H_
+ 
+-#include <sys/cdefs.h>
++#include "cdefs.h"
+ 
+ /*
+  * This file defines four types of data structures: singly-linked lists,
+diff -Naur libbsd-0.8.3.orig/include/bsd/sys/tree.h libbsd-0.8.3/include/bsd/sys/tree.h
+--- libbsd-0.8.3.orig/include/bsd/sys/tree.h	2016-08-10 13:54:09.059111724 -0700
++++ libbsd-0.8.3/include/bsd/sys/tree.h	2016-08-10 14:00:05.587795704 -0700
+@@ -30,7 +30,7 @@
+ #ifndef	_SYS_TREE_H_
+ #define	_SYS_TREE_H_
+ 
+-#include <sys/cdefs.h>
++#include "cdefs.h"
+ 
+ /*
+  * This file defines data structures for different types of trees:
+diff -Naur libbsd-0.8.3.orig/include/bsd/timeconv.h libbsd-0.8.3/include/bsd/timeconv.h
+--- libbsd-0.8.3.orig/include/bsd/timeconv.h	2016-08-10 13:54:09.057111703 -0700
++++ libbsd-0.8.3/include/bsd/timeconv.h	2016-08-10 13:56:26.952578971 -0700
+@@ -41,7 +41,7 @@
+ #ifndef _TIMECONV_H_
+ #define _TIMECONV_H_
+ 
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <stdint.h>
+ #include <time.h>
+ 
+diff -Naur libbsd-0.8.3.orig/include/bsd/vis.h libbsd-0.8.3/include/bsd/vis.h
+--- libbsd-0.8.3.orig/include/bsd/vis.h	2016-08-10 13:54:09.059111724 -0700
++++ libbsd-0.8.3/include/bsd/vis.h	2016-08-10 13:56:53.115844239 -0700
+@@ -72,7 +72,7 @@
+  */
+ #define	UNVIS_END	1	/* no more characters */
+ 
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ 
+ __BEGIN_DECLS
+ char	*vis(char *, int, int, int);
+diff -Naur libbsd-0.8.3.orig/include/bsd/wchar.h libbsd-0.8.3/include/bsd/wchar.h
+--- libbsd-0.8.3.orig/include/bsd/wchar.h	2016-08-10 13:54:09.058111714 -0700
++++ libbsd-0.8.3/include/bsd/wchar.h	2016-08-10 13:57:03.455949077 -0700
+@@ -40,7 +40,7 @@
+ #define LIBBSD_WCHAR_H
+ 
+ #include <stddef.h>
+-#include <sys/cdefs.h>
++#include "sys/cdefs.h"
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
