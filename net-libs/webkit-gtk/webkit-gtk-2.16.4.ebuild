@@ -15,7 +15,7 @@ SRC_URI="http://www.webkitgtk.org/releases/${MY_P}.tar.xz"
 
 LICENSE="LGPL-2+ BSD"
 SLOT="4/37" # soname version of libwebkit2gtk-4.0
-KEYWORDS="~alpha amd64 ~arm ~ia64 ~ppc ~ppc64 ~sparc x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x86-macos"
+KEYWORDS="~alpha ~amd64 ~arm ~ia64 ~ppc ~ppc64 ~sparc ~x86 ~amd64-fbsd ~x86-fbsd ~amd64-linux ~x86-linux ~x86-macos"
 
 IUSE="aqua coverage doc +egl +geolocation gles2 gnome-keyring +gstreamer +introspection +jit libnotify nsplugin +opengl spell wayland +webgl X"
 
@@ -39,6 +39,7 @@ RESTRICT="test"
 # use sqlite, svg by default
 # Aqua support in gtk3 is untested
 # Dependencies found at Source/cmake/OptionsGTK.cmake
+# Various compile-time optionals for gtk+-3.22.0 - ensure it
 RDEPEND="
 	dev-db/sqlite:3=
 	>=dev-libs/glib-2.36:2
@@ -54,7 +55,7 @@ RDEPEND="
 	dev-libs/libgcrypt:0=
 	>=net-libs/libsoup-2.42:2.4[introspection?]
 	>=x11-libs/cairo-1.10.2:=
-	>=x11-libs/gtk+-3.14:3[introspection?]
+	>=x11-libs/gtk+-3.22:3[introspection?]
 	>=x11-libs/pango-1.30.0
 	virtual/jpeg:0=
 
@@ -127,10 +128,6 @@ PATCHES=(
 	# https://bugs.gentoo.org/show_bug.cgi?id=564352
 	# https://bugs.webkit.org/show_bug.cgi?id=167283
 	"${FILESDIR}"/${PN}-2.8.5-fix-alpha-build.patch
-
-	# Avoid perl[ithreads] build time requirement as that would be very very messy
-	# https://bugs.webkit.org/show_bug.cgi?id=170106 (should get backported for 2.16.3)
-	"${FILESDIR}"/${PV}-avoid-perl-ithreads.patch
 
 	# musl and jit
 	"${FILESDIR}"/${PN}-2.14.3-musl.patch
