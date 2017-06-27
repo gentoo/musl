@@ -1,6 +1,5 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=6
 
@@ -52,10 +51,9 @@ PDEPEND="
 
 DOCS=( docs/TODO HACKING NEWS README )
 
-PATCHES=(
-	"${FILESDIR}"/${P}-elogind.patch
+PATCHES=( "${FILESDIR}"/${P}-elogind.patch
 	"${FILESDIR}"/${P}-make-netgroup-support-optional.patch
-)
+ )
 
 QA_MULTILIB_PATHS="
 	usr/lib/polkit-1/polkit-agent-helper-1
