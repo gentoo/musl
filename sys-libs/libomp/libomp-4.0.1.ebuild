@@ -52,7 +52,7 @@ pkg_setup() {
 src_prepare() {
 	# fix atomic tests with gcc
 	eapply "${FILESDIR}"/4.0.0/0001-test-Try-to-link-latomic-to-provide-atomics-when-ava.patch
-	eapply "${FILESDIR}"/${P}-use-va_copy-macro.patch
+	eapply "${FILESDIR}"/${PN}-4.0.0-use-va_copy-macro.patch
 
 	eapply_user
 }
