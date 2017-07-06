@@ -1,7 +1,7 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI=5
 
 inherit eutils toolchain-funcs flag-o-matic multilib
 
@@ -21,24 +21,28 @@ SLOT="0"
 IUSE="atm berkdb +iptables ipv6 minimal selinux"
 
 # We could make libmnl optional, but it's tiny, so eh
-RDEPEND="!net-misc/arpd
+RDEPEND="
+	!net-misc/arpd
 	!minimal? ( net-libs/libmnl )
 	iptables? ( >=net-firewall/iptables-1.4.20:= )
 	berkdb? ( sys-libs/db:= )
 	atm? ( net-dialup/linux-atm )
-	selinux? ( sys-libs/libselinux )"
+	selinux? ( sys-libs/libselinux )
+"
 # We require newer linux-headers for ipset support #549948 and some defines #553876
-DEPEND="${RDEPEND}
+DEPEND="
+	${RDEPEND}
 	app-arch/xz-utils
 	iptables? ( virtual/pkgconfig )
 	sys-devel/bison
 	sys-devel/flex
 	>=sys-kernel/linux-headers-3.16
-	elibc_glibc? ( >=sys-libs/glibc-2.7 )"
+	elibc_glibc? ( >=sys-libs/glibc-2.7 )
+"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
-	"${FILESDIR}"/${PN}-4.11.0-musl.patch
+	"${FILESDIR}"/${PN}-4.12.0-musl.patch
 )
 
 src_prepare() {
