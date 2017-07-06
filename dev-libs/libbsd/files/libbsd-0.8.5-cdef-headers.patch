@@ -1,0 +1,180 @@
+diff -Naur libbsd-0.8.5.orig/include/bsd/libutil.h libbsd-0.8.5/include/bsd/libutil.h
+--- libbsd-0.8.5.orig/include/bsd/libutil.h	2017-07-06 16:08:04.619303082 -0700
++++ libbsd-0.8.5/include/bsd/libutil.h	2017-07-06 16:12:50.818328308 -0700
+@@ -40,7 +40,11 @@
+ #define LIBBSD_LIBUTIL_H
+ 
+ #include <features.h>
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ #include <sys/types.h>
+ #include <stdint.h>
+ #include <stdio.h>
+diff -Naur libbsd-0.8.5.orig/include/bsd/md5.h libbsd-0.8.5/include/bsd/md5.h
+--- libbsd-0.8.5.orig/include/bsd/md5.h	2017-07-06 16:08:04.619303082 -0700
++++ libbsd-0.8.5/include/bsd/md5.h	2017-07-06 16:13:04.431483349 -0700
+@@ -27,7 +27,11 @@
+ 	uint8_t buffer[MD5_BLOCK_LENGTH];	/* input buffer */
+ } MD5_CTX;
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
+diff -Naur libbsd-0.8.5.orig/include/bsd/nlist.h libbsd-0.8.5/include/bsd/nlist.h
+--- libbsd-0.8.5.orig/include/bsd/nlist.h	2017-07-06 16:08:04.618303071 -0700
++++ libbsd-0.8.5/include/bsd/nlist.h	2017-07-06 16:09:48.534486197 -0700
+@@ -27,7 +27,11 @@
+ #ifndef LIBBSD_NLIST_H
+ #define LIBBSD_NLIST_H
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ 
+ struct nlist {
+ 	union {
+diff -Naur libbsd-0.8.5.orig/include/bsd/readpassphrase.h libbsd-0.8.5/include/bsd/readpassphrase.h
+--- libbsd-0.8.5.orig/include/bsd/readpassphrase.h	2017-07-06 16:08:04.619303082 -0700
++++ libbsd-0.8.5/include/bsd/readpassphrase.h	2017-07-06 16:09:03.248970623 -0700
+@@ -31,7 +31,11 @@
+ #define RPP_SEVENBIT    0x10		/* Strip the high bit from input. */
+ #define RPP_STDIN       0x20		/* Read from stdin, not /dev/tty */
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
+diff -Naur libbsd-0.8.5.orig/include/bsd/stdlib.h libbsd-0.8.5/include/bsd/stdlib.h
+--- libbsd-0.8.5.orig/include/bsd/stdlib.h	2017-07-06 16:08:04.619303082 -0700
++++ libbsd-0.8.5/include/bsd/stdlib.h	2017-07-06 16:12:34.317140374 -0700
+@@ -42,7 +42,11 @@
+ #ifndef LIBBSD_STDLIB_H
+ #define LIBBSD_STDLIB_H
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ #include <sys/stat.h>
+ #include <stdint.h>
+ 
+diff -Naur libbsd-0.8.5.orig/include/bsd/string.h libbsd-0.8.5/include/bsd/string.h
+--- libbsd-0.8.5.orig/include/bsd/string.h	2017-07-06 16:08:04.616303048 -0700
++++ libbsd-0.8.5/include/bsd/string.h	2017-07-06 16:11:30.373645631 -0700
+@@ -33,7 +33,11 @@
+ #ifndef LIBBSD_STRING_H
+ #define LIBBSD_STRING_H
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
+diff -Naur libbsd-0.8.5.orig/include/bsd/stringlist.h libbsd-0.8.5/include/bsd/stringlist.h
+--- libbsd-0.8.5.orig/include/bsd/stringlist.h	2017-07-06 16:08:04.618303071 -0700
++++ libbsd-0.8.5/include/bsd/stringlist.h	2017-07-06 16:10:04.714670407 -0700
+@@ -31,7 +31,11 @@
+ 
+ #ifndef LIBBSD_STRINGLIST_H
+ #define LIBBSD_STRINGLIST_H
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ #include <sys/types.h>
+ 
+ /*
+diff -Naur libbsd-0.8.5.orig/include/bsd/sys/queue.h libbsd-0.8.5/include/bsd/sys/queue.h
+--- libbsd-0.8.5.orig/include/bsd/sys/queue.h	2017-07-06 16:08:04.617303059 -0700
++++ libbsd-0.8.5/include/bsd/sys/queue.h	2017-07-06 16:10:50.413190683 -0700
+@@ -33,7 +33,11 @@
+ #ifndef LIBBSD_SYS_QUEUE_H
+ #define LIBBSD_SYS_QUEUE_H
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ 
+ /*
+  * This file defines four types of data structures: singly-linked lists,
+diff -Naur libbsd-0.8.5.orig/include/bsd/sys/tree.h libbsd-0.8.5/include/bsd/sys/tree.h
+--- libbsd-0.8.5.orig/include/bsd/sys/tree.h	2017-07-06 16:08:04.616303048 -0700
++++ libbsd-0.8.5/include/bsd/sys/tree.h	2017-07-06 16:10:36.518032487 -0700
+@@ -30,7 +30,11 @@
+ #ifndef LIBBSD_SYS_TREE_H
+ #define LIBBSD_SYS_TREE_H
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ 
+ /*
+  * This file defines data structures for different types of trees:
+diff -Naur libbsd-0.8.5.orig/include/bsd/timeconv.h libbsd-0.8.5/include/bsd/timeconv.h
+--- libbsd-0.8.5.orig/include/bsd/timeconv.h	2017-07-06 16:08:04.618303071 -0700
++++ libbsd-0.8.5/include/bsd/timeconv.h	2017-07-06 16:09:22.051184685 -0700
+@@ -41,7 +41,11 @@
+ #ifndef LIBBSD_TIMECONV_H
+ #define LIBBSD_TIMECONV_H
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ #include <stdint.h>
+ #include <time.h>
+ 
+diff -Naur libbsd-0.8.5.orig/include/bsd/vis.h libbsd-0.8.5/include/bsd/vis.h
+--- libbsd-0.8.5.orig/include/bsd/vis.h	2017-07-06 16:08:04.618303071 -0700
++++ libbsd-0.8.5/include/bsd/vis.h	2017-07-06 16:11:53.812912487 -0700
+@@ -72,7 +72,11 @@
+  */
+ #define	UNVIS_END	1	/* no more characters */
+ 
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ 
+ __BEGIN_DECLS
+ char	*vis(char *, int, int, int);
+diff -Naur libbsd-0.8.5.orig/include/bsd/wchar.h libbsd-0.8.5/include/bsd/wchar.h
+--- libbsd-0.8.5.orig/include/bsd/wchar.h	2017-07-06 16:08:04.617303059 -0700
++++ libbsd-0.8.5/include/bsd/wchar.h	2017-07-06 16:12:15.509834163 -0700
+@@ -40,7 +40,11 @@
+ #define LIBBSD_WCHAR_H
+ 
+ #include <stddef.h>
++#ifdef LIBBSD_OVERLAY
+ #include <sys/cdefs.h>
++#else
++#include <bsd/sys/cdefs.h>
++#endif
+ #include <sys/types.h>
+ 
+ __BEGIN_DECLS
