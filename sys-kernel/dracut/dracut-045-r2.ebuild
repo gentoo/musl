@@ -49,9 +49,10 @@ DEPEND="${CDEPEND}
 DOCS=( AUTHORS HACKING NEWS README README.generic README.kernel README.modules
 	README.testsuite TODO )
 
-QA_MULTILIB_PATHS="usr/lib/dracut"
+QA_MULTILIB_PATHS="usr/lib/dracut/.*"
 
 PATCHES=(
+	"${FILESDIR}/045-systemdutildir.patch"
 	"${FILESDIR}"/${P}-libfts.patch
 )
 
