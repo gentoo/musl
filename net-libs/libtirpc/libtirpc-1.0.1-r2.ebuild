@@ -3,7 +3,7 @@
 
 EAPI="5"
 
-inherit multilib-minimal toolchain-funcs eutils
+inherit autotools multilib-minimal toolchain-funcs eutils
 
 DESCRIPTION="Transport Independent RPC library (SunRPC replacement)"
 HOMEPAGE="http://libtirpc.sourceforge.net/"
@@ -12,7 +12,7 @@ SRC_URI="mirror://sourceforge/${PN}/${P}.tar.bz2
 
 LICENSE="GPL-2"
 SLOT="0/3" # subslot matches SONAME major
-KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 ~mips ppc ppc64 ~s390 ~sh sparc x86"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
 IUSE="ipv6 kerberos static-libs"
 
 RDEPEND="kerberos? ( >=virtual/krb5-0-r1[${MULTILIB_USEDEP}] )"
@@ -23,14 +23,21 @@ DEPEND="${RDEPEND}
 
 PATCHES=(
 	"${FILESDIR}/${P}-CVE-2017-8779.patch"
+	"${FILESDIR}/${P}_uclibc-dont-use-struct-rpcent.patch"
+	"${FILESDIR}/${P}_ifdef-out-yp-headers-742bbdff6ddf.patch"
+	"${FILESDIR}/${P}_remove-nis-h-dep-5f00f8c78c5d.patch"
+	"${FILESDIR}/${P}_add-des_impl-c-7f6bb9a3467a.patch"
+	"${FILESDIR}/${P}_remove-des-deps-to-glibc-503ac2e9fa56.patch"
+	"${FILESDIR}/${P}_uclibc-use-memset-not-bzero.patch"
 	# musl fixes
-	"${FILESDIR}"/git.patch
+	"${FILESDIR}/musl-1.0.1_r2.patch"
 )
 
 src_prepare() {
 	cp -r "${WORKDIR}"/tirpc "${S}"/ || die
 	epatch "${PATCHES[@]}"
 	epatch_user
+	eautoreconf
 }
 
 multilib_src_configure() {
