@@ -41,17 +41,18 @@ RDEPEND="${CDEPEND}
 	selinux? ( sec-policy/selinux-policykit )
 "
 PDEPEND="
-	gtk? ( >=gnome-extra/polkit-gnome-0.105 )
-	kde? ( || (
-		kde-plasma/polkit-kde-agent
-		sys-auth/polkit-kde-agent
+	gtk? ( || (
+		>=gnome-extra/polkit-gnome-0.105
+		>=lxde-base/lxsession-0.5.2
 	) )
+	kde? ( kde-plasma/polkit-kde-agent )
 	!systemd? ( !elogind? ( sys-auth/consolekit[policykit] ) )
 "
 
 DOCS=( docs/TODO HACKING NEWS README )
 
-PATCHES=( "${FILESDIR}"/${P}-elogind.patch
+PATCHES=(
+	"${FILESDIR}"/${P}-elogind.patch
 	"${FILESDIR}"/${P}-make-netgroup-support-optional.patch
  )
 
@@ -79,6 +80,9 @@ src_prepare() {
 		-e '/install-data-local:/,/uninstall-local:/ s/@ENABLE_GTK_DOC_TRUE@//' \
 		-e 's/@ENABLE_GTK_DOC_FALSE@install-data-local://' \
 		docs/polkit/Makefile.in || die
+
+	# disable broken test - bug #624022
+	sed -i -e "/^SUBDIRS/s/polkitbackend//" test/Makefile.am || die
 
 	# Fix cross-building, bug #590764, elogind patch, bug #598615
 	eautoreconf
