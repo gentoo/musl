@@ -1,7 +1,7 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
+EAPI=6
 inherit autotools eutils flag-o-matic
 
 DESCRIPTION="Create, destroy, resize, check, copy partitions and file systems"
@@ -28,14 +28,17 @@ DEPEND="
 	nls? ( >=sys-devel/gettext-0.12.1-r2 )
 	virtual/pkgconfig
 "
+PATCHES=(
+	"${FILESDIR}"/${PN}-3.2-devmapper.patch
+	"${FILESDIR}"/${PN}-3.2-po4a-mandir.patch
+	"${FILESDIR}"/${PN}-3.2-fix-resizing-FAT16.patch
+	"${FILESDIR}"/${PN}-3.2-sysmacros.patch
+	"${FILESDIR}"/${PN}-3.2-fix-includes.patch
+)
 
 src_prepare() {
-	epatch \
-		"${FILESDIR}"/${PN}-3.2-devmapper.patch \
-		"${FILESDIR}"/${PN}-3.2-po4a-mandir.patch \
-		"${FILESDIR}"/${PN}-3.2-fix-resizing-FAT16.patch \
-		"${FILESDIR}"/${PN}-3.2-sysmacros.patch \
-		"${FILESDIR}"/${PN}-3.2-fix-includes.patch
+	default
+
 	eautoreconf
 }
 
@@ -56,5 +59,6 @@ DOCS=( AUTHORS BUGS ChangeLog NEWS README THANKS TODO doc/{API,FAT,USER.jp} )
 
 src_install() {
 	default
+
 	prune_libtool_files
 }
