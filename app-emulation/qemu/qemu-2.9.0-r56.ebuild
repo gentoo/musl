@@ -137,7 +137,7 @@ SOFTMMU_TOOLS_DEPEND="
 	)
 	seccomp? ( >=sys-libs/libseccomp-2.1.0[static-libs(+)] )
 	smartcard? ( >=app-emulation/libcacard-2.5.0[static-libs(+)] )
-	snappy? ( app-arch/snappy[static-libs(+)] )
+	snappy? ( app-arch/snappy:=[static-libs(+)] )
 	spice? (
 		>=app-emulation/spice-protocol-0.12.3
 		>=app-emulation/spice-0.12.0[static-libs(+)]
@@ -200,11 +200,20 @@ PATCHES=(
 	# gentoo patches
 	"${FILESDIR}"/${PN}-2.5.0-cflags.patch
 	"${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
-	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8309.patch # bug 616870
-	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8379.patch # bug 616872
-	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8380.patch # bug 616874
-	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8112.patch # bug 616636
-	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-7493.patch # bug 618808
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8309.patch    # bug 616870
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8379.patch    # bug 616872
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8380.patch    # bug 616874
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8112.patch    # bug 616636
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-7493.patch    # bug 618808
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-11434.patch   # bug 625614
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-11334.patch   # bug 621292
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-9524-1.patch  # bug 621292
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-9524-2.patch
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-9503-1.patch  # bug 621184
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-9503-2.patch
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-10664.patch   # bug 623016
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-10806.patch   # bug 624088
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-7539.patch  # bug 625850
 )
 
 STRIP_MASK="/usr/share/qemu/palcode-clipper"
@@ -516,7 +525,7 @@ qemu_src_configure() {
 	if use ${static_flag}; then
 		conf_opts+=( --static --disable-pie )
 	else
-		gcc-specs-pie && conf_opts+=( --enable-pie )
+		tc-enables-pie && conf_opts+=( --enable-pie )
 	fi
 
 	echo "../configure ${conf_opts[*]}"

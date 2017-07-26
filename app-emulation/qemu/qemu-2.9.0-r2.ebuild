@@ -17,7 +17,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
-	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
+	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 x86 ~x86-fbsd"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -513,7 +513,7 @@ qemu_src_configure() {
 	if use ${static_flag}; then
 		conf_opts+=( --static --disable-pie )
 	else
-		gcc-specs-pie && conf_opts+=( --enable-pie )
+		tc-enables-pie && conf_opts+=( --enable-pie )
 	fi
 
 	echo "../configure ${conf_opts[*]}"
