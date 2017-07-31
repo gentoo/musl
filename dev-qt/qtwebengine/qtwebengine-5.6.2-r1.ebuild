@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -8,13 +8,13 @@ inherit pax-utils python-any-r1 qt5-build
 DESCRIPTION="Library for rendering dynamic web content in Qt5 C++ and QML applications"
 
 if [[ ${QT5_BUILD_TYPE} == release ]]; then
-	KEYWORDS="~amd64 ~x86"
+	KEYWORDS="amd64 x86"
 fi
 
-IUSE="alsa bindist geolocation pax_kernel pulseaudio +system-ffmpeg +system-icu widgets"
+IUSE="bindist geolocation pax_kernel +system-ffmpeg +system-icu widgets"
 
 RDEPEND="
-	app-arch/snappy
+	app-arch/snappy:=
 	dev-libs/glib:2
 	dev-libs/nspr
 	dev-libs/nss
@@ -28,7 +28,7 @@ RDEPEND="
 	dev-libs/libevent:=
 	dev-libs/libxml2
 	dev-libs/libxslt
-	dev-libs/protobuf:=
+	media-libs/alsa-lib
 	media-libs/flac
 	media-libs/fontconfig
 	media-libs/freetype
@@ -56,9 +56,7 @@ RDEPEND="
 	x11-libs/libXrender
 	x11-libs/libXScrnSaver
 	x11-libs/libXtst
-	alsa? ( media-libs/alsa-lib )
 	geolocation? ( ~dev-qt/qtpositioning-${PV} )
-	pulseaudio? ( media-sound/pulseaudio:= )
 	system-ffmpeg? ( media-video/ffmpeg:0= )
 	system-icu? ( dev-libs/icu:= )
 	widgets? ( ~dev-qt/qtwidgets-${PV} )
@@ -73,17 +71,11 @@ DEPEND="${RDEPEND}
 "
 
 PATCHES=(
-	"${FILESDIR}/${PN}-5.7.1-fix-audio-detection.patch"
-	"${FILESDIR}/${PN}-5.7.0-fix-system-ffmpeg.patch"
-	"${FILESDIR}/${PN}-5.7.0-icu58.patch"
-
-	# musl patches
 	"${FILESDIR}/${PN}-5.6.0-musl-execinfo.patch"
-	"${FILESDIR}/${PN}-5.7.0-musl-mallinfo.patch"
+	"${FILESDIR}/${PN}-5.6.0-musl-mallinfo.patch"
 	"${FILESDIR}/${PN}-5.6.0-musl-off_t.patch"
-	"${FILESDIR}/${PN}-5.7.0-musl-pthread-setname.patch"
-	"${FILESDIR}/${PN}-5.7.0-musl-resolver.patch"
-	"${FILESDIR}/${PN}-5.7.0-musl-sandbox.patch"
+	"${FILESDIR}/${PN}-5.6.0-musl-resolver.patch"
+	"${FILESDIR}/${PN}-5.6.0-musl-sandbox.patch"
 	"${FILESDIR}/${PN}-5.6.0-musl-siginfo.patch"
 	"${FILESDIR}/${PN}-5.6.0-musl-stack.patch"
 	"${FILESDIR}/${PN}-5.6.0-musl-sysctl.patch"
@@ -110,9 +102,7 @@ src_configure() {
 	export NINJA_PATH=/usr/bin/ninja
 
 	local myqmakeargs=(
-		$(usex alsa 'WEBENGINE_CONFIG+=use_alsa' '')
 		$(usex bindist '' 'WEBENGINE_CONFIG+=use_proprietary_codecs')
-		$(usex pulseaudio 'WEBENGINE_CONFIG+=use_pulseaudio' '')
 		$(usex system-ffmpeg 'WEBENGINE_CONFIG+=use_system_ffmpeg' '')
 		$(usex system-icu 'WEBENGINE_CONFIG+=use_system_icu' '')
 	)
