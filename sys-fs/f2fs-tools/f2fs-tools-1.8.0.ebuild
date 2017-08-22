@@ -9,7 +9,7 @@ SRC_URI="https://dev.gentoo.org/~blueness/f2fs-tools/${P}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0/2"
-KEYWORDS="~amd64 ~arm ~mips ~x86"
+KEYWORDS="~amd64 ~arm ~mips ~ppc ~ppc64 ~x86"
 IUSE="selinux"
 
 RDEPEND="
@@ -17,6 +17,10 @@ RDEPEND="
 	selinux? ( sys-libs/libselinux )
 	elibc_musl? ( sys-libs/queue )"
 DEPEND="$RDEPEND"
+
+PATCHES=(
+	"${FILESDIR}"/${P}-sysmacros.patch #623660
+)
 
 src_configure() {
 	#This is required to install to /sbin, bug #481110
