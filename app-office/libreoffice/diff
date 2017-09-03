@@ -1,0 +1,84 @@
+10c10
+< PYTHON_COMPAT=( python{2_7,3_4,3_5} )
+---
+> PYTHON_COMPAT=( python2_7 python3_{4,5,6} )
+59c59
+< 	"${ADDONS_URI}/ce12af00283eb90d9281956524250d6e-xmlsec1-1.2.20.tar.gz" # modifies source code
+---
+> 	"${ADDONS_URI}/86b1daaa438f5a7bea9a52d7b9799ac0-xmlsec1-1.2.23.tar.gz" # modifies source code
+86c86
+< KEYWORDS="amd64 ~arm x86 ~amd64-linux ~x86-linux"
+---
+> KEYWORDS="~amd64 ~arm ~x86 ~amd64-linux ~x86-linux"
+99a100
+> 	app-text/libstaroffice
+108c109
+< 	>=dev-libs/boost-1.55:=
+---
+> 	dev-libs/boost:=
+112c113
+< 	=dev-libs/liborcus-0.11*
+---
+> 	=dev-libs/liborcus-0.12*
+123c124
+< 	>=media-libs/harfbuzz-0.9.18:=[icu(+)]
+---
+> 	media-libs/harfbuzz:=[graphite,icu]
+129a131
+> 	media-libs/libzmf
+134d135
+< 	virtual/jpeg:0
+139a141
+> 	virtual/jpeg:0
+143c145
+< 	collada? ( >=media-libs/opencollada-1.2.2_p20150207 )
+---
+> 	collada? ( media-libs/opencollada )
+150c152
+< 	firebird? ( >=dev-db/firebird-2.5 )
+---
+> 	firebird? ( >=dev-db/firebird-3.0.2.32703.0-r1 )
+164c166
+< 		>=x11-libs/gtk+-3.8:3
+---
+> 		x11-libs/gtk+:3
+207c209
+< 	>=dev-util/mdds-1.2.0:1=
+---
+> 	>=dev-util/mdds-1.2.2:1=
+242,244d243
+< 	# from master branch
+< 	"${FILESDIR}/${PN}-5.2-icu58.patch"
+< 
+246c245
+< 	"${FILESDIR}/${PN}-5.2-system-pyuno.patch"
+---
+> 	"${FILESDIR}/${PN}-5.3-system-pyuno.patch"
+253c252
+< 	"${FILESDIR}/${PN}-5.0.5.2-linux-musl.patch"
+---
+> 	"${FILESDIR}/${PN}-5.3.0.3-linux-musl.patch"
+260c259,265
+< 		ewarn "If you plan to use lbase application you should enable java or you will get various crashes."
+---
+> 		ewarn "If you plan to use Base application you should enable java or you will get various crashes."
+> 
+> 	if has_version "<app-office/libreoffice-5.3.0[firebird]"; then
+> 		ewarn "Firebird has been upgraded to version 3.0.0. It is unable to read back Firebird 2.5 data,"
+> 		ewarn "so embedded firebird odb files created in LibreOffice pre-5.3 cannot be opened with LibreOffice 5.3."
+> 		ewarn "See also: https://wiki.documentfoundation.org/ReleaseNotes/5.3#Base"
+> 	fi
+431a437
+> 	# --disable-breakpad: requires not-yet-in-tree dev-utils/breakpad
+455a462
+> 		--disable-breakpad \
+457d463
+< 		--disable-crashdump \
+462d467
+< 		--disable-hardlink-deliver \
+481d485
+< 		--without-sun-templates \
+560c564
+< 		dosym /usr/$(get_libdir)/libreoffice/program/liblibreofficekitgtk.so \
+---
+> 		dosym libreoffice/program/liblibreofficekitgtk.so \
