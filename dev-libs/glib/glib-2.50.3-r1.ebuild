@@ -11,11 +11,11 @@ PYTHON_COMPAT=( python2_7 )
 # pkg-config
 GNOME2_LA_PUNT="yes"
 
-inherit autotools bash-completion-r1 eutils flag-o-matic gnome2 libtool linux-info \
-	multilib multilib-minimal pax-utils python-r1  toolchain-funcs versionator virtualx
+inherit autotools bash-completion-r1 epunt-cxx flag-o-matic gnome2 libtool linux-info \
+	multilib multilib-minimal pax-utils python-r1 toolchain-funcs versionator virtualx
 
 DESCRIPTION="The GLib library of C routines"
-HOMEPAGE="http://www.gtk.org/"
+HOMEPAGE="https://www.gtk.org/"
 SRC_URI="${SRC_URI}
 	https://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz" # pkg.m4 for eautoreconf
 
@@ -27,7 +27,11 @@ REQUIRED_USE="
 	test? ( ${PYTHON_REQUIRED_USE} )
 "
 
-KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 ~m68k ~mips ppc ppc64 ~s390 ~sh sparc x86 ~amd64-fbsd ~sparc-fbsd ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux"
+KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~amd64-fbsd ~sparc-fbsd ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux"
+
+# Added util-linux multilib dependency to have libmount support (which
+# is always turned on on linux systems, unless explicitly disabled, but
+# this ebuild does not do that anyway) (bug #599586)
 
 RDEPEND="
 	!<dev-util/gdbus-codegen-${PV}
@@ -36,6 +40,7 @@ RDEPEND="
 	>=virtual/libffi-3.0.13-r1[${MULTILIB_USEDEP}]
 	>=virtual/libintl-0-r2[${MULTILIB_USEDEP}]
 	>=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}]
+	kernel_linux? ( sys-apps/util-linux[${MULTILIB_USEDEP}] )
 	selinux? ( >=sys-libs/libselinux-2.2.2-r5[${MULTILIB_USEDEP}] )
 	xattr? ( >=sys-apps/attr-2.4.47-r1[${MULTILIB_USEDEP}] )
 	fam? ( >=virtual/fam-0-r1[${MULTILIB_USEDEP}] )
@@ -82,6 +87,7 @@ pkg_setup() {
 }
 
 src_prepare() {
+
 	# Fix for MUSL
 	eapply "${FILESDIR}"/quark_init_on_demand.patch
 	eapply "${FILESDIR}"/gobject_init_on_demand.patch
@@ -116,10 +122,11 @@ src_prepare() {
 		sed -i -e 's/ tests//' {.,gio,glib}/Makefile.am || die
 	fi
 
-	eapply "${FILESDIR}"/${PN}-2.50.3-fix-gdatetime-tests.patch
+	# Fix tests with timezone-data-2017a and newer
+	eapply "${FILESDIR}"/${P}-fix-gdatetime-tests.patch
 
 	# gdbus-codegen is a separate package
-	eapply "${FILESDIR}"/${PN}-2.40.0-external-gdbus-codegen.patch
+	eapply "${FILESDIR}"/${PN}-2.50.0-external-gdbus-codegen.patch
 
 	# Leave python shebang alone - handled by python_replicate_script
 	# We could call python_setup and give configure a valid --with-python
@@ -146,6 +153,8 @@ multilib_src_configure() {
 		fi
 		export LIBFFI_CFLAGS="-I$(echo /usr/$(get_libdir)/libffi-*/include)"
 		export LIBFFI_LIBS="-lffi"
+		export PCRE_CFLAGS=" " # test -n "$PCRE_CFLAGS" needs to pass
+		export PCRE_LIBS="-lpcre"
 	fi
 
 	# These configure tests don't work when cross-compiling.
@@ -173,6 +182,7 @@ multilib_src_configure() {
 		$(usex debug --enable-debug=yes ' ') \
 		$(use_enable xattr) \
 		$(use_enable fam) \
+		$(use_enable kernel_linux libmount) \
 		$(use_enable selinux) \
 		$(use_enable static-libs static) \
 		$(use_enable systemtap dtrace) \
@@ -196,6 +206,7 @@ multilib_src_test() {
 	export XDG_DATA_DIRS=/usr/local/share:/usr/share
 	export G_DBUS_COOKIE_SHA1_KEYRING_DIR="${T}/temp"
 	export LC_TIME=C # bug #411967
+	unset GSETTINGS_BACKEND # bug #596380
 	python_setup
 
 	# Related test is a bit nitpicking
@@ -248,7 +259,7 @@ pkg_preinst() {
 
 	multilib_pkg_preinst() {
 		# Make giomodule.cache belong to glib alone
-		local cache="usr/$(get_libdir)/gio/giomodule.cache"
+		local cache="usr/$(get_libdir)/gio/modules/giomodule.cache"
 
 		if [[ -e ${EROOT}${cache} ]]; then
 			cp "${EROOT}"${cache} "${ED}"/${cache} || die
@@ -257,7 +268,11 @@ pkg_preinst() {
 		fi
 	}
 
-	multilib_foreach_abi multilib_pkg_preinst
+	# Don't run the cache ownership when cross-compiling, as it would end up with an empty cache
+	# file due to inability to create it and GIO might not look at any of the modules there
+	if ! tc-is-cross-compiler ; then
+		multilib_foreach_abi multilib_pkg_preinst
+	fi
 }
 
 pkg_postinst() {
@@ -270,7 +285,14 @@ pkg_postinst() {
 		gnome2_giomodule_cache_update \
 			|| die "Update GIO modules cache failed (for ${ABI})"
 	}
-	multilib_foreach_abi multilib_pkg_postinst
+	if ! tc-is-cross-compiler ; then
+		multilib_foreach_abi multilib_pkg_postinst
+	else
+		ewarn "Updating of GIO modules cache skipped due to cross-compilation."
+		ewarn "You might want to run gio-querymodules manually on the target for"
+		ewarn "your final image for performance reasons and re-run it when packages"
+		ewarn "installing GIO modules get upgraded or added to the image."
+	fi
 }
 
 pkg_postrm() {
@@ -278,7 +300,7 @@ pkg_postrm() {
 
 	if [[ -z ${REPLACED_BY_VERSION} ]]; then
 		multilib_pkg_postrm() {
-			rm -f "${EROOT}"usr/$(get_libdir)/gio/giomodule.cache
+			rm -f "${EROOT}"usr/$(get_libdir)/gio/modules/giomodule.cache
 		}
 		multilib_foreach_abi multilib_pkg_postrm
 		rm -f "${EROOT}"usr/share/glib-2.0/schemas/gschemas.compiled
