@@ -2,6 +2,8 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
+
+GNOME2_EAUTORECONF="yes"
 inherit gnome2 systemd
 
 DESCRIPTION="D-Bus interfaces for querying and manipulating user account information"
@@ -10,16 +12,19 @@ SRC_URI="https://www.freedesktop.org/software/${PN}/${P}.tar.xz"
 
 LICENSE="GPL-3+"
 SLOT="0"
-KEYWORDS="~alpha amd64 arm ~arm64 ~ia64 ppc ppc64 ~sparc x86"
+KEYWORDS="~alpha amd64 arm ~arm64 ~ia64 ~ppc ~ppc64 ~sparc ~x86"
 
-IUSE="doc +introspection selinux systemd"
+IUSE="doc elogind +introspection selinux systemd"
+
+REQUIRED_USE="?? ( elogind systemd )"
 
 CDEPEND="
 	>=dev-libs/glib-2.37.3:2
 	sys-auth/polkit
+	elogind? ( >=sys-auth/elogind-229.4 )
 	introspection? ( >=dev-libs/gobject-introspection-0.9.12:= )
 	systemd? ( >=sys-apps/systemd-186:0= )
-	!systemd? ( sys-auth/consolekit )
+	!systemd? ( !elogind? ( sys-auth/consolekit ) )
 "
 DEPEND="${CDEPEND}
 	dev-libs/libxslt
@@ -38,6 +43,7 @@ RDEPEND="${CDEPEND}
 
 PATCHES=(
 	"${FILESDIR}/${PN}-0.6.35-gentoo-system-users.patch"
+	"${FILESDIR}/${P}-elogind.patch"
 	"${FILESDIR}/musl-fgetspent_r.patch"
 )
 
@@ -55,6 +61,7 @@ src_configure() {
 		--enable-admin-group="wheel" \
 		--with-systemdsystemunitdir="$(systemd_get_systemunitdir)" \
 		$(use_enable doc docbook-docs) \
+		$(use_enable elogind) \
 		$(use_enable introspection) \
 		$(use_enable systemd)
 }
