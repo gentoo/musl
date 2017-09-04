@@ -1,11 +1,11 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=5
 
 inherit eutils linux-info multilib pam toolchain-funcs
 
-PATCH_VER="1"
+PATCH_VER="4"
 DESCRIPTION="Point-to-Point Protocol (PPP)"
 HOMEPAGE="http://www.samba.org/ppp"
 SRC_URI="ftp://ftp.samba.org/pub/ppp/${P}.tar.gz
@@ -14,16 +14,20 @@ SRC_URI="ftp://ftp.samba.org/pub/ppp/${P}.tar.gz
 
 LICENSE="BSD GPL-2"
 SLOT="0/${PV}"
-KEYWORDS="amd64 arm ~mips ppc x86"
-IUSE="activefilter atm dhcp eap-tls gtk ipv6 pam radius"
+KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 ~mips ppc ppc64 ~s390 ~sh sparc x86"
+IUSE="activefilter atm dhcp eap-tls gtk ipv6 libressl pam radius"
 
-DEPEND="!net-dialup/ppp-scripts
-	activefilter? ( net-libs/libpcap )
+DEPEND="activefilter? ( net-libs/libpcap )
 	atm? ( net-dialup/linux-atm )
 	pam? ( virtual/pam )
 	gtk? ( x11-libs/gtk+:2 )
-	eap-tls? ( net-misc/curl dev-libs/openssl:0 )"
+	eap-tls? (
+		net-misc/curl
+		!libressl? ( dev-libs/openssl:0 )
+		libressl? ( dev-libs/libressl )
+	)"
 RDEPEND="${DEPEND}"
+PDEPEND="net-dialup/ppp-scripts"
 
 src_prepare() {
 	mv "${WORKDIR}/dhcp" "${S}/pppd/plugins" || die
@@ -90,6 +94,8 @@ src_prepare() {
 			epatch "${FILESDIR}"/${P}-dhcp-musl.patch
 		fi
 	fi
+
+	epatch_user # 549588
 }
 
 src_compile() {
@@ -126,14 +132,6 @@ src_install() {
 
 	insopts -m0644
 	doins etc.ppp/options
-
-	exeinto /etc/ppp
-	for i in ip-up ip-down ; do
-		doexe "${WORKDIR}/scripts/${i}"
-		insinto /etc/ppp/${i}.d
-		use ipv6 && dosym ${i} /etc/ppp/${i/ip/ipv6}
-		doins "${WORKDIR}/scripts/${i}.d"/*
-	done
 
 	pamd_mimic_system ppp auth account session
 
