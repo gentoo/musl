@@ -11,15 +11,9 @@ HOMEPAGE="http://www.rsyslog.com/"
 BRANCH="8-stable"
 
 if [[ ${PV} == "9999" ]]; then
-	EGIT_REPO_URI="
-		git://github.com/rsyslog/${PN}.git
-		https://github.com/rsyslog/${PN}.git
-	"
+	EGIT_REPO_URI="https://github.com/rsyslog/${PN}.git"
 
-	DOC_REPO_URI="
-		git://github.com/rsyslog/${PN}-doc.git
-		https://github.com/rsyslog/${PN}-doc.git
-	"
+	DOC_REPO_URI="https://github.com/rsyslog/${PN}-doc.git"
 
 	inherit git-r3
 else
@@ -45,7 +39,7 @@ else
 		unset _tmp_last_index
 		unset _tmp_suffix
 	else
-		KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~x86"
+		KEYWORDS="amd64 ~arm ~arm64 hppa x86"
 	fi
 
 	SRC_URI="
@@ -55,8 +49,7 @@ else
 
 	PATCHES=(
 		"${FILESDIR}"/8-stable/${PN}-8.26.0-fix-zmq3-format-security.patch
-		"${FILESDIR}"/8-stable/${PN}-8.27.0-fix-librdkafka-detection.patch
-		"${FILESDIR}"/8-stable/50-${PN}-8.18.0-musl-fix.patch
+		"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-fix.patch"
 	)
 fi
 
@@ -222,7 +215,6 @@ src_configure() {
 		$(use_enable elasticsearch)
 		$(use_enable gcrypt libgcrypt)
 		$(use_enable jemalloc)
-		$(use_enable kafka imkafka)
 		$(use_enable kafka omkafka)
 		$(use_enable kerberos gssapi-krb5)
 		$(use_enable normalize mmnormalize)
