@@ -2,6 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
+GNOME2_EAUTORECONF="yes"
 inherit gnome2
 
 DESCRIPTION="Gnome session manager"
@@ -9,7 +10,7 @@ HOMEPAGE="https://git.gnome.org/browse/gnome-session"
 
 LICENSE="GPL-2 LGPL-2 FDL-1.1"
 SLOT="0"
-KEYWORDS="~alpha amd64 ~arm ~ia64 ~ppc ~ppc64 ~sparc x86 ~x86-fbsd ~amd64-linux ~x86-linux ~x86-solaris"
+KEYWORDS="~alpha amd64 ~arm ~arm64 ~ia64 ~ppc ~ppc64 ~sparc x86 ~x86-fbsd ~amd64-linux ~x86-linux ~x86-solaris"
 IUSE="doc elibc_FreeBSD ipv6 systemd"
 
 # x11-misc/xdg-user-dirs{,-gtk} are needed to create the various XDG_*_DIRs, and
@@ -24,7 +25,9 @@ COMMON_DEPEND="
 	>=gnome-base/gnome-desktop-3.18:3=
 	elibc_FreeBSD? ( dev-libs/libexecinfo )
 
-	virtual/opengl
+	media-libs/mesa[egl,gles2]
+
+	media-libs/libepoxy
 	x11-libs/libSM
 	x11-libs/libICE
 	x11-libs/libXau
@@ -54,24 +57,27 @@ RDEPEND="${COMMON_DEPEND}
 	)
 "
 DEPEND="${COMMON_DEPEND}
-	>=dev-lang/perl-5
-	>=sys-devel/gettext-0.10.40
 	dev-libs/libxslt
 	>=dev-util/intltool-0.40.6
+	>=sys-devel/gettext-0.10.40
 	virtual/pkgconfig
 	!<gnome-base/gdm-2.20.4
 	doc? (
 		app-text/xmlto
 		dev-libs/libxslt )
+	gnome-base/gnome-common
 "
-PATCHES=( "${FILESDIR}"/patch-gnome-session_main_c.patch )
-
 # gnome-common needed for eautoreconf
 # gnome-base/gdm does not provide gnome.desktop anymore
 
-src_prepare() {
-	default
-}
+PATCHES=(
+	# Make gnome wayland session launch inside a login shell for /etc/env.d and other stuff to work, bug 604110
+	"${FILESDIR}/${PV}-wayland-login-shell.patch"
+	# Restore Xorg as the default GNOME session instead of Wayland for the 3.22 release, bug 611146
+	"${FILESDIR}/${PV}-xorg-default.patch" # remove ewarn about this below when removing for 3.24
+	"${FILESDIR}/${PV}-xorg-default-translations.patch"
+	"${FILESDIR}/patch-gnome-session_main_c.patch"
+)
 
 src_configure() {
 	# 1. Avoid automagic on old upower releases
@@ -118,6 +124,12 @@ src_install() {
 
 pkg_postinst() {
 	gnome2_pkg_postinst
+
+	ewarn "The Gentoo GNOME team has decided to retain Xorg session default instead of"
+	ewarn "Wayland for GNOME 3.22 stable version, even if USE=wayland is set on applicable"
+	ewarn "packages. You can still choose the 'GNOME on Wayland' session explicitly, if"
+	ewarn "desired. GNOME 3.24 will default to Wayland again as upstream GNOME does, if"
+	ewarn "USE=wayland is used globally, but 'GNOME on Xorg' session will be a choice."
 
 	if ! has_version gnome-base/gdm && ! has_version x11-misc/sddm; then
 		ewarn "If you use a custom .xinitrc for your X session,"
