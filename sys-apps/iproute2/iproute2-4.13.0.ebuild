@@ -1,13 +1,13 @@
 # Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
+EAPI=6
 
-inherit eutils toolchain-funcs flag-o-matic multilib
+inherit toolchain-funcs flag-o-matic multilib
 
 if [[ ${PV} == "9999" ]] ; then
 	EGIT_REPO_URI="git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git"
-	inherit git-2
+	inherit git-r3
 else
 	SRC_URI="mirror://kernel/linux/utils/net/${PN}/${P}.tar.xz"
 	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
@@ -52,7 +52,15 @@ src_prepare() {
 		)
 	fi
 
-	epatch "${PATCHES[@]}"
+	# Local uclibc-ng compat fix until uclibc-ng upstream can sync
+	# netinet/in.h with glibc.  Resolves #626546.
+	if use elibc_uclibc ; then
+		PATCHES+=(
+			"${FILESDIR}"/${PN}-4.12.0-uclibc-ng-add-ipproto_mh.patch
+		)
+	fi
+
+	default
 
 	sed -i \
 		-e '/^CC :=/d' \
@@ -113,18 +121,18 @@ src_install() {
 
 	emake \
 		DESTDIR="${D}" \
-		LIBDIR="${EPREFIX}"/$(get_libdir) \
-		SBINDIR="${EPREFIX}"/sbin \
-		CONFDIR="${EPREFIX}"/etc/iproute2 \
-		DOCDIR="${EPREFIX}"/usr/share/doc/${PF} \
-		MANDIR="${EPREFIX}"/usr/share/man \
-		ARPDDIR="${EPREFIX}"/var/lib/arpd \
+		LIBDIR="${EPREFIX%/}"/$(get_libdir) \
+		SBINDIR="${EPREFIX%/}"/sbin \
+		CONFDIR="${EPREFIX%/}"/etc/iproute2 \
+		DOCDIR="${EPREFIX%/}"/usr/share/doc/${PF} \
+		MANDIR="${EPREFIX%/}"/usr/share/man \
+		ARPDDIR="${EPREFIX%/}"/var/lib/arpd \
 		install
 
-	rm "${ED}"/usr/share/doc/${PF}/*.{sgml,tex} || die #455988
+	rm "${ED%/}"/usr/share/doc/${PF}/*.{sgml,tex} || die #455988
 
 	dodir /bin
-	mv "${ED}"/{s,}bin/ip || die #330115
+	mv "${ED%/}"/{s,}bin/ip || die #330115
 
 	dolib.a lib/libnetlink.a
 	insinto /usr/include
@@ -132,12 +140,12 @@ src_install() {
 	# This local header pulls in a lot of linux headers it
 	# doesn't directly need.  Delete this header that requires
 	# linux-headers-3.8 until that goes stable.  #467716
-	sed -i '/linux\/netconf.h/d' "${ED}"/usr/include/libnetlink.h || die
+	sed -i '/linux\/netconf.h/d' "${ED%/}"/usr/include/libnetlink.h || die
 
 	if use berkdb ; then
 		dodir /var/lib/arpd
 		# bug 47482, arpd doesn't need to be in /sbin
 		dodir /usr/bin
-		mv "${ED}"/sbin/arpd "${ED}"/usr/bin/ || die
+		mv "${ED%/}"/sbin/arpd "${ED%/}"/usr/bin/ || die
 	fi
 }
