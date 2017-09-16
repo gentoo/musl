@@ -1,0 +1,43 @@
+diff -Naur libnsl-libnsl-1.1.0.orig/src/rpcsvc/nis.h libnsl-libnsl-1.1.0/src/rpcsvc/nis.h
+--- libnsl-libnsl-1.1.0.orig/src/rpcsvc/nis.h	2017-08-18 12:40:34.000000000 -0700
++++ libnsl-libnsl-1.1.0/src/rpcsvc/nis.h	2017-09-16 16:48:58.148882799 -0700
+@@ -56,10 +56,38 @@
+  *                                              <kukuk@suse.de>
+  */
+ 
+-
+ #ifndef __nis_object_h
+ #define __nis_object_h
+ 
++#ifndef rawmemchr
++#define rawmemchr(s, c) memchr((s),(size_t)-1,(c))
++#endif
++
++#ifndef __asprintf
++#define __asprintf asprintf
++#endif
++
++#ifndef __mempcpy
++#define __mempcpy mempcpy
++#endif
++
++#ifndef __strtok_r
++#define __strtok_r strtok_r
++#endif
++
++#ifndef __always_inline
++#define __always_inline inline
++#endif
++
++#ifndef TEMP_FAILURE_RETRY
++#define TEMP_FAILURE_RETRY(exp) ({ \
++	typeof (exp) _rc; \
++	do { \
++		_rc = (exp); \
++	} while (_rc == -1 && errno == EINTR); \
++	_rc; })
++#endif
++
+ #define NIS_MAXSTRINGLEN 255
+ #define NIS_MAXNAMELEN 1024
+ #define NIS_MAXATTRNAME 32
