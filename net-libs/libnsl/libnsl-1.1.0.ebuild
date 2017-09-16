@@ -28,6 +28,7 @@ src_prepare(){
 		sed -e 's|^__BEGIN_DECLS$|#ifdef __cplusplus\nextern "C" {\n#endif|' \
 		    -e 's|^__END_DECLS$|#ifdef __cplusplus\n}\n#endif|' \
 		    -e 's| __THROW||' \
+		    -e 's|__always_inline|inline|' \
 		    -i {} \; || die
 	eautoreconf
 }
