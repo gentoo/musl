@@ -1,7 +1,7 @@
 diff -Naur libnsl-libnsl-1.1.0.orig/src/rpcsvc/nis.h libnsl-libnsl-1.1.0/src/rpcsvc/nis.h
 --- libnsl-libnsl-1.1.0.orig/src/rpcsvc/nis.h	2017-08-18 12:40:34.000000000 -0700
 +++ libnsl-libnsl-1.1.0/src/rpcsvc/nis.h	2017-09-16 16:48:58.148882799 -0700
-@@ -56,10 +56,38 @@
+@@ -56,10 +56,42 @@
   *                                              <kukuk@suse.de>
   */
  
@@ -19,6 +19,10 @@ diff -Naur libnsl-libnsl-1.1.0.orig/src/rpcsvc/nis.h libnsl-libnsl-1.1.0/src/rpc
 +
 +#ifndef __mempcpy
 +#define __mempcpy mempcpy
++#endif
++
++#ifdef __stpcpy
++#define __stpcpy stpcpy
 +#endif
 +
 +#ifndef __strtok_r
