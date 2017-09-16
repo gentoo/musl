@@ -20,7 +20,7 @@ DEPEND="
 "
 RDEPEND=${DEPEND}
 
-PATCHES=( "${S}"/${P}-musl.patch )
+PATCHES=( "${FILESDIR}"/${P}-musl.patch )
 
 S=${WORKDIR}/${PN}-${P}
 
