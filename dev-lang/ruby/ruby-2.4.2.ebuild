@@ -139,7 +139,7 @@ src_configure() {
 	# Configure script does not detect isinf/isnan as macros, which breaks
 	# some native extensions.
 	export ac_cv_func_isnan=yes
-	export ac_cf_func_isinf=yes
+	export ac_cv_func_isinf=yes
 
 	# Provide an empty LIBPATHENV because we disable rpath but we do not
 	# need LD_LIBRARY_PATH by default since that breaks USE=multitarget
