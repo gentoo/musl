@@ -7,11 +7,11 @@ inherit eutils toolchain-funcs multilib
 
 DESCRIPTION="xfs filesystem utilities"
 HOMEPAGE="http://oss.sgi.com/projects/xfs/"
-SRC_URI="https://www.kernel.org/pub/linux/utils/fs/xfs/${PN}/${P}.tar.xz"
+SRC_URI="ftp://ftp.kernel.org/pub/linux/utils/fs/xfs/${PN}/${P}.tar.xz"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
+KEYWORDS="alpha amd64 arm arm64 ~hppa ia64 ~mips ppc ppc64 ~s390 ~sh sparc x86"
 IUSE="libedit nls readline static static-libs"
 REQUIRED_USE="static? ( static-libs )"
 
@@ -28,11 +28,11 @@ DEPEND="${RDEPEND}
 	nls? ( sys-devel/gettext )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-4.12.0-sharedlibs.patch
+	"${FILESDIR}"/${PN}-4.7.0-sharedlibs.patch
 	"${FILESDIR}"/${PN}-4.7.0-libxcmd-link.patch
-	"${FILESDIR}"/${PN}-4.9.0-underlinking.patch
-	"${FILESDIR}"/${PN}-4.11.0-musl.patch
-	"${FILESDIR}"/${PN}-4.12.0-fix_musl.patch
+	"${FILESDIR}"/${PN}-4.9.0-cross-compile.patch
+	"${FILESDIR}"/${P}-underlinking.patch
+	"${FILESDIR}"/${PN}-4.9.0-musl.patch
 )
 
 pkg_setup() {
