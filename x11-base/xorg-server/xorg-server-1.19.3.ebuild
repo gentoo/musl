@@ -9,7 +9,7 @@ EGIT_REPO_URI="https://anongit.freedesktop.org/git/xorg/xserver.git"
 
 DESCRIPTION="X.Org X servers"
 SLOT="0/${PV}"
-KEYWORDS="~arm"
+KEYWORDS="arm"
 
 IUSE_SERVERS="dmx kdrive wayland xephyr xnest xorg xvfb"
 IUSE="${IUSE_SERVERS} debug glamor ipv6 libressl minimal selinux +suid systemd tslib +udev unwind xcsecurity"
