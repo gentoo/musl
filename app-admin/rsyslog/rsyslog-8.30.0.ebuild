@@ -47,7 +47,10 @@ else
 		doc? ( http://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-doc-${MY_PV}.tar.gz -> ${MY_FILENAME_DOCS} )
 	"
 
-	PATCHES=( "${FILESDIR}"/8-stable/50-${PN}-8.18.0-musl-fix.patch )
+	PATCHES=(
+		"${FILESDIR}"/8-stable/${PN}-8.30.0-fix-kerberos.patch
+		"${FILESDIR}"/8-stable/${PN}-8.18.0-musl-fix.patch
+	)
 fi
 
 LICENSE="GPL-3 LGPL-3 Apache-2.0"
@@ -56,7 +59,7 @@ IUSE="dbi debug doc elasticsearch +gcrypt grok jemalloc kafka kerberos libressl 
 IUSE+=" omudpspoof postgres rabbitmq redis relp rfc3195 rfc5424hmac snmp ssl systemd test usertools +uuid zeromq"
 
 RDEPEND="
-	>=dev-libs/libfastjson-0.99.3:=
+	>=dev-libs/libfastjson-0.99.7:=
 	>=dev-libs/libestr-0.1.9
 	>=dev-libs/liblogging-1.0.1:=[stdlog]
 	>=sys-libs/zlib-1.2.5
@@ -87,7 +90,7 @@ RDEPEND="
 	)
 	snmp? ( >=net-analyzer/net-snmp-5.7.2 )
 	ssl? ( >=net-libs/gnutls-2.12.23:0= )
-	systemd? ( >=sys-apps/systemd-208 )
+	systemd? ( >=sys-apps/systemd-234 )
 	uuid? ( sys-apps/util-linux:0= )
 	zeromq? (
 		>=net-libs/zeromq-4.1.1:=

@@ -49,7 +49,7 @@ else
 
 	PATCHES=(
 		"${FILESDIR}"/8-stable/${PN}-8.26.0-fix-zmq3-format-security.patch
-		"${FILESDIR}/8-stable/50-${PN}-8.18.0-musl-fix.patch"
+		"${FILESDIR}"/8-stable/${PN}-8.18.0-musl-fix.patch
 	)
 fi
 
