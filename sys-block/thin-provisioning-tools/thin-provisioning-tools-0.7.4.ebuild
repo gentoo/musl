@@ -31,6 +31,7 @@ DEPEND="${RDEPEND}
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.7.0-build-fixes.patch
+	"${FILESDIR}/${P}-disabled-tests_build_fix.patch" #634868
 	"${FILESDIR}"/${PN}-0.7.0-page_size.patch
 )
 
