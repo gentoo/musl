@@ -24,6 +24,7 @@ src_prepare() {
 
 	# Upstream Patch
 	epatch "${FILESDIR}"/${PN}-5.4.0-pr70473.patch
+	epatch "${FILESDIR}"/${PN}-6.4.0-fix-genattrtab-memory-consumption-on-arm.patch
 
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl ]]; then
 		epatch "${FILESDIR}"/4.9.4/boehm_gc.patch
