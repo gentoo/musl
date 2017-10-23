@@ -153,7 +153,7 @@ src_prepare() {
 	# https://bugs.gentoo.org/show_bug.cgi?id=555504
 	eapply "${FILESDIR}"/${PN}-2.8.5-fix-ia64-build.patch
 	# musl and jit
-	eapply "${FILESDIR}"/${PN}-2.14.3-musl.patch
+	eapply "${FILESDIR}"/${PN}-2.18.1-musl.patch
 	cmake-utils_src_prepare
 	gnome2_src_prepare
 }
