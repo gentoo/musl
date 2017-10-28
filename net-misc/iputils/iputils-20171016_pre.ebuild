@@ -63,9 +63,7 @@ S="${WORKDIR}/${PN}-${MY_COMMIT}"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-99999999-tracepath46.patch
-	"${FILESDIR}"/${PN}-20150815-remove-rdisc-glibc-assumption.patch
 	"${FILESDIR}"/${PN}-20171016-missing-AI_IDN-AI_CANONIDN-NI_IDN.patch
-	"${FILESDIR}"/${PN}-20171016-scope-delimiter.patch
 )
 
 src_prepare() {
