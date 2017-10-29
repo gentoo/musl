@@ -19,7 +19,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
-	KEYWORDS="amd64 ~arm64 ~ppc ~ppc64 x86 ~x86-fbsd"
+	KEYWORDS="~amd64 ~arm64 ~ppc ~ppc64 ~x86 ~x86-fbsd"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -89,7 +89,7 @@ SOFTMMU_TOOLS_DEPEND="
 	bzip2? ( app-arch/bzip2[static-libs(+)] )
 	caps? ( sys-libs/libcap-ng[static-libs(+)] )
 	curl? ( >=net-misc/curl-7.15.4[static-libs(+)] )
-	fdt? ( >=sys-apps/dtc-1.4.0[static-libs(+)] )
+	fdt? ( >=sys-apps/dtc-1.4.2[static-libs(+)] )
 	glusterfs? ( >=sys-cluster/glusterfs-3.4.0[static-libs(+)] )
 	gnutls? (
 		dev-libs/nettle:=[static-libs(+)]
@@ -200,7 +200,19 @@ PATCHES=(
 	# gentoo patches
 	"${FILESDIR}"/${PN}-2.5.0-cflags.patch
 	"${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
-	"${FILESDIR}"/${PN}-2.10.0-CVE-2017-13711.patch   # bug 629350
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8309.patch    # bug 616870
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8379.patch    # bug 616872
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8380.patch    # bug 616874
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-8112.patch    # bug 616636
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-7493.patch    # bug 618808
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-11434.patch   # bug 625614
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-11334.patch   # bug 621292
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-9524-1.patch  # bug 621292
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-9524-2.patch
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-9503-1.patch  # bug 621184
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-9503-2.patch
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-10664.patch   # bug 623016
+	"${FILESDIR}"/${PN}-2.9.0-CVE-2017-10806.patch   # bug 624088
 )
 
 STRIP_MASK="/usr/share/qemu/palcode-clipper"
@@ -211,7 +223,6 @@ QA_PREBUILT="
 	usr/share/qemu/openbios-sparc32
 	usr/share/qemu/palcode-clipper
 	usr/share/qemu/s390-ccw.img
-	usr/share/qemu/s390-netboot.img
 	usr/share/qemu/u-boot.e500"
 
 QA_WX_LOAD="usr/bin/qemu-i386
@@ -367,6 +378,9 @@ src_prepare() {
 
 	# Run after we've applied all patches.
 	handle_locales
+
+	#remove bundled copy of libfdt
+	rm -r dtc || die
 }
 
 ##
@@ -684,6 +698,7 @@ src_install() {
 	cd "${S}"
 	dodoc Changelog MAINTAINERS docs/specs/pci-ids.txt
 	newdoc pc-bios/README README.pc-bios
+	dodoc docs/qmp-*.txt
 
 	if [[ -n ${softmmu_targets} ]]; then
 		# Remove SeaBIOS since we're using the SeaBIOS packaged one
