@@ -177,3 +177,27 @@ diff -ur ppp-2.4.7.orig/pppd/sys-linux.c ppp-2.4.7/pppd/sys-linux.c
  #include <netinet/in.h>
  #include <arpa/inet.h>
  
+diff --git a/pppd/plugins/pppol2tp/openl2tp.c b/pppd/plugins/pppol2tp/openl2tp.c
+index 9643b96..458316b 100644
+--- a/pppd/plugins/pppol2tp/openl2tp.c
++++ b/pppd/plugins/pppol2tp/openl2tp.c
+@@ -47,7 +47,6 @@
+ #include <linux/if_ether.h>
+ #include <linux/ppp_defs.h>
+ #include <linux/if_ppp.h>
+-#include <linux/if_pppox.h>
+ #include <linux/if_pppol2tp.h>
+ 
+ #include "l2tp_event.h"
+diff --git a/pppd/plugins/pppol2tp/pppol2tp.c b/pppd/plugins/pppol2tp/pppol2tp.c
+index 0e28606..4f6d98c 100644
+--- a/pppd/plugins/pppol2tp/pppol2tp.c
++++ b/pppd/plugins/pppol2tp/pppol2tp.c
+@@ -46,7 +46,6 @@
+ #include <linux/if_ether.h>
+ #include <linux/ppp_defs.h>
+ #include <linux/if_ppp.h>
+-#include <linux/if_pppox.h>
+ #include <linux/if_pppol2tp.h>
+ 
+ /* should be added to system's socket.h... */
