@@ -19,7 +19,7 @@ OPENGL_DIR="xorg-x11"
 MY_P="${P/_/-}"
 
 DESCRIPTION="OpenGL-like graphic library for Linux"
-HOMEPAGE="https://www.mesa3d.org/"
+HOMEPAGE="https://www.mesa3d.org/ https://mesa.freedesktop.org/"
 
 if [[ $PV == 9999 ]]; then
 	SRC_URI=""
@@ -53,14 +53,14 @@ REQUIRED_USE="
 	vaapi? ( gallium )
 	vdpau? ( gallium )
 	vulkan? ( || ( video_cards_i965 video_cards_radeonsi )
-	          video_cards_radeonsi? ( llvm ) )
+			  video_cards_radeonsi? ( llvm ) )
 	wayland? ( egl gbm )
 	xa?  ( gallium )
 	video_cards_freedreno?  ( gallium )
 	video_cards_intel?  ( classic )
 	video_cards_i915?   ( || ( classic gallium ) )
 	video_cards_i965?   ( classic )
-	video_cards_imx?    ( gallium )
+	video_cards_imx?    ( gallium video_cards_vivante )
 	video_cards_nouveau? ( || ( classic gallium ) )
 	video_cards_radeon? ( || ( classic gallium )
 						  gallium? ( x86? ( llvm ) amd64? ( llvm ) ) )
@@ -75,7 +75,7 @@ REQUIRED_USE="
 	video_cards_vmware? ( gallium )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.82"
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.85"
 # keep correct libdrm and dri2proto dep
 # keep blocks in rdepend for binpkg
 RDEPEND="
@@ -146,9 +146,9 @@ RDEPEND="${RDEPEND}
 # 1. List all the working slots (with min versions) in ||, newest first.
 # 2. Update the := to specify *max* version, e.g. < 7.
 # 3. Specify LLVM_MAX_SLOT, e.g. 6.
-LLVM_MAX_SLOT="5"
 LLVM_DEPSTR="
 	|| (
+		sys-devel/llvm:6[${MULTILIB_USEDEP}]
 		sys-devel/llvm:5[${MULTILIB_USEDEP}]
 		sys-devel/llvm:4[${MULTILIB_USEDEP}]
 		>=sys-devel/llvm-3.9.0:0[${MULTILIB_USEDEP}]
@@ -320,7 +320,7 @@ multilib_src_configure() {
 		myconf+="
 			$(use_enable d3d9 nine)
 			$(use_enable llvm)
-			$(use_enable openmax omx)
+			$(use_enable openmax omx-bellagio)
 			$(use_enable vaapi va)
 			$(use_enable vdpau)
 			$(use_enable xa)
