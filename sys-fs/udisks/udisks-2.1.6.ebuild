@@ -67,6 +67,7 @@ src_prepare() {
 
 	epatch "${FILESDIR}"/${PN}-2.1.6-musl-fixup.patch
 	epatch "${FILESDIR}"/${PN}-2.1.6-musl-fixup1.patch
+	epatch "${FILESDIR}"/${PN}-musl-nonglibc.patch
 
 	epatch_user
 }
