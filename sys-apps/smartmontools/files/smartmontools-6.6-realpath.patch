@@ -1,0 +1,12 @@
+diff -Naur smartmontools-6.6.orig/os_linux.cpp smartmontools-6.6/os_linux.cpp
+--- smartmontools-6.6.orig/os_linux.cpp	2017-11-06 12:06:53.605654329 -0800
++++ smartmontools-6.6/os_linux.cpp	2017-11-06 12:07:41.881653464 -0800
+@@ -3176,7 +3176,7 @@
+ {
+   char path[128];
+   snprintf(path, sizeof(path), "/sys/block/%s/device", name);
+-  char * syshostpath = canonicalize_file_name(path);
++  char * syshostpath = realpath(path, NULL);
+   if (!syshostpath)
+     return false;
+ 
