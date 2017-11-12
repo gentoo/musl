@@ -9,16 +9,20 @@ DESCRIPTION="Public client interface for NIS(YP) and NIS+ in a IPv6 ready versio
 HOMEPAGE="https://github.com/thkukuk/libnsl"
 SRC_URI="https://github.com/thkukuk/${PN}/archive/${P}.tar.gz"
 
-SLOT="0"
+SLOT="0/2"
 LICENSE="LGPL-2.1+"
+
+# Stabilize together with glibc-2.26!
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
+
 IUSE=""
 
 DEPEND="
-	!<sys-libs/glibc-2.26
 	net-libs/libtirpc[${MULTILIB_USEDEP}]
 "
-RDEPEND=${DEPEND}
+RDEPEND="${DEPEND}
+	!<sys-libs/glibc-2.26
+"
 
 PATCHES=( "${FILESDIR}"/${P}-musl.patch )
 
