@@ -27,7 +27,7 @@ fi
 
 LICENSE="public-domain"
 SLOT="0"
-IUSE="pcre2 python ruby static-libs ruby_targets_ruby22 ruby_targets_ruby23"
+IUSE="pcre2 python ruby static-libs ruby_targets_ruby21 ruby_targets_ruby22 ruby_targets_ruby23"
 REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 
 RDEPEND=">=sys-libs/libsepol-${SEPOL_VER}:=[${MULTILIB_USEDEP}]
