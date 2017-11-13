@@ -42,7 +42,7 @@ DEPEND="
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
-	"${FILESDIR}"/${PN}-4.12.0-musl.patch
+	"${FILESDIR}"/${PN}-4.14.0-musl.patch
 )
 
 src_prepare() {
@@ -128,8 +128,6 @@ src_install() {
 		MANDIR="${EPREFIX%/}"/usr/share/man \
 		ARPDDIR="${EPREFIX%/}"/var/lib/arpd \
 		install
-
-	rm "${ED%/}"/usr/share/doc/${PF}/*.{sgml,tex} || die #455988
 
 	dodir /bin
 	mv "${ED%/}"/{s,}bin/ip || die #330115
