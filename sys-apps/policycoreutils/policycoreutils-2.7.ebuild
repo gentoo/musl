@@ -41,7 +41,6 @@ LICENSE="GPL-2"
 SLOT="0"
 
 DEPEND=">=sys-libs/libselinux-${SELNX_VER}:=[python,${PYTHON_USEDEP}]
-	>=sys-libs/glibc-2.4
 	>=sys-libs/libcap-1.10-r10:=
 	>=sys-libs/libsemanage-${SEMNG_VER}:=[python,${PYTHON_USEDEP}]
 	sys-libs/libcap-ng:=
@@ -84,6 +83,7 @@ src_prepare() {
 	if [[ ${PV} != 9999 ]] ; then
 		# If needed for live ebuilds please use /etc/portage/patches
 		eapply "${FILESDIR}/policycoreutils-2.7-0001-newrole-not-suid.patch"
+		eapply "${FILESDIR}/${P}-musl.patch"
 	fi
 
 	# rlpkg is more useful than fixfiles
