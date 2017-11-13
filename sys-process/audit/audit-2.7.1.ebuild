@@ -35,6 +35,7 @@ pkg_setup() {
 }
 
 src_prepare() {
+	eapply "${FILESDIR}/${P}-musl.patch"
 	eapply_user
 
 	# Do not build GUI tools
