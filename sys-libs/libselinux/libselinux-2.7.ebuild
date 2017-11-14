@@ -27,7 +27,7 @@ fi
 
 LICENSE="public-domain"
 SLOT="0"
-IUSE="pcre2 python ruby static-libs ruby_targets_ruby21 ruby_targets_ruby22 ruby_targets_ruby23"
+IUSE="elibc_musl pcre2 python ruby static-libs ruby_targets_ruby21 ruby_targets_ruby22 ruby_targets_ruby23"
 REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 
 RDEPEND=">=sys-libs/libsepol-${SEPOL_VER}:=[${MULTILIB_USEDEP}]
@@ -44,6 +44,7 @@ DEPEND="${RDEPEND}
 	python? ( >=dev-lang/swig-2.0.9 )"
 
 src_prepare() {
+	eapply "${FILESDIR}/${P}-fts_ldlibs.patch"
 	eapply_user
 
 	multilib_copy_sources
