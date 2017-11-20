@@ -10,7 +10,7 @@ HOMEPAGE="https://dracut.wiki.kernel.org"
 SRC_URI="mirror://kernel/linux/utils/boot/${PN}/${P}.tar.xz"
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="alpha amd64 ~arm ia64 ~mips ppc ~ppc64 sparc x86"
+KEYWORDS="~alpha ~amd64 ~arm ~ia64 ~mips ~ppc ~ppc64 ~sparc ~x86"
 IUSE="debug selinux"
 
 RESTRICT="test"
@@ -25,7 +25,6 @@ RDEPEND="${CDEPEND}
 	|| (
 		>=sys-apps/sysvinit-2.87-r3
 		sys-apps/systemd[sysv-utils]
-		sys-apps/systemd-sysv-utils
 	)
 	sys-apps/coreutils[xattr(-)]
 	>=sys-apps/util-linux-2.21
@@ -53,7 +52,7 @@ QA_MULTILIB_PATHS="usr/lib/dracut/.*"
 
 PATCHES=(
 	"${FILESDIR}/045-systemdutildir.patch"
-	"${FILESDIR}"/${P}-libfts.patch
+	"${FILESDIR}"/dracut-045-libfts.patch
 )
 
 src_configure() {
