@@ -52,7 +52,7 @@ QA_MULTILIB_PATHS="usr/lib/dracut/.*"
 
 PATCHES=(
 	"${FILESDIR}/045-systemdutildir.patch"
-	"${FILESDIR}"/dracut-045-libfts.patch
+	"${FILESDIR}"/${P}-libfts.patch
 )
 
 src_configure() {
