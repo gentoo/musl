@@ -1,0 +1,24 @@
+diff -Naur libreoffice-5.4.2.2.orig/sal/osl/unx/backtrace.h libreoffice-5.4.2.2/sal/osl/unx/backtrace.h
+--- libreoffice-5.4.2.2.orig/sal/osl/unx/backtrace.h	2017-09-27 14:03:26.000000000 -0400
++++ libreoffice-5.4.2.2/sal/osl/unx/backtrace.h	2017-11-20 04:09:46.568616084 -0500
+@@ -20,7 +20,7 @@
+ #ifndef INCLUDED_SAL_OSL_UNX_BACKTRACE_H
+ #define INCLUDED_SAL_OSL_UNX_BACKTRACE_H
+ 
+-#if defined (LINUX)
++#if defined (LINUX) && defined (__GLIBC__)
+ 
+ #include <execinfo.h>
+ 
+diff -Naur libreoffice-5.4.2.2.orig/sal/osl/unx/signal.cxx libreoffice-5.4.2.2/sal/osl/unx/signal.cxx
+--- libreoffice-5.4.2.2.orig/sal/osl/unx/signal.cxx	2017-09-27 14:03:26.000000000 -0400
++++ libreoffice-5.4.2.2/sal/osl/unx/signal.cxx	2017-11-20 04:03:01.440227794 -0500
+@@ -35,7 +35,7 @@
+ 
+ #endif /* MACOSX */
+ 
+-#ifdef LINUX
++#if defined (LINUX) && defined (__GLIBC__)
+ #include <execinfo.h>
+ #include <link.h>
+ #define INCLUDE_BACKTRACE

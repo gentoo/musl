@@ -1,7 +1,22 @@
-diff -Naur libreoffice-5.0.5.2.orig/configure.ac libreoffice-5.0.5.2/configure.ac
---- libreoffice-5.0.5.2.orig/configure.ac	2016-02-04 16:41:28.000000000 +0000
-+++ libreoffice-5.0.5.2/configure.ac	2016-03-14 10:12:03.004000000 +0000
-@@ -587,7 +587,7 @@
+diff -Naur libreoffice-5.4.2.2.orig/configure.ac libreoffice-5.4.2.2/configure.ac
+--- libreoffice-5.4.2.2.orig/configure.ac	2017-09-27 14:03:26.000000000 -0400
++++ libreoffice-5.4.2.2/configure.ac	2017-11-20 04:22:51.742130616 -0500
+@@ -1,4 +1,4 @@
+-dnl -*- Mode: Autoconf; tab-width: 4; indent-tabs-mode: nil; fill-column: 102 -*-
++12927dnl -*- Mode: Autoconf; tab-width: 4; indent-tabs-mode: nil; fill-column: 102 -*-
+ dnl configure.ac serves as input for the GNU autoconf package
+ dnl in order to create a configure script.
+ 
+@@ -441,7 +441,7 @@
+     # all objects have been built with debug information.)
+     toolchain_system='*'
+     case $build_os in
+-    linux-gnu*)
++    linux-gnu*|linux-musl*)
+         ndk_build_os=linux
+         ;;
+     darwin*)
+@@ -664,7 +664,7 @@
      fi
      ;;
  
@@ -10,16 +25,16 @@ diff -Naur libreoffice-5.0.5.2.orig/configure.ac libreoffice-5.0.5.2/configure.a
      test_gtk=yes
      build_gstreamer_1_0=yes
      build_gstreamer_0_10=yes
-@@ -4124,7 +4124,7 @@
+@@ -4129,7 +4129,7 @@
      esac
      ;;
  
 -linux-gnu*)
 +linux-gnu*|linux-musl*)
      COM=GCC
-     GUIBASE=unx
+     USING_X11=TRUE
      OS=LINUX
-@@ -7074,7 +7074,7 @@
+@@ -7135,7 +7135,7 @@
          test -d "$JAVA_HOME/include/native_thread" && JAVAINC="$JAVAINC -I$JAVA_HOME/include/native_thread"
          ;;
  
@@ -28,7 +43,7 @@ diff -Naur libreoffice-5.0.5.2.orig/configure.ac libreoffice-5.0.5.2/configure.a
          JAVAINC="-I$JAVA_HOME/include"
          JAVAINC="$JAVAINC -I$JAVA_HOME/include/linux"
          test -d "$JAVA_HOME/include/native_thread" && JAVAINC="$JAVAINC -I$JAVA_HOME/include/native_thread"
-@@ -9550,21 +9550,6 @@
+@@ -9645,21 +9645,6 @@
  fi
  AC_SUBST(SYSTEM_LIBEXTTEXTCAT_DATA)
  
@@ -48,14 +63,14 @@ diff -Naur libreoffice-5.0.5.2.orig/configure.ac libreoffice-5.0.5.2/configure.a
 -fi
 -
  dnl =========================================
- dnl Check for the Windows  SDK.
+ dnl Check for uuidgen
  dnl =========================================
-@@ -12942,7 +12927,7 @@
+@@ -12572,7 +12557,7 @@
  
      case "$host_os" in
  
 -    aix*|dragonfly*|freebsd*|linux-gnu*|*netbsd*|openbsd*)
 +    aix*|dragonfly*|freebsd*|linux-gnu*|linux-musl*|*netbsd*|openbsd*)
-         if test "$ENABLE_JAVA" != "" -a "$JDK"!="gcj"; then
+         if test "$ENABLE_JAVA" != ""; then
              pathmunge "$JAVA_HOME/bin" "after"
          fi
