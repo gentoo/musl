@@ -2,8 +2,9 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
+PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
 
-inherit autotools eutils linux-info systemd
+inherit autotools eutils linux-info python-any-r1 systemd
 
 DESCRIPTION="An enhanced multi-threaded syslogd with database support and more"
 HOMEPAGE="http://www.rsyslog.com/"
@@ -47,10 +48,7 @@ else
 		doc? ( http://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-doc-${MY_PV}.tar.gz -> ${MY_FILENAME_DOCS} )
 	"
 
-	PATCHES=(
-		"${FILESDIR}"/8-stable/${PN}-8.30.0-fix-kerberos.patch
-		"${FILESDIR}"/8-stable/${PN}-8.18.0-musl-fix.patch
-	)
+	PATCHES=( "${FILESDIR}"/8-stable/${PN}-8.18.0-musl-fix.patch )
 fi
 
 LICENSE="GPL-3 LGPL-3 Apache-2.0"
@@ -71,7 +69,7 @@ RDEPEND="
 	kafka? ( >=dev-libs/librdkafka-0.9.0.99:= )
 	kerberos? ( virtual/krb5 )
 	mdblookup? ( dev-libs/libmaxminddb:= )
-	mongodb? ( >=dev-libs/libmongo-client-0.1.4 )
+	mongodb? ( >=dev-libs/mongo-c-driver-1.1.10:= )
 	mysql? ( virtual/mysql )
 	normalize? (
 		>=dev-libs/libee-0.4.0
@@ -93,14 +91,17 @@ RDEPEND="
 	systemd? ( >=sys-apps/systemd-234 )
 	uuid? ( sys-apps/util-linux:0= )
 	zeromq? (
-		>=net-libs/zeromq-4.1.1:=
-		>=net-libs/czmq-3.0.0
+		>=net-libs/czmq-3.0.2
 	)"
 DEPEND="${RDEPEND}
 	>=sys-devel/autoconf-archive-2015.02.24
 	virtual/pkgconfig
 	elibc_musl? ( sys-libs/queue )
-	test? ( sys-libs/libfaketime )"
+	test? (
+		jemalloc? ( <sys-libs/libfaketime-0.9.7 )
+		!jemalloc? ( sys-libs/libfaketime )
+		${PYTHON_DEPS}
+	)"
 
 if [[ ${PV} == "9999" ]]; then
 	DEPEND+=" doc? ( >=dev-python/sphinx-1.1.3-r7 )"
@@ -111,6 +112,10 @@ fi
 
 CONFIG_CHECK="~INOTIFY_USER"
 WARNING_INOTIFY_USER="CONFIG_INOTIFY_USER isn't set. Imfile module on this system will only support polling mode!"
+
+pkg_setup() {
+	use test && python-any-r1_pkg_setup
+}
 
 src_unpack() {
 	if [[ ${PV} == "9999" ]]; then
@@ -235,9 +240,7 @@ src_configure() {
 		$(use_enable usertools)
 		$(use_enable uuid)
 		$(use_enable zeromq imczmq)
-		$(use_enable zeromq imzmq3)
 		$(use_enable zeromq omczmq)
-		$(use_enable zeromq omzmq3)
 		--with-systemdsystemunitdir="$(systemd_get_systemunitdir)"
 	)
 
