@@ -3,13 +3,13 @@
 
 EAPI="5"
 
-PATCH_GCC_VER="7.1.0"
 PATCH_VER="1.1"
+PATCH_GCC_VER="7.1.0"
 #UCLIBC_VER="1.0"
 
 inherit epatch toolchain
 
-KEYWORDS=""
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-fbsd ~x86-fbsd"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
@@ -20,10 +20,10 @@ if [[ ${CATEGORY} != cross-* ]] ; then
 	PDEPEND="${PDEPEND} elibc_glibc? ( >=sys-libs/glibc-2.13 )"
 fi
 
-
-
 src_prepare() {
 	toolchain_src_prepare
+
+	epatch "${FILESDIR}"/gcc-7.2.0-pr69728.patch
 
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl ]]; then
 		epatch "${FILESDIR}"/6.3.0/cpu_indicator.patch

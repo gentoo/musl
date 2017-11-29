@@ -1,0 +1,26 @@
+diff -Naur gcc-7.2.0.orig/gcc/graphite-sese-to-poly.c gcc-7.2.0/gcc/graphite-sese-to-poly.c
+--- gcc-7.2.0.orig/gcc/graphite-sese-to-poly.c	2017-11-29 12:32:19.000188886 -0800
++++ gcc-7.2.0/gcc/graphite-sese-to-poly.c	2017-11-29 12:32:35.858188584 -0800
+@@ -1043,6 +1043,14 @@
+   if (empty < 0 || empty)
+     return empty < 0 ? isl_schedule_free (schedule) : schedule;
+ 
++  isl_union_set *domain = isl_schedule_get_domain (schedule);
++  /* We cannot apply an empty domain to pbbs in this loop so return early.  */
++  if (isl_union_set_is_empty (domain))
++    {
++      isl_union_set_free (domain);
++      return schedule;
++    }
++
+   isl_space *space = isl_set_get_space (iterators);
+   int loop_index = isl_space_dim (space, isl_dim_set) - 1;
+ 
+@@ -1063,7 +1071,6 @@
+   prefix = isl_multi_aff_set_tuple_id (prefix, isl_dim_out, label);
+ 
+   int n = isl_multi_aff_dim (prefix, isl_dim_in);
+-  isl_union_set *domain = isl_schedule_get_domain (schedule);
+   isl_multi_union_pw_aff *mupa = outer_projection_mupa (domain, n);
+   mupa = isl_multi_union_pw_aff_apply_multi_aff (mupa, prefix);
+   return isl_schedule_insert_partial_schedule (schedule, mupa);
