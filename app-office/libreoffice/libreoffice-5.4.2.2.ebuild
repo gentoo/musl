@@ -247,7 +247,7 @@ PATCHES=(
 
 	# musl patches
 	"${FILESDIR}/${PN}-5.4.2.2-musl-fix-execinfo.patch"
-	#"${FILESDIR}/${PN}-5.0.5.2-linux-musl.patch"
+	"${FILESDIR}/${PN}-5.4.2.2-linux-musl.patch"
 	"${FILESDIR}/${PN}-5.2.3.3-fix-includes.patch"
 	"${FILESDIR}/${PN}-5.2.5.1-musl-vlc.patch"
 )
