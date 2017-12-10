@@ -53,7 +53,7 @@ src_configure() {
 		$(qt_use icu)
 		$(qt_use !icu iconv)
 		$(qt_use systemd journald)
-		$(usex libcxx "-platform linux-clang-libc++")
+		$(if use libcxx ; then echo "-platform linux-clang-libc++" ; fi)
 	)
 	qt5-build_src_configure
 }
