@@ -1,0 +1,12 @@
+diff --git a/mkspecs/linux-clang-libc++/qmake.conf.orig b/mkspecs/linux-clang-libc++/qmake.conf
+index c5b0b57..97256f0 100644
+--- a/mkspecs/linux-clang-libc++/qmake.conf.orig
++++ b/mkspecs/linux-clang-libc++/qmake.conf
+@@ -5,6 +5,6 @@
+ include(../linux-clang/qmake.conf)
+ 
+ QMAKE_CXXFLAGS    += -stdlib=libc++
+-QMAKE_LFLAGS      += -stdlib=libc++
++QMAKE_LFLAGS      += -stdlib=libc++ -lc++abi
+ 
+ load(qt_config)
