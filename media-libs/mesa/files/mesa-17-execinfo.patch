@@ -1,0 +1,77 @@
+diff -Naur mesa-17.3.0.orig/configure.ac mesa-17.3.0/configure.ac
+--- mesa-17.3.0.orig/configure.ac	2017-12-08 05:49:11.000000000 -0800
++++ mesa-17.3.0/configure.ac	2017-12-11 14:11:53.587811247 -0800
+@@ -794,6 +794,7 @@
+ AC_CHECK_FUNC([strtof], [DEFINES="$DEFINES -DHAVE_STRTOF"])
+ AC_CHECK_FUNC([mkostemp], [DEFINES="$DEFINES -DHAVE_MKOSTEMP"])
+ AC_CHECK_FUNC([memfd_create], [DEFINES="$DEFINES -DHAVE_MEMFD_CREATE"])
++AC_CHECK_HEADER([execinfo.h], [DEFINES="$DEFINES -DHAVE_EXECINFO_H"])
+ 
+ AC_MSG_CHECKING([whether strtod has locale support])
+ AC_LINK_IFELSE([AC_LANG_SOURCE([[
+diff -Naur mesa-17.3.0.orig/src/gallium/auxiliary/util/u_debug_symbol.c mesa-17.3.0/src/gallium/auxiliary/util/u_debug_symbol.c
+--- mesa-17.3.0.orig/src/gallium/auxiliary/util/u_debug_symbol.c	2017-12-08 05:49:11.000000000 -0800
++++ mesa-17.3.0/src/gallium/auxiliary/util/u_debug_symbol.c	2017-12-11 14:13:52.780809112 -0800
+@@ -219,7 +219,7 @@
+ #endif /* PIPE_OS_WINDOWS */
+ 
+ 
+-#if defined(__GLIBC__) && !defined(__UCLIBC__)
++#if defined(HAVE_EXECINFO_H)
+ 
+ #include <execinfo.h>
+ 
+@@ -240,7 +240,7 @@
+    return TRUE;
+ }
+ 
+-#endif /* defined(__GLIBC__) && !defined(__UCLIBC__) */
++#endif /* defined(HAVE_EXECINFO_H) */
+ 
+ 
+ void
+@@ -252,7 +252,7 @@
+    }
+ #endif
+ 
+-#if defined(__GLIBC__) && !defined(__UCLIBC__)
++#if defined(HAVE_EXECINFO_H)
+    if (debug_symbol_name_glibc(addr, buf, size)) {
+        return;
+    }
+diff -Naur mesa-17.3.0.orig/src/mapi/glapi/gen/gl_gentable.py mesa-17.3.0/src/mapi/glapi/gen/gl_gentable.py
+--- mesa-17.3.0.orig/src/mapi/glapi/gen/gl_gentable.py	2017-12-08 05:49:11.000000000 -0800
++++ mesa-17.3.0/src/mapi/glapi/gen/gl_gentable.py	2017-12-11 14:11:53.587811247 -0800
+@@ -43,7 +43,7 @@
+ #endif
+ 
+ #if (defined(GLXEXT) && defined(HAVE_BACKTRACE)) \\
+-	|| (!defined(GLXEXT) && defined(DEBUG) && !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__DragonFly__))
++	|| (!defined(GLXEXT) && defined(DEBUG) && defined(HAVE_EXECINFO_H))
+ #define USE_BACKTRACE
+ #endif
+ 
+diff -Naur mesa-17.3.0.orig/src/mapi/glapi/glapi_gentable.c mesa-17.3.0/src/mapi/glapi/glapi_gentable.c
+--- mesa-17.3.0.orig/src/mapi/glapi/glapi_gentable.c	2017-12-08 05:49:45.000000000 -0800
++++ mesa-17.3.0/src/mapi/glapi/glapi_gentable.c	2017-12-11 14:11:53.588811247 -0800
+@@ -36,7 +36,7 @@
+ #endif
+ 
+ #if (defined(GLXEXT) && defined(HAVE_BACKTRACE)) \
+-	|| (!defined(GLXEXT) && defined(DEBUG) && !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__DragonFly__))
++	|| (!defined(GLXEXT) && defined(DEBUG) && defined(HAVE_EXECINFO_H))
+ #define USE_BACKTRACE
+ #endif
+ 
+diff -Naur mesa-17.3.0.orig/src/mesa/drivers/dri/i915/intel_regions.c mesa-17.3.0/src/mesa/drivers/dri/i915/intel_regions.c
+--- mesa-17.3.0.orig/src/mesa/drivers/dri/i915/intel_regions.c	2017-12-08 05:49:11.000000000 -0800
++++ mesa-17.3.0/src/mesa/drivers/dri/i915/intel_regions.c	2017-12-11 14:11:53.588811247 -0800
+@@ -57,7 +57,7 @@
+  */
+ #define DEBUG_BACKTRACE_SIZE 0
+ 
+-#if DEBUG_BACKTRACE_SIZE == 0
++#if DEBUG_BACKTRACE_SIZE == 0 || !defined(HAVE_EXECINFO_H)
+ /* Use the standard debug output */
+ #define _DBG(...) DBG(__VA_ARGS__)
+ #else
