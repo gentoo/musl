@@ -146,14 +146,14 @@ RDEPEND="${RDEPEND}
 # 1. List all the working slots (with min versions) in ||, newest first.
 # 2. Update the := to specify *max* version, e.g. < 7.
 # 3. Specify LLVM_MAX_SLOT, e.g. 6.
+LLVM_MAX_SLOT="5"
 LLVM_DEPSTR="
 	|| (
-		sys-devel/llvm:6[${MULTILIB_USEDEP}]
 		sys-devel/llvm:5[${MULTILIB_USEDEP}]
 		sys-devel/llvm:4[${MULTILIB_USEDEP}]
 		>=sys-devel/llvm-3.9.0:0[${MULTILIB_USEDEP}]
 	)
-	sys-devel/llvm:=[${MULTILIB_USEDEP}]
+	<sys-devel/llvm-6:=[${MULTILIB_USEDEP}]
 "
 LLVM_DEPSTR_AMDGPU=${LLVM_DEPSTR//]/,llvm_targets_AMDGPU(-)]}
 CLANG_DEPSTR=${LLVM_DEPSTR//llvm/clang}
@@ -518,13 +518,8 @@ pkg_postinst() {
 	# warn about patent encumbered texture-float
 	if use !bindist; then
 		elog "USE=\"bindist\" was not set. Potentially patent encumbered code was"
-		elog "enabled. Please see patents.txt for an explanation."
-	fi
-
-	if ! has_version media-libs/libtxc_dxtn; then
-		elog "Note that in order to have full S3TC support, it is necessary to install"
-		elog "media-libs/libtxc_dxtn as well. This may be necessary to get nice"
-		elog "textures in some apps, and some others even require this to run."
+		elog "enabled. Please see /usr/share/doc/${P}/patents.txt.bz2 for an"
+		elog "explanation."
 	fi
 }
 
