@@ -1,0 +1,47 @@
+diff -Naur mesa-17.3.0.orig/src/gallium/auxiliary/os/os_process.c mesa-17.3.0/src/gallium/auxiliary/os/os_process.c
+--- mesa-17.3.0.orig/src/gallium/auxiliary/os/os_process.c	2017-12-08 05:49:11.000000000 -0800
++++ mesa-17.3.0/src/gallium/auxiliary/os/os_process.c	2017-12-11 14:24:35.200797607 -0800
+@@ -32,7 +32,7 @@
+ 
+ #if defined(PIPE_SUBSYSTEM_WINDOWS_USER)
+ #  include <windows.h>
+-#elif defined(__GLIBC__) || defined(__CYGWIN__)
++#elif defined(__linux__) || defined(__CYGWIN__)
+ #  include <errno.h>
+ #elif defined(PIPE_OS_BSD) || defined(PIPE_OS_APPLE) || defined(PIPE_OS_ANDROID)
+ #  include <stdlib.h>
+@@ -84,7 +84,7 @@
+ 
+       name = lpProcessName;
+ 
+-#elif defined(__GLIBC__) || defined(__CYGWIN__)
++#elif defined(__linux__) || defined(__CYGWIN__)
+       name = program_invocation_short_name;
+ #elif defined(PIPE_OS_BSD) || defined(PIPE_OS_APPLE) || defined(PIPE_OS_ANDROID)
+       /* *BSD and OS X */
+diff -Naur mesa-17.3.0.orig/src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c mesa-17.3.0/src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c
+--- mesa-17.3.0.orig/src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c	2017-12-08 05:49:11.000000000 -0800
++++ mesa-17.3.0/src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c	2017-12-11 14:23:35.312798680 -0800
+@@ -84,7 +84,7 @@
+    ret = os_get_process_name(cmdline, 63);
+    if (ret == FALSE)
+       strcpy(cmdline, nstr);
+-#if defined(__GLIBC__) || defined(__CYGWIN__)
++#if defined(__linux__) || defined(__CYGWIN__)
+    if (!strcmp(cmdline, "shader_runner")) {
+       const char *name;
+       /* hack to get better testname */
+diff -Naur mesa-17.3.0.orig/src/util/xmlconfig.c mesa-17.3.0/src/util/xmlconfig.c
+--- mesa-17.3.0.orig/src/util/xmlconfig.c	2017-12-08 05:49:11.000000000 -0800
++++ mesa-17.3.0/src/util/xmlconfig.c	2017-12-11 14:22:54.052799419 -0800
+@@ -40,8 +40,8 @@
+ 
+ #undef GET_PROGRAM_NAME
+ 
+-#if (defined(__GNU_LIBRARY__) || defined(__GLIBC__)) && !defined(__UCLIBC__)
+-#    if !defined(__GLIBC__) || (__GLIBC__ < 2)
++#if defined(__linux__)
++#    if defined(__GLIBC__) && (__GLIBC__ < 2)
+ /* These aren't declared in any libc5 header */
+ extern char *program_invocation_name, *program_invocation_short_name;
+ #    endif

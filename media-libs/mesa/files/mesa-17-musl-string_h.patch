@@ -1,0 +1,63 @@
+diff -Naur mesa-17.3.0.orig/src/compiler/glsl/glcpp/glcpp-parse.c mesa-17.3.0/src/compiler/glsl/glcpp/glcpp-parse.c
+--- mesa-17.3.0.orig/src/compiler/glsl/glcpp/glcpp-parse.c	2017-12-08 05:49:48.000000000 -0800
++++ mesa-17.3.0/src/compiler/glsl/glcpp/glcpp-parse.c	2017-12-11 14:07:34.299815890 -0800
+@@ -1220,7 +1220,7 @@
+ #if YYERROR_VERBOSE
+ 
+ # ifndef yystrlen
+-#  if defined __GLIBC__ && defined _STRING_H
++#  if defined __linux__ && defined _STRING_H
+ #   define yystrlen strlen
+ #  else
+ /* Return the length of YYSTR.  */
+@@ -1236,7 +1236,7 @@
+ # endif
+ 
+ # ifndef yystpcpy
+-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
++#  if defined __linux__ && defined _STRING_H && defined _GNU_SOURCE
+ #   define yystpcpy stpcpy
+ #  else
+ /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
+diff -Naur mesa-17.3.0.orig/src/compiler/glsl/glsl_parser.cpp mesa-17.3.0/src/compiler/glsl/glsl_parser.cpp
+--- mesa-17.3.0.orig/src/compiler/glsl/glsl_parser.cpp	2017-12-08 05:49:49.000000000 -0800
++++ mesa-17.3.0/src/compiler/glsl/glsl_parser.cpp	2017-12-11 14:07:04.530816423 -0800
+@@ -2815,7 +2815,7 @@
+ #if YYERROR_VERBOSE
+ 
+ # ifndef yystrlen
+-#  if defined __GLIBC__ && defined _STRING_H
++#  if defined __linux__ && defined _STRING_H
+ #   define yystrlen strlen
+ #  else
+ /* Return the length of YYSTR.  */
+@@ -2831,7 +2831,7 @@
+ # endif
+ 
+ # ifndef yystpcpy
+-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
++#  if defined __linux__ && defined _STRING_H && defined _GNU_SOURCE
+ #   define yystpcpy stpcpy
+ #  else
+ /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
+diff -Naur mesa-17.3.0.orig/src/mesa/program/program_parse.tab.c mesa-17.3.0/src/mesa/program/program_parse.tab.c
+--- mesa-17.3.0.orig/src/mesa/program/program_parse.tab.c	2017-12-08 05:49:53.000000000 -0800
++++ mesa-17.3.0/src/mesa/program/program_parse.tab.c	2017-12-11 14:10:08.621813126 -0800
+@@ -1440,7 +1440,7 @@
+ #if YYERROR_VERBOSE
+ 
+ # ifndef yystrlen
+-#  if defined __GLIBC__ && defined _STRING_H
++#  if defined __linux__ && defined _STRING_H
+ #   define yystrlen strlen
+ #  else
+ /* Return the length of YYSTR.  */
+@@ -1456,7 +1456,7 @@
+ # endif
+ 
+ # ifndef yystpcpy
+-#  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
++#  if defined __linux__ && defined _STRING_H && defined _GNU_SOURCE
+ #   define yystpcpy stpcpy
+ #  else
+ /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in

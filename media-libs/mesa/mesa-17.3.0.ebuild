@@ -280,8 +280,11 @@ pkg_setup() {
 }
 
 src_prepare() {
-	eapply "${FILESDIR}"/${PN}-17-execinfo.patch
 	eapply "${FILESDIR}"/${PN}-13-musl_endian.patch
+	eapply "${FILESDIR}"/${PN}-17-execinfo.patch
+	eapply "${FILESDIR}"/${PN}-17-musl-string_h.patch
+	eapply "${FILESDIR}"/${PN}-17-musl-invocation_name.patch
+	eapply "${FILESDIR}"/${PN}-17-musl-pthread.patch
 
 	eautoreconf
 
