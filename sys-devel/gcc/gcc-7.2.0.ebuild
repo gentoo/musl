@@ -25,7 +25,7 @@ src_prepare() {
 
 	epatch "${FILESDIR}"/gcc-7.2.0-pr69728.patch
 
-	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl ]]; then
+	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl* ]]; then
 		epatch "${FILESDIR}"/6.3.0/cpu_indicator.patch
 		epatch "${FILESDIR}"/7.1.0/posix_memalign.patch
 	fi
