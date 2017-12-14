@@ -69,7 +69,6 @@ SRC_URI="https://static.rust-lang.org/dist/${SRC} -> rustc-${PV}-src.tar.xz
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 
 IUSE="debug doc jemalloc system-llvm"
-REQUIRED_USE=""
 
 RDEPEND="
 	system-llvm? ( sys-devel/llvm:4 )
@@ -192,6 +191,14 @@ src_install() {
 	mv "${D}/usr/bin/rust-gdb" "${D}/usr/bin/rust-gdb-${PV}" || die
 	mv "${D}/usr/bin/rust-lldb" "${D}/usr/bin/rust-lldb-${PV}" || die
 
+	if use doc; then
+		rm "${D}/usr/$(get_libdir)/${P}/rustlib/manifest-rust-docs" || die
+	fi
+
+	rm "${D}/usr/share/doc/${P}/LICENSE-MIT" || die
+	rm "${D}/usr/share/doc/${P}/LICENSE-APACHE" || die
+
+	docompress "${D}/usr/share/${P}/man"
 	dodoc COPYRIGHT
 
 	cat <<-EOF > "${T}"/50${P}
