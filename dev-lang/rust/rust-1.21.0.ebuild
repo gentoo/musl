@@ -149,7 +149,7 @@ src_configure() {
 	verbose = 2
 	[install]
 	prefix = "${EPREFIX}/usr"
-	libdir = "$(get_libdir)/${P}"
+	libdir = "$(get_libdir)"
 	mandir = "share/${P}/man"
 	docdir = "share/doc/${P}"
 	[rust]
@@ -179,12 +179,12 @@ src_compile() {
 src_install() {
 	env DESTDIR="${D}" ./x.py install || die
 
-	rm "${D}/usr/$(get_libdir)/${P}/rustlib/components" || die
-	rm "${D}/usr/$(get_libdir)/${P}/rustlib/install.log" || die
-	rm "${D}/usr/$(get_libdir)/${P}/rustlib/manifest-rust-std-${RUSTHOST}" || die
-	rm "${D}/usr/$(get_libdir)/${P}/rustlib/manifest-rustc" || die
-	rm "${D}/usr/$(get_libdir)/${P}/rustlib/rust-installer-version" || die
-	rm "${D}/usr/$(get_libdir)/${P}/rustlib/uninstall.sh" || die
+	rm "${D}/usr/$(get_libdir)/rustlib/components" || die
+	rm "${D}/usr/$(get_libdir)/rustlib/install.log" || die
+	rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-std-${RUSTHOST}" || die
+	rm "${D}/usr/$(get_libdir)/rustlib/manifest-rustc" || die
+	rm "${D}/usr/$(get_libdir)/rustlib/rust-installer-version" || die
+	rm "${D}/usr/$(get_libdir)/rustlib/uninstall.sh" || die
 
 	mv "${D}/usr/bin/rustc" "${D}/usr/bin/rustc-${PV}" || die
 	mv "${D}/usr/bin/rustdoc" "${D}/usr/bin/rustdoc-${PV}" || die
@@ -192,17 +192,15 @@ src_install() {
 	mv "${D}/usr/bin/rust-lldb" "${D}/usr/bin/rust-lldb-${PV}" || die
 
 	if use doc; then
-		rm "${D}/usr/$(get_libdir)/${P}/rustlib/manifest-rust-docs" || die
+		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-docs" || die
 	fi
 
 	rm "${D}/usr/share/doc/${P}/LICENSE-MIT" || die
 	rm "${D}/usr/share/doc/${P}/LICENSE-APACHE" || die
 
 	docompress "/usr/share/${P}/man"
-	dodoc COPYRIGHT
 
 	cat <<-EOF > "${T}"/50${P}
-	LDPATH="/usr/$(get_libdir)/${P}"
 	MANPATH="/usr/share/${P}/man"
 	EOF
 	doenvd "${T}"/50${P}
