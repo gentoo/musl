@@ -198,7 +198,7 @@ src_install() {
 	rm "${D}/usr/share/doc/${P}/LICENSE-MIT" || die
 	rm "${D}/usr/share/doc/${P}/LICENSE-APACHE" || die
 
-	docompress "${D}/usr/share/${P}/man"
+	docompress "/usr/share/${P}/man"
 	dodoc COPYRIGHT
 
 	cat <<-EOF > "${T}"/50${P}
