@@ -43,7 +43,7 @@ src_prepare() {
 
 	toolchain_src_prepare
 
-	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl ]]; then
+	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl* ]]; then
 		cd "${S}"
 		sed -i 's@\./fixinc\.sh@-c true@' gcc/Makefile.in
 		mv libstdc\+\+-v3/config/os/gnu-linux libstdc\+\+-v3/config/os/gnu-linux.org
