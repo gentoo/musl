@@ -208,7 +208,7 @@ src_configure() {
 src_compile() {
 	export CARGO_HOME="${ECARGO_HOME}"
 	local cargo="${WORKDIR}/cargo-${CARGO_SNAPSHOT_VERSION}-${CARGOHOST}/cargo/bin/cargo"
-	${cargo} build --release --verbose || die
+	${cargo} build --release || die
 
 	# Building HTML documentation
 	use doc && ${cargo} doc
