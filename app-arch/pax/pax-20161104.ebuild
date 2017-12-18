@@ -1,9 +1,8 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
-
-inherit eutils unpacker toolchain-funcs
+EAPI=6
+inherit unpacker toolchain-funcs
 
 DESCRIPTION="pax (Portable Archive eXchange) is the POSIX standard archive tool"
 HOMEPAGE="https://www.mirbsd.org/pax.htm"
@@ -12,23 +11,24 @@ SRC_URI="https://www.mirbsd.org/MirOS/dist/mir/cpio/paxmirabilis-${PV}.cpio.gz"
 LICENSE="BSD"
 SLOT="0"
 KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
-IUSE=""
 
-RDEPEND="dev-libs/libbsd
-elibc_musl? ( sys-libs/fts-standalone )"
-DEPEND="${RDEPEND}
-	$(unpacker_src_uri_depends)"
-
+RDEPEND="
+	dev-libs/libbsd
+	elibc_musl? ( sys-libs/fts-standalone )
+"
+DEPEND="
+	${RDEPEND}
+	$(unpacker_src_uri_depends)
+"
+PATCHES=(
+	"${FILESDIR}/${PN}-20160306-glibc-to-linux.patch"
+)
 S=${WORKDIR}/${PN}
-
-PATCHES=( "${FILESDIR}/${P}-glibc-to-linux.patch" )
 
 src_prepare() {
 	# Newer C libraries omit this include from sys/types.h.
 	sed -i '1i#include <sys/sysmacros.h>' extern.h || die
 	default
-
-	epatch "${PATCHES[@]}"
 }
 
 src_configure() {
@@ -39,6 +39,7 @@ src_compile() {
 	# We can't rely on LFS flags as it uses the fts.h interface which lacks 64-bit support.
 	set -- \
 		${CC} ${CPPFLAGS} ${CFLAGS} \
+		-DPAX_SAFE_PATH=\"/bin:/usr/bin\" \
 		-DHAVE_STRLCPY -DHAVE_VIS -DHAVE_STRMODE \
 		-DLONG_OFF_T -DHAVE_LINKAT \
 		$(${PKG_CONFIG} --cflags libbsd-overlay) \
