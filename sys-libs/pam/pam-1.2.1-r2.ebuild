@@ -3,7 +3,7 @@
 
 EAPI=5
 
-inherit libtool multilib multilib-minimal eutils pam toolchain-funcs flag-o-matic db-use
+inherit libtool multilib multilib-minimal eutils pam toolchain-funcs flag-o-matic db-use fcaps
 
 MY_PN="Linux-PAM"
 MY_P="${MY_PN}-${PV}"
@@ -16,7 +16,7 @@ SRC_URI="http://www.linux-pam.org/library/${MY_P}.tar.bz2
 LICENSE="|| ( BSD GPL-2 )"
 SLOT="0"
 KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~amd64-linux ~x86-linux"
-IUSE="audit berkdb cracklib debug nis nls +pie selinux test vim-syntax"
+IUSE="audit berkdb cracklib debug nis nls +pie selinux test"
 
 RDEPEND="nls? ( >=virtual/libintl-0-r1[${MULTILIB_USEDEP}] )
 	cracklib? ( >=sys-libs/cracklib-2.9.1-r1[${MULTILIB_USEDEP}] )
@@ -24,13 +24,14 @@ RDEPEND="nls? ( >=virtual/libintl-0-r1[${MULTILIB_USEDEP}] )
 	selinux? ( >=sys-libs/libselinux-2.2.2-r4[${MULTILIB_USEDEP}] )
 	berkdb? ( >=sys-libs/db-4.8.30-r1:=[${MULTILIB_USEDEP}] )
 	nis? ( >=net-libs/libtirpc-0.2.4-r2[${MULTILIB_USEDEP}] )"
+
 DEPEND="${RDEPEND}
 	>=sys-devel/libtool-2
 	>=sys-devel/flex-2.5.39-r1[${MULTILIB_USEDEP}]
 	nls? ( sys-devel/gettext )
 	nis? ( >=virtual/pkgconfig-0-r1[${MULTILIB_USEDEP}] )"
-PDEPEND="sys-auth/pambase
-	vim-syntax? ( app-vim/pam-syntax )"
+PDEPEND="sys-auth/pambase"
+
 RDEPEND="${RDEPEND}
 	!<sys-apps/openrc-0.11.8
 	!sys-auth/openpam
@@ -87,6 +88,8 @@ pkg_pretend() {
 src_unpack() {
 	# Upstream didn't release a new doc tarball (since nothing changed?).
 	unpack ${MY_PN}-1.2.0-docs.tar.bz2
+	# Update timestamps to avoid regenerating at build time. #569338
+	find -type f -exec touch -r "${T}" {} + || die
 	mv Linux-PAM-1.2.{0,1} || die
 	unpack ${MY_P}.tar.bz2
 }
@@ -167,9 +170,6 @@ multilib_src_install_all() {
 	einstalldocs
 	prune_libtool_files --all
 
-	# Need to be suid
-	fperms 4711 /sbin/unix_chkpwd
-
 	docinto modules
 	local dir
 	for dir in modules/pam_*; do
@@ -207,4 +207,8 @@ pkg_postinst() {
 		elog "  chmod -x /var/log/tallylog"
 		elog ""
 	fi
+
+	# The pam_unix module needs to check the password of the user which requires
+	# read access to /etc/shadow only.
+	fcaps cap_dac_override sbin/unix_chkpwd
 }
