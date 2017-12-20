@@ -175,7 +175,7 @@ IUSE="bash-completion doc libressl"
 COMMON_DEPEND="
 	libressl? (
 		>=dev-libs/libressl-2.5.0:=
-		<dev-libs/libressl-2.6.4:=
+		<dev-libs/libressl-2.6.5:=
 	)
 	!libressl? ( dev-libs/openssl:0= )
 	net-libs/http-parser:=
