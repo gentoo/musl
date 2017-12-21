@@ -8,16 +8,17 @@ EAPI=6
 CMAKE_MIN_VERSION=3.7.0-r1
 PYTHON_COMPAT=( python2_7 )
 
-inherit check-reqs cmake-utils flag-o-matic llvm python-any-r1 versionator
+inherit check-reqs cmake-utils flag-o-matic llvm python-any-r1
 
 DESCRIPTION="Compiler runtime libraries for clang (sanitizers & xray)"
-HOMEPAGE="http://llvm.org/"
-SRC_URI="http://releases.llvm.org/${PV/_//}/compiler-rt-${PV/_/}.src.tar.xz
-	test? ( http://releases.llvm.org/${PV/_//}/llvm-${PV/_/}.src.tar.xz )"
+HOMEPAGE="https://llvm.org/"
+SRC_URI="https://releases.llvm.org/${PV/_//}/compiler-rt-${PV/_/}.src.tar.xz
+	https://dev.gentoo.org/~mgorny/dist/llvm/${P}-patchset.tar.xz
+	test? ( https://releases.llvm.org/${PV/_//}/llvm-${PV/_/}.src.tar.xz )"
 
 LICENSE="|| ( UoI-NCSA MIT )"
 SLOT="${PV%_*}"
-KEYWORDS="~amd64 ~arm64 ~x86"
+KEYWORDS="amd64 ~arm64 x86"
 IUSE="test"
 
 LLVM_SLOT=${SLOT%%.*}
@@ -34,9 +35,7 @@ DEPEND="
 
 S=${WORKDIR}/compiler-rt-${PV/_/}.src
 
-PATCHES=(
-	"${FILESDIR}"/${PN}-4.0.0-musl-patches.patch
-)
+PATCHES=( "${FILESDIR}"/${PN}-4.0.0-musl-patches.patch )
 
 # least intrusive of all
 CMAKE_BUILD_TYPE=RelWithDebInfo
@@ -64,6 +63,11 @@ src_unpack() {
 	if use test; then
 		mv llvm-* llvm || die
 	fi
+}
+
+src_prepare() {
+	eapply "${WORKDIR}/${P}-patchset"
+	cmake-utils_src_prepare
 }
 
 src_configure() {

@@ -10,10 +10,13 @@ PYTHON_COMPAT=( python2_7 )
 
 inherit check-reqs cmake-utils flag-o-matic llvm python-any-r1
 
+MY_P=compiler-rt-${PV/_/}.src
+LLVM_P=llvm-${PV/_/}.src
+
 DESCRIPTION="Compiler runtime libraries for clang (sanitizers & xray)"
 HOMEPAGE="https://llvm.org/"
-SRC_URI="https://releases.llvm.org/${PV/_//}/compiler-rt-${PV/_/}.src.tar.xz
-	test? ( https://releases.llvm.org/${PV/_//}/llvm-${PV/_/}.src.tar.xz )"
+SRC_URI="https://releases.llvm.org/${PV/_//}/${MY_P}.tar.xz
+	test? ( https://releases.llvm.org/${PV/_//}/${LLVM_P}.tar.xz )"
 
 LICENSE="|| ( UoI-NCSA MIT )"
 SLOT="${PV%_*}"
@@ -31,7 +34,7 @@ DEPEND="
 		sys-libs/compiler-rt:${SLOT} )
 	${PYTHON_DEPS}"
 
-S=${WORKDIR}/compiler-rt-${PV/_/}.src
+S=${WORKDIR}/${MY_P}
 
 PATCHES=( "${FILESDIR}"/${PN}-5.0.0-musl-patches.patch )
 
@@ -56,10 +59,14 @@ pkg_setup() {
 }
 
 src_unpack() {
-	default
+	einfo "Unpacking ${MY_P}.tar.xz ..."
+	tar -xf "${DISTDIR}/${MY_P}.tar.xz" || die
 
 	if use test; then
-		mv llvm-* llvm || die
+		einfo "Unpacking parts of ${LLVM_P}.tar.xz ..."
+		tar -xf "${DISTDIR}/${LLVM_P}.tar.xz" \
+			"${LLVM_P}"/utils/{lit,unittest} || die
+		mv "${LLVM_P}" llvm || die
 	fi
 }
 
