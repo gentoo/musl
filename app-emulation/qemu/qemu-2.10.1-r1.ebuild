@@ -89,7 +89,7 @@ SOFTMMU_TOOLS_DEPEND="
 	bzip2? ( app-arch/bzip2[static-libs(+)] )
 	caps? ( sys-libs/libcap-ng[static-libs(+)] )
 	curl? ( >=net-misc/curl-7.15.4[static-libs(+)] )
-	fdt? ( >=sys-apps/dtc-1.4.0[static-libs(+)] )
+	fdt? ( >=sys-apps/dtc-1.4.2[static-libs(+)] )
 	glusterfs? ( >=sys-cluster/glusterfs-3.4.0[static-libs(+)] )
 	gnutls? (
 		dev-libs/nettle:=[static-libs(+)]
@@ -164,6 +164,14 @@ X86_FIRMWARE_DEPEND="
 		>=sys-firmware/seabios-1.10.2[seavgabios]
 		sys-firmware/sgabios
 	)"
+PPC64_FIRMWARE_DEPEND="
+	pin-upstream-blobs? (
+		~sys-firmware/seabios-1.10.2[binary,seavgabios]
+	)
+	!pin-upstream-blobs? (
+		>=sys-firmware/seabios-1.10.2[seavgabios]
+	)
+"
 
 CDEPEND="
 	!static? (
@@ -171,7 +179,9 @@ CDEPEND="
 		${SOFTMMU_TOOLS_DEPEND//\[static-libs(+)]}
 	)
 	qemu_softmmu_targets_i386? ( ${X86_FIRMWARE_DEPEND} )
-	qemu_softmmu_targets_x86_64? ( ${X86_FIRMWARE_DEPEND} )"
+	qemu_softmmu_targets_x86_64? ( ${X86_FIRMWARE_DEPEND} )
+	qemu_softmmu_targets_ppc64? ( ${PPC64_FIRMWARE_DEPEND} )
+"
 DEPEND="${CDEPEND}
 	dev-lang/perl
 	=dev-lang/python-2*
@@ -200,7 +210,8 @@ PATCHES=(
 	# gentoo patches
 	"${FILESDIR}"/${PN}-2.5.0-cflags.patch
 	"${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
-	"${FILESDIR}"/${PN}-2.10.0-CVE-2017-13711.patch   # bug 629350
+	"${FILESDIR}"/${PN}-2.10.1-CVE-2017-15268.patch
+	"${FILESDIR}"/${PN}-2.10.1-CVE-2017-15289.patch
 )
 
 STRIP_MASK="/usr/share/qemu/palcode-clipper"
@@ -281,7 +292,11 @@ pkg_pretend() {
 			ERROR_VHOST_NET+=" support"
 
 			if use amd64 || use x86 || use amd64-linux || use x86-linux; then
-				CONFIG_CHECK+=" ~KVM_AMD ~KVM_INTEL"
+				if grep -q AuthenticAMD /proc/cpuinfo; then
+					CONFIG_CHECK+=" ~KVM_AMD"
+				elif grep -q GenuineIntel /proc/cpuinfo; then
+					CONFIG_CHECK+=" ~KVM_INTEL"
+				fi
 			fi
 
 			use python && CONFIG_CHECK+=" ~DEBUG_FS"
@@ -367,6 +382,9 @@ src_prepare() {
 
 	# Run after we've applied all patches.
 	handle_locales
+
+	# Remove bundled copy of libfdt
+	rm -r dtc || die
 }
 
 ##
@@ -701,7 +719,8 @@ src_install() {
 		rm "${ED}/usr/share/qemu/vgabios-stdvga.bin"
 		rm "${ED}/usr/share/qemu/vgabios-virtio.bin"
 		rm "${ED}/usr/share/qemu/vgabios-vmware.bin"
-		if use qemu_softmmu_targets_x86_64 || use qemu_softmmu_targets_i386; then
+		# PPC64 loads vgabios-stdvga
+		if use qemu_softmmu_targets_x86_64 || use qemu_softmmu_targets_i386 || use qemu_softmmu_targets_ppc64; then
 			dosym ../seavgabios/vgabios-isavga.bin /usr/share/qemu/vgabios.bin
 			dosym ../seavgabios/vgabios-cirrus.bin /usr/share/qemu/vgabios-cirrus.bin
 			dosym ../seavgabios/vgabios-qxl.bin /usr/share/qemu/vgabios-qxl.bin
