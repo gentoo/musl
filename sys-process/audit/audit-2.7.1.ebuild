@@ -36,6 +36,7 @@ pkg_setup() {
 
 src_prepare() {
 	eapply "${FILESDIR}/${P}-musl.patch"
+	eapply "${FILESDIR}/${P}-swig.patch"
 	eapply_user
 
 	# Do not build GUI tools
