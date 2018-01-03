@@ -165,7 +165,6 @@ src_configure() {
 	[target.${RUSTHOST}]
 	cc = "$(tc-getCC)"
 	cxx = "$(tc-getCXX)"
-	ar = "$(tc-getAR)"
 	crt-static = false
 	EOF
 	use system-llvm && cat <<- EOF >> "${S}"/config.toml
