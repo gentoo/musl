@@ -26,6 +26,7 @@ DEPEND="${RDEPEND}
 PATCHES=(
 	"${FILESDIR}"/${P}-scanelf-fix-out-of-bounds-access-in-ia64.patch
 	"${FILESDIR}"/${P}-solaris.patch
+	"${FILESDIR}"/${P}-linux-2.6.32.patch
 	"${FILESDIR}/${PN}-1.1.7-musl.patch"
 )
 
