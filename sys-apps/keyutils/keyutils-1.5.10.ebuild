@@ -11,7 +11,7 @@ SRC_URI="https://people.redhat.com/dhowells/${PN}/${P}.tar.bz2"
 
 LICENSE="GPL-2 LGPL-2.1"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="static static-libs test"
 
 RDEPEND=""
