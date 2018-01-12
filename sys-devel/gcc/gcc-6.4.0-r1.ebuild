@@ -3,13 +3,12 @@
 
 EAPI="5"
 
-PATCH_VER="1.2"
+PATCH_VER="1.3"
 UCLIBC_VER="1.0"
 
-inherit epatch toolchain
+inherit toolchain
 
-# unkeyworded for testing bug #641474
-#KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
