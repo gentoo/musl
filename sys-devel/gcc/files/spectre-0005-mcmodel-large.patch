@@ -1,7 +1,8 @@
-From: "H dot J dot  Lu" <hjl dot tools at gmail dot com>
-To: gcc-patches at gcc dot gnu dot org
-Subject: [PATCH 5/5] x86: Disallow -mindirect-branch=/-mfunction-return= with -mcmodel=large
-Date: Sat, 13 Jan 2018 19:37:07 -0800
+From 5d1c53c6fd593de2360c1a2ae44ebf5fa3c5263b Mon Sep 17 00:00:00 2001
+From: hjl <hjl@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Tue, 16 Jan 2018 11:22:01 +0000
+Subject: [PATCH] x86: Disallow -mindirect-branch=/-mfunction-return= with
+ -mcmodel=large
 
 Since the thunk function may not be reachable in large code model,
 -mcmodel=large is incompatible with -mindirect-branch=thunk,
@@ -11,6 +12,9 @@ Since the thunk function may not be reachable in large code model,
 
 gcc/
 
+	Backport from mainline
+	2018-01-14  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/i386/i386.c (ix86_set_indirect_branch_type): Disallow
 	-mcmodel=large with -mindirect-branch=thunk,
 	-mindirect-branch=thunk-extern, -mfunction-return=thunk and
@@ -19,51 +23,18 @@ gcc/
 	-mindirect-branch=thunk, -mindirect-branch=thunk-extern,
 	-mfunction-return=thunk and -mfunction-return=thunk-extern.
 
-gcc/testsuite/
 
-	* gcc.target/i386/indirect-thunk-10.c: New test.
-	* gcc.target/i386/indirect-thunk-8.c: Likewise.
-	* gcc.target/i386/indirect-thunk-9.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-10.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-11.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-9.c: Likewise.
-	* gcc.target/i386/ret-thunk-17.c: Likewise.
-	* gcc.target/i386/ret-thunk-18.c: Likewise.
-	* gcc.target/i386/ret-thunk-19.c: Likewise.
-	* gcc.target/i386/ret-thunk-20.c: Likewise.
-	* gcc.target/i386/ret-thunk-21.c: Likewise.
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/branches/gcc-7-branch@256737 138bc75d-0d04-0410-961f-82ee72b054a4
 ---
  gcc/config/i386/i386.c                             | 26 ++++++++++++++++++++++
  gcc/doc/invoke.texi                                | 11 +++++++++
- gcc/testsuite/gcc.target/i386/indirect-thunk-10.c  |  7 ++++++
- gcc/testsuite/gcc.target/i386/indirect-thunk-8.c   |  7 ++++++
- gcc/testsuite/gcc.target/i386/indirect-thunk-9.c   |  7 ++++++
- .../gcc.target/i386/indirect-thunk-attr-10.c       |  9 ++++++++
- .../gcc.target/i386/indirect-thunk-attr-11.c       |  9 ++++++++
- .../gcc.target/i386/indirect-thunk-attr-9.c        |  9 ++++++++
- gcc/testsuite/gcc.target/i386/ret-thunk-17.c       |  7 ++++++
- gcc/testsuite/gcc.target/i386/ret-thunk-18.c       |  8 +++++++
- gcc/testsuite/gcc.target/i386/ret-thunk-19.c       |  8 +++++++
- gcc/testsuite/gcc.target/i386/ret-thunk-20.c       |  9 ++++++++
- gcc/testsuite/gcc.target/i386/ret-thunk-21.c       |  9 ++++++++
- 13 files changed, 126 insertions(+)
- create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-10.c
- create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-8.c
- create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-9.c
- create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-attr-10.c
- create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-attr-11.c
- create mode 100644 gcc/testsuite/gcc.target/i386/indirect-thunk-attr-9.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-17.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-18.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-19.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-20.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-21.c
+ 15 files changed, 156 insertions(+)
 
 diff --git a/gcc/config/i386/i386.c b/gcc/config/i386/i386.c
-index 9807de0c117..92b328ebfc2 100644
+index 1bbdd0c..e758387 100644
 --- a/gcc/config/i386/i386.c
 +++ b/gcc/config/i386/i386.c
-@@ -5836,6 +5836,19 @@ ix86_set_indirect_branch_type (tree fndecl)
+@@ -7187,6 +7187,19 @@ ix86_set_indirect_branch_type (tree fndecl)
  	}
        else
  	cfun->machine->indirect_branch_type = ix86_indirect_branch;
@@ -83,7 +54,7 @@ index 9807de0c117..92b328ebfc2 100644
      }
  
    if (cfun->machine->function_return_type == indirect_branch_unset)
-@@ -5861,6 +5874,19 @@ ix86_set_indirect_branch_type (tree fndecl)
+@@ -7212,6 +7225,19 @@ ix86_set_indirect_branch_type (tree fndecl)
  	}
        else
  	cfun->machine->function_return_type = ix86_function_return;
@@ -104,10 +75,10 @@ index 9807de0c117..92b328ebfc2 100644
  }
  
 diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
-index d16006e653a..2495a45c957 100644
+index 1e572b1..6f3c344 100644
 --- a/gcc/doc/invoke.texi
 +++ b/gcc/doc/invoke.texi
-@@ -26851,6 +26851,11 @@ to external call and return thunk provided in a separate object file.
+@@ -25699,6 +25699,11 @@ to external call and return thunk provided in a separate object file.
  You can control this behavior for a specific function by using the
  function attribute @code{indirect_branch}.  @xref{Function Attributes}.
  
@@ -119,7 +90,7 @@ index d16006e653a..2495a45c957 100644
  @item -mfunction-return=@var{choice}
  @opindex -mfunction-return
  Convert function return with @var{choice}.  The default is @samp{keep},
-@@ -26862,6 +26867,12 @@ object file.  You can control this behavior for a specific function by
+@@ -25710,6 +25715,12 @@ object file.  You can control this behavior for a specific function by
  using the function attribute @code{function_return}.
  @xref{Function Attributes}.
  
@@ -132,161 +103,3 @@ index d16006e653a..2495a45c957 100644
  @item -mindirect-branch-register
  @opindex -mindirect-branch-register
  Force indirect call and jump via register.
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-10.c b/gcc/testsuite/gcc.target/i386/indirect-thunk-10.c
-new file mode 100644
-index 00000000000..5623f162dea
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-10.c
-@@ -0,0 +1,7 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mindirect-branch=thunk-inline -mfunction-return=keep -mcmodel=large" } */
-+
-+void
-+bar (void)
-+{
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-8.c b/gcc/testsuite/gcc.target/i386/indirect-thunk-8.c
-new file mode 100644
-index 00000000000..d6c1437bcf1
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-8.c
-@@ -0,0 +1,7 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mindirect-branch=thunk -mfunction-return=keep -mcmodel=large" } */
-+
-+void
-+bar (void)
-+{ /* { dg-error "'-mindirect-branch=thunk' and '-mcmodel=large' are not compatible" } */
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-9.c b/gcc/testsuite/gcc.target/i386/indirect-thunk-9.c
-new file mode 100644
-index 00000000000..6914dac27ce
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-9.c
-@@ -0,0 +1,7 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mindirect-branch=thunk-extern -mfunction-return=keep -mcmodel=large" } */
-+
-+void
-+bar (void)
-+{ /* { dg-error "'-mindirect-branch=thunk-extern' and '-mcmodel=large' are not compatible" } */
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-10.c b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-10.c
-new file mode 100644
-index 00000000000..87c7684aa92
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-10.c
-@@ -0,0 +1,9 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mindirect-branch=keep -mfunction-return=keep -mcmodel=large" } */
-+/* { dg-additional-options "-fPIC" { target fpic } } */
-+
-+__attribute__ ((indirect_branch("thunk-extern")))
-+void
-+bar (void)
-+{ /* { dg-error "'-mindirect-branch=thunk-extern' and '-mcmodel=large' are not compatible" } */
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-11.c b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-11.c
-new file mode 100644
-index 00000000000..0499c1d7d27
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-11.c
-@@ -0,0 +1,9 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mindirect-branch=keep -mfunction-return=keep -mcmodel=large" } */
-+/* { dg-additional-options "-fPIC" { target fpic } } */
-+
-+__attribute__ ((indirect_branch("thunk-inline")))
-+void
-+bar (void)
-+{
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-9.c b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-9.c
-new file mode 100644
-index 00000000000..3f1d4f54884
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-9.c
-@@ -0,0 +1,9 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mindirect-branch=keep -mfunction-return=keep -mcmodel=large" } */
-+/* { dg-additional-options "-fPIC" { target fpic } } */
-+
-+__attribute__ ((indirect_branch("thunk")))
-+void
-+bar (void)
-+{ /* { dg-error "'-mindirect-branch=thunk' and '-mcmodel=large' are not compatible" } */
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-17.c b/gcc/testsuite/gcc.target/i386/ret-thunk-17.c
-new file mode 100644
-index 00000000000..930f72713ae
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/ret-thunk-17.c
-@@ -0,0 +1,7 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mfunction-return=thunk -mindirect-branch=keep -mcmodel=large" } */
-+
-+void
-+bar (void)
-+{ /* { dg-error "'-mfunction-return=thunk' and '-mcmodel=large' are not compatible" } */
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-18.c b/gcc/testsuite/gcc.target/i386/ret-thunk-18.c
-new file mode 100644
-index 00000000000..5763fde84b1
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/ret-thunk-18.c
-@@ -0,0 +1,8 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mfunction-return=thunk-extern -mindirect-branch=keep -mcmodel=large" } */
-+/* { dg-additional-options "-fPIC" { target fpic } } */
-+
-+void
-+bar (void)
-+{ /* { dg-error "'-mfunction-return=thunk-extern' and '-mcmodel=large' are not compatible" } */
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-19.c b/gcc/testsuite/gcc.target/i386/ret-thunk-19.c
-new file mode 100644
-index 00000000000..ff710d4c1fe
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/ret-thunk-19.c
-@@ -0,0 +1,8 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=keep -mcmodel=large" } */
-+
-+__attribute__ ((function_return("thunk")))
-+void
-+bar (void)
-+{ /* { dg-error "'-mfunction-return=thunk' and '-mcmodel=large' are not compatible" } */
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-20.c b/gcc/testsuite/gcc.target/i386/ret-thunk-20.c
-new file mode 100644
-index 00000000000..eeffbd2289a
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/ret-thunk-20.c
-@@ -0,0 +1,9 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=keep -mcmodel=large" } */
-+/* { dg-additional-options "-fPIC" { target fpic } } */
-+
-+__attribute__ ((function_return("thunk-extern")))
-+void
-+bar (void)
-+{ /* { dg-error "'-mfunction-return=thunk-extern' and '-mcmodel=large' are not compatible" } */
-+}
-diff --git a/gcc/testsuite/gcc.target/i386/ret-thunk-21.c b/gcc/testsuite/gcc.target/i386/ret-thunk-21.c
-new file mode 100644
-index 00000000000..49ab118e04f
---- /dev/null
-+++ b/gcc/testsuite/gcc.target/i386/ret-thunk-21.c
-@@ -0,0 +1,9 @@
-+/* { dg-do compile { target { ! ia32 } } } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=keep -mcmodel=large" } */
-+/* { dg-additional-options "-fPIC" { target fpic } } */
-+
-+__attribute__ ((function_return("thunk-inline")))
-+void
-+bar (void)
-+{
-+}
--- 
-2.14.3
-

@@ -1,7 +1,7 @@
-From: "H dot J dot  Lu" <hjl dot tools at gmail dot com>
-To: gcc-patches at gcc dot gnu dot org
-Subject: [PATCH 2/4] x86: Add -mfunction-return=
-Date: Fri, 12 Jan 2018 05:15:47 -0800
+From 357311dd400f7f72d2132f2f94161ece39bf08c6 Mon Sep 17 00:00:00 2001
+From: hjl <hjl@138bc75d-0d04-0410-961f-82ee72b054a4>
+Date: Tue, 16 Jan 2018 11:10:44 +0000
+Subject: [PATCH] x86: Add -mfunction-return=
 
 Add -mfunction-return= option to convert function return to call and
 return thunks.  The default is 'keep', which keeps function return
@@ -18,6 +18,7 @@ __x86_return_thunk:
 	call L2
 L1:
 	pause
+	lfence
 	jmp L1
 L2:
 	lea 8(%rsp), %rsp|lea 4(%esp), %esp
@@ -27,11 +28,10 @@ and function return becomes
 
 	jmp __x86_return_thunk
 
--mindirect-branch= tests are updated with -mfunction-return=keep to
-avoid false test failures when -mfunction-return=thunk is added to
-RUNTESTFLAGS for "make check".
-
 gcc/
+
+	Backport from mainline
+	2018-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/i386/i386-protos.h (ix86_output_function_return): New.
 	* config/i386/i386.c (ix86_set_indirect_branch_type): Also
@@ -40,7 +40,8 @@ gcc/
 	return.
 	(output_indirect_thunk_function): Pass false to
 	indirect_thunk_name.
-	(ix86_output_indirect_branch): Likewise.
+	(ix86_output_indirect_branch_via_reg): Likewise.
+	(ix86_output_indirect_branch_via_push): Likewise.
 	(output_indirect_thunk_function): Create alias for function
 	return thunk if regno < 0.
 	(ix86_output_function_return): New function.
@@ -56,137 +57,41 @@ gcc/
 	* doc/extend.texi: Document function_return function attribute.
 	* doc/invoke.texi: Document -mfunction-return= option.
 
-gcc/testsuite/
+i386: Don't use ASM_OUTPUT_DEF for TARGET_MACHO
 
-	* gcc.target/i386/indirect-thunk-1.c (dg-options): Add
-	-mfunction-return=keep.
-	* gcc.target/i386/indirect-thunk-2.c: Likewise.
-	* gcc.target/i386/indirect-thunk-3.c: Likewise.
-	* gcc.target/i386/indirect-thunk-4.c: Likewise.
-	* gcc.target/i386/indirect-thunk-5.c: Likewise.
-	* gcc.target/i386/indirect-thunk-6.c: Likewise.
-	* gcc.target/i386/indirect-thunk-7.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-1.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-2.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-3.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-4.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-5.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-6.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-7.c: Likewise.
-	* gcc.target/i386/indirect-thunk-attr-8.c: Likewise.
-	* gcc.target/i386/indirect-thunk-bnd-1.c: Likewise.
-	* gcc.target/i386/indirect-thunk-bnd-2.c: Likewise.
-	* gcc.target/i386/indirect-thunk-bnd-3.c: Likewise.
-	* gcc.target/i386/indirect-thunk-bnd-4.c: Likewise.
-	* gcc.target/i386/indirect-thunk-extern-1.c: Likewise.
-	* gcc.target/i386/indirect-thunk-extern-2.c: Likewise.
-	* gcc.target/i386/indirect-thunk-extern-3.c: Likewise.
-	* gcc.target/i386/indirect-thunk-extern-4.c: Likewise.
-	* gcc.target/i386/indirect-thunk-extern-5.c: Likewise.
-	* gcc.target/i386/indirect-thunk-extern-6.c: Likewise.
-	* gcc.target/i386/indirect-thunk-extern-7.c: Likewise.
-	* gcc.target/i386/indirect-thunk-inline-1.c: Likewise.
-	* gcc.target/i386/indirect-thunk-inline-2.c: Likewise.
-	* gcc.target/i386/indirect-thunk-inline-3.c: Likewise.
-	* gcc.target/i386/indirect-thunk-inline-4.c: Likewise.
-	* gcc.target/i386/indirect-thunk-inline-5.c: Likewise.
-	* gcc.target/i386/indirect-thunk-inline-6.c: Likewise.
-	* gcc.target/i386/indirect-thunk-inline-7.c: Likewise.
-	* gcc.target/i386/ret-thunk-1.c: New test.
-	* gcc.target/i386/ret-thunk-10.c: Likewise.
-	* gcc.target/i386/ret-thunk-11.c: Likewise.
-	* gcc.target/i386/ret-thunk-12.c: Likewise.
-	* gcc.target/i386/ret-thunk-13.c: Likewise.
-	* gcc.target/i386/ret-thunk-14.c: Likewise.
-	* gcc.target/i386/ret-thunk-15.c: Likewise.
-	* gcc.target/i386/ret-thunk-16.c: Likewise.
-	* gcc.target/i386/ret-thunk-2.c: Likewise.
-	* gcc.target/i386/ret-thunk-3.c: Likewise.
-	* gcc.target/i386/ret-thunk-4.c: Likewise.
-	* gcc.target/i386/ret-thunk-5.c: Likewise.
-	* gcc.target/i386/ret-thunk-6.c: Likewise.
-	* gcc.target/i386/ret-thunk-7.c: Likewise.
-	* gcc.target/i386/ret-thunk-8.c: Likewise.
-	* gcc.target/i386/ret-thunk-9.c: Likewise.
+ASM_OUTPUT_DEF isn't defined for TARGET_MACHO.  Use ASM_OUTPUT_LABEL to
+generate the __x86_return_thunk label, instead of the set directive.
+Update testcase to remove the __x86_return_thunk label check.  Since
+-fno-pic is ignored on Darwin, update testcases to sscan or "push"
+only on Linux.
+
+gcc/
+
+	Backport from mainline
+	2018-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR target/83839
+	* config/i386/i386.c (output_indirect_thunk_function): Use
+	ASM_OUTPUT_LABEL, instead of ASM_OUTPUT_DEF, for TARGET_MACHO
+	for  __x86.return_thunk.
+
+
+git-svn-id: svn+ssh://gcc.gnu.org/svn/gcc/branches/gcc-7-branch@256734 138bc75d-0d04-0410-961f-82ee72b054a4
 ---
  gcc/config/i386/i386-protos.h                      |   1 +
- gcc/config/i386/i386.c                             | 149 ++++++++++++++++++++-
+ gcc/config/i386/i386.c                             | 152 +++++++++++++++++++--
  gcc/config/i386/i386.h                             |   3 +
  gcc/config/i386/i386.md                            |   9 +-
  gcc/config/i386/i386.opt                           |   6 +-
  gcc/doc/extend.texi                                |   9 ++
  gcc/doc/invoke.texi                                |  13 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-1.c   |   2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-2.c   |   2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-3.c   |   2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-4.c   |   2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-5.c   |   2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-6.c   |   2 +-
- gcc/testsuite/gcc.target/i386/indirect-thunk-7.c   |   2 +-
- .../gcc.target/i386/indirect-thunk-attr-1.c        |   2 +-
- .../gcc.target/i386/indirect-thunk-attr-2.c        |   2 +-
- .../gcc.target/i386/indirect-thunk-attr-3.c        |   2 +-
- .../gcc.target/i386/indirect-thunk-attr-4.c        |   2 +-
- .../gcc.target/i386/indirect-thunk-attr-5.c        |   2 +-
- .../gcc.target/i386/indirect-thunk-attr-6.c        |   2 +-
- .../gcc.target/i386/indirect-thunk-attr-7.c        |   2 +-
- .../gcc.target/i386/indirect-thunk-attr-8.c        |   2 +-
- .../gcc.target/i386/indirect-thunk-bnd-1.c         |   2 +-
- .../gcc.target/i386/indirect-thunk-bnd-2.c         |   2 +-
- .../gcc.target/i386/indirect-thunk-bnd-3.c         |   2 +-
- .../gcc.target/i386/indirect-thunk-bnd-4.c         |   2 +-
- .../gcc.target/i386/indirect-thunk-extern-1.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-extern-2.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-extern-3.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-extern-4.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-extern-5.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-extern-6.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-extern-7.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-inline-1.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-inline-2.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-inline-3.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-inline-4.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-inline-5.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-inline-6.c      |   2 +-
- .../gcc.target/i386/indirect-thunk-inline-7.c      |   2 +-
- gcc/testsuite/gcc.target/i386/ret-thunk-1.c        |  12 ++
- gcc/testsuite/gcc.target/i386/ret-thunk-10.c       |  22 +++
- gcc/testsuite/gcc.target/i386/ret-thunk-11.c       |  22 +++
- gcc/testsuite/gcc.target/i386/ret-thunk-12.c       |  21 +++
- gcc/testsuite/gcc.target/i386/ret-thunk-13.c       |  21 +++
- gcc/testsuite/gcc.target/i386/ret-thunk-14.c       |  21 +++
- gcc/testsuite/gcc.target/i386/ret-thunk-15.c       |  21 +++
- gcc/testsuite/gcc.target/i386/ret-thunk-16.c       |  18 +++
- gcc/testsuite/gcc.target/i386/ret-thunk-2.c        |  12 ++
- gcc/testsuite/gcc.target/i386/ret-thunk-3.c        |  12 ++
- gcc/testsuite/gcc.target/i386/ret-thunk-4.c        |  12 ++
- gcc/testsuite/gcc.target/i386/ret-thunk-5.c        |  14 ++
- gcc/testsuite/gcc.target/i386/ret-thunk-6.c        |  13 ++
- gcc/testsuite/gcc.target/i386/ret-thunk-7.c        |  13 ++
- gcc/testsuite/gcc.target/i386/ret-thunk-8.c        |  14 ++
- gcc/testsuite/gcc.target/i386/ret-thunk-9.c        |  23 ++++
- 56 files changed, 478 insertions(+), 49 deletions(-)
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-1.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-10.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-11.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-12.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-13.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-14.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-15.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-16.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-2.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-3.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-4.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-5.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-6.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-7.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-8.c
- create mode 100644 gcc/testsuite/gcc.target/i386/ret-thunk-9.c
+ 58 files changed, 641 insertions(+), 74 deletions(-)
 
-diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386-protos.h gcc-7.2.0/gcc/config/i386/i386-protos.h
---- gcc-7.2.0.orig/gcc/config/i386/i386-protos.h	2018-01-15 19:51:30.252618154 -0800
-+++ gcc-7.2.0/gcc/config/i386/i386-protos.h	2018-01-15 19:51:44.370617901 -0800
-@@ -316,6 +316,7 @@
+diff --git a/gcc/config/i386/i386-protos.h b/gcc/config/i386/i386-protos.h
+index bcdd987..42eece3 100644
+--- a/gcc/config/i386/i386-protos.h
++++ b/gcc/config/i386/i386-protos.h
+@@ -314,6 +314,7 @@ extern enum attr_cpu ix86_schedule;
  
  extern const char * ix86_output_call_insn (rtx_insn *insn, rtx call_op);
  extern const char * ix86_output_indirect_jmp (rtx call_op, bool ret_p);
@@ -194,10 +99,11 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386-protos.h gcc-7.2.0/gcc/config/i38
  extern bool ix86_operands_ok_for_move_multiple (rtx *operands, bool load,
  						enum machine_mode mode);
  
-diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.c
---- gcc-7.2.0.orig/gcc/config/i386/i386.c	2018-01-15 19:51:30.252618154 -0800
-+++ gcc-7.2.0/gcc/config/i386/i386.c	2018-01-15 19:54:59.663614404 -0800
-@@ -7177,6 +7177,31 @@
+diff --git a/gcc/config/i386/i386.c b/gcc/config/i386/i386.c
+index 7e779c1..8fb8902 100644
+--- a/gcc/config/i386/i386.c
++++ b/gcc/config/i386/i386.c
+@@ -7188,6 +7188,31 @@ ix86_set_indirect_branch_type (tree fndecl)
        else
  	cfun->machine->indirect_branch_type = ix86_indirect_branch;
      }
@@ -229,7 +135,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
  }
  
  /* Establish appropriate back-end context for processing the function
-@@ -11979,8 +12004,12 @@
+@@ -12000,8 +12025,12 @@ static int indirect_thunks_bnd_used;
  /* Fills in the label name that should be used for the indirect thunk.  */
  
  static void
@@ -243,7 +149,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
    if (USE_HIDDEN_LINKONCE)
      {
        const char *bnd = need_bnd_p ? "_bnd" : "";
-@@ -11995,7 +12024,10 @@
+@@ -12016,7 +12045,10 @@ indirect_thunk_name (char name[32], int regno, bool need_bnd_p)
  		   bnd, reg_prefix, reg_names[regno]);
  	}
        else
@@ -255,7 +161,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
      }
    else
      {
-@@ -12008,10 +12040,20 @@
+@@ -12029,10 +12061,20 @@ indirect_thunk_name (char name[32], int regno, bool need_bnd_p)
  	}
        else
  	{
@@ -279,7 +185,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
  	}
      }
  }
-@@ -12106,7 +12148,7 @@
+@@ -12127,7 +12169,7 @@ output_indirect_thunk_function (bool need_bnd_p, int regno)
    tree decl;
  
    /* Create __x86_indirect_thunk/__x86_indirect_thunk_bnd.  */
@@ -288,7 +194,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
    decl = build_decl (BUILTINS_LOCATION, FUNCTION_DECL,
  		     get_identifier (name),
  		     build_function_type_list (void_type_node, NULL_TREE));
-@@ -12149,6 +12191,35 @@
+@@ -12170,6 +12212,36 @@ output_indirect_thunk_function (bool need_bnd_p, int regno)
  	ASM_OUTPUT_LABEL (asm_out_file, name);
        }
  
@@ -298,7 +204,6 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
 +      char alias[32];
 +
 +      indirect_thunk_name (alias, regno, need_bnd_p, true);
-+      ASM_OUTPUT_DEF (asm_out_file, alias, name);
 +#if TARGET_MACHO
 +      if (TARGET_MACHO)
 +	{
@@ -307,8 +212,10 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
 +	  fputs ("\n\t.private_extern\t", asm_out_file);
 +	  assemble_name (asm_out_file, alias);
 +	  putc ('\n', asm_out_file);
++	  ASM_OUTPUT_LABEL (asm_out_file, alias);
 +	}
 +#else
++      ASM_OUTPUT_DEF (asm_out_file, alias, name);
 +      if (USE_HIDDEN_LINKONCE)
 +	{
 +	  fputs ("\t.globl\t", asm_out_file);
@@ -324,7 +231,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
    DECL_INITIAL (decl) = make_node (BLOCK);
    current_function_decl = decl;
    allocate_struct_function (decl, false);
-@@ -28766,7 +28837,7 @@
+@@ -28775,7 +28847,7 @@ ix86_output_indirect_branch_via_reg (rtx call_op, bool sibcall_p)
  	  else
  	    indirect_thunks_used |= 1 << i;
  	}
@@ -333,7 +240,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
        thunk_name = thunk_name_buf;
      }
    else
-@@ -28875,7 +28946,7 @@
+@@ -28884,7 +28956,7 @@ ix86_output_indirect_branch_via_push (rtx call_op, const char *xasm,
  	  else
  	    indirect_thunk_needed = true;
  	}
@@ -342,7 +249,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
        thunk_name = thunk_name_buf;
      }
    else
-@@ -29010,6 +29081,46 @@
+@@ -29019,6 +29091,46 @@ ix86_output_indirect_jmp (rtx call_op, bool ret_p)
      return "%!jmp\t%A0";
  }
  
@@ -389,7 +296,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
  /* Output the assembly for a call instruction.  */
  
  const char *
-@@ -42066,6 +42177,28 @@
+@@ -42090,6 +42202,28 @@ ix86_handle_fndecl_attribute (tree *node, tree name, tree args, int,
  	}
      }
  
@@ -418,19 +325,20 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.c gcc-7.2.0/gcc/config/i386/i386.
    return NULL_TREE;
  }
  
-@@ -46362,6 +46495,8 @@
+@@ -46400,6 +46534,8 @@ static const struct attribute_spec ix86_attribute_table[] =
      ix86_handle_no_caller_saved_registers_attribute, false },
    { "indirect_branch", 1, 1, true, false, false,
-     ix86_handle_fndecl_attribute, NULL },
+     ix86_handle_fndecl_attribute, false },
 +  { "function_return", 1, 1, true, false, false,
-+    ix86_handle_fndecl_attribute, NULL },
++    ix86_handle_fndecl_attribute, false },
  
    /* End element.  */
    { NULL,        0, 0, false, false, false, NULL, false }
-diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.h gcc-7.2.0/gcc/config/i386/i386.h
---- gcc-7.2.0.orig/gcc/config/i386/i386.h	2018-01-15 19:51:30.252618154 -0800
-+++ gcc-7.2.0/gcc/config/i386/i386.h	2018-01-15 19:51:44.381617901 -0800
-@@ -2611,6 +2611,9 @@
+diff --git a/gcc/config/i386/i386.h b/gcc/config/i386/i386.h
+index d8370ae..e7da790 100644
+--- a/gcc/config/i386/i386.h
++++ b/gcc/config/i386/i386.h
+@@ -2616,6 +2616,9 @@ struct GTY(()) machine_function {
       "indirect_jump" or "tablejump".  */
    BOOL_BITFIELD has_local_indirect_jump : 1;
  
@@ -440,10 +348,11 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.h gcc-7.2.0/gcc/config/i386/i386.
    /* If true, the current function is a function specified with
       the "interrupt" or "no_caller_saved_registers" attribute.  */
    BOOL_BITFIELD no_caller_saved_registers : 1;
-diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.md gcc-7.2.0/gcc/config/i386/i386.md
---- gcc-7.2.0.orig/gcc/config/i386/i386.md	2018-01-15 19:51:30.252618154 -0800
-+++ gcc-7.2.0/gcc/config/i386/i386.md	2018-01-15 19:51:44.385617901 -0800
-@@ -12298,7 +12298,7 @@
+diff --git a/gcc/config/i386/i386.md b/gcc/config/i386/i386.md
+index cd2e73c..d112bdb 100644
+--- a/gcc/config/i386/i386.md
++++ b/gcc/config/i386/i386.md
+@@ -12315,7 +12315,7 @@
  (define_insn "simple_return_internal"
    [(simple_return)]
    "reload_completed"
@@ -452,7 +361,7 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.md gcc-7.2.0/gcc/config/i386/i386
    [(set_attr "length" "1")
     (set_attr "atom_unit" "jeu")
     (set_attr "length_immediate" "0")
-@@ -12320,12 +12320,7 @@
+@@ -12337,12 +12337,7 @@
    [(simple_return)
     (unspec [(const_int 0)] UNSPEC_REP)]
    "reload_completed"
@@ -466,10 +375,11 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.md gcc-7.2.0/gcc/config/i386/i386
    [(set_attr "length" "2")
     (set_attr "atom_unit" "jeu")
     (set_attr "length_immediate" "0")
-diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.opt gcc-7.2.0/gcc/config/i386/i386.opt
---- gcc-7.2.0.orig/gcc/config/i386/i386.opt	2018-01-15 19:51:30.252618154 -0800
-+++ gcc-7.2.0/gcc/config/i386/i386.opt	2018-01-15 19:51:44.386617901 -0800
-@@ -932,9 +932,13 @@
+diff --git a/gcc/config/i386/i386.opt b/gcc/config/i386/i386.opt
+index c076d9c..b07388d 100644
+--- a/gcc/config/i386/i386.opt
++++ b/gcc/config/i386/i386.opt
+@@ -932,9 +932,13 @@ mindirect-branch=
  Target Report RejectNegative Joined Enum(indirect_branch) Var(ix86_indirect_branch) Init(indirect_branch_keep)
  Convert indirect call and jump to call and return thunks.
  
@@ -484,10 +394,11 @@ diff -Naur gcc-7.2.0.orig/gcc/config/i386/i386.opt gcc-7.2.0/gcc/config/i386/i38
  
  EnumValue
  Enum(indirect_branch) String(keep) Value(indirect_branch_keep)
-diff -Naur gcc-7.2.0.orig/gcc/doc/extend.texi gcc-7.2.0/gcc/doc/extend.texi
---- gcc-7.2.0.orig/gcc/doc/extend.texi	2018-01-15 19:51:28.536618185 -0800
-+++ gcc-7.2.0/gcc/doc/extend.texi	2018-01-15 19:51:44.392617901 -0800
-@@ -5550,6 +5550,15 @@
+diff --git a/gcc/doc/extend.texi b/gcc/doc/extend.texi
+index 935381d..46e0a36 100644
+--- a/gcc/doc/extend.texi
++++ b/gcc/doc/extend.texi
+@@ -5550,6 +5550,15 @@ call and jump to call and return thunk.  @samp{thunk-inline} converts
  indirect call and jump to inlined call and return thunk.
  @samp{thunk-extern} converts indirect call and jump to external call
  and return thunk provided in a separate object file.
@@ -503,10 +414,11 @@ diff -Naur gcc-7.2.0.orig/gcc/doc/extend.texi gcc-7.2.0/gcc/doc/extend.texi
  @end table
  
  On the x86, the inliner does not inline a
-diff -Naur gcc-7.2.0.orig/gcc/doc/invoke.texi gcc-7.2.0/gcc/doc/invoke.texi
---- gcc-7.2.0.orig/gcc/doc/invoke.texi	2018-01-15 19:51:28.537618185 -0800
-+++ gcc-7.2.0/gcc/doc/invoke.texi	2018-01-15 19:51:44.397617901 -0800
-@@ -1211,7 +1211,7 @@
+diff --git a/gcc/doc/invoke.texi b/gcc/doc/invoke.texi
+index 4979c8c..f3eb54b 100644
+--- a/gcc/doc/invoke.texi
++++ b/gcc/doc/invoke.texi
+@@ -1211,7 +1211,7 @@ See RS/6000 and PowerPC Options.
  -mavx256-split-unaligned-load  -mavx256-split-unaligned-store @gol
  -malign-data=@var{type}  -mstack-protector-guard=@var{guard} @gol
  -mmitigate-rop  -mgeneral-regs-only @gol
@@ -515,7 +427,7 @@ diff -Naur gcc-7.2.0.orig/gcc/doc/invoke.texi gcc-7.2.0/gcc/doc/invoke.texi
  
  @emph{x86 Windows Options}
  @gccoptlist{-mconsole  -mcygwin  -mno-cygwin  -mdll @gol
-@@ -25660,6 +25660,17 @@
+@@ -25698,6 +25698,17 @@ to external call and return thunk provided in a separate object file.
  You can control this behavior for a specific function by using the
  function attribute @code{indirect_branch}.  @xref{Function Attributes}.
  
@@ -533,668 +445,3 @@ diff -Naur gcc-7.2.0.orig/gcc/doc/invoke.texi gcc-7.2.0/gcc/doc/invoke.texi
  @end table
  
  These @samp{-m} switches are supported in addition to the above
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-1.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-2.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-3.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-4.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-5.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk" } */
- 
- extern void bar (void);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-6.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk" } */
- 
- extern void bar (void);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-7.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fno-pic" } */
- 
- void func0 (void);
- void func1 (void);
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-1.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-2.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-3.c	2018-01-15 19:51:44.398617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-4.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-5.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c	2018-01-15 19:51:28.901618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-6.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-7.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fno-pic" } */
- 
- void func0 (void);
- void func1 (void);
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-attr-8.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fno-pic" } */
- 
- void func0 (void);
- void func1 (void);
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-1.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target { ! x32 } } } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fno-pic" } */
- 
- void (*dispatch) (char *);
- char buf[10];
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-2.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target { ! x32 } } } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fno-pic" } */
- 
- void (*dispatch) (char *);
- char buf[10];
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-3.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target { *-*-linux* && { ! x32 } } } } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
- 
- void bar (char *);
- char buf[10];
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-bnd-4.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target { *-*-linux* && { ! x32 } } } } */
--/* { dg-options "-O2 -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fcheck-pointer-bounds -mmpx -fpic -fno-plt" } */
- 
- void bar (char *);
- char buf[10];
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-1.c	2018-01-15 19:51:44.399617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-extern -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-extern -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-2.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-extern -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-extern -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-3.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-extern -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-extern -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-4.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-extern -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-extern -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-5.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk-extern" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-extern" } */
- 
- extern void bar (void);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-6.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk-extern" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-extern" } */
- 
- extern void bar (void);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-extern-7.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-extern -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-extern -fno-pic" } */
- 
- void func0 (void);
- void func1 (void);
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-1.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-inline -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-inline -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-2.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-inline -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-inline -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-3.c	2018-01-15 19:51:44.400617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-inline -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-inline -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-4.c	2018-01-15 19:51:44.401617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-inline -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-inline -fno-pic" } */
- 
- typedef void (*dispatch_t)(long offset);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-5.c	2018-01-15 19:51:44.401617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk-inline" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-inline" } */
- 
- extern void bar (void);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-6.c	2018-01-15 19:51:44.401617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile { target *-*-linux* } } */
--/* { dg-options "-O2 -fpic -fno-plt -mindirect-branch=thunk-inline" } */
-+/* { dg-options "-O2 -mfunction-return=keep -fpic -fno-plt -mindirect-branch=thunk-inline" } */
- 
- extern void bar (void);
- 
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c	2018-01-15 19:51:28.902618178 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/indirect-thunk-inline-7.c	2018-01-15 19:51:44.401617901 -0800
-@@ -1,5 +1,5 @@
- /* { dg-do compile } */
--/* { dg-options "-O2 -mindirect-branch=thunk-inline -fno-pic" } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-inline -fno-pic" } */
- 
- void func0 (void);
- void func1 (void);
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-1.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-1.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-1.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-1.c	2018-01-15 19:51:44.401617901 -0800
-@@ -0,0 +1,12 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=thunk" } */
-+
-+void
-+foo (void)
-+{
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-10.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-10.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-10.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-10.c	2018-01-15 19:51:44.401617901 -0800
-@@ -0,0 +1,22 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=thunk-inline -mindirect-branch=thunk -fno-pic" } */
-+
-+extern void (*bar) (void);
-+
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-times {\tpause} 2 } } */
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*_?bar" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" { target { ! x32 } }  } } */
-+/* { dg-final { scan-assembler "__x86_indirect_thunk:" { target { ! x32 } }  } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target { x32 } }  } } */
-+/* { dg-final { scan-assembler "__x86_indirect_thunk_(r|e)ax:" { target { x32 } }  } } */
-+/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-11.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-11.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-11.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-11.c	2018-01-15 19:51:44.401617901 -0800
-@@ -0,0 +1,22 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=thunk-extern -mindirect-branch=thunk -fno-pic" } */
-+
-+extern void (*bar) (void);
-+
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-times {\tpause} 1 } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*_?bar" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "__x86_indirect_thunk:" { target { ! x32 } }  } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target { x32 } }  } } */
-+/* { dg-final { scan-assembler "__x86_indirect_thunk_(r|e)ax:" { target { x32 } }  } } */
-+/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-12.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-12.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-12.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-12.c	2018-01-15 19:51:44.401617901 -0800
-@@ -0,0 +1,21 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk -fno-pic" } */
-+
-+extern void (*bar) (void);
-+
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-times {\tpause} 1 } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "__x86_indirect_thunk:" { target { ! x32 } }  } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target { x32 } }  } } */
-+/* { dg-final { scan-assembler "__x86_indirect_thunk_(r|e)ax:" { target { x32 } }  } } */
-+/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-13.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-13.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-13.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-13.c	2018-01-15 19:51:44.401617901 -0800
-@@ -0,0 +1,21 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-inline -fno-pic" } */
-+
-+extern void (*bar) (void);
-+extern int foo (void) __attribute__ ((function_return("thunk")));
-+
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-times {\tpause} 2 } } */
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*_?bar" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler-times "jmp\[ \t\]*\.LIND" 3 } } */
-+/* { dg-final { scan-assembler-times "call\[ \t\]*\.LIND" 3 } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*__x86_indirect_thunk" } } */
-+/* { dg-final { scan-assembler-not "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target { x32 } }  } } */
-+/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-14.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-14.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-14.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-14.c	2018-01-15 19:51:44.401617901 -0800
-@@ -0,0 +1,21 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=thunk-extern -fno-pic" } */
-+
-+extern void (*bar) (void);
-+
-+__attribute__ ((function_return("thunk-inline")))
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler-times {\tpause} 1 } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*_?bar" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target { x32 } }  } } */
-+/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-15.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-15.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-15.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-15.c	2018-01-15 19:51:44.402617901 -0800
-@@ -0,0 +1,21 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=keep -mindirect-branch=keep -fno-pic" } */
-+
-+extern void (*bar) (void);
-+
-+__attribute__ ((function_return("thunk-extern"), indirect_branch("thunk")))
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-times {\tpause} 1 } } */
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*_?bar" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target x32 } } } */
-+/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-16.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-16.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-16.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-16.c	2018-01-15 19:51:44.402617901 -0800
-@@ -0,0 +1,18 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=thunk-inline -mindirect-branch=thunk-extern -fno-pic" } */
-+
-+extern void (*bar) (void);
-+
-+__attribute__ ((function_return("keep"), indirect_branch("keep")))
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler-not "__x86_indirect_thunk" } } */
-+/* { dg-final { scan-assembler-not "__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-not {\tpause} } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-2.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-2.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-2.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-2.c	2018-01-15 19:51:44.402617901 -0800
-@@ -0,0 +1,12 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=thunk-inline" } */
-+
-+void
-+foo (void)
-+{
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*__x86_return_thunk" } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-3.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-3.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-3.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-3.c	2018-01-15 19:51:44.402617901 -0800
-@@ -0,0 +1,12 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=thunk-extern" } */
-+
-+void
-+foo (void)
-+{
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-not {\tpause} } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-4.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-4.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-4.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-4.c	2018-01-15 19:51:44.402617901 -0800
-@@ -0,0 +1,12 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=keep" } */
-+
-+void
-+foo (void)
-+{
-+}
-+
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-not {\tpause} } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-5.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-5.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-5.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-5.c	2018-01-15 19:51:44.402617901 -0800
-@@ -0,0 +1,14 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=keep" } */
-+
-+extern void foo (void) __attribute__ ((function_return("thunk")));
-+
-+void
-+foo (void)
-+{
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-6.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-6.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-6.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-6.c	2018-01-15 19:51:44.403617901 -0800
-@@ -0,0 +1,13 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=keep" } */
-+
-+__attribute__ ((function_return("thunk-inline")))
-+void
-+foo (void)
-+{
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler {\tpause} } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*__x86_return_thunk" } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-7.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-7.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-7.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-7.c	2018-01-15 19:51:44.403617901 -0800
-@@ -0,0 +1,13 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=keep" } */
-+
-+__attribute__ ((function_return("thunk-extern")))
-+void
-+foo (void)
-+{
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-not {\tpause} } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-8.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-8.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-8.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-8.c	2018-01-15 19:51:44.403617901 -0800
-@@ -0,0 +1,14 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=thunk-inline" } */
-+
-+extern void foo (void) __attribute__ ((function_return("keep")));
-+
-+void
-+foo (void)
-+{
-+}
-+
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-not {\tpause} } } */
-+/* { dg-final { scan-assembler-not "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler-not "call\[ \t\]*\.LIND" } } */
-diff -Naur gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-9.c gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-9.c
---- gcc-7.2.0.orig/gcc/testsuite/gcc.target/i386/ret-thunk-9.c	1969-12-31 16:00:00.000000000 -0800
-+++ gcc-7.2.0/gcc/testsuite/gcc.target/i386/ret-thunk-9.c	2018-01-15 19:51:44.403617901 -0800
-@@ -0,0 +1,23 @@
-+/* { dg-do compile } */
-+/* { dg-options "-O2 -mfunction-return=thunk -mindirect-branch=thunk -fno-pic" } */
-+
-+extern void (*bar) (void);
-+
-+int
-+foo (void)
-+{
-+  bar ();
-+  return 0;
-+}
-+
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_return_thunk" } } */
-+/* { dg-final { scan-assembler-not "__x86_return_thunk:" } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*\.LIND" } } */
-+/* { dg-final { scan-assembler "__x86_indirect_thunk:" } } */
-+/* { dg-final { scan-assembler-times {\tpause} 1 { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "push(?:l|q)\[ \t\]*_?bar" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler "jmp\[ \t\]*__x86_indirect_thunk" { target { ! x32 } } } } */
-+/* { dg-final { scan-assembler-times {\tpause} 2 { target { x32 } } } } */
-+/* { dg-final { scan-assembler "call\[ \t\]*__x86_indirect_thunk_(r|e)ax" { target { x32 } } } } */
-+/* { dg-final { scan-assembler-not "pushq\[ \t\]%rax" { target x32 } } } */
