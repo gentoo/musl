@@ -27,8 +27,6 @@ src_prepare() {
 	# Meltdown/Spectre
 	epatch "${FILESDIR}"/0001-gcc-7.2.0-move-struct-ix86_frame-to-machine-function.patch
 	epatch "${FILESDIR}"/0002-gcc-7.2.0-move-struct-ix86_frame-to-machine-function.patch
-	epatch "${FILESDIR}"/0003-gcc-7.2.0-move-struct-ix86_frame-to-machine-function.patch
-	epatch "${FILESDIR}"/0004-gcc-7.2.0-move-struct-ix86_frame-to-machine-function.patch
 
 	epatch "${FILESDIR}"/spectre-0001-mindirect-branch.patch
 	epatch "${FILESDIR}"/spectre-0002-mfunction-return.patch
