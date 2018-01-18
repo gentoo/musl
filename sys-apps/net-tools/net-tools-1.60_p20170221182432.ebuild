@@ -1,17 +1,16 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI=6
 
 inherit flag-o-matic toolchain-funcs
 
 if [[ ${PV} == "9999" ]] ; then
 	EGIT_REPO_URI="git://git.code.sf.net/p/net-tools/code"
-	EGIT_PROJECT="${PN}"
-	inherit git-2
+	inherit git-r3
 else
-	SRC_URI="mirror://gentoo/${P}.tar.xz"
-	KEYWORDS="amd64 arm ~mips ppc x86"
+	SRC_URI="https://dev.gentoo.org/~polynomial-c/dist/${P}.tar.xz"
+	KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
 fi
 
 DESCRIPTION="Standard Linux networking tools"
@@ -33,6 +32,8 @@ RDEPEND+="
 	hostname? ( !sys-apps/coreutils[hostname] )
 	!<sys-apps/openrc-0.9.9.3"
 
+PATCHES=( "${FILESDIR}"/${PN}-fix-headers.patch )
+
 maint_pkg_create() {
 	cd /usr/local/src/net-tools
 	#git-update
@@ -43,7 +44,7 @@ maint_pkg_create() {
 	pushd "${T}" >/dev/null
 	emake -C "${p}/po" dist
 	sed -i "/^RELEASE/s:=.*:=${pv}:" */Makefile || die
-	tar cf - ${p}/ | xz > ${p}.tar.xz
+	tar --exclude-vcs cf - ${p}/ | xz > ${p}.tar.xz
 	popd >/dev/null
 
 	du -b "${T}"/*.tar.xz
@@ -59,11 +60,6 @@ set_opt() {
 	sed -i \
 		-e "/^bool.* ${opt} /s:[yn]$:${ans}:" \
 		config.in || die
-}
-
-src_prepare() {
-	epatch "${FILESDIR}"/${PN}-fix-headers.patch
-	epatch "${FILESDIR}/${P}-fix-building-w-older-linux-headers.patch"
 }
 
 src_configure() {
