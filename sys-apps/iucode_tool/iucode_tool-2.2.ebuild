@@ -3,6 +3,8 @@
 
 EAPI="6"
 
+inherit autotools eutils
+
 DESCRIPTION="tool to manipulate Intel X86 and X86-64 processor microcode update collections"
 HOMEPAGE="https://gitlab.com/iucode-tool/"
 SRC_URI="https://gitlab.com/iucode-tool/releases/raw/master/${PN/_/-}_${PV}.tar.xz"
@@ -12,6 +14,16 @@ SLOT="0"
 KEYWORDS="-* ~amd64 ~x86"
 IUSE=""
 
-PATCHES=( "${FILESDIR}"/${P}-limits.patch )
+DEPEND="elibc_musl? ( sys-libs/argp-standalone )"
+RDEPEND=${DEPEND}
 
 S="${WORKDIR}/${PN/_/-}-${PV}"
+
+src_prepare() {
+	eapply "${FILESDIR}/${P}-limits.patch"
+	use elibc_musl && eapply "${FILESDIR}/${P}-argp.patch"
+
+	eapply_user
+
+	eautoreconf
+}
