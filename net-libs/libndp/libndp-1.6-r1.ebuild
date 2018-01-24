@@ -12,7 +12,7 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE=""
 
-KEYWORDS="~alpha amd64 arm ~arm64 ~ia64 ppc ppc64 ~sparc x86"
+KEYWORDS="amd64 arm ~ia64 ppc ~sparc x86"
 
 DEPEND=""
 RDEPEND=""

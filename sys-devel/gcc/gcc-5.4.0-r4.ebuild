@@ -23,7 +23,7 @@ SSP_MUSL_STABLE="amd64 arm ppc mips"
 
 inherit epatch toolchain
 
-KEYWORDS="alpha amd64 arm arm64 hppa ia64 ~m68k ~mips ppc ppc64 ~s390 ~sh ~sparc x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}

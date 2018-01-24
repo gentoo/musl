@@ -11,7 +11,7 @@ SRC_URI="https://dev.gentoo.org/~blueness/f2fs-tools/${P}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0/0"
-KEYWORDS="amd64 arm ~mips ppc ppc64 x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE=""
 
 DEPEND="elibc_musl? ( sys-libs/queue )"

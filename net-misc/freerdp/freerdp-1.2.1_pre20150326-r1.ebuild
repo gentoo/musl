@@ -8,7 +8,7 @@ inherit cmake-utils vcs-snapshot
 if [[ ${PV} != 9999* ]]; then
 	COMMIT="aa2181dcf2dd98693767ba738c5b2ad8c3d742d4"
 	SRC_URI="https://github.com/FreeRDP/FreeRDP/archive/${COMMIT}.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="alpha amd64 arm ppc ppc64 x86"
+	KEYWORDS="amd64 arm ppc x86"
 else
 	inherit git-r3
 	SRC_URI=""

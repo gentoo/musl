@@ -10,7 +10,7 @@ SRC_URI="http://www.valgrind.org/downloads/${P}.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="-* amd64 arm ppc ppc64 x86"
+KEYWORDS="-* amd64 arm ppc x86"
 IUSE="mpi"
 
 DEPEND="mpi? ( virtual/mpi )"

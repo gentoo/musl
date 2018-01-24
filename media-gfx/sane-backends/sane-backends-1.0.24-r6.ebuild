@@ -121,7 +121,7 @@ SRC_URI="https://alioth.debian.org/frs/download.php/file/3958/${P}.tar.gz"
 
 LICENSE="GPL-2 public-domain"
 SLOT="0"
-KEYWORDS="alpha amd64 arm hppa ia64 ppc ppc64 sparc x86"
+KEYWORDS="amd64 arm ia64 ppc sparc x86"
 
 RDEPEND="
 	sane_backends_dc210? ( >=virtual/jpeg-0-r2[${MULTILIB_USEDEP}] )

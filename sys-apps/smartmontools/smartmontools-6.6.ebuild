@@ -10,7 +10,7 @@ if [[ ${PV} == "9999" ]] ; then
 	inherit subversion
 else
 	SRC_URI="mirror://sourceforge/${PN}/${P}.tar.gz"
-	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~sparc ~x86"
+	KEYWORDS="~amd64 ~arm ~ia64 ~mips ~ppc ~sparc ~x86"
 fi
 
 DESCRIPTION="Tools to monitor storage systems to provide advanced warning of disk degradation"

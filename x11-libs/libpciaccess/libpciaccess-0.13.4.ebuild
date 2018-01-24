@@ -7,7 +7,7 @@ XORG_MULTILIB=yes
 inherit xorg-2
 
 DESCRIPTION="Library providing generic access to the PCI bus and devices"
-KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 ~mips ppc ppc64 ~s390 ~sh sparc x86"
+KEYWORDS="amd64 arm ia64 ~mips ppc ~sh sparc x86"
 IUSE="zlib"
 
 DEPEND="!<x11-base/xorg-server-1.5

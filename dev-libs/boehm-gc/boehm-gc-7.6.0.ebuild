@@ -13,7 +13,7 @@ SRC_URI="http://www.hboehm.info/gc/gc_source/${MY_P}.tar.gz"
 
 LICENSE="boehm-gc"
 SLOT="0"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~sparc ~x86"
+KEYWORDS="~amd64 ~arm ~ia64 ~mips ~ppc ~sparc ~x86"
 IUSE="cxx static-libs threads"
 
 DEPEND=">=dev-libs/libatomic_ops-7.4

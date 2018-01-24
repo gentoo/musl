@@ -57,7 +57,7 @@ LICENSE="GPL-2 LGPL-2"
 SLOT="0"
 if [[ ${PV} != 9999* ]] ; then
 	# alpha #562128
-	KEYWORDS="-alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sparc x86 ~ppc-aix"
+	KEYWORDS="amd64 arm ~mips ppc x86"
 fi
 IUSE="+client expat lzma multitarget nls +python +server test vanilla"
 REQUIRED_USE="
