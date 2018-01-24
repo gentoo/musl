@@ -1,0 +1,408 @@
+From 3f14fcbb1dc6a11ed82724d6c006325243122bfb Mon Sep 17 00:00:00 2001
+From: Samuel Holland <samuel@sholland.org>
+Date: Fri, 8 Sep 2017 22:11:14 -0500
+Subject: [PATCH 2/8] Remove -nostdlib and musl_root from musl targets
+
+---
+ config.toml.example                              |  6 -----
+ src/bootstrap/bin/rustc.rs                       | 10 --------
+ src/bootstrap/cc_detect.rs                       | 27 +++------------------
+ src/bootstrap/compile.rs                         | 31 ------------------------
+ src/bootstrap/config.rs                          |  7 ------
+ src/bootstrap/configure.py                       | 14 -----------
+ src/bootstrap/lib.rs                             |  8 ------
+ src/bootstrap/sanity.rs                          | 29 ----------------------
+ src/ci/docker/cross/Dockerfile                   |  6 +----
+ src/ci/docker/dist-i586-gnu-i686-musl/Dockerfile |  1 -
+ src/ci/docker/dist-x86_64-musl/Dockerfile        |  1 -
+ src/librustc_back/target/linux_musl_base.rs      | 15 ------------
+ 12 files changed, 4 insertions(+), 151 deletions(-)
+
+diff --git a/config.toml.example b/config.toml.example
+index df0142b8d4..9cb6fc5c9e 100644
+--- a/config.toml.example
++++ b/config.toml.example
+@@ -348,12 +348,6 @@
+ # only use static libraries. If unset, the target's default linkage is used.
+ #crt-static = false
+ 
+-# The root location of the MUSL installation directory. The library directory
+-# will also need to contain libunwind.a for an unwinding implementation. Note
+-# that this option only makes sense for MUSL targets that produce statically
+-# linked binaries
+-#musl-root = "..."
+-
+ # Used in testing for configuring where the QEMU images are located, you
+ # probably don't want to use this.
+ #qemu-rootfs = "..."
+diff --git a/src/bootstrap/bin/rustc.rs b/src/bootstrap/bin/rustc.rs
+index 16a23eb364..84b68dd9f4 100644
+--- a/src/bootstrap/bin/rustc.rs
++++ b/src/bootstrap/bin/rustc.rs
+@@ -30,7 +30,6 @@
+ extern crate bootstrap;
+ 
+ use std::env;
+-use std::ffi::OsString;
+ use std::str::FromStr;
+ use std::path::PathBuf;
+ use std::process::{Command, ExitStatus};
+@@ -111,15 +110,6 @@ fn main() {
+             cmd.arg("-Cprefer-dynamic");
+         }
+ 
+-        // Help the libc crate compile by assisting it in finding the MUSL
+-        // native libraries.
+-        if let Some(s) = env::var_os("MUSL_ROOT") {
+-            let mut root = OsString::from("native=");
+-            root.push(&s);
+-            root.push("/lib");
+-            cmd.arg("-L").arg(&root);
+-        }
+-
+         // Override linker if necessary.
+         if let Ok(target_linker) = env::var("RUSTC_TARGET_LINKER") {
+             cmd.arg(format!("-Clinker={}", target_linker));
+diff --git a/src/bootstrap/cc_detect.rs b/src/bootstrap/cc_detect.rs
+index e531fdaf29..3f49a2cfec 100644
+--- a/src/bootstrap/cc_detect.rs
++++ b/src/bootstrap/cc_detect.rs
+@@ -84,7 +84,7 @@ pub fn find(build: &mut Build) {
+         if let Some(cc) = config.and_then(|c| c.cc.as_ref()) {
+             cfg.compiler(cc);
+         } else {
+-            set_compiler(&mut cfg, Language::C, target, config, build);
++            set_compiler(&mut cfg, Language::C, target, config);
+         }
+ 
+         let compiler = cfg.get_compiler();
+@@ -112,7 +112,7 @@ pub fn find(build: &mut Build) {
+         if let Some(cxx) = config.and_then(|c| c.cxx.as_ref()) {
+             cfg.compiler(cxx);
+         } else {
+-            set_compiler(&mut cfg, Language::CPlusPlus, host, config, build);
++            set_compiler(&mut cfg, Language::CPlusPlus, host, config);
+         }
+         let compiler = cfg.get_compiler();
+         build.verbose(&format!("CXX_{} = {:?}", host, compiler.path()));
+@@ -123,8 +123,7 @@ pub fn find(build: &mut Build) {
+ fn set_compiler(cfg: &mut cc::Build,
+                 compiler: Language,
+                 target: Interned<String>,
+-                config: Option<&Target>,
+-                build: &Build) {
++                config: Option<&Target>) {
+     match &*target {
+         // When compiling for android we may have the NDK configured in the
+         // config.toml in which case we look there. Otherwise the default
+@@ -161,26 +160,6 @@ fn set_compiler(cfg: &mut cc::Build,
+             }
+         }
+ 
+-        "mips-unknown-linux-musl" => {
+-            if cfg.get_compiler().path().to_str() == Some("gcc") {
+-                cfg.compiler("mips-linux-musl-gcc");
+-            }
+-        }
+-        "mipsel-unknown-linux-musl" => {
+-            if cfg.get_compiler().path().to_str() == Some("gcc") {
+-                cfg.compiler("mipsel-linux-musl-gcc");
+-            }
+-        }
+-
+-        t if t.contains("musl") => {
+-            if let Some(root) = build.musl_root(target) {
+-                let guess = root.join("bin/musl-gcc");
+-                if guess.exists() {
+-                    cfg.compiler(guess);
+-                }
+-            }
+-        }
+-
+         _ => {}
+     }
+ }
+diff --git a/src/bootstrap/compile.rs b/src/bootstrap/compile.rs
+index db013691bb..9e9badab9b 100644
+--- a/src/bootstrap/compile.rs
++++ b/src/bootstrap/compile.rs
+@@ -78,13 +78,6 @@ impl Step for Std {
+             });
+             println!("Uplifting stage1 std ({} -> {})", from.host, target);
+ 
+-            // Even if we're not building std this stage, the new sysroot must
+-            // still contain the musl startup objects.
+-            if target.contains("musl") && !target.contains("mips") {
+-                let libdir = builder.sysroot_libdir(compiler, target);
+-                copy_musl_third_party_objects(build, target, &libdir);
+-            }
+-
+             builder.ensure(StdLink {
+                 compiler: from,
+                 target_compiler: compiler,
+@@ -97,11 +90,6 @@ impl Step for Std {
+         println!("Building stage{} std artifacts ({} -> {})", compiler.stage,
+                 &compiler.host, target);
+ 
+-        if target.contains("musl") && !target.contains("mips") {
+-            let libdir = builder.sysroot_libdir(compiler, target);
+-            copy_musl_third_party_objects(build, target, &libdir);
+-        }
+-
+         let out_dir = build.stage_out(compiler, Mode::Libstd);
+         build.clear_if_dirty(&out_dir, &builder.rustc(compiler));
+         let mut cargo = builder.cargo(compiler, Mode::Libstd, target, "build");
+@@ -118,20 +106,6 @@ impl Step for Std {
+     }
+ }
+ 
+-/// Copies the crt(1,i,n).o startup objects
+-///
+-/// Since musl supports fully static linking, we can cross link for it even
+-/// with a glibc-targeting toolchain, given we have the appropriate startup
+-/// files. As those shipped with glibc won't work, copy the ones provided by
+-/// musl so we have them on linux-gnu hosts.
+-fn copy_musl_third_party_objects(build: &Build,
+-                                 target: Interned<String>,
+-                                 into: &Path) {
+-    for &obj in &["crt1.o", "crti.o", "crtn.o"] {
+-        copy(&build.musl_root(target).unwrap().join("lib").join(obj), &into.join(obj));
+-    }
+-}
+-
+ /// Configure cargo to compile the standard library, adding appropriate env vars
+ /// and such.
+ pub fn std_cargo(build: &Build,
+@@ -173,11 +147,6 @@ pub fn std_cargo(build: &Build,
+             cargo.env("JEMALLOC_OVERRIDE", jemalloc);
+         }
+     }
+-    if target.contains("musl") {
+-        if let Some(p) = build.musl_root(target) {
+-            cargo.env("MUSL_ROOT", p);
+-        }
+-    }
+ }
+ 
+ #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+diff --git a/src/bootstrap/config.rs b/src/bootstrap/config.rs
+index 35e62f17f2..cf85233c2c 100644
+--- a/src/bootstrap/config.rs
++++ b/src/bootstrap/config.rs
+@@ -112,8 +112,6 @@ pub struct Config {
+     pub channel: String,
+     pub quiet_tests: bool,
+     pub test_miri: bool,
+-    // Fallback musl-root for all targets
+-    pub musl_root: Option<PathBuf>,
+     pub prefix: Option<PathBuf>,
+     pub sysconfdir: Option<PathBuf>,
+     pub docdir: Option<PathBuf>,
+@@ -147,7 +145,6 @@ pub struct Target {
+     pub linker: Option<PathBuf>,
+     pub ndk: Option<PathBuf>,
+     pub crt_static: Option<bool>,
+-    pub musl_root: Option<PathBuf>,
+     pub qemu_rootfs: Option<PathBuf>,
+ }
+ 
+@@ -269,7 +266,6 @@ struct Rust {
+     backtrace: Option<bool>,
+     default_linker: Option<String>,
+     channel: Option<String>,
+-    musl_root: Option<String>,
+     rpath: Option<bool>,
+     optimize_tests: Option<bool>,
+     debuginfo_tests: Option<bool>,
+@@ -293,7 +289,6 @@ struct TomlTarget {
+     linker: Option<String>,
+     android_ndk: Option<String>,
+     crt_static: Option<bool>,
+-    musl_root: Option<String>,
+     qemu_rootfs: Option<String>,
+ }
+ 
+@@ -471,7 +466,6 @@ impl Config {
+             set(&mut config.quiet_tests, rust.quiet_tests);
+             set(&mut config.test_miri, rust.test_miri);
+             config.rustc_default_linker = rust.default_linker.clone();
+-            config.musl_root = rust.musl_root.clone().map(PathBuf::from);
+ 
+             match rust.codegen_units {
+                 Some(0) => config.rust_codegen_units = Some(num_cpus::get() as u32),
+@@ -498,7 +492,6 @@ impl Config {
+                 target.ar = cfg.ar.clone().map(PathBuf::from);
+                 target.linker = cfg.linker.clone().map(PathBuf::from);
+                 target.crt_static = cfg.crt_static.clone();
+-                target.musl_root = cfg.musl_root.clone().map(PathBuf::from);
+                 target.qemu_rootfs = cfg.qemu_rootfs.clone().map(PathBuf::from);
+ 
+                 config.target_config.insert(INTERNER.intern_string(triple.clone()), target);
+diff --git a/src/bootstrap/configure.py b/src/bootstrap/configure.py
+index 579422c979..ff06a24d9c 100755
+--- a/src/bootstrap/configure.py
++++ b/src/bootstrap/configure.py
+@@ -103,20 +103,6 @@ v("aarch64-linux-android-ndk", "target.aarch64-linux-android.android-ndk",
+   "aarch64-linux-android NDK standalone path")
+ v("x86_64-linux-android-ndk", "target.x86_64-linux-android.android-ndk",
+   "x86_64-linux-android NDK standalone path")
+-v("musl-root", "target.x86_64-unknown-linux-musl.musl-root",
+-  "MUSL root installation directory (deprecated)")
+-v("musl-root-x86_64", "target.x86_64-unknown-linux-musl.musl-root",
+-  "x86_64-unknown-linux-musl install directory")
+-v("musl-root-i686", "target.i686-unknown-linux-musl.musl-root",
+-  "i686-unknown-linux-musl install directory")
+-v("musl-root-arm", "target.arm-unknown-linux-musleabi.musl-root",
+-  "arm-unknown-linux-musleabi install directory")
+-v("musl-root-armhf", "target.arm-unknown-linux-musleabihf.musl-root",
+-  "arm-unknown-linux-musleabihf install directory")
+-v("musl-root-armv7", "target.armv7-unknown-linux-musleabihf.musl-root",
+-  "armv7-unknown-linux-musleabihf install directory")
+-v("musl-root-aarch64", "target.aarch64-unknown-linux-musl.musl-root",
+-  "aarch64-unknown-linux-musl install directory")
+ v("qemu-armhf-rootfs", "target.arm-unknown-linux-gnueabihf.qemu-rootfs",
+   "rootfs in qemu testing, you probably don't want to use this")
+ v("qemu-aarch64-rootfs", "target.aarch64-unknown-linux-gnu.qemu-rootfs",
+diff --git a/src/bootstrap/lib.rs b/src/bootstrap/lib.rs
+index 6832992259..edb7d3ce43 100644
+--- a/src/bootstrap/lib.rs
++++ b/src/bootstrap/lib.rs
+@@ -694,14 +694,6 @@ impl Build {
+         }
+     }
+ 
+-    /// Returns the "musl root" for this `target`, if defined
+-    fn musl_root(&self, target: Interned<String>) -> Option<&Path> {
+-        self.config.target_config.get(&target)
+-            .and_then(|t| t.musl_root.as_ref())
+-            .or(self.config.musl_root.as_ref())
+-            .map(|p| &**p)
+-    }
+-
+     /// Returns whether the target will be tested using the `remote-test-client`
+     /// and `remote-test-server` binaries.
+     fn remote_tested(&self, target: Interned<String>) -> bool {
+diff --git a/src/bootstrap/sanity.rs b/src/bootstrap/sanity.rs
+index 8b23be69a8..187b30da9d 100644
+--- a/src/bootstrap/sanity.rs
++++ b/src/bootstrap/sanity.rs
+@@ -21,7 +21,6 @@
+ use std::collections::HashMap;
+ use std::env;
+ use std::ffi::{OsString, OsStr};
+-use std::fs;
+ use std::process::Command;
+ use std::path::PathBuf;
+ 
+@@ -168,34 +167,6 @@ pub fn check(build: &mut Build) {
+             panic!("the iOS target is only supported on macOS");
+         }
+ 
+-        // Make sure musl-root is valid
+-        if target.contains("musl") && !target.contains("mips") {
+-            // If this is a native target (host is also musl) and no musl-root is given,
+-            // fall back to the system toolchain in /usr before giving up
+-            if build.musl_root(*target).is_none() && build.config.build == *target {
+-                let target = build.config.target_config.entry(target.clone())
+-                                 .or_insert(Default::default());
+-                target.musl_root = Some("/usr".into());
+-            }
+-            match build.musl_root(*target) {
+-                Some(root) => {
+-                    if fs::metadata(root.join("lib/libc.a")).is_err() {
+-                        panic!("couldn't find libc.a in musl dir: {}",
+-                               root.join("lib").display());
+-                    }
+-                    if fs::metadata(root.join("lib/libunwind.a")).is_err() {
+-                        panic!("couldn't find libunwind.a in musl dir: {}",
+-                               root.join("lib").display());
+-                    }
+-                }
+-                None => {
+-                    panic!("when targeting MUSL either the rust.musl-root \
+-                            option or the target.$TARGET.musl-root option must \
+-                            be specified in config.toml")
+-                }
+-            }
+-        }
+-
+         if target.contains("msvc") {
+             // There are three builds of cmake on windows: MSVC, MinGW, and
+             // Cygwin. The Cygwin build does not have generators for Visual
+diff --git a/src/ci/docker/cross/Dockerfile b/src/ci/docker/cross/Dockerfile
+index 05745709a0..3f5422b0ae 100644
+--- a/src/ci/docker/cross/Dockerfile
++++ b/src/ci/docker/cross/Dockerfile
+@@ -61,11 +61,7 @@ ENV STAGING_DIR=/tmp
+ 
+ ENV RUST_CONFIGURE_ARGS \
+       --enable-extended \
+-      --target=$TARGETS \
+-      --musl-root-arm=/usr/local/arm-linux-musleabi \
+-      --musl-root-armhf=/usr/local/arm-linux-musleabihf \
+-      --musl-root-armv7=/usr/local/armv7-linux-musleabihf \
+-      --musl-root-aarch64=/usr/local/aarch64-linux-musl
++      --target=$TARGETS
+ ENV SCRIPT python2.7 ../x.py dist --target $TARGETS
+ 
+ # sccache
+diff --git a/src/ci/docker/dist-i586-gnu-i686-musl/Dockerfile b/src/ci/docker/dist-i586-gnu-i686-musl/Dockerfile
+index 2fb1219681..e2e3599be0 100644
+--- a/src/ci/docker/dist-i586-gnu-i686-musl/Dockerfile
++++ b/src/ci/docker/dist-i586-gnu-i686-musl/Dockerfile
+@@ -25,7 +25,6 @@ RUN sh /scripts/sccache.sh
+ 
+ ENV RUST_CONFIGURE_ARGS \
+       --target=i686-unknown-linux-musl,i586-unknown-linux-gnu \
+-      --musl-root-i686=/musl-i686 \
+       --enable-extended
+ 
+ # Newer binutils broke things on some vms/distros (i.e., linking against
+diff --git a/src/ci/docker/dist-x86_64-musl/Dockerfile b/src/ci/docker/dist-x86_64-musl/Dockerfile
+index 91ed6bfe1f..9859cfeee9 100644
+--- a/src/ci/docker/dist-x86_64-musl/Dockerfile
++++ b/src/ci/docker/dist-x86_64-musl/Dockerfile
+@@ -25,7 +25,6 @@ RUN sh /scripts/sccache.sh
+ 
+ ENV RUST_CONFIGURE_ARGS \
+       --target=x86_64-unknown-linux-musl \
+-      --musl-root-x86_64=/musl-x86_64 \
+       --enable-extended
+ 
+ # Newer binutils broke things on some vms/distros (i.e., linking against
+diff --git a/src/librustc_back/target/linux_musl_base.rs b/src/librustc_back/target/linux_musl_base.rs
+index 6e5e139715..d99cb55cc5 100644
+--- a/src/librustc_back/target/linux_musl_base.rs
++++ b/src/librustc_back/target/linux_musl_base.rs
+@@ -14,10 +14,6 @@ use target::TargetOptions;
+ pub fn opts() -> TargetOptions {
+     let mut base = super::linux_base::opts();
+ 
+-    // Make sure that the linker/gcc really don't pull in anything, including
+-    // default objects, libs, etc.
+-    base.pre_link_args.get_mut(&LinkerFlavor::Gcc).unwrap().push("-nostdlib".to_string());
+-
+     // At least when this was tested, the linker would not add the
+     // `GNU_EH_FRAME` program header to executables generated, which is required
+     // when unwinding to locate the unwinding information. I'm not sure why this
+@@ -49,17 +45,6 @@ pub fn opts() -> TargetOptions {
+     base.pre_link_args.get_mut(&LinkerFlavor::Gcc).unwrap().push("-Wl,-(".to_string());
+     base.post_link_args.insert(LinkerFlavor::Gcc, vec!["-Wl,-)".to_string()]);
+ 
+-    // When generating a statically linked executable there's generally some
+-    // small setup needed which is listed in these files. These are provided by
+-    // a musl toolchain and are linked by default by the `musl-gcc` script. Note
+-    // that `gcc` also does this by default, it just uses some different files.
+-    //
+-    // Each target directory for musl has these object files included in it so
+-    // they'll be included from there.
+-    base.pre_link_objects_exe.push("crt1.o".to_string());
+-    base.pre_link_objects_exe.push("crti.o".to_string());
+-    base.post_link_objects.push("crtn.o".to_string());
+-
+     // These targets statically link libc by default
+     base.crt_static_default = true;
+     // These targets allow the user to choose between static and dynamic linking.
+-- 
+2.13.6
+
