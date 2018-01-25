@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -11,7 +11,7 @@ if [[ ${QT5_BUILD_TYPE} == release ]]; then
 	KEYWORDS="~amd64 ~arm ~ppc ~x86"
 fi
 
-IUSE="icu libcxx libcxxabi systemd"
+IUSE="icu systemd"
 
 DEPEND="
 	dev-libs/double-conversion:=
@@ -21,11 +21,6 @@ DEPEND="
 	icu? ( dev-libs/icu:= )
 	!icu? ( virtual/libiconv )
 	systemd? ( sys-apps/systemd:= )
-	libcxx? (
-		sys-devel/clang:=
-		sys-libs/libcxx:=
-		libcxxabi? ( sys-libs/libcxxabi:= )
-	)
 "
 RDEPEND="${DEPEND}"
 
@@ -45,15 +40,10 @@ QT5_TARGET_SUBDIRS=(
 )
 
 src_configure() {
-	if use libcxxabi; then
-		eapply "${FILESDIR}/${PN}-clang-libc++abi.patch"
-	fi
-
 	local myconf=(
 		$(qt_use icu)
 		$(qt_use !icu iconv)
 		$(qt_use systemd journald)
-		$(if use libcxx ; then echo "-platform linux-clang-libc++" ; fi)
 	)
 	qt5-build_src_configure
 }
