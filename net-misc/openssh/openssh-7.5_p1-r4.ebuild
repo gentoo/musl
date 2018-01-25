@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="5"
@@ -39,8 +39,8 @@ LIB_DEPEND="
 	audit? ( sys-process/audit[static-libs(+)] )
 	ldns? (
 		net-libs/ldns[static-libs(+)]
-		!bindist? ( net-libs/ldns[ecdsa,ssl] )
-		bindist? ( net-libs/ldns[-ecdsa,ssl] )
+		!bindist? ( net-libs/ldns[ecdsa,ssl(+)] )
+		bindist? ( net-libs/ldns[-ecdsa,ssl(+)] )
 	)
 	libedit? ( dev-libs/libedit:=[static-libs(+)] )
 	sctp? ( net-misc/lksctp-tools[static-libs(+)] )
