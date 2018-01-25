@@ -1,12 +1,12 @@
-diff -Naur mesa-17.3.1.orig/src/util/u_endian.h mesa-17.3.1/src/util/u_endian.h
---- mesa-17.3.1.orig/src/util/u_endian.h	2017-12-29 14:19:33.532915798 -0800
-+++ mesa-17.3.1/src/util/u_endian.h	2017-12-29 14:21:55.547913255 -0800
+diff -Naur mesa-13.0.5.orig/src/util/u_endian.h mesa-13.0.5/src/util/u_endian.h
+--- mesa-13.0.5.orig/src/util/u_endian.h	2017-03-19 12:40:43.808781967 -0700
++++ mesa-13.0.5/src/util/u_endian.h	2017-03-19 12:49:01.731158551 -0700
 @@ -27,7 +27,7 @@
  #ifndef U_ENDIAN_H
  #define U_ENDIAN_H
  
 -#if defined(__GLIBC__) || defined(ANDROID) || defined(__CYGWIN__)
-+#if defined(__linux__) || defined(__CYGWIN__)
++#if defined(__linux__)
  #include <endian.h>
  
  #if __BYTE_ORDER == __LITTLE_ENDIAN
