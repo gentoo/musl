@@ -6,6 +6,8 @@
     <name>Rust Project</name>
   </maintainer>
   <use>
+    <flag name="extended">Build and install rls, rustfmt and cargo
+    alongside the compiler and stdlib</flag>
     <flag name="system-llvm">Use system <pkg>sys-devel/llvm</pkg> in
     place of the bundled one</flag>
     <flag name="jemalloc">Use <pkg>sys-libs/jemalloc</pkg> as the
