@@ -74,6 +74,7 @@ src_prepare() {
 	cd "${S}"/core
 	eapply "${WORKDIR}"/arch/trunk/fix_build_core.patch
 	eapply "${FILESDIR}"/${P}-build.patch
+	eapply "${FILESDIR}"/${P}-musl.patch
 	sed -i '1i#include <sys/sysmacros.h>' adb/client/usb_linux.cpp || die #616508
 
 	cd "${S}"/selinux
