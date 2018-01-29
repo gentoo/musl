@@ -20,7 +20,7 @@ mirror://gentoo/${MY_P}-f2fs-tools.tar.gz"
 # The entire source code is Apache-2.0, except for fastboot which is BSD-2.
 LICENSE="Apache-2.0 BSD-2"
 SLOT="0"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="amd64 x86"
 IUSE="libressl"
 
 RDEPEND="sys-libs/zlib:=
@@ -29,7 +29,7 @@ RDEPEND="sys-libs/zlib:=
 	dev-libs/libpcre"
 # dev-lang/ruby is necessary for build script generation.
 DEPEND="${RDEPEND}
-	dev-lang/ruby:*"
+	virtual/rubygems"
 
 PATCHES=( "${FILESDIR}/${PN}-deffilemode.patch" )
 
@@ -54,7 +54,7 @@ src_prepare() {
 	mv core/*/* core/ || die
 	epatch arch/*/trunk/fix_build.patch
 	cp arch/*/trunk/generate_build.rb ./ || die
-
+	sed -i '1i#include <sys/sysmacros.h>' core/adb/usb_linux.cpp || die #616508
 	default
 
 	#580686
@@ -68,10 +68,20 @@ src_prepare() {
 }
 
 src_compile() {
-	chmod +x ./generate_build.rb || die
-	./generate_build.rb > build.sh || die
+	# Dynamically detect rubygems interpreter (bug 631398).
+	local ruby_bin=$(type -P ruby) ruby_error_log=${T}/generate_build.rb.log success=
+	for ruby_bin in "${ruby_bin}" "${ruby_bin}"[[:digit:]][[:digit:]]; do
+		"${ruby_bin}" ./generate_build.rb 1> build.sh 2> "${ruby_error_log}" && \
+			{ success=1; break; }
+	done
+	if [[ -z ${success} ]]; then
+		cat "${ruby_error_log}" >&2
+		die "${ruby_bin} ./generate_build.rb failed"
+	fi
+	sed -e 's:^gcc:${CC}:' -e 's:^g++:${CXX}:' -i build.sh || die
 	chmod +x build.sh || die
-	./build.sh || die
+	tc-export CC CXX
+	bash -e ./build.sh || die
 }
 
 src_install() {
