@@ -79,6 +79,7 @@ src_prepare() {
 	cd "${S}"/selinux
 	eapply "${WORKDIR}"/arch/trunk/fix_build_selinux.patch
 
+	cd "${S}"
 	#580686
 	find "${S}" -name '*.h' -exec \
 		sed -e 's|^#include <sys/cdefs.h>$|/* \0 */|' \
@@ -88,7 +89,6 @@ src_prepare() {
 	sed -e 's|^#include <sys/cdefs.h>$|/* \0 */|' \
 	    -i extras/ext4_utils/sha1.c || die
 
-	cd "${S}"
 	default
 
 	# The pregenerated ninja file expects the build/ dir.
