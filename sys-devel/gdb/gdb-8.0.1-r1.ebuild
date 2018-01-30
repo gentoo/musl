@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -48,10 +48,14 @@ case ${PV} in
 	;;
 esac
 
-PATCH_VER=""
+PATCH_VER="1"
+PATCH_DEV="slyfox"
 DESCRIPTION="GNU debugger"
 HOMEPAGE="https://sourceware.org/gdb/"
-SRC_URI="${SRC_URI} ${PATCH_VER:+mirror://gentoo/${P}-patches-${PATCH_VER}.tar.xz}"
+SRC_URI="${SRC_URI}
+	${PATCH_DEV:+https://dev.gentoo.org/~${PATCH_DEV}/distfiles/${P}-patches-${PATCH_VER}.tar.xz}
+	${PATCH_VER:+mirror://gentoo/${P}-patches-${PATCH_VER}.tar.xz}
+"
 
 LICENSE="GPL-2 LGPL-2"
 SLOT="0"
