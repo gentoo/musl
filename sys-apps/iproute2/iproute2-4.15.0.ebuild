@@ -42,9 +42,8 @@ DEPEND="
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
-	"${FILESDIR}"/${P}-fix-tc-actions.patch
-	"${FILESDIR}"/${P}-configure-nomagic.patch # bug 643722
-	"${FILESDIR}"/${PN}-4.14.0-musl.patch
+	"${FILESDIR}"/${PN}-4.14.1-configure-nomagic.patch # bug 643722
+	"${FILESDIR}"/${PN}-4.15.0-musl.patch
 )
 
 src_prepare() {
