@@ -177,3 +177,58 @@ diff -Naur iproute2-4.15.0.orig/tc/f_flower.c iproute2-4.15.0/tc/f_flower.c
  #include <linux/if_ether.h>
  #include <linux/ip.h>
  #include <linux/tc_act/tc_vlan.h>
+diff -Naur iproute2-4.15.0.orig/tc/m_mirred.c iproute2-4.15.0/tc/m_mirred.c
+--- iproute2-4.15.0.orig/tc/m_mirred.c	2018-01-30 12:22:46.377424243 -0800
++++ iproute2-4.15.0/tc/m_mirred.c	2018-01-30 12:57:12.620387241 -0800
+@@ -17,6 +17,7 @@
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <sys/socket.h>
++#include <net/if.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+ #include <string.h>
+diff -Naur iproute2-4.15.0.orig/tc/tc_class.c iproute2-4.15.0/tc/tc_class.c
+--- iproute2-4.15.0.orig/tc/tc_class.c	2018-01-30 12:22:46.369424244 -0800
++++ iproute2-4.15.0/tc/tc_class.c	2018-01-30 12:54:53.420389734 -0800
+@@ -15,6 +15,7 @@
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <sys/socket.h>
++#include <net/if.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+ #include <string.h>
+diff -Naur iproute2-4.15.0.orig/tc/tc_filter.c iproute2-4.15.0/tc/tc_filter.c
+--- iproute2-4.15.0.orig/tc/tc_filter.c	2018-01-30 12:22:46.368424244 -0800
++++ iproute2-4.15.0/tc/tc_filter.c	2018-01-30 12:56:02.186388502 -0800
+@@ -15,6 +15,7 @@
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <sys/socket.h>
++#include <net/if.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+ #include <string.h>
+diff -Naur iproute2-4.15.0.orig/tc/tc_qdisc.c iproute2-4.15.0/tc/tc_qdisc.c
+--- iproute2-4.15.0.orig/tc/tc_qdisc.c	2018-01-30 12:22:46.368424244 -0800
++++ iproute2-4.15.0/tc/tc_qdisc.c	2018-01-30 12:53:37.801391088 -0800
+@@ -15,6 +15,7 @@
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <sys/socket.h>
++#include <net/if.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+ #include <string.h>
+diff -Naur iproute2-4.15.0.orig/tc/tc_util.h iproute2-4.15.0/tc/tc_util.h
+--- iproute2-4.15.0.orig/tc/tc_util.h	2018-01-30 12:22:46.367424244 -0800
++++ iproute2-4.15.0/tc/tc_util.h	2018-01-30 12:51:24.463393476 -0800
+@@ -4,7 +4,6 @@
+ 
+ #define MAX_MSG 16384
+ #include <limits.h>
+-#include <linux/if.h>
+ 
+ #include <linux/pkt_sched.h>
+ #include <linux/pkt_cls.h>
