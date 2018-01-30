@@ -18,6 +18,7 @@ RDEPEND=""
 
 src_prepare() {
 	eapply "${FILESDIR}"/${PN}-0.8.5-cdef-headers.patch
+	eapply "${FILESDIR}"/${PN}-0.8.7-musl.patch
 	default
 }
 
