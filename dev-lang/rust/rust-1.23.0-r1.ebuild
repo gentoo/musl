@@ -215,6 +215,7 @@ src_install() {
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-cargo" || die
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rls-preview" || die
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-analysis-${RUSTHOST}" || die
+		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-src" || die
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rustfmt-preview" || die
 	fi
 
