@@ -174,6 +174,7 @@ src_configure() {
 		channel = "${SLOT%%/*}"
 		rpath = false
 		optimize-tests = $(toml_usex !debug)
+		dist-src = $(toml_usex debug)
 		[dist]
 		src-tarball = false
 		[target.${RUSTHOST}]
@@ -208,6 +209,13 @@ src_install() {
 
 	if use doc; then
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-docs" || die
+	fi
+
+	if use extended; then
+		rm "${D}/usr/$(get_libdir)/rustlib/manifest-cargo" || die
+		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rls-preview" || die
+		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-analysis-${RUSTHOST}" || die
+		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rustfmt-preview" || die
 	fi
 
 	rm "${D}/usr/share/doc/${P}/LICENSE-APACHE" || die
