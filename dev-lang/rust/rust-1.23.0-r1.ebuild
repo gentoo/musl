@@ -74,6 +74,14 @@ IUSE="debug doc extended jemalloc system-llvm"
 RDEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 		jemalloc? ( dev-libs/jemalloc )
 		system-llvm? ( sys-devel/llvm:4 )
+		extended? (
+			net-libs/http-parser:=
+			net-libs/libssh2:=
+			net-misc/curl:=[ssl]
+			sys-libs/zlib:=
+			!dev-util/rustfmt
+			!dev-util/cargo
+		)
 "
 DEPEND="${RDEPEND}
 	${PYTHON_DEPS}
