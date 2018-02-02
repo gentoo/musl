@@ -193,7 +193,7 @@ src_compile() {
 }
 
 src_install() {
-	env DESTDIR="${D}" ./x.py install || die
+	env DESTDIR="${D}" ./x.py install -j$(makeopts_jobs) || die
 
 	rm "${D}/usr/$(get_libdir)/rustlib/components" || die
 	rm "${D}/usr/$(get_libdir)/rustlib/install.log" || die
