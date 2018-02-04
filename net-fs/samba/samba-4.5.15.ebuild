@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -14,9 +14,9 @@ SRC_PATH="stable"
 [[ ${PV} = *_rc* ]] && SRC_PATH="rc"
 
 SRC_URI="mirror://samba/${SRC_PATH}/${MY_P}.tar.gz
-	https://dev.gentoo.org/~polynomial-c/samba-disable-python-patches-4.5.0_rc1.tar.xz"
+	https://dev.gentoo.org/~polynomial-c/samba-4.5.11-disable-python-patches.tar.xz"
 [[ ${PV} = *_rc* ]] || \
-KEYWORDS="amd64 ~arm ia64 ppc sparc x86"
+KEYWORDS="~alpha amd64 ~arm ~arm64 ~ia64 ~ppc ~ppc64 ~sparc x86"
 
 DESCRIPTION="Samba Suite Version 4"
 HOMEPAGE="http://www.samba.org/"
@@ -26,6 +26,12 @@ SLOT="0"
 
 IUSE="acl addc addns ads client cluster cups dmapi fam gnutls gpg iprint ldap pam
 quota selinux syslog system-heimdal +system-mitkrb5 systemd test winbind zeroconf"
+
+# the test suite is messed, it uses system-installed samba
+# bits instead of what was built, tests things disabled via use
+# flags, and generally just fails to work in a way ebuilds could
+# rely on in its current state
+RESTRICT="test"
 
 MULTILIB_WRAPPED_HEADERS=(
 	/usr/include/samba-4.0/policy.h
@@ -49,6 +55,7 @@ CDEPEND="${PYTHON_DEPS}
 	dev-python/subunit[${PYTHON_USEDEP},${MULTILIB_USEDEP}]
 	sys-apps/attr[${MULTILIB_USEDEP}]
 	>=sys-libs/ldb-1.1.27[ldap(+)?,python(+),${MULTILIB_USEDEP}]
+	<sys-libs/ldb-1.1.30[ldap(+)?,python(+),${MULTILIB_USEDEP}]
 	sys-libs/libcap
 	sys-libs/ncurses:0=[${MULTILIB_USEDEP}]
 	sys-libs/readline:0=
@@ -74,14 +81,14 @@ CDEPEND="${PYTHON_DEPS}
 	system-mitkrb5? ( app-crypt/mit-krb5[${MULTILIB_USEDEP}] )
 	systemd? ( sys-apps/systemd:0= )"
 DEPEND="${CDEPEND}
+	app-text/docbook-xsl-stylesheets
+	dev-libs/libxslt
 	virtual/pkgconfig
 	test? (
-		!system-mitkrb5? (
-			>=sys-libs/nss_wrapper-1.1.3
-			>=net-dns/resolv_wrapper-1.1.4
-			>=net-libs/socket_wrapper-1.1.7
-			>=sys-libs/uid_wrapper-1.2.1
-		)
+		>=sys-libs/nss_wrapper-1.1.3
+		>=net-dns/resolv_wrapper-1.1.4
+		>=net-libs/socket_wrapper-1.1.7
+		>=sys-libs/uid_wrapper-1.2.1
 	)"
 RDEPEND="${CDEPEND}
 	client? ( net-fs/cifs-utils[ads?] )
@@ -100,6 +107,7 @@ S="${WORKDIR}/${MY_P}"
 PATCHES=(
 	"${FILESDIR}/${PN}-4.4.0-pam.patch"
 	"${FILESDIR}/${PN}-4.5.1-compile_et_fix.patch"
+	"${FILESDIR}/${PN}-glibc-2.26-no_rpc.patch" #637320
 	"${FILESDIR}/${PN}-4.3.9-remove-getpwent_r.patch"
 	"${FILESDIR}/netdb-defines.patch"
 )
@@ -159,6 +167,7 @@ multilib_src_configure() {
 		--disable-rpath-install
 		--nopyc
 		--nopyo
+		--disable-cephfs
 	)
 	if multilib_is_native_abi ; then
 		myconf+=(
@@ -233,7 +242,7 @@ multilib_src_install() {
 
 		# create symlink for cups (bug #552310)
 		if use cups ; then
-			dosym /usr/bin/smbspool /usr/libexec/cups/backend/smb
+			dosym ../../../bin/smbspool /usr/libexec/cups/backend/smb
 		fi
 
 		# install example config file
