@@ -146,6 +146,8 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-1.18-support-multiple-Files-sections.patch
 	"${FILESDIR}"/${PN}-1.19.4-sysmacros.patch #633530
 	"${FILESDIR}"/${PN}-1.17.4-arm-musl.patch
+	# see https://bugs.gentoo.org/646390
+        "${FILESDIR}"/${PN}-1.19.6-fix-NULL-value-detection.patch
 )
 
 pkg_pretend() {
