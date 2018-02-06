@@ -6,7 +6,7 @@ EAPI=6
 LLVM_MAX_SLOT=4
 PYTHON_COMPAT=( python2_7 )
 
-inherit python-any-r1 versionator toolchain-funcs llvm
+inherit multiprocessing python-any-r1 versionator toolchain-funcs llvm
 
 if [[ ${PV} = *beta* ]]; then
 	betaver=${PV//*beta}
@@ -194,11 +194,11 @@ src_configure() {
 }
 
 src_compile() {
-	./x.py build || die
+	./x.py build -j$(makeopts_jobs) || die
 }
 
 src_install() {
-	env DESTDIR="${D}" ./x.py install || die
+	env DESTDIR="${D}" ./x.py install -j$(makeopts_jobs) || die
 
 	rm "${D}/usr/$(get_libdir)/rustlib/components" || die
 	rm "${D}/usr/$(get_libdir)/rustlib/install.log" || die
