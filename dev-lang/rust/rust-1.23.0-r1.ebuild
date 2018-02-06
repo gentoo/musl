@@ -69,12 +69,17 @@ SRC_URI="https://static.rust-lang.org/dist/${SRC} -> rustc-${PV}-src.tar.xz
 
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 
-IUSE="debug doc extended jemalloc system-llvm"
+IUSE="debug doc extended jemalloc libressl system-llvm"
 
 RDEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 		jemalloc? ( dev-libs/jemalloc )
 		system-llvm? ( sys-devel/llvm:4 )
 		extended? (
+			libressl? (
+				>=dev-libs/libressl-2.5.0:=
+				<dev-libs/libressl-2.7.0:=
+			)
+			!libressl? ( dev-libs/openssl:0= )
 			net-libs/http-parser:=
 			net-libs/libssh2:=
 			net-misc/curl:=[ssl]
