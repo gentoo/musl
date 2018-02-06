@@ -1,0 +1,15 @@
+diff --git a/extcap/udpdump.c b/extcap/udpdump.c
+index 44cc24e1db..1310e37e61 100644
+--- a/extcap/udpdump.c
++++ b/extcap/udpdump.c
+@@ -38,6 +38,10 @@
+ 	#include <unistd.h>
+ #endif
+ 
++#ifdef HAVE_SYS_TYPES_H
++	#include <sys/types.h>
++#endif
++
+ #ifdef HAVE_ARPA_INET_H
+ 	#include <arpa/inet.h>
+ #endif
