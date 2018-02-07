@@ -12,7 +12,7 @@ SRC_URI="mirror://gentoo/${P}.tar.xz
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
+KEYWORDS="amd64 ~arm ia64 ~mips ~ppc ~sh ~sparc x86"
 IUSE="caps debug python seccomp"
 
 RDEPEND="caps? ( >=sys-libs/libcap-2.24 )
