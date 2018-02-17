@@ -25,7 +25,6 @@ else
 	SRC_URI+=" https://dev.gentoo.org/~tamiko/distfiles/${P}-patches-r0.tar.xz"
 fi
 
-
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
 HOMEPAGE="http://www.qemu.org http://www.linux-kvm.org"
 
@@ -536,6 +535,9 @@ qemu_src_configure() {
 	else
 		tc-enables-pie && conf_opts+=( --enable-pie )
 	fi
+
+	#bug #647570
+	conf_opts+=( --disable-capstone )
 
 	echo "../configure ${conf_opts[*]}"
 	cd "${builddir}"

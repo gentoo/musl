@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
@@ -20,6 +20,9 @@ if [[ ${PV} = *9999* ]]; then
 else
 	SRC_URI="http://wiki.qemu-project.org/download/${P}.tar.bz2"
 	KEYWORDS="amd64 ~ppc ~ppc64 x86"
+
+	# Gentoo specific patchsets:
+	SRC_URI+=" https://dev.gentoo.org/~chutzpah/distfiles/${P}-patches-r0.tar.xz"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -113,7 +116,7 @@ SOFTMMU_TOOLS_DEPEND="
 		sys-libs/ncurses:0=[unicode]
 		sys-libs/ncurses:0=[static-libs(+)]
 	)
-	nfs? ( >=net-fs/libnfs-1.9.3[static-libs(+)] )
+	nfs? ( >=net-fs/libnfs-1.9.3:=[static-libs(+)] )
 	numa? ( sys-process/numactl[static-libs(+)] )
 	opengl? (
 		virtual/opengl
@@ -210,8 +213,8 @@ PATCHES=(
 	# gentoo patches
 	"${FILESDIR}"/${PN}-2.5.0-cflags.patch
 	"${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
-	"${FILESDIR}"/${PN}-2.10.1-CVE-2017-15268.patch
-	"${FILESDIR}"/${PN}-2.10.1-CVE-2017-15289.patch
+	"${FILESDIR}"/${PN}-2.11.0-glibc-2.27.patch
+	"${WORKDIR}"/patches
 )
 
 STRIP_MASK="/usr/share/qemu/palcode-clipper"
@@ -504,7 +507,6 @@ qemu_src_configure() {
 			--disable-linux-user
 			--enable-system
 			--disable-tools
-			--with-system-pixman
 		)
 		local static_flag="static"
 		;;
