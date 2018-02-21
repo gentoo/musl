@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 #
@@ -17,7 +17,7 @@ SRC_URI="mirror://gentoo/${P}.tar.xz
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm ia64 ~mips ppc ~sh sparc x86"
+KEYWORDS="amd64 arm ia64 ~mips ppc sh sparc x86"
 IUSE=""
 
 DEPEND="app-arch/xz-utils
