@@ -4,7 +4,7 @@
 EAPI=6
 CMAKE_MAKEFILE_GENERATOR="ninja"
 PYTHON_COMPAT=( python2_7 )
-USE_RUBY="ruby22 ruby23 ruby24"
+USE_RUBY="ruby22 ruby23 ruby24 ruby25"
 
 inherit check-reqs cmake-utils eutils flag-o-matic gnome2 pax-utils python-any-r1 ruby-single toolchain-funcs versionator virtualx
 
@@ -15,7 +15,7 @@ SRC_URI="http://www.webkitgtk.org/releases/${MY_P}.tar.xz"
 
 LICENSE="LGPL-2+ BSD"
 SLOT="4/37" # soname version of libwebkit2gtk-4.0
-KEYWORDS="~amd64 ~arm ~ppc ~x86"
+KEYWORDS="amd64 ~arm ~ppc x86"
 
 IUSE="aqua coverage doc +egl +geolocation gles2 gnome-keyring +gstreamer +introspection +jit libnotify nsplugin +opengl spell wayland +webgl +X"
 
@@ -194,7 +194,9 @@ src_configure() {
 
 	local ruby_interpreter=""
 
-	if has_version "virtual/rubygems[ruby_targets_ruby24]"; then
+	if has_version "virtual/rubygems[ruby_targets_ruby25]"; then
+		ruby_interpreter="-DRUBY_EXECUTABLE=$(type -P ruby25)"
+	elif has_version "virtual/rubygems[ruby_targets_ruby24]"; then
 		ruby_interpreter="-DRUBY_EXECUTABLE=$(type -P ruby24)"
 	elif has_version "virtual/rubygems[ruby_targets_ruby23]"; then
 		ruby_interpreter="-DRUBY_EXECUTABLE=$(type -P ruby23)"
