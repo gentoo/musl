@@ -121,7 +121,7 @@ wincolor-0.1.4
 ws2_32-sys-0.2.1
 "
 
-inherit multiprocessing bash-completion-r1 cargo versionator
+inherit bash-completion-r1 cargo versionator
 
 case "${CHOST}" in
 	armv7a-hardfloat-*)
@@ -208,7 +208,7 @@ src_configure() {
 src_compile() {
 	export CARGO_HOME="${ECARGO_HOME}"
 	local cargo="${WORKDIR}/cargo-${CARGO_SNAPSHOT_VERSION}-${CARGOHOST}/cargo/bin/cargo"
-	${cargo} build --release -j$(makeopts_jobs) || die
+	${cargo} build --release || die
 
 	# Building HTML documentation
 	use doc && ${cargo} doc
