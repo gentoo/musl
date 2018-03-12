@@ -5,7 +5,7 @@ EAPI="6"
 
 PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
 
-inherit autotools ltprune multilib multilib-minimal toolchain-funcs preserve-libs python-r1 linux-info systemd
+inherit autotools multilib multilib-minimal toolchain-funcs preserve-libs python-r1 linux-info systemd
 
 DESCRIPTION="Userspace utilities for storing and processing auditing records"
 HOMEPAGE="https://people.redhat.com/sgrubb/audit/"
@@ -13,7 +13,7 @@ SRC_URI="https://people.redhat.com/sgrubb/audit/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm ia64 ~mips ppc ~sh sparc x86"
+KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
 IUSE="gssapi ldap python static-libs"
 REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 # Testcases are pretty useless as they are built for RedHat users/groups and kernels.
@@ -35,7 +35,7 @@ pkg_setup() {
 }
 
 src_prepare() {
-	eapply "${FILESDIR}/${PN}-2.7.1-musl.patch"
+	eapply "${FILESDIR}/${P}-musl.patch"
 	eapply "${FILESDIR}/${PN}-2.7.1-swig.patch"
 	eapply_user
 
@@ -205,10 +205,10 @@ multilib_src_install_all() {
 	# audit logs go here
 	keepdir /var/log/audit/
 
+	find "${D}" -name '*.la' -delete || die
+
 	# Security
 	lockdown_perms "${ED}"
-
-	prune_libtool_files --modules
 }
 
 pkg_preinst() {
