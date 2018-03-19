@@ -1,0 +1,102 @@
+diff -Naur openjdk.orig/hotspot/src/os/linux/vm/os_linux.cpp openjdk/hotspot/src/os/linux/vm/os_linux.cpp
+--- openjdk.orig/hotspot/src/os/linux/vm/os_linux.cpp	2017-07-25 17:17:16.777812565 -0700
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2017-07-25 17:20:23.263840744 -0700
+@@ -94,7 +94,6 @@
+ # include <string.h>
+ # include <syscall.h>
+ # include <sys/sysinfo.h>
+-# include <gnu/libc-version.h>
+ # include <sys/ipc.h>
+ # include <sys/shm.h>
+ # include <link.h>
+@@ -530,6 +529,13 @@
+ // detecting pthread library
+ 
+ void os::Linux::libpthread_init() {
++# if 1
++  // Hardcode Alpine Linux supported uclibc/musl compatible settings
++  os::Linux::set_glibc_version("glibc 2.9");
++  os::Linux::set_libpthread_version("NPTL");
++  os::Linux::set_is_NPTL();
++  os::Linux::set_is_floating_stack();
++#else
+   // Save glibc and pthread version strings. Note that _CS_GNU_LIBC_VERSION
+   // and _CS_GNU_LIBPTHREAD_VERSION are supported in glibc >= 2.3.2. Use a
+   // generic name for earlier versions.
+@@ -588,6 +594,7 @@
+   if (os::Linux::is_NPTL() || os::Linux::supports_variable_stack_size()) {
+      os::Linux::set_is_floating_stack();
+   }
++#endif
+ }
+ 
+ /////////////////////////////////////////////////////////////////////////////
+@@ -2833,17 +2840,13 @@
+ // Handle request to load libnuma symbol version 1.1 (API v1). If it fails
+ // load symbol from base version instead.
+ void* os::Linux::libnuma_dlsym(void* handle, const char *name) {
+-  void *f = dlvsym(handle, name, "libnuma_1.1");
+-  if (f == NULL) {
+-    f = dlsym(handle, name);
+-  }
+-  return f;
++  return dlsym(handle, name);
+ }
+ 
+ // Handle request to load libnuma symbol version 1.2 (API v2) only.
+ // Return NULL if the symbol is not defined in this particular version.
+ void* os::Linux::libnuma_v2_dlsym(void* handle, const char* name) {
+-  return dlvsym(handle, name, "libnuma_1.2");
++  return NULL;
+ }
+ 
+ bool os::Linux::libnuma_init() {
+@@ -5701,7 +5704,25 @@
+ // Linux doesn't yet have a (official) notion of processor sets,
+ // so just return the system wide load average.
+ int os::loadavg(double loadavg[], int nelem) {
++#ifdef __UCLIBC__
++  FILE *LOADAVG;
++  double avg[3] = { 0.0, 0.0, 0.0 };
++  int i, res = -1;
++
++  if ((LOADAVG = fopen("/proc/loadavg", "r"))) {
++    fscanf(LOADAVG, "%lf %lf %lf", &avg[0], &avg[1], &avg[2]);
++    res = 0;
++    fclose(LOADAVG);
++  }
++
++  for (i = 0; (i < nelem) && (i < 3); i++) {
++    loadavg[i] = avg[i];
++  }
++
++  return res;
++#else
+   return ::getloadavg(loadavg, nelem);
++#endif
+ }
+ 
+ void os::pause() {
+diff -Naur openjdk.orig/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp openjdk/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp
+--- openjdk.orig/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp	2017-07-25 17:17:16.701811724 -0700
++++ openjdk/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp	2017-07-25 17:17:47.708149321 -0700
+@@ -235,7 +235,7 @@
+ #elif defined(__APPLE__)
+ inline int g_isnan(double f) { return isnan(f); }
+ #elif defined(LINUX) || defined(_ALLBSD_SOURCE)
+-inline int g_isnan(float  f) { return isnanf(f); }
++inline int g_isnan(float  f) { return isnan(f); }
+ inline int g_isnan(double f) { return isnan(f); }
+ #else
+ #error "missing platform-specific definition here"
+@@ -249,8 +249,8 @@
+ 
+ // Checking for finiteness
+ 
+-inline int g_isfinite(jfloat  f)                 { return finite(f); }
+-inline int g_isfinite(jdouble f)                 { return finite(f); }
++inline int g_isfinite(jfloat  f)                 { return isfinite(f); }
++inline int g_isfinite(jdouble f)                 { return isfinite(f); }
+ 
+ 
+ // Wide characters

@@ -1,0 +1,11 @@
+--- openjdk.orig/common/autoconf/toolchain.m4	2017-05-22 17:47:00.836442251 -0700
++++ openjdk/common/autoconf/toolchain.m4	2017-05-22 17:47:20.029658125 -0700
+@@ -122,7 +122,7 @@
+   else
+     COMPILER_VERSION_TEST=`$COMPILER --version 2>&1 | $HEAD -n 1`
+     # Check that this is GCC or the compatible distcc.
+-    $COMPILER --version 2>&1 | $GREP -E "^(gcc|g\+\+|distcc)" >&AS_MESSAGE_LOG_FD 2>&1
++    $COMPILER --version 2>&1 | $GREP -E "(gcc|g\+\+|distcc)" >&AS_MESSAGE_LOG_FD 2>&1
+     if test $? -ne 0; then
+       AC_MSG_NOTICE([The $COMPILER_NAME compiler (located as $COMPILER) does not seem to be the recommended GCC compiler.])
+       AC_MSG_NOTICE([The result from running with --version was: "$COMPILER_VERSION_TEST"])
