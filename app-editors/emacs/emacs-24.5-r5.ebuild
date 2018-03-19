@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -12,8 +12,8 @@ SRC_URI="mirror://gnu/emacs/${P}.tar.xz
 
 LICENSE="GPL-3+ FDL-1.3+ BSD HPND MIT W3C unicode PSF-2"
 SLOT="24"
-KEYWORDS="~amd64 ~arm ia64 ~mips ~ppc ~sh ~sparc ~x86"
-IUSE="acl alsa aqua athena dbus games gconf gfile gif gpm gsettings gtk +gtk3 gzip-el hesiod imagemagick +inotify jpeg kerberos libxml2 livecd m17n-lib motif pax_kernel png selinux sound source ssl svg tiff toolkit-scroll-bars wide-int X Xaw3d xft +xpm zlib"
+KEYWORDS="amd64 arm ia64 ~mips ppc ~sh ~sparc x86"
+IUSE="acl alsa aqua athena dbus games gconf gfile gif gpm gsettings gtk +gtk3 gzip-el imagemagick +inotify jpeg kerberos libxml2 livecd m17n-lib motif pax_kernel png selinux sound source ssl svg tiff toolkit-scroll-bars wide-int X Xaw3d xft +xpm zlib"
 REQUIRED_USE="?? ( aqua X )"
 
 RDEPEND="sys-libs/ncurses:0=
@@ -24,7 +24,6 @@ RDEPEND="sys-libs/ncurses:0=
 	alsa? ( media-libs/alsa-lib )
 	dbus? ( sys-apps/dbus )
 	gpm? ( sys-libs/gpm )
-	hesiod? ( net-dns/hesiod )
 	!inotify? ( gfile? ( >=dev-libs/glib-2.28.6 ) )
 	kerberos? ( virtual/krb5 )
 	libxml2? ( >=dev-libs/libxml2-2.2.0 )
@@ -32,8 +31,12 @@ RDEPEND="sys-libs/ncurses:0=
 	ssl? ( net-libs/gnutls:0= )
 	zlib? ( sys-libs/zlib )
 	X? (
-		x11-libs/libXmu
-		x11-libs/libXt
+		x11-libs/libICE
+		x11-libs/libSM
+		x11-libs/libX11
+		x11-libs/libXext
+		x11-libs/libXinerama
+		x11-libs/libXrandr
 		x11-misc/xbitmaps
 		gconf? ( >=gnome-base/gconf-2.26.2 )
 		gsettings? ( >=dev-libs/glib-2.28.6 )
@@ -48,6 +51,7 @@ RDEPEND="sys-libs/ncurses:0=
 			media-libs/fontconfig
 			media-libs/freetype
 			x11-libs/libXft
+			x11-libs/libXrender
 			m17n-lib? (
 				>=dev-libs/libotf-0.9.4
 				>=dev-libs/m17n-lib-1.5.1
@@ -58,10 +62,23 @@ RDEPEND="sys-libs/ncurses:0=
 			!gtk3? ( x11-libs/gtk+:2 )
 		)
 		!gtk? (
-			motif? ( >=x11-libs/motif-2.3:0 )
+			motif? (
+				>=x11-libs/motif-2.3:0
+				x11-libs/libXpm
+				x11-libs/libXmu
+				x11-libs/libXt
+			)
 			!motif? (
-				Xaw3d? ( x11-libs/libXaw3d )
-				!Xaw3d? ( athena? ( x11-libs/libXaw ) )
+				Xaw3d? (
+					x11-libs/libXaw3d
+					x11-libs/libXmu
+					x11-libs/libXt
+				)
+				!Xaw3d? ( athena? (
+					x11-libs/libXaw
+					x11-libs/libXmu
+					x11-libs/libXt
+				) )
 			)
 		)
 	)"
@@ -104,6 +121,7 @@ src_prepare() {
 src_configure() {
 	strip-flags
 	filter-flags -pie					#526948
+	append-ldflags $(test-flags -no-pie)	#639570
 
 	if use sh; then
 		replace-flags "-O[1-9]" -O0		#262359
@@ -197,11 +215,11 @@ src_configure() {
 		--enable-locallisppath="${EPREFIX}/etc/emacs:${EPREFIX}${SITELISP}" \
 		--with-gameuser=":gamestat" \
 		--without-compress-install \
+		--without-hesiod \
 		--with-file-notification=$(usev inotify || usev gfile || echo no) \
 		$(use_enable acl) \
 		$(use_with dbus) \
 		$(use_with gpm) \
-		$(use_with hesiod) \
 		$(use_with kerberos) $(use_with kerberos kerberos5) \
 		$(use_with libxml2 xml2) \
 		$(use_with selinux) \
@@ -215,8 +233,8 @@ src_compile() {
 	# compile preload hack
 	$(tc-getCC) -shared -fPIC -o preload.so "${FILESDIR}/preload.c" || die
 
-	export SANDBOX_ON=0			# for the unbelievers, see Bug #131505
-	emake
+	# Disable sandbox when dumping. For the unbelievers, see bug #131505
+	emake RUN_TEMACS="env SANDBOX_ON=0 LD_PRELOAD=preload.so ./temacs"
 }
 
 src_install () {
@@ -262,7 +280,7 @@ src_install () {
 		cdir="/usr/src/debug/${CATEGORY}/${PF}/${S#"${WORKDIR}/"}/src"
 	fi
 
-	sed -e "${cdir:+#}/^Y/d" -e "s/^[XY]//" >"${T}/${SITEFILE}" <<-EOF
+	sed -e "${cdir:+#}/^Y/d" -e "s/^[XY]//" >"${T}/${SITEFILE}" <<-EOF || die
 	X
 	;;; ${PN}-${SLOT} site-lisp configuration
 	X
@@ -329,11 +347,6 @@ pkg_preinst() {
 
 pkg_postinst() {
 	elisp-site-regen
-
-	local pvr
-	for pvr in ${REPLACING_VERSIONS}; do
-		[[ ${pvr%%[-_]*} = 24.[12] ]] && FORCE_PRINT_ELOG=1
-	done
 	readme.gentoo_print_elog
 
 	if use livecd; then
