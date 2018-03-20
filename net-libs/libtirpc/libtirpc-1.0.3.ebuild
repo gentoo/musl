@@ -23,6 +23,7 @@ DEPEND="${RDEPEND}
 
 PATCHES=(
 	"${FILESDIR}/${PN}-1.0.2-bcopy-to-memmove.patch"
+	"${FILESDIR}/${PN}-1.0.3-musl_types.patch"
 )
 
 src_prepare() {

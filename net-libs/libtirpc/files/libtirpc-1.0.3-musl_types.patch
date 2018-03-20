@@ -1,0 +1,12 @@
+diff -Naur libtirpc-1.0.3.orig/tirpc/rpc/types.h libtirpc-1.0.3/tirpc/rpc/types.h
+--- libtirpc-1.0.3.orig/tirpc/rpc/types.h	2018-03-20 09:30:54.610040509 -0700
++++ libtirpc-1.0.3/tirpc/rpc/types.h	2018-03-20 09:33:43.502037484 -0700
+@@ -66,7 +66,7 @@
+ #define mem_free(ptr, bsize)	free(ptr)
+ 
+ 
+-#if defined __APPLE_CC__ || defined __FreeBSD__
++#if defined __APPLE_CC__ || defined __FreeBSD__ || (defined(__linux__) && !defined(__GLIBC__))
+ # define __u_char_defined
+ # define __daddr_t_defined
+ #endif
