@@ -54,7 +54,7 @@ src_prepare() {
 
 	epatch "${FILESDIR}"/${PN}-0.97.0-gnome-doc.patch #159381 , upstream #470812 #558690
 	epatch "${FILESDIR}"/${PN}-0.97.2-underlinking.patch #420685, upstream #678761
-	epatch "${FILESDIR}"/${P}-remove-detection-of-isinf.patch
+	epatch "${FILESDIR}"/${P}-fix-detection-of-isinf.patch
 
 	if use python; then
 		python_fix_shebang .

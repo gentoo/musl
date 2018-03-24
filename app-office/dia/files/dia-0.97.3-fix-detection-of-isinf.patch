@@ -1,0 +1,42 @@
+--- a/configure.in	2018-03-24 15:04:26.707264129 -0700
++++ b/configure.in	2018-03-24 15:06:03.580596527 -0700
+@@ -399,24 +399,23 @@
+ dnl Sun Forte C provides isinf() in the unbundled -lsunmath. Solaris
+ dnl declares finite() in ieeefp.h. It's preferrable not to link
+ dnl to -lsunmath as it's not present on all machines.
+-have_isinf=no
+-AC_CHECK_HEADERS(math.h,
+-        AC_CHECK_LIB(m,isinf,
+-                have_isinf=yes))
+
+-if test "$have_isinf" = "no"; then
+-    AC_CHECK_HEADER(ieeefp.h,
+-             [AC_CHECK_FUNC(finite,
+-	               AC_DEFINE(HAVE_IEEEFP_H,1,
+-		                 [Define if finite() is defined in ieeefp.h]),
+-                       AC_MSG_ERROR([Can't find a definition of neither
+-                                     finite nor isinf]))],
+-             [AC_MSG_ERROR(Can't find neither a definition of
+-	                   isinf nor ieeefp.h)])
+-else
+-    AC_DEFINE([HAVE_ISINF], 1,
+-              [Define if the isinf() function is available])
++AC_MSG_CHECKING([for isnan])
++AC_TRY_LINK([#include <math.h>
++], [if (!isnan(3.14159)) isnan(2.7183);], ok=yes, ok=no)
++if test "$ok" = "yes"; then
++	AC_DEFINE(HAVE_ISNAN,1,[Define if the isnan() function/macro is available.])
+ fi
++AC_MSG_RESULT(${ok})
++
++AC_MSG_CHECKING([for isinf])
++AC_TRY_LINK([#include <math.h>
++], [if (!isinf(3.14159)) isinf(2.7183);], ok=yes, ok=no)
++if test "$ok" = "yes"; then
++	AC_DEFINE(HAVE_ISINF,1,[Define if the isinf() function/macro is available.])
++fi
++AC_MSG_RESULT(${ok})
++
+
+ dnl Alpha needs -mieee or we get a segfault
+ dnl This shouldn't be needed but is here until a real solution is found
