@@ -1,0 +1,12 @@
+--- a/configure.in	2018-03-24 14:07:58.963963565 -0700
++++ b/configure.in	2018-03-24 14:26:34.360619444 -0700
+@@ -401,8 +401,7 @@
+ dnl to -lsunmath as it's not present on all machines.
+ have_isinf=no
+ AC_CHECK_HEADERS(math.h,
+-        AC_CHECK_LIB(m,isinf,
+-                have_isinf=yes))
++                have_isinf=yes)
+
+ if test "$have_isinf" = "no"; then
+     AC_CHECK_HEADER(ieeefp.h,
