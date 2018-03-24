@@ -1,0 +1,26 @@
+--- a/libraries/libapparmor/src/private.c
++++ b/libraries/libapparmor/src/private.c	
+@@ -30,17 +30,21 @@
+ 
+ #include "private.h"
+ 
++
++
+ /**
+  * Allow libapparmor to build on older systems where secure_getenv() is still
+  * named __secure_getenv(). This snippet was taken from the glibc wiki
+  * (https://sourceware.org/glibc/wiki/Tips_and_Tricks/secure_getenv).
+  */
+-#ifndef HAVE_SECURE_GETENV
++#ifdef HAVE_SECURE_GETENV
+  #ifdef HAVE___SECURE_GETENV
+   #define secure_getenv __secure_getenv
+  #else
+   #error neither secure_getenv nor __secure_getenv is available
+  #endif
++#else
++#define secure_getenv getenv
+ #endif
+ 
+ struct ignored_suffix_t {
+
