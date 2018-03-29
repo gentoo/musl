@@ -1,5 +1,5 @@
---- a/src/libply/ply-command-parser.c	2018-03-28 19:59:36.277214405 -0700
-+++ b/src/libply/ply-command-parser.c	2018-03-28 20:19:00.993869805 -0700
+--- src/libply/ply-command-parser.c.orig	2017-08-09 05:48:57.000000000 -0700
++++ src/libply/ply-command-parser.c	2018-03-29 00:05:04.820405271 -0700
 @@ -731,14 +731,23 @@
                  /* next argument isn't ours, so treat it like an unqualified
                   * flag
@@ -15,13 +15,13 @@
 +		switch (argument[0]) {
 +		case 'N':
 +		case 'n':
-+			option->result.as_boolean = (bool) 0
++			option->result.as_boolean = (bool) 0;
 +			ply_list_remove_node (arguments, node);
 +			return true;
 +			break;
 +		case 'Y':
 +		case 'y':
-+			option->result.as_boolean = (bool) 1
++			option->result.as_boolean = (bool) 1;
 +			ply_list_remove_node (arguments, node);
 +			return true;
 +			break;
