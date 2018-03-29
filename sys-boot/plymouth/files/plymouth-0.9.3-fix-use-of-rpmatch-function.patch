@@ -1,0 +1,34 @@
+--- a/src/libply/ply-command-parser.c	2018-03-28 19:59:36.277214405 -0700
++++ b/src/libply/ply-command-parser.c	2018-03-28 20:19:00.993869805 -0700
+@@ -731,14 +731,23 @@
+                 /* next argument isn't ours, so treat it like an unqualified
+                  * flag
+                  */
+-                if (rpmatch (argument) < 0) {
+-                        option->result.as_boolean = true;
+-                        return true;
+-                }
+-
+-                option->result.as_boolean = (bool) rpmatch (argument);
+-                ply_list_remove_node (arguments, node);
+-                return true;
++		switch (argument[0]) {
++		case 'N':
++		case 'n':
++			option->result.as_boolean = (bool) 0
++			ply_list_remove_node (arguments, node);
++			return true;
++			break;
++		case 'Y':
++		case 'y':
++			option->result.as_boolean = (bool) 1
++			ply_list_remove_node (arguments, node);
++			return true;
++			break;
++		default:
++			option->result.as_boolean = true;
++			return true;
++		}
+
+         case PLY_COMMAND_OPTION_TYPE_STRING:
+                 option->result.as_string = strdup (argument);
