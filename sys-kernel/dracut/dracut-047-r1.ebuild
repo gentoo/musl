@@ -11,7 +11,7 @@ SRC_URI="mirror://kernel/linux/utils/boot/${PN}/${P}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~ia64 ~mips ~ppc ~sparc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE="debug selinux"
 
 # Tests need root privileges, bug #298014
