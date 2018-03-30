@@ -56,6 +56,7 @@ PATCHES=(
 	"${FILESDIR}/047-all-fix-issues-found-by-shellcheck.patch"
 	"${FILESDIR}/047-plymouth-fix-detection-of-plymouth-directory.patch"
 	"${FILESDIR}"/${P}-libfts.patch
+	"${FILESDIR}"/${PN}-sys-reg_h.patch
 )
 
 src_configure() {
