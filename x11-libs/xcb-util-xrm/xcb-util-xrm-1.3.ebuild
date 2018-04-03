@@ -12,7 +12,7 @@ DESCRIPTION="X C-language Bindings sample implementations"
 HOMEPAGE="https://xcb.freedesktop.org/"
 SRC_URI="https://github.com/Airblader/${PN}/releases/download/v${PV}/${P}.tar.bz2"
 
-KEYWORDS="amd64 ~arm x86"
+KEYWORDS="~amd64 ~arm ~x86"
 IUSE="test"
 
 RDEPEND="
@@ -20,7 +20,7 @@ RDEPEND="
 	x11-libs/xcb-util[${MULTILIB_USEDEP}]
 	elibc_musl? ( sys-libs/queue )"
 DEPEND="${RDEPEND}
-	test? ( x11-libs/libX11[${MULTILIB_USEDEP}] )"
+	x11-libs/libX11[${MULTILIB_USEDEP}]" # Only for tests, but configure.ac requires it
 
 src_configure() {
 	xorg-2_src_configure
