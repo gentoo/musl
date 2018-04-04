@@ -6,7 +6,7 @@ EAPI=6
 # no support for python3_2 or above yet wrt #471326
 PYTHON_COMPAT=( python2_7 )
 
-inherit autotools eutils multilib multilib-minimal python-single-r1
+inherit autotools multilib multilib-minimal python-single-r1
 
 DESCRIPTION="Advanced Linux Sound Architecture Library"
 HOMEPAGE="https://alsa-project.org/"
@@ -15,13 +15,9 @@ SRC_URI="mirror://alsaproject/lib/${P}.tar.bz2"
 LICENSE="LGPL-2.1"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
-IUSE="alisp debug doc elibc_uclibc python"
+IUSE="alisp debug doc elibc_uclibc python +thread-safety"
 
-RDEPEND="python? ( ${PYTHON_DEPS} )
-	abi_x86_32? (
-		!<=app-emulation/emul-linux-x86-soundlibs-20130224-r1
-		!app-emulation/emul-linux-x86-soundlibs[-abi_x86_32(-)]
-	)"
+RDEPEND="python? ( ${PYTHON_DEPS} )"
 DEPEND="${RDEPEND}
 	doc? ( >=app-doc/doxygen-1.2.6 )"
 
@@ -42,27 +38,24 @@ src_prepare() {
 }
 
 multilib_src_configure() {
-	local myconf
-	# enable Python only on final ABI
-	if multilib_is_native_abi; then
-		myconf="$(use_enable python)"
-	else
-		myconf="--disable-python"
-	fi
-	use elibc_uclibc && myconf+=" --without-versioned"
+	local myeconfargs=(
+		--disable-maintainer-mode
+		--disable-resmgr
+		--enable-aload
+		--enable-rawmidi
+		--enable-seq
+		--enable-shared
+		# enable Python only on final ABI
+		$(multilib_native_use_enable python)
+		$(use_enable alisp)
+		$(use_enable thread-safety)
+		$(use_with debug)
+		$(usex elibc_uclibc --without-versioned '')
+		$(usex elibc_musl --without-versioned '')
+	)
 
-	ECONF_SOURCE=${S} \
-	econf \
-		--disable-maintainer-mode \
-		--enable-shared \
-		--disable-resmgr \
-		--enable-rawmidi \
-		--enable-seq \
-		--enable-aload \
-		--without-versioned \
-		$(use_with debug) \
-		$(use_enable alisp) \
-		${myconf}
+	ECONF_SOURCE="${S}" \
+	econf "${myeconfargs[@]}"
 }
 
 multilib_src_compile() {
@@ -70,7 +63,7 @@ multilib_src_compile() {
 
 	if multilib_is_native_abi && use doc; then
 		emake doc
-		fgrep -Zrl "${S}" doc/doxygen/html | \
+		grep -FZrl "${S}" doc/doxygen/html | \
 			xargs -0 sed -i -e "s:${S}::"
 	fi
 }
@@ -84,8 +77,6 @@ multilib_src_install() {
 }
 
 multilib_src_install_all() {
-	prune_libtool_files --all
-	find "${ED}"/usr/$(get_libdir)/alsa-lib -name '*.a' -exec rm -f {} +
-	docinto ""
+	find "${ED}" \( -name '*.a' -o -name '*.la' \) -delete || die
 	dodoc ChangeLog doc/asoundrc.txt NOTES TODO
 }
