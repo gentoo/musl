@@ -31,7 +31,7 @@ src_prepare() {
 	default
 
 	[[ -n ${PATCH_VER} ]] && EPATCH_SUFFIX="patch" epatch "${WORKDIR}"/${PV}
-	epatch "${FILESDIR}"/libc-4.15-portability.patch
+	epatch "${FILESDIR}"/libc-4.16-portability.patch
 }
 
 src_install() {
