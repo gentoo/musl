@@ -1,0 +1,38 @@
+From d8a2fd4dc00c88d739add2dc653a0e7cee8f9d2e Mon Sep 17 00:00:00 2001
+From: parazyd <parazyd@dyne.org>
+Date: Mon, 9 Apr 2018 17:14:27 +0200
+Subject: [PATCH 2/2] proc/numa: Remove unneeded macros.
+
+These macros break compatibility with musl-libc, and are not needed.
+---
+ proc/numa.h | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/proc/numa.h b/proc/numa.h
+index c198d9d..1b2b4eb 100644
+--- a/proc/numa.h
++++ b/proc/numa.h
+@@ -22,7 +22,9 @@
+ 
+ #include <features.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ void numa_init (void);
+ void numa_uninit (void);
+@@ -30,6 +32,8 @@ void numa_uninit (void);
+ extern int (*numa_max_node) (void);
+ extern int (*numa_node_of_cpu) (int);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif
+-- 
+2.17.0
+
