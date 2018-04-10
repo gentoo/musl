@@ -11,8 +11,8 @@ SRC_URI="http://v6web.litech.org/radvd/dist/${P}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS="amd64 arm ~arm64 hppa ppc sparc x86 ~x86-fbsd"
-IUSE="kernel_FreeBSD selinux test"
+KEYWORDS="amd64 arm ~arm64 hppa ppc sparc x86"
+IUSE="selinux test"
 
 CDEPEND="dev-libs/libdaemon"
 DEPEND="${CDEPEND}
@@ -50,12 +50,6 @@ src_install() {
 	newconfd "${FILESDIR}"/${PN}.conf ${PN}
 
 	systemd_dounit "${FILESDIR}"/${PN}.service
-
-	if use kernel_FreeBSD ; then
-		sed -i -e \
-			's/^SYSCTL_FORWARD=.*$/SYSCTL_FORWARD=net.inet6.ip6.forwarding/g' \
-			"${D}"/etc/init.d/${PN} || die
-	fi
 
 	readme.gentoo_create_doc
 }
