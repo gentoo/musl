@@ -10,7 +10,10 @@ detect_version
 
 PATCH_VER="1"
 SRC_URI="mirror://gentoo/gentoo-headers-base-${PV}.tar.xz
-	${PATCH_VER:+mirror://gentoo/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}"
+	${PATCH_VER:+mirror://gentoo/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}
+	https://dev.gentoo.org/~slyfox/distfiles/gentoo-headers-base-${PV}.tar.xz
+	${PATCH_VER:+https://dev.gentoo.org/~slyfox/distfiles/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}
+"
 
 KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
 
@@ -28,7 +31,7 @@ src_prepare() {
 	default
 
 	[[ -n ${PATCH_VER} ]] && EPATCH_SUFFIX="patch" epatch "${WORKDIR}"/${PV}
-	epatch "${FILESDIR}"/libc-4.15-portability.patch
+	epatch "${FILESDIR}"/libc-4.16-portability.patch
 }
 
 src_install() {

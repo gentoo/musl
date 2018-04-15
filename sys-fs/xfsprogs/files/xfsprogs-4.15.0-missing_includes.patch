@@ -1,0 +1,39 @@
+From b354707a4acae9a09264e40195ba1c3b88b562b1 Mon Sep 17 00:00:00 2001
+From: "Jory A. Pratt" <anarchy@gentoo.org>
+Date: Mon, 9 Apr 2018 11:04:54 -0500
+Subject: [PATCH] Add support for missing includes
+
+Signed-off-by: Jory A. Pratt <anarchy@gentoo.org>
+---
+ include/workqueue.h | 2 ++
+ scrub/xfs_scrub.c   | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/include/workqueue.h b/include/workqueue.h
+index b4b3541..edb2f8a 100644
+--- a/include/workqueue.h
++++ b/include/workqueue.h
+@@ -22,6 +22,8 @@
+ #ifndef	_WORKQUEUE_H_
+ #define	_WORKQUEUE_H_
+ 
++#include <pthread.h>
++
+ struct workqueue;
+ 
+ typedef void workqueue_func_t(struct workqueue *wq, uint32_t index, void *arg);
+diff --git a/scrub/xfs_scrub.c b/scrub/xfs_scrub.c
+index ab26e63..9f33bdc 100644
+--- a/scrub/xfs_scrub.c
++++ b/scrub/xfs_scrub.c
+@@ -18,6 +18,7 @@
+  * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301, USA.
+  */
+ #include <stdio.h>
++#include <paths.h>
+ #include <pthread.h>
+ #include <stdbool.h>
+ #include <stdlib.h>
+-- 
+2.17.0
+
