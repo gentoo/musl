@@ -74,6 +74,7 @@ IUSE="debug doc jemalloc system-llvm"
 RDEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 		jemalloc? ( dev-libs/jemalloc )
 		system-llvm? ( sys-devel/llvm:4 )
+	net-libs/http-parser:0/2.6.2
 "
 DEPEND="${RDEPEND}
 	${PYTHON_DEPS}
