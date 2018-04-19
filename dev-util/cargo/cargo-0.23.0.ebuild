@@ -131,7 +131,7 @@ ws2_32-sys-0.2.1
 inherit bash-completion-r1 cargo versionator
 
 case "${CHOST}" in
-	armv7a-hardfloat-*)
+	armv7*)
 		CARGOARCH=armv7 ;;
 	arm*)
 		CARGOARCH=arm ;;
@@ -142,7 +142,7 @@ case "${CHOST}" in
 	armv7a-hardfloat-*)
 		CARGOLIBC=${ELIBC/glibc/gnu}eabihf ;;
 	arm*)
-		CARGOLIBC=${ELIBC/glibc/gnu}eabi ;;
+		CARGOLIBC=${CHOST##*-} ;;
 	*)
 		CARGOLIBC=${ELIBC/glibc/gnu} ;;
 esac
@@ -185,7 +185,7 @@ COMMON_DEPEND="
 		<dev-libs/libressl-2.7.0:=
 	)
 	!libressl? ( dev-libs/openssl:0= )
-	net-libs/http-parser:=
+	net-libs/http-parser:0/2.6.2
 	net-libs/libssh2:=
 	net-misc/curl:=[ssl]
 	sys-libs/zlib:=

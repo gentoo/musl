@@ -24,7 +24,7 @@ else
 fi
 
 case "${CHOST}" in
-	armv7a-hardfloat-*)
+	armv7*)
 		RUSTARCH=armv7 ;;
 	arm*)
 		RUSTARCH=arm ;;
@@ -35,7 +35,7 @@ case "${CHOST}" in
 	armv7a-hardfloat-*)
 		RUSTLIBC=${ELIBC/glibc/gnu}eabihf ;;
 	arm*)
-		RUSTLIBC=${ELIBC/glibc/gnu}eabi ;;
+		RUSTLIBC=${CHOST##*-} ;;
 	*)
 		RUSTLIBC=${ELIBC/glibc/gnu} ;;
 esac
@@ -86,17 +86,17 @@ PDEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	dev-util/cargo"
 
 PATCHES=(
-	"${FILESDIR}/0001-Explicitly-run-perl-for-OpenSSL-Configure.patch"
-	"${FILESDIR}/0002-Require-rlibs-for-dependent-crates-when-linking-stat.patch"
-	"${FILESDIR}/0003-Adjust-dependency-resolution-errors-to-be-more-consi.patch"
-	"${FILESDIR}/0004-Require-static-native-libraries-when-linking-static-.patch"
-	"${FILESDIR}/0005-Remove-nostdlib-and-musl_root-from-musl-targets.patch"
-	"${FILESDIR}/0006-Prefer-libgcc_eh-over-libunwind-for-musl.patch"
-	"${FILESDIR}/0007-Fix-LLVM-build.patch"
-	"${FILESDIR}/0008-Add-openssl-configuration-for-musl-targets.patch"
-	"${FILESDIR}/0009-liblibc.patch"
-	"${FILESDIR}/0010-static-linking-default.patch"
-	"${FILESDIR}/llvm-musl-fixes.patch"
+	"${FILESDIR}/1.21.0/0001-Explicitly-run-perl-for-OpenSSL-Configure.patch"
+	"${FILESDIR}/1.21.0/0002-Require-rlibs-for-dependent-crates-when-linking-stat.patch"
+	"${FILESDIR}/1.21.0/0003-Adjust-dependency-resolution-errors-to-be-more-consi.patch"
+	"${FILESDIR}/1.21.0/0004-Require-static-native-libraries-when-linking-static-.patch"
+	"${FILESDIR}/1.21.0/0005-Remove-nostdlib-and-musl_root-from-musl-targets.patch"
+	"${FILESDIR}/1.21.0/0006-Prefer-libgcc_eh-over-libunwind-for-musl.patch"
+	"${FILESDIR}/1.21.0/0007-Fix-LLVM-build.patch"
+	"${FILESDIR}/1.21.0/0008-Add-openssl-configuration-for-musl-targets.patch"
+	"${FILESDIR}/1.21.0/0009-liblibc.patch"
+	"${FILESDIR}/1.21.0/0010-static-linking-default.patch"
+	"${FILESDIR}/llvm4-musl-fixes.patch"
 )
 
 S="${WORKDIR}/${MY_P}-src"
