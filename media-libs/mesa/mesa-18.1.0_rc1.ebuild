@@ -287,6 +287,7 @@ src_prepare() {
 	eapply "${FILESDIR}"/${PN}-17-musl-string_h.patch
 	eapply "${FILESDIR}"/${PN}-17-musl-invocation_name.patch
 	eapply "${FILESDIR}"/${PN}-18-musl-pthread.patch
+	eapply "${FILESDIR}"/${PN}-18-intel-missing-time_t.patch
 
 	eautoreconf
 
