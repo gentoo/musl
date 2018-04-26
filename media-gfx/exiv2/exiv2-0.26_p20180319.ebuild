@@ -9,11 +9,11 @@ if [[ ${PV} = *9999 ]]; then
 	EGIT_BRANCH="0.26"
 	GIT_ECLASS=git-r3
 else
-	COMMIT=900d2417dbeb46e14cbf65fc2798ed1d043ab76d
+	COMMIT=876b1314ab892cbfa6672b6b94adbeb90db4211f
 	SRC_URI="https://github.com/Exiv2/${PN}/tarball/${COMMIT} -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~arm ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
 fi
-inherit cmake-multilib python-any-r1 vcs-snapshot
+inherit cmake-multilib python-any-r1
 
 DESCRIPTION="EXIF, IPTC and XMP metadata C++ library and command line utility"
 HOMEPAGE="http://www.exiv2.org/"
@@ -45,11 +45,15 @@ DEPEND="${RDEPEND}
 
 DOCS=( README doc/ChangeLog doc/cmd.txt )
 
+S="${WORKDIR}/${PN^}-${PN}-${COMMIT:0:7}"
+
 PATCHES=(
+	# master, pending backports for 0.26
+	"${FILESDIR}"/${P}-CVE-2018-4868.patch
+	"${FILESDIR}"/${P}-CVE-2017-18005.patch
 	# TODO: Take to upstream
 	"${FILESDIR}"/${PN}-0.26-fix-docs.patch
 	"${FILESDIR}"/${PN}-0.26-tools-optional.patch
-	"${FILESDIR}"/${PN}-0.26-pentaxnikon-crash.patch
 	"${FILESDIR}"/${PN}-0.26-musl.patch
 )
 
@@ -87,6 +91,8 @@ src_prepare() {
 		einfo "Updating doxygen config"
 		doxygen &>/dev/null -u config/Doxyfile || die
 	fi
+
+	edos2unix samples/exiv2json.cpp # workaround for CVE-2017-18005 patch
 
 	cmake-utils_src_prepare
 }
