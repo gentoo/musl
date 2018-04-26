@@ -1,0 +1,12 @@
+--- a/binutils/Makefile
++++ b/binutils/Makefile
+@@ -52,7 +52,7 @@ SRCS = aa_enabled.c
+ HDRS =
+ TOOLS = aa-enabled aa-exec
+ 
+-AALIB = -Wl,-Bstatic -lapparmor  -Wl,-Bdynamic -lpthread
++AALIB = -Wl,-Bdynamic -lapparmor  -Wl,-Bdynamic -lpthread -lintl
+ 
+ ifdef USE_SYSTEM
+   # Using the system libapparmor so Makefile dependencies can't be used
+
