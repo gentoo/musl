@@ -1,0 +1,12 @@
+--- a/configure.ac	2018-04-15 04:23:39.953481823 +0000
++++ b/configure.ac	2018-04-15 04:33:34.474448938 +0000
+@@ -81,7 +81,7 @@
+ AC_HEADER_STDC
+ AC_CHECK_HEADERS(unistd.h stdint.h syslog.h)
+ 
+-AC_CHECK_FUNCS([asprintf __secure_getenv secure_getenv])
++AC_CHECK_FUNCS([asprintf __secure_getenv secure_getenv scandirat])
+ 
+ AM_PROG_CC_C_O
+ AC_C_CONST
+

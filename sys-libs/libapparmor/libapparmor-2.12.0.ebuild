@@ -24,7 +24,8 @@ IUSE="doc +perl +python static-libs"
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
 RDEPEND="perl? ( dev-lang/perl:= )
-	python? ( ${PYTHON_DEPS} )"
+	python? ( ${PYTHON_DEPS} )
+	~dev-libs/libintl-0.19.8.1"
 
 DEPEND="${RDEPEND}
 	sys-devel/autoconf-archive
@@ -36,12 +37,12 @@ DEPEND="${RDEPEND}
 
 S=${WORKDIR}/apparmor-${MY_PV}/libraries/${PN}
 
+PATCHES=( "${FILESDIR}/libapparmor-${MY_PV}-musl-configureac.patch" )
+PATCHES=( "${FILESDIR}/libapparmor-${MY_PV}-musl-library.patch" )
+
 RESTRICT="test"
 
 src_prepare() {
-	rm -r m4 || die "failed to remove bundled macros"
-	epatch "${FILESDIR}/${PN}-2.12.0-musl.patch"
-	epatch "${FILESDIR}"/${PN}-2.10-symbol_visibility.patch
 	autotools-utils_src_prepare
 	use python && distutils-r1_src_prepare
 }
