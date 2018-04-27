@@ -24,7 +24,7 @@ else
 fi
 
 case "${CHOST}" in
-	armv7a-hardfloat-*)
+	armv7a*)
 		RUSTARCH=armv7 ;;
 	arm*)
 		RUSTARCH=arm ;;
@@ -35,7 +35,7 @@ case "${CHOST}" in
 	armv7a-hardfloat-*)
 		RUSTLIBC=${ELIBC/glibc/gnu}eabihf ;;
 	arm*)
-		RUSTLIBC=${ELIBC/glibc/gnu}eabi ;;
+		RUSTLIBC=${CHOST##*-} ;;
 	*)
 		RUSTLIBC=${ELIBC/glibc/gnu} ;;
 esac
