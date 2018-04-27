@@ -24,7 +24,7 @@
  	-Wl,--version-script=$(top_srcdir)/src/libapparmor.map
  
 --- a/src/private.c
-+++ b/src/private.c	
++++ b/src/private.c
 @@ -39,10 +39,14 @@
   #ifdef HAVE___SECURE_GETENV
    #define secure_getenv __secure_getenv
