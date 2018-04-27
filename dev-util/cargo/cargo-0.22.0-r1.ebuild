@@ -124,7 +124,7 @@ ws2_32-sys-0.2.1
 inherit bash-completion-r1 cargo versionator
 
 case "${CHOST}" in
-	armv7a-hardfloat-*)
+	armv7a*)
 		CARGOARCH=armv7 ;;
 	arm*)
 		CARGOARCH=arm ;;
@@ -135,7 +135,7 @@ case "${CHOST}" in
 	armv7a-hardfloat-*)
 		CARGOLIBC=${ELIBC/glibc/gnu}eabihf ;;
 	arm*)
-		CARGOLIBC=${ELIBC/glibc/gnu}eabi ;;
+		CARGOLIBC=${CHOST##*-} ;;
 	*)
 		CARGOLIBC=${ELIBC/glibc/gnu} ;;
 esac
