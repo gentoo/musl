@@ -24,7 +24,7 @@ else
 fi
 
 case "${CHOST}" in
-	armv7a-hardfloat-*)
+	armv7*)
 		RUSTARCH=armv7 ;;
 	arm*)
 		RUSTARCH=arm ;;
@@ -35,7 +35,7 @@ case "${CHOST}" in
 	armv7a-hardfloat-*)
 		RUSTLIBC=${ELIBC/glibc/gnu}eabihf ;;
 	arm*)
-		RUSTLIBC=${ELIBC/glibc/gnu}eabi ;;
+		RUSTLIBC=${CHOST##*-} ;;
 	*)
 		RUSTLIBC=${ELIBC/glibc/gnu} ;;
 esac
@@ -103,16 +103,16 @@ PDEPEND="!extended? ( >=dev-util/cargo-${CARGO_DEPEND_VERSION} )"
 
 PATCHES=(
 	"${FILESDIR}/1.23.0-separate-libdir.patch"
-	"${FILESDIR}/0001-Require-static-native-libraries-when-linking-static-.patch"
-	"${FILESDIR}/0002-Remove-nostdlib-and-musl_root-from-musl-targets.patch"
-	"${FILESDIR}/0003-Switch-musl-targets-to-link-dynamically-by-default.patch"
-	"${FILESDIR}/0004-Prefer-libgcc_eh-over-libunwind-for-musl.patch"
-	"${FILESDIR}/0005-Fix-LLVM-build.patch"
-	"${FILESDIR}/0006-Fix-rustdoc-for-cross-targets.patch"
-	"${FILESDIR}/0007-Add-openssl-configuration-for-musl-targets.patch"
-	"${FILESDIR}/0008-Don-t-pass-CFLAGS-to-the-C-compiler.patch"
-	"${FILESDIR}/0009-liblibc.patch"
-	"${FILESDIR}/llvm-musl-fixes.patch"
+	"${FILESDIR}/1.23.0/0001-Require-static-native-libraries-when-linking-static-.patch"
+	"${FILESDIR}/1.23.0/0002-Remove-nostdlib-and-musl_root-from-musl-targets.patch"
+	"${FILESDIR}/1.23.0/0003-Switch-musl-targets-to-link-dynamically-by-default.patch"
+	"${FILESDIR}/1.23.0/0004-Prefer-libgcc_eh-over-libunwind-for-musl.patch"
+	"${FILESDIR}/1.23.0/0005-Fix-LLVM-build.patch"
+	"${FILESDIR}/1.23.0/0006-Fix-rustdoc-for-cross-targets.patch"
+	"${FILESDIR}/1.23.0/0007-Add-openssl-configuration-for-musl-targets.patch"
+	"${FILESDIR}/1.23.0/0008-Don-t-pass-CFLAGS-to-the-C-compiler.patch"
+	"${FILESDIR}/1.23.0/0009-liblibc.patch"
+	"${FILESDIR}/llvm4-musl-fixes.patch"
 )
 
 S="${WORKDIR}/${MY_P}-src"
