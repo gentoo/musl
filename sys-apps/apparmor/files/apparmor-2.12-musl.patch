@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/missingdefs.h
++++ b/missingdefs.h	
 @@ -0,0 +1,9 @@
 +#ifndef PARSER_MISSINGDEFS_H
 +#define PARSER_MISSINGDEFS_H
@@ -21,8 +21,8 @@
  struct alias_rule {
  	char *from;
 
---- a/parser_symtab.c
-+++ b/parser_symtab.c
+--- a/parser_symtab.c	
++++ b/parser_symtab.c	
 @@ -24,6 +24,7 @@
  
  #include "immunix.h"
