@@ -1,0 +1,14 @@
+--- a/lib/Driver/ToolChains.cpp
++++ b/lib/Driver/ToolChains.cpp
+@@ -4112,6 +4112,11 @@ Linux::Linux(const Driver &D, const llvm::Triple &Triple, const ArgList &Args)
+ 
+   Distro Distro(D.getVFS());
+ 
++  if (Distro.IsGentooLinux()) {
++    ExtraOpts.push_back("-z");
++    ExtraOpts.push_back("now");
++  }
++
+   if (Distro.IsOpenSUSE() || Distro.IsUbuntu() || Distro.IsGentooLinux()) {
+     ExtraOpts.push_back("-z");
+     ExtraOpts.push_back("relro");
