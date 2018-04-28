@@ -1,0 +1,11 @@
+--- a/lib/Driver/ToolChains.cpp
++++ b/lib/Driver/ToolChains.cpp
+@@ -4112,7 +4112,7 @@
+ 
+   Distro Distro(D.getVFS());
+ 
+-  if (Distro.IsOpenSUSE() || Distro.IsUbuntu()) {
++  if (Distro.IsOpenSUSE() || Distro.IsUbuntu() || Distro.IsGentooLinux()) {
+     ExtraOpts.push_back("-z");
+     ExtraOpts.push_back("relro");
+   }

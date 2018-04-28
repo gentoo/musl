@@ -1,0 +1,26 @@
+--- a/lib/Driver/ToolChains.cpp
++++ b/lib/Driver/ToolChains.cpp
+@@ -4721,7 +4721,9 @@
+   }
+ }
+ 
+-bool Linux::isPIEDefault() const { return getSanitizerArgs().requiresPIE(); }
++bool Linux::isPIEDefault() const {
++  return true;
++}
+ 
+ SanitizerMask Linux::getSupportedSanitizers() const {
+   const bool IsX86 = getTriple().getArch() == llvm::Triple::x86;
+--- a/lib/Driver/Tools.cpp
++++ b/lib/Driver/Tools.cpp
+@@ -9258,7 +9258,9 @@
+   if (!D.SysRoot.empty())
+     CmdArgs.push_back(Args.MakeArgString("--sysroot=" + D.SysRoot));
+ 
+-  if (IsPIE)
++  if (Args.hasArg(options::OPT_nopie))
++    CmdArgs.push_back("-nopie");
++  else if (IsPIE)
+     CmdArgs.push_back("-pie");
+ 
+   CmdArgs.push_back("--eh-frame-hdr");
