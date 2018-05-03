@@ -8,7 +8,8 @@ PATCH_VER="1.0"
 
 inherit epatch toolchain
 
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+#needs minimal test before unkeywording
+#KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
@@ -21,8 +22,6 @@ fi
 
 src_prepare() {
 	toolchain_src_prepare
-
-	epatch "${FILESDIR}"/gcc-7.2.0-pr69728.patch
 
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl* ]]; then
 		epatch "${FILESDIR}"/6.3.0/cpu_indicator.patch
