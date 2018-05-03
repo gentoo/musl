@@ -206,11 +206,10 @@ DEPEND="${RDEPEND}
 if in_iuse gcj ; then
 	GCJ_DEPS=">=media-libs/libart_lgpl-2.1"
 	GCJ_GTK_DEPS="
+		x11-base/xorg-proto
 		x11-libs/libXt
 		x11-libs/libX11
 		x11-libs/libXtst
-		x11-proto/xproto
-		x11-proto/xextproto
 		=x11-libs/gtk+-2*
 		virtual/pkgconfig
 	"
@@ -972,7 +971,14 @@ toolchain_src_configure() {
 		case ${CTARGET} in
 		*-linux)		 needed_libc=no-fucking-clue;;
 		*-dietlibc)		 needed_libc=dietlibc;;
-		*-elf|*-eabi)	 needed_libc=newlib;;
+		*-elf|*-eabi)
+			needed_libc=newlib
+			# Bare-metal targets don't have access to clock_gettime()
+			# arm-none-eabi example: bug #589672
+			# But we explicitly do --enable-libstdcxx-time above.
+			# Undoing it here.
+			confgcc+=( --disable-libstdcxx-time )
+			;;
 		*-freebsd*)		 needed_libc=freebsd-lib;;
 		*-gnu*)			 needed_libc=glibc;;
 		*-klibc)		 needed_libc=klibc;;
