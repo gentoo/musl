@@ -119,7 +119,9 @@ src_prepare() {
 	eapply "${WORKDIR}/firefox"
 
 	# Musl Patches
-	eapply "${FILESDIR}"/${P}-musl-cmsghdr.patch
+	if [[ ${ABI} == amd64 ]] && use elibc_musl; then
+		eapply "${FILESDIR}"/${P}-musl-cmsghdr.patch
+	fi
 	eapply "${FILESDIR}"/${P}-musl-sys_auxv_h.patch
 
 	# Enable gnomebreakpad
