@@ -1,0 +1,11 @@
+diff -Naur firefox-60.0.orig/media/audioipc/audioipc/src/cmsg.rs firefox-60.0/media/audioipc/audioipc/src/cmsg.rs
+--- firefox-60.0.orig/media/audioipc/audioipc/src/cmsg.rs	2018-05-13 18:05:51.713781232 -0700
++++ firefox-60.0/media/audioipc/audioipc/src/cmsg.rs	2018-05-13 17:33:39.536856530 -0700
+@@ -108,6 +108,7 @@
+ 
+             let cmsghdr = cmsghdr {
+                 cmsg_len: cmsg_len as _,
++                __pad1: 0,
+                 cmsg_level: level,
+                 cmsg_type: kind,
+             };
