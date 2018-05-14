@@ -1,12 +1,13 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
+PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
 
-inherit autotools eutils linux-info systemd
+inherit autotools eutils linux-info python-any-r1 systemd
 
 DESCRIPTION="An enhanced multi-threaded syslogd with database support and more"
-HOMEPAGE="http://www.rsyslog.com/"
+HOMEPAGE="https://www.rsyslog.com/"
 
 BRANCH="8-stable"
 
@@ -39,30 +40,31 @@ else
 		unset _tmp_last_index
 		unset _tmp_suffix
 	else
-		KEYWORDS="amd64 arm x86"
+		KEYWORDS="~amd64 ~arm ~x86"
 	fi
 
 	SRC_URI="
-		http://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-${MY_PV}.tar.gz -> ${MY_FILENAME}
-		doc? ( http://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-doc-${MY_PV}.tar.gz -> ${MY_FILENAME_DOCS} )
+		https://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-${MY_PV}.tar.gz -> ${MY_FILENAME}
+		doc? ( https://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-doc-${MY_PV}.tar.gz -> ${MY_FILENAME_DOCS} )
 	"
 
 	PATCHES=(
-		"${FILESDIR}"/8-stable/${PN}-8.24.0-fix-tcpflood-without-librelp-r1.patch
+		"${FILESDIR}"/8-stable/${PN}-8.32.0-fix-building-without-curl-r3.patch
 		"${FILESDIR}"/8-stable/${PN}-8.18.0-musl-fix.patch
 	)
 fi
 
 LICENSE="GPL-3 LGPL-3 Apache-2.0"
 SLOT="0"
-IUSE="dbi debug doc elasticsearch +gcrypt grok jemalloc kafka kerberos libressl mongodb mysql normalize omhttpfs"
+IUSE="curl dbi debug doc elasticsearch +gcrypt grok jemalloc kafka kerberos libressl mdblookup mongodb mysql normalize omhttpfs"
 IUSE+=" omudpspoof postgres rabbitmq redis relp rfc3195 rfc5424hmac snmp ssl systemd test usertools +uuid zeromq"
 
 RDEPEND="
-	>=dev-libs/libfastjson-0.99.3:=
+	>=dev-libs/libfastjson-0.99.8:=
 	>=dev-libs/libestr-0.1.9
 	>=dev-libs/liblogging-1.0.1:=[stdlog]
 	>=sys-libs/zlib-1.2.5
+	curl? ( >=net-misc/curl-7.35.0 )
 	dbi? ( >=dev-db/libdbi-0.8.3 )
 	elasticsearch? ( >=net-misc/curl-7.35.0 )
 	gcrypt? ( >=dev-libs/libgcrypt-1.5.3:= )
@@ -70,18 +72,19 @@ RDEPEND="
 	jemalloc? ( >=dev-libs/jemalloc-3.3.1:= )
 	kafka? ( >=dev-libs/librdkafka-0.9.0.99:= )
 	kerberos? ( virtual/krb5 )
-	mongodb? ( >=dev-libs/libmongo-client-0.1.4 )
-	mysql? ( virtual/mysql )
+	mdblookup? ( dev-libs/libmaxminddb:= )
+	mongodb? ( >=dev-libs/mongo-c-driver-1.1.10:= )
+	mysql? ( virtual/libmysqlclient:= )
 	normalize? (
 		>=dev-libs/libee-0.4.0
-		>=dev-libs/liblognorm-2.0.1:=
+		>=dev-libs/liblognorm-2.0.3:=
 	)
 	omhttpfs? ( >=net-misc/curl-7.35.0 )
 	omudpspoof? ( >=net-libs/libnet-1.1.6 )
 	postgres? ( >=dev-db/postgresql-8.4.20:= )
 	rabbitmq? ( >=net-libs/rabbitmq-c-0.3.0:= )
 	redis? ( >=dev-libs/hiredis-0.11.0:= )
-	relp? ( >=dev-libs/librelp-1.2.12:= )
+	relp? ( >=dev-libs/librelp-1.2.14:= )
 	rfc3195? ( >=dev-libs/liblogging-1.0.1:=[rfc3195] )
 	rfc5424hmac? (
 		!libressl? ( >=dev-libs/openssl-0.9.8y:0= )
@@ -89,17 +92,20 @@ RDEPEND="
 	)
 	snmp? ( >=net-analyzer/net-snmp-5.7.2 )
 	ssl? ( >=net-libs/gnutls-2.12.23:0= )
-	systemd? ( >=sys-apps/systemd-208 )
+	systemd? ( >=sys-apps/systemd-234 )
 	uuid? ( sys-apps/util-linux:0= )
 	zeromq? (
-		>=net-libs/zeromq-4.1.1:=
-		>=net-libs/czmq-3.0.0
+		>=net-libs/czmq-3.0.2
 	)"
 DEPEND="${RDEPEND}
 	>=sys-devel/autoconf-archive-2015.02.24
 	virtual/pkgconfig
 	elibc_musl? ( sys-libs/queue )
-	test? ( sys-libs/libfaketime )"
+	test? (
+		jemalloc? ( <sys-libs/libfaketime-0.9.7 )
+		!jemalloc? ( sys-libs/libfaketime )
+		${PYTHON_DEPS}
+	)"
 
 if [[ ${PV} == "9999" ]]; then
 	DEPEND+=" doc? ( >=dev-python/sphinx-1.1.3-r7 )"
@@ -110,6 +116,10 @@ fi
 
 CONFIG_CHECK="~INOTIFY_USER"
 WARNING_INOTIFY_USER="CONFIG_INOTIFY_USER isn't set. Imfile module on this system will only support polling mode!"
+
+pkg_setup() {
+	use test && python-any-r1_pkg_setup
+}
 
 src_unpack() {
 	if [[ ${PV} == "9999" ]]; then
@@ -171,6 +181,7 @@ src_configure() {
 		--disable-generate-man-pages
 		--without-valgrind-testbench
 		$(use_enable test testbench)
+		$(use_enable curl libcurl)
 		# Input Plugins without depedencies
 		--enable-imdiag
 		--enable-imfile
@@ -214,9 +225,11 @@ src_configure() {
 		$(use_enable elasticsearch)
 		$(use_enable gcrypt libgcrypt)
 		$(use_enable jemalloc)
+		$(use_enable kafka imkafka)
 		$(use_enable kafka omkafka)
 		$(use_enable kerberos gssapi-krb5)
 		$(use_enable normalize mmnormalize)
+		$(use_enable mdblookup mmdblookup)
 		$(use_enable grok mmgrok)
 		$(use_enable omhttpfs)
 		$(use_enable omudpspoof)
@@ -232,9 +245,7 @@ src_configure() {
 		$(use_enable usertools)
 		$(use_enable uuid)
 		$(use_enable zeromq imczmq)
-		$(use_enable zeromq imzmq3)
 		$(use_enable zeromq omczmq)
-		$(use_enable zeromq omzmq3)
 		--with-systemdsystemunitdir="$(systemd_get_systemunitdir)"
 	)
 
@@ -302,7 +313,7 @@ src_install() {
 	newins "${FILESDIR}/${BRANCH}/${PN}.conf" ${PN}.conf
 
 	insinto /etc/rsyslog.d/
-	doins "${FILESDIR}/${BRANCH}/50-default.conf"
+	newins "${FILESDIR}/${BRANCH}/50-default-r1.conf" 50-default.conf
 
 	insinto /etc/logrotate.d/
 	newins "${FILESDIR}/${BRANCH}/${PN}.logrotate" ${PN}
