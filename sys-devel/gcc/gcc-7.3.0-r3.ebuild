@@ -3,13 +3,12 @@
 
 EAPI="5"
 
-PATCH_VER="1.2"
+PATCH_VER="1.4"
 #UCLIBC_VER="1.0"
 
 inherit epatch toolchain
 
-#not enough fixes to warrant a revbump: #511548
-#KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
