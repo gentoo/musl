@@ -1,9 +1,8 @@
 From 1fb0b21870179c3ab5350b29217e0c01cd77c13e Mon Sep 17 00:00:00 2001
-From: "Jory A. Pratt" <anarchy@gentoo.org>
+From: 
 Date: Sun, 20 May 2018 17:24:30 -0500
 Subject: [PATCH] misc musl fixes
 
-Signed-off-by: Jory A. Pratt <anarchy@gentoo.org>
 ---
  common/drive.c   | 1 +
  common/main.c    | 4 ++++
