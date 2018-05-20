@@ -1,0 +1,95 @@
+From 1fb0b21870179c3ab5350b29217e0c01cd77c13e Mon Sep 17 00:00:00 2001
+From: "Jory A. Pratt" <anarchy@gentoo.org>
+Date: Sun, 20 May 2018 17:24:30 -0500
+Subject: [PATCH] misc musl fixes
+
+Signed-off-by: Jory A. Pratt <anarchy@gentoo.org>
+---
+ common/drive.c   | 1 +
+ common/main.c    | 4 ++++
+ common/types.h   | 3 +++
+ dump/content.c   | 1 +
+ dump/var.c       | 1 +
+ invutil/invidx.c | 1 +
+ 6 files changed, 11 insertions(+)
+
+diff --git a/common/drive.c b/common/drive.c
+index 5fe6867..9e10b63 100644
+--- a/common/drive.c
++++ b/common/drive.c
+@@ -17,6 +17,7 @@
+  */
+ 
+ #include <stdio.h>
++#include <stdlib.h>
+ #include <unistd.h>
+ #include <sys/stat.h>
+ #include <time.h>
+diff --git a/common/main.c b/common/main.c
+index d3bdcf3..b6ba0a6 100644
+--- a/common/main.c
++++ b/common/main.c
+@@ -56,6 +56,10 @@
+ #include "content.h"
+ #include "inventory.h"
+ 
++#ifndef RLIM64_INFINITY
++#define RLIM64_INFINITY (~0ULL)
++#endif
++
+ #ifdef DUMP
+ /* main.c - main for dump
+  */
+diff --git a/common/types.h b/common/types.h
+index 424b47a..0c58ab5 100644
+--- a/common/types.h
++++ b/common/types.h
+@@ -47,6 +47,9 @@
+ /* integers
+  */
+ typedef uint32_t size32_t;
++#ifndef __uint32_t
++#define __uint32_t uint32_t
++#endif
+ typedef uint64_t size64_t;
+ typedef char char_t;
+ typedef unsigned char u_char_t;
+diff --git a/dump/content.c b/dump/content.c
+index bee4e65..f9da485 100644
+--- a/dump/content.c
++++ b/dump/content.c
+@@ -38,6 +38,7 @@
+ #ifdef linux
+ #include <linux/limits.h>
+ #include <xfs/xqm.h>
++#include <linux/limits.h>
+ #endif
+ 
+ #include <attr/attributes.h>
+diff --git a/dump/var.c b/dump/var.c
+index 6e3ead0..be2f310 100644
+--- a/dump/var.c
++++ b/dump/var.c
+@@ -16,6 +16,7 @@
+  * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ 
++#include <limits.h>
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <sys/stat.h>
+diff --git a/invutil/invidx.c b/invutil/invidx.c
+index 82d89d9..dba88fc 100644
+--- a/invutil/invidx.c
++++ b/invutil/invidx.c
+@@ -19,6 +19,7 @@
+ #include <xfs/xfs.h>
+ #include <xfs/jdm.h>
+ 
++#include <fcntl.h>
+ #include <stdio.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+-- 
+2.17.0
+
