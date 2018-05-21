@@ -120,9 +120,9 @@ src_prepare() {
 
 	# Musl Patches
 	if [[ ${ABI} == amd64 ]] && use elibc_musl; then
-		eapply "${FILESDIR}"/${P}-musl-cmsghdr.patch
+		eapply "${FILESDIR}"/${PN}-60.0-musl-cmsghdr.patch
 	fi
-	eapply "${FILESDIR}"/${P}-musl-sys_auxv_h.patch
+	eapply "${FILESDIR}"/${PN}-60.0-musl-sys_auxv_h.patch
 
 	# Enable gnomebreakpad
 	if use debug ; then
