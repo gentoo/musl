@@ -1,0 +1,21 @@
+--- nfs-utils-2.3.1/configure.ac.orig	2018-05-21 11:05:01.939912918 -0700
++++ nfs-utils-2.3.1/configure.ac	2018-05-21 11:05:10.531968707 -0700
+@@ -401,7 +401,7 @@
+ fi
+ 
+ dnl libdnsidmap specific checks
+-AC_CHECK_LIB([resolv], [__res_querydomain], , AC_MSG_ERROR(res_querydomain needed))
++AC_CHECK_LIB([resolv], [res_querydomain], , AC_MSG_ERROR(res_querydomain needed))
+ 
+ AC_ARG_ENABLE([ldap],
+ 	[AS_HELP_STRING([--disable-ldap],[Disable support for LDAP @<:default=detect@:>@])])
+--- nfs-utils-2.3.1/support/misc/file.c.orig	2018-05-21 18:15:37.572007979 +0000
++++ nfs-utils-2.3.1/support/misc/file.c	2018-05-21 18:15:43.668047008 +0000
+@@ -27,6 +27,7 @@
+ #include <dirent.h>
+ #include <stdlib.h>
+ #include <stdbool.h>
++#include <limits.h> /* PATH_MAX */
+ 
+ #include "xlog.h"
+ #include "misc.h"
