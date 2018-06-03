@@ -14,11 +14,12 @@ SRC_URI="amd64? ( https://portage.smaeul.xyz/distfiles/${MY_P}-x86_64-unknown-li
 		https://portage.smaeul.xyz/distfiles/${MY_P}-arm-unknown-linux-musleabi.tar.xz
 		https://portage.smaeul.xyz/distfiles/${MY_P}-armv7-unknown-linux-musleabihf.tar.xz
 		)
+	arm64? ( https://portage.smaeul.xyz/distfiles/${MY_P}-aarch64-unknown-linux-musl.tar.xz )
 	x86? ( https://portage.smaeul.xyz/distfiles/${MY_P}-i686-unknown-linux-musl.tar.xz )"
 
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 SLOT="stable"
-KEYWORDS="~amd64 ~arm ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~x86"
 IUSE="doc extended"
 
 DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
