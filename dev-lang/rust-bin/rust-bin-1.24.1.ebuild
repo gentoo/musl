@@ -47,15 +47,17 @@ src_unpack() {
 	default
 
 	local postfix
-	use amd64 && postfix=x86_64-unknown-linux-gnu
+	use amd64 && postfix=x86_64-unknown-linux-musl
 
 	if use arm && [[ "$(tc-is-softfloat)" != "no" ]] && [[ ${CHOST} == armv6* ]]; then
-		postfix=arm-unknown-linux-gnueabi
+		postfix=arm-unknown-linux-musleabi
 	elif use arm && [[ ${CHOST} == armv7*h* ]]; then
-		postfix=armv7-unknown-linux-gnueabihf
+		postfix=armv7-unknown-linux-musleabihf
         fi
 
-	use x86 && postfix=i686-unknown-linux-gnu
+	use arm64 && postfix=aarch64-unknown-linux-musl
+
+	use x86 && postfix=i686-unknown-linux-musl
 	mv "${WORKDIR}/${MY_P}-${postfix}" "${S}" || die
 }
 
