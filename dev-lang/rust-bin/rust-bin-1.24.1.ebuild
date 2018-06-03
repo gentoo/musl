@@ -24,6 +24,7 @@ IUSE="doc extended"
 
 DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	!dev-lang/rust:0
+	<=net-libs/http-parser-2.6.2
 "
 RDEPEND="${DEPEND}"
 
