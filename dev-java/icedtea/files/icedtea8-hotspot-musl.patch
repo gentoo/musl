@@ -1,0 +1,59 @@
+diff -Naur openjdk.orig/hotspot/src/os/linux/vm/jvm_linux.cpp openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp
+--- openjdk.orig/hotspot/src/os/linux/vm/jvm_linux.cpp	2018-06-10 21:57:47.854907734 -0700
++++ openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp	2018-06-10 21:58:39.423906811 -0700
+@@ -154,7 +154,9 @@
+ #ifdef SIGSTKFLT
+   "STKFLT",     SIGSTKFLT,      /* Stack fault.  */
+ #endif
++#ifdef SIGCLD
+   "CLD",        SIGCLD,         /* Same as SIGCHLD (System V).  */
++#endif
+   "CHLD",       SIGCHLD,        /* Child status has changed (POSIX).  */
+   "CONT",       SIGCONT,        /* Continue (POSIX).  */
+   "STOP",       SIGSTOP,        /* Stop, unblockable (POSIX).  */
+diff -Naur openjdk.orig/hotspot/src/os_cpu/linux_aarch64/vm/os_linux_aarch64.cpp openjdk/hotspot/src/os_cpu/linux_aarch64/vm/os_linux_aarch64.cpp
+--- openjdk.orig/hotspot/src/os_cpu/linux_aarch64/vm/os_linux_aarch64.cpp	2018-06-10 21:57:47.861907734 -0700
++++ openjdk/hotspot/src/os_cpu/linux_aarch64/vm/os_linux_aarch64.cpp	2018-06-10 22:02:01.895903185 -0700
+@@ -75,7 +75,7 @@
+ # include <pwd.h>
+ # include <poll.h>
+ # include <ucontext.h>
+-# include <fpu_control.h>
++# include <linux/types.h>  /* provides __u64 */
+ 
+ #ifdef BUILTIN_SIM
+ #define REG_SP REG_RSP
+diff -Naur openjdk.orig/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
+--- openjdk.orig/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp	2018-06-10 21:57:47.862907734 -0700
++++ openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp	2018-06-10 22:00:00.892905352 -0700
+@@ -72,7 +72,6 @@
+ # include <pwd.h>
+ # include <poll.h>
+ # include <ucontext.h>
+-# include <fpu_control.h>
+ 
+ #ifdef AMD64
+ #define REG_SP REG_RSP
+@@ -544,6 +543,9 @@
+   return true; // Mute compiler
+ }
+ 
++#define _FPU_GETCW(cw) __asm__ __volatile__ ("fnstcw %0" : "=m" (*&cw))
++#define _FPU_SETCW(cw) __asm__ __volatile__ ("fldcw %0" : : "m" (*&cw))
++
+ void os::Linux::init_thread_fpu_state(void) {
+ #ifndef AMD64
+   // set fpu to 53 bit precision
+diff -Naur openjdk.orig/hotspot/src/os_cpu/linux_x86/vm/threadLS_linux_x86.hpp openjdk/hotspot/src/os_cpu/linux_x86/vm/threadLS_linux_x86.hpp
+--- openjdk.orig/hotspot/src/os_cpu/linux_x86/vm/threadLS_linux_x86.hpp	2018-06-10 21:57:47.862907734 -0700
++++ openjdk/hotspot/src/os_cpu/linux_x86/vm/threadLS_linux_x86.hpp	2018-06-10 22:01:01.766904262 -0700
+@@ -32,7 +32,9 @@
+   // map stack pointer to thread pointer - see notes in threadLS_linux_x86.cpp
+   #define SP_BITLENGTH  32
+   #define PAGE_SHIFT    12
++  #ifndef PAGE_SIZE
+   #define PAGE_SIZE     (1UL << PAGE_SHIFT)
++  #endif
+   static Thread* _sp_map[1UL << (SP_BITLENGTH - PAGE_SHIFT)];
+ 
+ public:
