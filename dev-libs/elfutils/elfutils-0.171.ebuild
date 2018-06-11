@@ -35,7 +35,7 @@ src_prepare() {
 	# Add MUSL patches
 	epatch "${FILESDIR}"/${PN}-0.170-musl-obstack-fts.patch
 	epatch "${FILESDIR}"/${P}-musl-libs.patch
-	epatch "${FILESDIR}"/${PN}-0.170-musl-utils.patch
+	epatch "${FILESDIR}"/${P}-musl-utils.patch
 
 	eautoreconf
 
