@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -11,7 +11,7 @@ SRC_URI="https://sourceware.org/elfutils/ftp/${PV}/${P}.tar.bz2"
 
 LICENSE="|| ( GPL-2+ LGPL-3+ ) utils? ( GPL-3+ )"
 SLOT="0"
-KEYWORDS="amd64 arm ia64 ~mips ~ppc ~sh ~sparc ~x86"
+KEYWORDS="~amd64 ~arm ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
 IUSE="bzip2 lzma nls static-libs test +threads +utils"
 
 RDEPEND=">=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}]
@@ -28,18 +28,18 @@ DEPEND="${RDEPEND}
 		sys-libs/obstack-standalone
 	)"
 
+PATCHES=("${FILESDIR}"/${PN}-0.118-PaX-support.patch)
+
 src_prepare() {
 	default
-	epatch "${FILESDIR}"/${PN}-0.118-PaX-support.patch
-
 	# Add MUSL patches
-	epatch "${FILESDIR}"/${PN}-0.168-musl-obstack-fts.patch
+	epatch "${FILESDIR}"/${PN}-0.170-musl-obstack-fts.patch
 	epatch "${FILESDIR}"/${P}-musl-libs.patch
-	epatch "${FILESDIR}"/${PN}-0.168-musl-utils.patch
+	epatch "${FILESDIR}"/${PN}-0.170-musl-utils.patch
 
 	eautoreconf
 
-	if use static-libs; then
+	if ! use static-libs; then
 		sed -i -e '/^lib_LIBRARIES/s:=.*:=:' -e '/^%.os/s:%.o$::' lib{asm,dw,elf}/Makefile.in || die
 	fi
 	sed -i 's:-Werror::' */Makefile.in || die
