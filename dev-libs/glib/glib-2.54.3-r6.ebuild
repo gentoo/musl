@@ -6,28 +6,28 @@
 # then to be think very closely.
 
 EAPI=6
-PYTHON_COMPAT=( python2_7 )
+PYTHON_COMPAT=( python{2_7,3_5,3_6} )
 # Completely useless with or without USE static-libs, people need to use
 # pkg-config
 GNOME2_LA_PUNT="yes"
 
 inherit autotools bash-completion-r1 epunt-cxx flag-o-matic gnome2 libtool linux-info \
-	multilib multilib-minimal pax-utils python-r1 toolchain-funcs versionator virtualx
+	multilib multilib-minimal pax-utils python-single-r1 toolchain-funcs versionator virtualx
 
 DESCRIPTION="The GLib library of C routines"
 HOMEPAGE="https://www.gtk.org/"
-SRC_URI="${SRC_URI}
+SRC_URI="${SRC_URI} https://dev.gentoo.org/~leio/distfiles/${P}-patchset.tar.xz
 	https://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz" # pkg.m4 for eautoreconf
 
 LICENSE="LGPL-2.1+"
 SLOT="2"
 IUSE="dbus debug fam kernel_linux +mime selinux static-libs systemtap test utils xattr"
 REQUIRED_USE="
-	utils? ( ${PYTHON_REQUIRED_USE} )
+	${PYTHON_REQUIRED_USE}
 	test? ( ${PYTHON_REQUIRED_USE} )
-"
+" # test dep left here and elsewhere to not forget, as global python requirement is supposed to be temporary until a split package is made with meson
 
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
 
 # Added util-linux multilib dependency to have libmount support (which
 # is always turned on on linux systems, unless explicitly disabled, but
@@ -44,9 +44,9 @@ RDEPEND="
 	selinux? ( >=sys-libs/libselinux-2.2.2-r5[${MULTILIB_USEDEP}] )
 	xattr? ( >=sys-apps/attr-2.4.47-r1[${MULTILIB_USEDEP}] )
 	fam? ( >=virtual/fam-0-r1[${MULTILIB_USEDEP}] )
+	${PYTHON_DEPS}
 	utils? (
-		${PYTHON_DEPS}
-		>=dev-util/gdbus-codegen-${PV}[${PYTHON_USEDEP}]
+		>=dev-util/gdbus-codegen-${PV}
 		virtual/libelf:0=
 	)
 "
@@ -59,7 +59,7 @@ DEPEND="${RDEPEND}
 	test? (
 		sys-devel/gdb
 		${PYTHON_DEPS}
-		>=dev-util/gdbus-codegen-${PV}[${PYTHON_USEDEP}]
+		>=dev-util/gdbus-codegen-${PV}
 		>=sys-apps/dbus-1.2.14 )
 	!<dev-util/gtk-doc-1.15-r2
 "
@@ -84,6 +84,8 @@ pkg_setup() {
 		fi
 		linux-info_pkg_setup
 	fi
+	# FIXME: Move python deps that are only required at build time of other packages to a split package
+	python-single-r1_pkg_setup
 }
 
 src_prepare() {
@@ -123,13 +125,13 @@ src_prepare() {
 	fi
 
 	# gdbus-codegen is a separate package
-	eapply "${FILESDIR}"/${PN}-2.50.0-external-gdbus-codegen.patch
+	eapply "${FILESDIR}"/${PN}-2.54.3-external-gdbus-codegen.patch
 
-	# Leave python shebang alone - handled by python_replicate_script
-	# We could call python_setup and give configure a valid --with-python
-	# arg, but that would mean a build dep on python when USE=utils.
-	sed -e '/${PYTHON}/d' \
-		-i glib/Makefile.{am,in} || die
+	# Upstream glib-2-54 branch; includes fixups for potential libreoffice lockups
+	eapply "${WORKDIR}"/patches/
+
+	# Leave gtester-report python shebang alone - handled by python_fix_shebang
+	sed -e '/${PYTHON}/d' -i glib/Makefile.{am,in} || die
 
 	# Also needed to prevent cross-compile failures, see bug #267603
 	eautoreconf
@@ -185,6 +187,7 @@ multilib_src_configure() {
 		$(use_enable systemtap dtrace) \
 		$(use_enable systemtap systemtap) \
 		$(multilib_native_use_enable utils libelf) \
+		--with-python=${EPYTHON} \
 		--disable-compile-warnings \
 		--enable-man \
 		--with-pcre=system \
@@ -229,8 +232,9 @@ multilib_src_install_all() {
 	einstalldocs
 
 	if use utils ; then
-		python_replicate_script "${ED}"/usr/bin/gtester-report
+		python_fix_shebang "${ED}"/usr/bin/gtester-report
 	else
+		# gtester-report is heavily deprecated, so do not install by default - https://bugzilla.gnome.org/show_bug.cgi?id=668035#c4
 		rm "${ED}usr/bin/gtester-report"
 		rm "${ED}usr/share/man/man1/gtester-report.1"
 	fi
