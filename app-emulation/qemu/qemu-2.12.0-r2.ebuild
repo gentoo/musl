@@ -22,7 +22,7 @@ else
 	KEYWORDS="~amd64 ~ppc ~ppc64 ~x86"
 
 	# Gentoo specific patchsets:
-	# SRC_URI+=" https://dev.gentoo.org/~tamiko/distfiles/${P}-patches-r1.tar.xz"
+	SRC_URI+=" https://dev.gentoo.org/~tamiko/distfiles/${P}-patches-r2.tar.xz"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -222,6 +222,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-2.5.0-cflags.patch
 	"${FILESDIR}"/${PN}-2.5.0-sysmacros.patch
 	"${FILESDIR}"/${PN}-2.11.1-capstone_include_path.patch
+	"${WORKDIR}"/patches
 )
 
 STRIP_MASK="/usr/share/qemu/palcode-clipper"
