@@ -22,7 +22,7 @@ else
 	KEYWORDS="~amd64 ~ppc ~ppc64 ~x86"
 
 	# Gentoo specific patchsets:
-	SRC_URI+=" https://dev.gentoo.org/~tamiko/distfiles/${P}-patches-r2.tar.xz"
+	SRC_URI+=" https://dev.gentoo.org/~tamiko/distfiles/${P}-patches-r4.tar.xz"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
