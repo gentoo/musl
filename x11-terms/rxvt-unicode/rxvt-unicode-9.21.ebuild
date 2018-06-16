@@ -31,7 +31,7 @@ RDEPEND="
 DEPEND="
 	${RDEPEND}
 	virtual/pkgconfig
-	x11-proto/xproto
+	x11-proto/xorg-proto
 "
 
 RESTRICT="test"
