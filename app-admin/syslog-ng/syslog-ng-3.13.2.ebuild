@@ -125,7 +125,7 @@ src_install() {
 
 	# We remove this module because it uses getprotobynumber_r()
 	# which is not available in musl
-	rm -f ${D}/usr/lib64/syslog-ng/libtfgetent.so
+	rm -f "${D}/usr/lib64/syslog-ng/libtfgetent.so"
 
 	dodoc AUTHORS NEWS.md CONTRIBUTING.md contrib/syslog-ng.conf* \
 		contrib/syslog2ng "${FILESDIR}/${MY_PV_MM}/syslog-ng.conf.gentoo.hardened" \
