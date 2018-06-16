@@ -14,13 +14,13 @@ if [[ ${PV} = *beta* ]]; then
 	MY_P="rustc-beta"
 	SLOT="beta/${PV}"
 	SRC="${BETA_SNAPSHOT}/rustc-beta-src.tar.xz"
-	KEYWORDS=""
+	KEYWORDS="amd64 x86"
 else
 	ABI_VER="$(get_version_component_range 1-2)"
 	SLOT="stable/${ABI_VER}"
 	MY_P="rustc-${PV}"
 	SRC="${MY_P}-src.tar.xz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~x86"
+	KEYWORDS="amd64 ~arm ~arm64 x86"
 fi
 
 case "${CHOST}" in
@@ -41,12 +41,12 @@ case "${CHOST}" in
 esac
 RUSTHOST=${RUSTARCH}-unknown-${KERNEL}-${RUSTLIBC}
 
-RUST_STAGE0_VERSION="1.$(($(get_version_component_range 2) - 1)).1"
+RUST_STAGE0_VERSION="1.$(($(get_version_component_range 2) - 0)).0"
 
 CARGO_DEPEND_VERSION="0.$(($(get_version_component_range 2) + 1)).0"
 
 DESCRIPTION="Systems programming language from Mozilla"
-HOMEPAGE="http://www.rust-lang.org/"
+HOMEPAGE="https://www.rust-lang.org/"
 
 SRC_URI="https://static.rust-lang.org/dist/${SRC} -> rustc-${PV}-src.tar.xz
 	amd64? (
