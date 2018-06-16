@@ -86,7 +86,7 @@ RDEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 				<dev-libs/libressl-2.7.0:=
 			)
 			!libressl? ( dev-libs/openssl:0= )
-			net-libs/http-parser:0/2.6.2
+			net-libs/http-parser:0/2.8.0
 			net-libs/libssh2:=
 			net-misc/curl:=[ssl]
 			sys-libs/zlib:=
