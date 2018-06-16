@@ -1,7 +1,7 @@
 # Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="6"
+EAPI=6
 
 inherit eutils flag-o-matic prefix systemd
 
@@ -12,9 +12,8 @@ SRC_URI="https://rsync.samba.org/ftp/rsync/src/${P}.tar.gz"
 
 LICENSE="GPL-3"
 SLOT="0"
-if [[ ${PV} != *_pre ]] ; then
+[[ ${PV} = *_pre* ]] || \
 KEYWORDS="alpha amd64 arm arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~ppc-aix ~x64-cygwin ~amd64-fbsd ~x86-fbsd ~amd64-linux ~arm-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~m68k-mint ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
-fi
 IUSE="acl examples iconv ipv6 static stunnel xattr"
 
 LIB_DEPEND="acl? ( virtual/acl[static-libs(+)] )
@@ -25,34 +24,34 @@ RDEPEND="!static? ( ${LIB_DEPEND//\[static-libs(+)]} )
 DEPEND="${RDEPEND}
 	static? ( ${LIB_DEPEND} )"
 
-PATCHES=(
-	"${FILESDIR}"/${PN}-3.1.2-CVE-2017-16548.patch
-	"${FILESDIR}"/${PN}-3.1.2-CVE-2017-17433.patch
-	"${FILESDIR}"/${PN}-3.1.2-CVE-2017-17434-part1.patch
-	"${FILESDIR}"/${PN}-3.1.2-CVE-2017-17434-part2.patch
-	"${FILESDIR}"/${PN}-3.1.2-CVE-2017-17433-fixup.patch
+PATCHES=( 
 	"${FILESDIR}"/${PN}-fix-musl-ipv6.patch
 )
 
-S=${WORKDIR}/${P/_/}
+S="${WORKDIR}/${P/_/}"
 
 src_configure() {
 	use static && append-ldflags -static
-	econf \
-		--without-included-popt \
-		$(use_enable acl acl-support) \
-		$(use_enable xattr xattr-support) \
-		$(use_enable ipv6) \
-		$(use_enable iconv) \
+	local myeconfargs=(
 		--with-rsyncd-conf="${EPREFIX}"/etc/rsyncd.conf
+		--without-included-popt
+		$(use_enable acl acl-support)
+		$(use_enable iconv)
+		$(use_enable ipv6)
+		$(use_enable xattr xattr-support)
+	)
+	econf "${myeconfargs[@]}"
 	touch proto.h-tstamp #421625
 }
 
 src_install() {
 	emake DESTDIR="${D}" install
+
 	newconfd "${FILESDIR}"/rsyncd.conf.d rsyncd
 	newinitd "${FILESDIR}"/rsyncd.init.d-r1 rsyncd
+
 	dodoc NEWS OLDNEWS README TODO tech_report.tex
+
 	insinto /etc
 	newins "${FILESDIR}"/rsyncd.conf-3.0.9-r1 rsyncd.conf
 
@@ -72,10 +71,10 @@ src_install() {
 	if use examples ; then
 		exeinto /usr/share/rsync
 		doexe support/*
-		rm -f "${ED}"/usr/share/rsync/{Makefile*,*.c}
+		rm -f "${ED%/}"/usr/share/rsync/{Makefile*,*.c}
 	fi
 
-	eprefixify "${ED}"/etc/{,xinetd.d}/rsyncd*
+	eprefixify "${ED%/}"/etc/{,xinetd.d}/rsyncd*
 
 	systemd_dounit "${FILESDIR}/rsyncd.service"
 }
