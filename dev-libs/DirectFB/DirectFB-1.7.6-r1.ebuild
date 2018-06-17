@@ -57,14 +57,13 @@ RDEPEND="
 	)
 	tremor? ( media-libs/tremor )
 	truetype? ( >=media-libs/freetype-2.0.1 )
-	vdpau? ( x11-proto/xproto x11-libs/libX11 x11-libs/libXext x11-libs/libvdpau )
+	vdpau? ( x11-libs/libX11 x11-libs/libXext x11-libs/libvdpau )
 	vorbis? ( media-libs/libvorbis )
 	webp? ( media-libs/libwebp )
 	X? ( x11-libs/libXext x11-libs/libX11 )
 	xine? ( media-libs/xine-lib[vdpau?] )
 	zlib? ( sys-libs/zlib )	"
-DEPEND="${RDEPEND}
-	X? ( x11-proto/xextproto x11-proto/xproto )"
+DEPEND="${RDEPEND}"
 
 src_prepare() {
 	epatch \
@@ -203,3 +202,4 @@ pkg_postinst() {
 	ewarn "unexpectedly set in absolute mode in all DirectFB applications."
 	ewarn "This can be fixed by removing linuxinput from INPUT_DEVICES."
 }
+
