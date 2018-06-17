@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -22,8 +22,7 @@ RDEPEND="virtual/jpeg:0
 	x11-libs/libXxf86vm"
 DEPEND="${RDEPEND}
 	app-arch/unzip
-	x11-proto/xproto
-	x11-proto/xf86vidmodeproto"
+	x11-base/xorg-proto"
 
 S=${WORKDIR}/${P}/source/${PN^}
 
