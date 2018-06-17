@@ -202,4 +202,3 @@ pkg_postinst() {
 	ewarn "unexpectedly set in absolute mode in all DirectFB applications."
 	ewarn "This can be fixed by removing linuxinput from INPUT_DEVICES."
 }
-

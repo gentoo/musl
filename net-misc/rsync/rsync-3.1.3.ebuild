@@ -24,7 +24,7 @@ RDEPEND="!static? ( ${LIB_DEPEND//\[static-libs(+)]} )
 DEPEND="${RDEPEND}
 	static? ( ${LIB_DEPEND} )"
 
-PATCHES=( 
+PATCHES=(
 	"${FILESDIR}"/${PN}-fix-musl-ipv6.patch
 )
 
