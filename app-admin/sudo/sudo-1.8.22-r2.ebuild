@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -14,8 +14,8 @@ case ${P} in
 esac
 
 DESCRIPTION="Allows users or groups to run commands as other users"
-HOMEPAGE="http://www.sudo.ws/"
-SRC_URI="http://www.sudo.ws/sudo/dist/${uri_prefix}${MY_P}.tar.gz
+HOMEPAGE="https://www.sudo.ws/"
+SRC_URI="https://www.sudo.ws/sudo/dist/${uri_prefix}${MY_P}.tar.gz
 	ftp://ftp.sudo.ws/pub/sudo/${uri_prefix}${MY_P}.tar.gz"
 
 # Basic license is ISC-style as-is, some files are released under
@@ -23,14 +23,15 @@ SRC_URI="http://www.sudo.ws/sudo/dist/${uri_prefix}${MY_P}.tar.gz
 LICENSE="ISC BSD"
 SLOT="0"
 if [[ ${PV} != *_beta* ]] && [[ ${PV} != *_rc* ]] ; then
-	KEYWORDS="x86"
+	KEYWORDS="alpha amd64 arm arm64 hppa ia64 ~m68k ~mips ppc ppc64 ~s390 ~sh sparc x86 ~amd64-fbsd ~x86-fbsd ~sparc-solaris"
 fi
-IUSE="gcrypt ldap nls pam offensive openssl selinux skey +sendmail"
+IUSE="gcrypt ldap nls pam offensive openssl sasl selinux +sendmail skey"
 
 CDEPEND="
 	gcrypt? ( dev-libs/libgcrypt:= )
 	openssl? ( dev-libs/openssl:0= )
 	pam? ( virtual/pam )
+	sasl? ( dev-libs/cyrus-sasl )
 	skey? ( >=sys-auth/skey-1.1.5-r1 )
 	ldap? (
 		>=net-nds/openldap-2.1.30-r1
@@ -129,6 +130,7 @@ src_configure() {
 		$(use_enable gcrypt)
 		$(use_enable nls)
 		$(use_enable openssl)
+		$(use_enable sasl)
 		$(use_with offensive insults)
 		$(use_with offensive all-insults)
 		$(use_with ldap ldap_conf_file /etc/ldap.conf.sudo)
@@ -172,15 +174,22 @@ src_install() {
 
 	pamd_mimic system-auth sudo auth account session
 
-	keepdir /var/db/sudo
-	fperms 0700 /var/db/sudo
+	keepdir /var/db/sudo/lectured
+	fperms 0700 /var/db/sudo/lectured
+	fperms 0711 /var/db/sudo #652958
 
 	# Don't install into /var/run as that is a tmpfs most of the time
 	# (bug #504854)
-	rm -rf "${D}"/var/run
+	rm -rf "${ED}"/var/run
 }
 
 pkg_postinst() {
+	#652958
+	local sudo_db="${EROOT}/var/db/sudo"
+	if [[ "$(stat -c %a "${sudo_db}")" -ne 711 ]] ; then
+		chmod 711 "${sudo_db}" || die
+	fi
+
 	if use ldap ; then
 		ewarn
 		ewarn "sudo uses the /etc/ldap.conf.sudo file for ldap configuration."
