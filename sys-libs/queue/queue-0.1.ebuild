@@ -4,7 +4,7 @@
 EAPI=5
 
 DESCRIPTION="Install <sys/queue.h> from glibc."
-HOMEPAGE="http://www.gnu.org/software/libc/libc.html"
+HOMEPAGE="https://www.gnu.org/software/libc/libc.html"
 
 LICENSE="BSD"
 SLOT="0"
