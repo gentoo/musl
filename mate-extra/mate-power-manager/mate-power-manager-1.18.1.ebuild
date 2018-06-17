@@ -70,4 +70,3 @@ src_test() {
 
 	dbus-launch Xemake check || die "Test phase failed"
 }
-
