@@ -261,4 +261,3 @@ pkg_postinst() {
 	# also change the homedir if the user has existed before
 	usermod -d "/var/lib/mpd" mpd
 }
-
