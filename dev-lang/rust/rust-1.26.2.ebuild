@@ -305,10 +305,13 @@ src_install() {
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-analysis-$(rust_host ${ARCH})" || die
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-src" || die
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rustfmt-preview" || die
+
+		rm "${D}/usr/share/doc/${P}/LICENSE-APACHE.old" || die
+		rm "${D}/usr/share/doc/${P}/LICENSE-MIT.old" || die
 	fi
 
-	rm "${D}/usr/share/doc/${P}"/LICENSE-APACHE{,.old} || die
-	rm "${D}/usr/share/doc/${P}"/LICENSE-MIT{,.old} || die
+	rm "${D}/usr/share/doc/${P}/LICENSE-APACHE" || die
+	rm "${D}/usr/share/doc/${P}/LICENSE-MIT" || die
 
 	docompress "/usr/share/${P}/man"
 
