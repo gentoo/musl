@@ -1,5 +1,5 @@
---- a/cargo_home/gentoo/libgit2-sys/libgit2/src/streams/openssl.c	2018-05-07 18:50:07 UTC
-+++ b/cargo_home/gentoo/libgit2-sys/libgit2/src/streams/openssl.c
+--- a/cargo_home/gentoo/libgit2-sys-0.7.1/libgit2/src/streams/openssl.c	2018-05-07 18:50:07 UTC
++++ b/cargo_home/gentoo/libgit2-sys-0.7.1/libgit2/src/streams/openssl.c
 @@ -104,7 +104,8 @@ int git_openssl_stream_global_init(void)
  	ssl_opts |= SSL_OP_NO_COMPRESSION;
  #endif
@@ -10,8 +10,8 @@
  	SSL_load_error_strings();
  	OpenSSL_add_ssl_algorithms();
  #else
---- a/cargo_home/gentoo/libgit2-sys/libgit2/src/streams/openssl.h	2018-05-07 18:50:07 UTC
-+++ b/cargo_home/gentoo/libgit2-sys/libgit2/src/streams/openssl.h
+--- a/cargo_home/gentoo/libgit2-sys-0.7.1/libgit2/src/streams/openssl.h	2018-05-07 18:50:07 UTC
++++ b/cargo_home/gentoo/libgit2-sys-0.7.1/libgit2/src/streams/openssl.h
 @@ -31,7 +31,8 @@ extern int git_openssl__set_cert_location(const char *
  
  
