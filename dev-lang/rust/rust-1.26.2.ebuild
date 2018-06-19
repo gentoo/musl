@@ -68,10 +68,7 @@ RDEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 		jemalloc? ( dev-libs/jemalloc )
 		system-llvm? ( sys-devel/llvm )
 		extended? (
-			libressl? (
-				>=dev-libs/libressl-2.5.0:=
-				<dev-libs/libressl-2.7.0:=
-			)
+			libressl? ( dev-libs/libressl:0= )
 			!libressl? ( dev-libs/openssl:0= )
 			net-libs/http-parser:0/2.8.0
 			net-libs/libssh2:=
@@ -107,6 +104,7 @@ PATCHES=(
 	"${FILESDIR}/1.26.2/0008-Don-t-pass-CFLAGS-to-the-C-compiler.patch"
 	"${FILESDIR}/1.25.0/0009-liblibc.patch"
 	"${FILESDIR}/1.25.0/0010-llvm.patch"
+	"${FILESDIR}/rust-1.26.0-libressl-2.7.0.patch"
 )
 
 S="${WORKDIR}/${MY_P}-src"
