@@ -124,7 +124,7 @@ winapi-i686-pc-windows-gnu-0.4.0
 winapi-x86_64-pc-windows-gnu-0.4.0
 wincolor-0.1.6"
 
-inherit bash-completion-r1 cargo versionator
+inherit bash-completion-r1 cargo epatch versionator
 
 case "${CHOST}" in
 	armv7a*)
@@ -201,6 +201,12 @@ DEPEND="
 	sys-apps/sed"
 
 PATCHES=()
+
+src_prepare() {
+	default
+
+	(cd ${WORKDIR} && epatch "${FILESDIR}/cargo27-libressl27.patch" || die "Could not apply patch")
+}
 
 src_configure() {
 	# Do nothing
