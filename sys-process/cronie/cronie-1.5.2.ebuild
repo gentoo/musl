@@ -49,7 +49,9 @@ src_configure() {
 		--with-daemon_groupname=cron
 	)
 
-	use elibc_musl && append-ldflags "-lobstack"
+	if use anacron; then
+		use elibc_musl && append-cflags "-lobstack"
+	fi
 	SPOOL_DIR="/var/spool/cron/crontabs" \
 	ANACRON_SPOOL_DIR="/var/spool/anacron" \
 	econf "${myeconfargs[@]}"
