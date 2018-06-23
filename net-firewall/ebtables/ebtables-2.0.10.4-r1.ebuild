@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="4"
@@ -8,17 +8,20 @@ inherit versionator eutils toolchain-funcs multilib flag-o-matic
 MY_PV=$(replace_version_separator 3 '-' )
 MY_P=${PN}-v${MY_PV}
 
-DESCRIPTION="Utility that enables basic Ethernet frame filtering on a Linux bridge, MAC NAT and brouting"
+DESCRIPTION="Controls Ethernet frame filtering on a Linux bridge, MAC NAT and brouting"
 HOMEPAGE="http://ebtables.sourceforge.net/"
 SRC_URI="mirror://sourceforge/${PN}/${MY_P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~ppc ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
 IUSE="+perl static"
 
 # The ebtables-save script is written in perl.
-RDEPEND="perl? ( dev-lang/perl )"
+RDEPEND="perl? ( dev-lang/perl )
+	!<net-firewall/iptables-1.6.2-r2[nftables(-)]
+	!net-misc/ethertypes
+"
 
 S=${WORKDIR}/${MY_P}
 
@@ -32,11 +35,6 @@ pkg_setup() {
 src_prepare() {
 	# Enhance ebtables-save to take table names as parameters bug #189315
 	epatch "${FILESDIR}/${PN}-2.0.8.1-ebt-save.diff"
-
-	# Musl fixes
-	epatch "${FILESDIR}/musl-fixes.patch"
-	sed -i 's,<linux/if_ether.h>,,netinet/if_ether.h>,g; /<linux\/if_pppox.h>/d' include/linux/netfilter_bridge.h include/linux/netfilter_bridge/ebtables.h extensions/ebt_*.c
-	rm -f include/linux/if_ether.h
 
 	sed -i -e "s,^MANDIR:=.*,MANDIR:=/usr/share/man," \
 		-e "s,^BINDIR:=.*,BINDIR:=/sbin," \
