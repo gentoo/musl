@@ -1,0 +1,25 @@
+--- a/src/app/main.cpp
++++ b/src/app/main.cpp
+@@ -58,14 +58,6 @@
+ #endif // DISABLE_GUI
+ 
+ #include <signal.h>
+-#ifdef STACKTRACE
+-#ifdef Q_OS_UNIX
+-#include "stacktrace.h"
+-#else
+-#include "stacktrace_win.h"
+-#include "stacktrace_win_dlg.h"
+-#endif // Q_OS_UNIX
+-#endif //STACKTRACE
+ 
+ #include "application.h"
+ #include "base/profile.h"
+@@ -304,7 +296,6 @@
+     reportToUser(msg);
+     reportToUser(sigName);
+     reportToUser("\n");
+-    print_stacktrace();  // unsafe
+ #endif
+ 
+ #if defined Q_OS_WIN

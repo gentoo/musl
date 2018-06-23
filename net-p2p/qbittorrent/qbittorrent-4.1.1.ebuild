@@ -6,16 +6,16 @@ EAPI=6
 inherit cmake-utils gnome2-utils xdg-utils
 
 DESCRIPTION="BitTorrent client in C++ and Qt"
-HOMEPAGE="https://www.qbittorrent.org/"
+HOMEPAGE="https://www.qbittorrent.org/
+	  https://github.com/qbittorrent/qBittorrent"
 
 if [[ ${PV} == *9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/${PN}/qBittorrent.git"
 else
-	MY_P=${P/_}
-	SRC_URI="mirror://sourceforge/${PN}/${MY_P}.tar.xz"
-	KEYWORDS="amd64 ~arm ~ppc64 x86"
-	S=${WORKDIR}/${MY_P}
+	SRC_URI="https://github.com/qbittorrent/qBittorrent/archive/release-${PV}.tar.gz -> ${P}.tar.gz"
+	KEYWORDS="~amd64 ~arm ~ppc64 ~x86"
+	S="${WORKDIR}/qBittorrent-release-${PV}"
 fi
 
 LICENSE="GPL-2"
@@ -30,6 +30,7 @@ RDEPEND="
 	>=dev-qt/qtsingleapplication-2.6.1_p20130904-r1[qt5(+),X?]
 	dev-qt/qtxml:5
 	>=net-libs/libtorrent-rasterbar-1.0.6:0=
+	dev-libs/geoip
 	sys-libs/zlib
 	dbus? ( dev-qt/qtdbus:5 )
 	X? (
@@ -42,7 +43,7 @@ DEPEND="${RDEPEND}
 	virtual/pkgconfig"
 
 DOCS=( AUTHORS Changelog CONTRIBUTING.md README.md TODO )
-PATCHES=( "${FILESDIR}/${PN}-4.0.4-werror.patch" )
+PATCHES=( "${FILESDIR}/${PN}-4.1.1-musl.patch" )
 
 src_configure() {
 	local mycmakeargs=(
