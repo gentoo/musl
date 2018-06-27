@@ -17,6 +17,7 @@ LLVM_P=llvm-${PV/_/}.src
 DESCRIPTION="Compiler runtime libraries for clang (sanitizers & xray)"
 HOMEPAGE="https://llvm.org/"
 SRC_URI="https://releases.llvm.org/${PV/_//}/${MY_P}.tar.xz
+	https://dev.gentoo.org/~mgorny/dist/llvm/${P}-patchset.tar.xz
 	test? ( https://releases.llvm.org/${PV/_//}/${LLVM_P}.tar.xz )"
 
 LICENSE="|| ( UoI-NCSA MIT )"
@@ -39,7 +40,7 @@ DEPEND="
 
 S=${WORKDIR}/${MY_P}
 
-PATCHES=( "${FILESDIR}"/${PN}-6.0.0-musl-patches.patch )
+PATCHES=( "${FILESDIR}"/${PN}-6.0.1-musl-patches.patch )
 
 # least intrusive of all
 CMAKE_BUILD_TYPE=RelWithDebInfo
@@ -64,6 +65,8 @@ pkg_setup() {
 src_unpack() {
 	einfo "Unpacking ${MY_P}.tar.xz ..."
 	tar -xf "${DISTDIR}/${MY_P}.tar.xz" || die
+	einfo "Unpacking ${P}-patchset.tar.xz ..."
+	tar -xf "${DISTDIR}/${P}-patchset.tar.xz" || die
 
 	if use test; then
 		einfo "Unpacking parts of ${LLVM_P}.tar.xz ..."
@@ -75,6 +78,9 @@ src_unpack() {
 
 src_prepare() {
 	cmake-utils_src_prepare
+
+	# apply the patchset (new glibc fixes)
+	eapply "${WORKDIR}/${P}-patchset"
 
 	if use test; then
 		# remove tests that are broken by new glibc
