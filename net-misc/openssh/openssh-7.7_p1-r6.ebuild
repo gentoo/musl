@@ -294,7 +294,7 @@ src_configure() {
 	)
 
 	# stackprotect is broken on musl x86
-	use elibc_musl && use x86 && myconf+=( --without-stackprotect)
+	use elibc_musl && use x86 && myconf+=( --without-stackprotect )
 
 	# The seccomp sandbox is broken on x32, so use the older method for now. #553748
 	use amd64 && [[ ${ABI} == "x32" ]] && myconf+=( --with-sandbox=rlimit )
