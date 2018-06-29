@@ -6,15 +6,16 @@ EAPI=6
 CRATES="
 aho-corasick-0.6.4
 ansi_term-0.11.0
-atty-0.2.9
-backtrace-0.3.6
+atty-0.2.10
+backtrace-0.3.7
 backtrace-sys-0.1.16
-bitflags-1.0.1
+bitflags-1.0.3
 bufstream-0.1.3
-cc-1.0.10
-cfg-if-0.1.2
+cargo-0.28.0
+cc-1.0.15
+cfg-if-0.1.3
 clap-2.31.2
-cmake-0.1.30
+cmake-0.1.31
 commoncrypto-0.2.0
 commoncrypto-sys-0.2.0
 core-foundation-0.5.1
@@ -23,13 +24,12 @@ crates-io-0.16.0
 crossbeam-0.3.2
 crypto-hash-0.3.1
 curl-0.4.12
-curl-sys-0.4.2
+curl-sys-0.4.5
 dtoa-0.4.2
-env_logger-0.5.9
+env_logger-0.5.10
 failure-0.1.1
 failure_derive-0.1.1
-filetime-0.1.15
-filetime-0.2.0
+filetime-0.2.1
 flate2-1.0.1
 fnv-1.0.6
 foreign-types-0.3.2
@@ -41,7 +41,6 @@ git2-0.7.1
 git2-curl-0.8.1
 glob-0.2.11
 globset-0.4.0
-hamcrest-0.1.1
 hex-0.3.2
 home-0.3.3
 humantime-1.1.1
@@ -54,7 +53,7 @@ lazy_static-1.0.0
 lazycell-0.6.0
 libc-0.2.40
 libgit2-sys-0.7.1
-libssh2-sys-0.2.6
+libssh2-sys-0.2.7
 libz-sys-1.0.18
 log-0.4.1
 matches-0.1.6
@@ -63,12 +62,12 @@ miniz-sys-0.1.10
 miow-0.3.1
 num-traits-0.2.4
 num_cpus-1.8.0
-openssl-0.10.6
+openssl-0.10.7
 openssl-probe-0.1.2
-openssl-sys-0.9.28
+openssl-sys-0.9.30
 percent-encoding-1.0.1
 pkg-config-0.3.11
-proc-macro2-0.3.7
+proc-macro2-0.3.8
 quick-error-1.2.1
 quote-0.3.15
 quote-0.5.2
@@ -143,7 +142,7 @@ case "${CHOST}" in
 		CARGOLIBC=${ELIBC/glibc/gnu} ;;
 esac
 CARGOHOST=${CARGOARCH}-unknown-${KERNEL}-${CARGOLIBC}
-CARGO_SNAPSHOT_VERSION="0.$(($(get_version_component_range 2) - 1)).0"
+CARGO_SNAPSHOT_VERSION="0.$(($(get_version_component_range 2) - 0)).0"
 
 DESCRIPTION="The Rust's package manager"
 HOMEPAGE="http://crates.io"

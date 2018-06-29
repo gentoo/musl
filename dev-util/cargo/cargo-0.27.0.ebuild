@@ -143,7 +143,7 @@ case "${CHOST}" in
 		CARGOLIBC=${ELIBC/glibc/gnu} ;;
 esac
 CARGOHOST=${CARGOARCH}-unknown-${KERNEL}-${CARGOLIBC}
-CARGO_SNAPSHOT_VERSION="0.$(($(get_version_component_range 2) - 1)).0"
+CARGO_SNAPSHOT_VERSION="0.$(($(get_version_component_range 2) - 0)).0"
 
 DESCRIPTION="The Rust's package manager"
 HOMEPAGE="http://crates.io"
@@ -182,7 +182,7 @@ IUSE="bash-completion doc libressl"
 COMMON_DEPEND="
 	libressl? ( dev-libs/libressl:0= )
 	!libressl? ( dev-libs/openssl:0= )
-	net-libs/http-parser:0/2.6.2
+	net-libs/http-parser:0/2.8.0
 	net-libs/libssh2:=
 	net-misc/curl:=[ssl]
 	sys-libs/zlib:=
