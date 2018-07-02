@@ -1,7 +1,17 @@
-diff -Naur pciutils-3.6.0.orig/lib/sysfs.c pciutils-3.6.0/lib/sysfs.c
---- pciutils-3.6.0.orig/lib/sysfs.c	2018-07-02 11:24:47.874595946 -0700
-+++ pciutils-3.6.0/lib/sysfs.c	2018-07-02 11:25:30.453595183 -0700
-@@ -133,7 +133,7 @@
+From 64716d37e2bed00e06fb3463214d979ca6b3e9c0 Mon Sep 17 00:00:00 2001
+From: 
+Date: Mon, 2 Jul 2018 18:22:29 -0500
+Subject: [PATCH] canonicalize_file_name only avaliable on glibc systems
+
+---
+ lib/sysfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/sysfs.c b/lib/sysfs.c
+index 1adb50f..c909d0c 100644
+--- a/lib/sysfs.c
++++ b/lib/sysfs.c
+@@ -133,7 +133,7 @@ sysfs_deref_link(struct pci_dev *d, char *link_name)
    sysfs_obj_name(d, "", path);
    strcat(path, rel_path);
  
@@ -10,3 +20,6 @@ diff -Naur pciutils-3.6.0.orig/lib/sysfs.c pciutils-3.6.0/lib/sysfs.c
  }
  
  static int
+-- 
+2.18.0
+
