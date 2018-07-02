@@ -136,7 +136,7 @@ PATCHES=(
 	"${PATCHDIR}/patches/${MY_PN}-1.6-memset-O3.patch" #480508
 	"${PATCHDIR}/patches/${MY_PN}-2.0-multislot-apploader.patch" #310611
 	"${PATCHDIR}/patches/${MY_PN}-2.0-rearrange-manpages.patch" #469418 #617864
-	"${FILESDIR}/${MY_PN}-2.0-musl-dlclose.patch
+	"${FILESDIR}/${MY_PN}-2.0-musl-dlclose.patch"
 )
 PATCHES_BIN=()
 
