@@ -60,7 +60,7 @@ SRC_URI="${SRC_URI}
 LICENSE="GPL-2 LGPL-2"
 SLOT="0"
 if [[ ${PV} != 9999* ]] ; then
-	KEYWORDS="amd64 ~arm arm64 ~mips ppc x86"
+	KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
 fi
 IUSE="+client lzma multitarget nls +python +server test vanilla xml"
 REQUIRED_USE="
@@ -69,9 +69,9 @@ REQUIRED_USE="
 "
 
 RDEPEND="
-	dev-libs/mpfr:=
 	server? ( !dev-util/gdbserver )
 	client? (
+		dev-libs/mpfr:0=
 		>=sys-libs/ncurses-5.2-r2:0=
 		sys-libs/readline:0=
 		lzma? ( app-arch/xz-utils )
@@ -124,7 +124,6 @@ src_configure() {
 	local myconf=(
 		--with-pkgversion="$(gdb_branding)"
 		--with-bugurl='https://bugs.gentoo.org/'
-		--with-mpfr
 		--disable-werror
 		# Disable modules that are in a combined binutils/gdb tree. #490566
 		--disable-{binutils,etc,gas,gold,gprof,ld}
