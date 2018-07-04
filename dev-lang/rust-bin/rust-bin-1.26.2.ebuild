@@ -22,13 +22,10 @@ SLOT="stable"
 KEYWORDS="~amd64 ~arm ~arm64 ~x86"
 IUSE="doc extended"
 
-CARGO_DEPEND_VERSION="0.$(($(get_version_component_range 2) + 1)).0"
-
 DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	!dev-lang/rust:0
 "
 RDEPEND="${DEPEND}"
-PDEPEND=">=dev-util/cargo-${CARGO_DEPEND_VERSION}"
 
 QA_PREBUILT="
 	opt/${P}/bin/rustc-bin-${PV}
