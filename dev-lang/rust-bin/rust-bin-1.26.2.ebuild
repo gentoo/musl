@@ -9,17 +9,17 @@ MY_P="rust-${PV}"
 
 DESCRIPTION="Systems programming language from Mozilla"
 HOMEPAGE="https://www.rust-lang.org/"
-SRC_URI="amd64? ( https://static.rust-lang.org/dist/${MY_P}-x86_64-unknown-linux-gnu.tar.xz )
+SRC_URI="amd64? ( https://portage.smaeul.xyz/distfiles/${MY_P}-x86_64-unknown-linux-musl.tar.xz )
 	arm? (
-		https://static.rust-lang.org/dist/${MY_P}-arm-unknown-linux-gnueabi.tar.xz
-		https://static.rust-lang.org/dist/${MY_P}-arm-unknown-linux-gnueabihf.tar.xz
-		https://static.rust-lang.org/dist/${MY_P}-armv7-unknown-linux-gnueabihf.tar.xz
+		https://portage.smaeul.xyz/distfiles/${MY_P}-arm-unknown-linux-musleabi.tar.xz
+		https://portage.smaeul.xyz/distfiles/${MY_P}-armv7-unknown-linux-musleabihf.tar.xz
 		)
-	x86? ( https://static.rust-lang.org/dist/${MY_P}-i686-unknown-linux-gnu.tar.xz )"
+	arm64? ( https://portage.smaeul.xyz/distfiles/${MY_P}-aarch64-unknown-linux-musl.tar.xz )
+	x86? ( https://portage.smaeul.xyz/distfiles/${MY_P}-i686-unknown-linux-musl.tar.xz )"
 
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 SLOT="stable"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~x86"
 IUSE="doc"
 
 CARGO_DEPEND_VERSION="0.$(($(get_version_component_range 2) + 1)).0"
@@ -41,6 +41,8 @@ QA_PREBUILT="
 pkg_pretend () {
 	if [[ "$(tc-is-softfloat)" != "no" ]] && [[ ${CHOST} == armv7* ]]; then
 		die "${CHOST} is not supported by upstream Rust. You must use a hard float version."
+	elif [[ ${CHOST} == armv6*h* ]]; then
+		die "${CHOST} is not supported on musl. You must use a soft float version."
 	fi
 }
 
@@ -48,17 +50,17 @@ src_unpack() {
 	default
 
 	local postfix
-	use amd64 && postfix=x86_64-unknown-linux-gnu
+	use amd64 && postfix=x86_64-unknown-linux-musl
 
 	if use arm && [[ "$(tc-is-softfloat)" != "no" ]] && [[ ${CHOST} == armv6* ]]; then
-		postfix=arm-unknown-linux-gnueabi
-	elif use arm && [[ ${CHOST} == armv6*h* ]]; then
-		postfix=arm-unknown-linux-gnueabihf
+		postfix=arm-unknown-linux-musleabi
 	elif use arm && [[ ${CHOST} == armv7*h* ]]; then
-		postfix=armv7-unknown-linux-gnueabihf
+		postfix=armv7-unknown-linux-musleabihf
 	fi
 
-	use x86 && postfix=i686-unknown-linux-gnu
+	use arm64 && postfix=aarch64-unknown-linux-musl
+	use x86 && postfix=i686-unknown-linux-musl
+
 	mv "${WORKDIR}/${MY_P}-${postfix}" "${S}" || die
 }
 
