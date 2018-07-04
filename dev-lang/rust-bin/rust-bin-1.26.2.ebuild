@@ -20,7 +20,7 @@ SRC_URI="amd64? ( https://portage.smaeul.xyz/distfiles/${MY_P}-x86_64-unknown-li
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 SLOT="stable"
 KEYWORDS="~amd64 ~arm ~arm64 ~x86"
-IUSE="doc"
+IUSE="doc extended"
 
 CARGO_DEPEND_VERSION="0.$(($(get_version_component_range 2) + 1)).0"
 
@@ -66,7 +66,7 @@ src_unpack() {
 
 src_install() {
 	local std=$(grep 'std' ./components)
-	local components="rustc,${std}"
+	local components="rustc,${std},cargo"
 	use doc && components="${components},rust-docs"
 	./install.sh \
 		--components="${components}" \
@@ -75,6 +75,12 @@ src_install() {
 		--mandir="${D}/usr/share/${P}/man" \
 		--disable-ldconfig \
 		|| die
+
+	if use extended; then
+		dosym "/opt/${P}/bin/cargo" /usr/bin/cargo
+		dosym "/opt/${P}/share/zsh/site-functions/_cargo" /usr/share/zsh/site-functions/_cargo
+		newbashcomp "${D}/opt/${P}/etc/bash_completion.d/cargo" cargo
+	fi
 
 	local rustc=rustc-bin-${PV}
 	local rustdoc=rustdoc-bin-${PV}
