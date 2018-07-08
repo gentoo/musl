@@ -275,7 +275,7 @@ src_prepare() {
 	eapply "${FILESDIR}"/${PN}-17-musl-invocation_name.patch
 	eapply "${FILESDIR}"/${PN}-18-musl-pthread.patch
 	eapply "${FILESDIR}"/${PN}-18-intel-missing-time_t.patch
-
+	eapply "${FILESDIR}"/${PN}-18-musl-amdgpu-include-pthread.patch
 	eautoreconf
 
 	eapply_user
