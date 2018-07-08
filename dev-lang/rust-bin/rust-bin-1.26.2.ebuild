@@ -25,7 +25,10 @@ IUSE="doc extended"
 DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	!dev-lang/rust:0
 "
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND}
+	net-libs/libssh2
+	net-libs/http-parser:0/2.8.0
+"
 
 QA_PREBUILT="
 	opt/${P}/bin/rustc-bin-${PV}
