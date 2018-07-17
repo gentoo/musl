@@ -20,7 +20,7 @@ SRC_URI="amd64? ( https://portage.smaeul.xyz/distfiles/${MY_P}-x86_64-unknown-li
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 SLOT="stable"
 KEYWORDS="~amd64 ~arm ~arm64 ~x86"
-IUSE="doc extended"
+IUSE="doc cargo"
 
 DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	!dev-lang/rust:0
@@ -66,8 +66,9 @@ src_unpack() {
 
 src_install() {
 	local std=$(grep 'std' ./components)
-	local components="rustc,${std},cargo"
+	local components="rustc,${std}"
 	use doc && components="${components},rust-docs"
+	use cargo && components="${components},cargo"
 	./install.sh \
 		--components="${components}" \
 		--disable-verify \
@@ -76,7 +77,7 @@ src_install() {
 		--disable-ldconfig \
 		|| die
 
-	if use extended; then
+	if use cargo; then
 		dosym "/opt/${P}/bin/cargo" /usr/bin/cargo
 		dosym "/opt/${P}/share/zsh/site-functions/_cargo" /usr/share/zsh/site-functions/_cargo
 		newbashcomp "${D}/opt/${P}/etc/bash_completion.d/cargo" cargo
@@ -93,6 +94,8 @@ src_install() {
 	dosym "../../opt/${P}/bin/${rustc}" "/usr/bin/${rustc}"
 	dosym "../../opt/${P}/bin/${rustdoc}" "/usr/bin/${rustdoc}"
 	dosym "../../opt/${P}/bin/${rustgdb}" "/usr/bin/${rustgdb}"
+
+
 
 	cat <<-EOF > "${T}"/50${P}
 	LDPATH="/opt/${P}/lib"
