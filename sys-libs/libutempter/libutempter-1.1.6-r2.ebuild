@@ -11,7 +11,7 @@ SRC_URI="ftp://ftp.altlinux.org/pub/people/ldv/${PN}/${P}.tar.bz2"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="static-libs elibc_FreeBSD"
 
 RDEPEND="!sys-apps/utempter"

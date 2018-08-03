@@ -10,7 +10,7 @@ SRC_URI="https://${PN}.freedesktop.org/releases/${P}.tar.xz"
 
 LICENSE="BSD BSD-2 BSD-4 ISC"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="static-libs"
 
 DEPEND=">=sys-kernel/linux-headers-3.17"

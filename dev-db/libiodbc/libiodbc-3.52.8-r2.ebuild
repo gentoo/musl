@@ -11,7 +11,7 @@ DESCRIPTION="ODBC Interface for Linux"
 HOMEPAGE="http://www.iodbc.org/"
 SRC_URI="https://github.com/openlink/${MY_PN}/archive/v${PV}.zip -> ${P}.zip"
 
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 LICENSE="|| ( LGPL-2 BSD )"
 SLOT="0"
 IUSE="gtk"

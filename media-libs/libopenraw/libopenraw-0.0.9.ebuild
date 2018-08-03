@@ -10,7 +10,7 @@ SRC_URI="http://${PN}.freedesktop.org/download/${P}.tar.bz2"
 
 LICENSE="GPL-3 LGPL-3"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="gtk static-libs test"
 
 RDEPEND="virtual/jpeg:0

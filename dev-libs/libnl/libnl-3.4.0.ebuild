@@ -17,7 +17,7 @@ SRC_URI="
 "
 LICENSE="LGPL-2.1 utils? ( GPL-2 )"
 SLOT="3"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="static-libs python utils"
 
 RDEPEND="

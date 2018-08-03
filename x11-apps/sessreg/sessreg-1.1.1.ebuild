@@ -6,7 +6,7 @@ inherit xorg-2
 
 DESCRIPTION="manage utmp/wtmp entries for non-init clients"
 
-KEYWORDS="amd64 arm ia64 ~mips ppc ~sh sparc x86"
+KEYWORDS="amd64 arm arm64 ia64 ~mips ppc ~sh sparc x86"
 IUSE=""
 
 RDEPEND=""

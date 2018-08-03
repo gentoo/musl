@@ -11,7 +11,7 @@ SRC_URI="https://www.freedesktop.org/software/libmbim/${P}.tar.xz"
 
 LICENSE="LGPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="static-libs udev"
 
 RDEPEND=">=dev-libs/glib-2.32:2

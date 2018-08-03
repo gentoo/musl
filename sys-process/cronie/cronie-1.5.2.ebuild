@@ -10,7 +10,7 @@ HOMEPAGE="https://github.com/cronie-crond/cronie"
 SRC_URI="https://github.com/cronie-crond/cronie/archive/${P}.tar.gz"
 
 LICENSE="ISC BSD BSD-2 GPL-2"
-KEYWORDS="amd64 arm ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="+anacron +inotify pam selinux"
 
 DEPEND="pam? ( virtual/pam )

@@ -15,7 +15,7 @@ SRC_URI="http://www.linux-pam.org/library/${MY_P}.tar.bz2
 
 LICENSE="|| ( BSD GPL-2 )"
 SLOT="0"
-KEYWORDS="amd64 arm ia64 ~mips ppc sh sparc x86"
+KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sh sparc x86"
 IUSE="audit berkdb +cracklib debug nis nls +pie selinux test"
 
 RDEPEND="nls? ( >=virtual/libintl-0-r1[${MULTILIB_USEDEP}] )

@@ -60,7 +60,7 @@ SRC_URI="${SRC_URI}
 LICENSE="GPL-2 LGPL-2"
 SLOT="0"
 if [[ ${PV} != 9999* ]] ; then
-	KEYWORDS="amd64 ~arm arm64 ~mips ppc x86"
+	KEYWORDS="amd64 ~arm ~arm64 arm64 ~mips ppc x86"
 fi
 IUSE="+client lzma multitarget nls +python +server test vanilla xml"
 REQUIRED_USE="

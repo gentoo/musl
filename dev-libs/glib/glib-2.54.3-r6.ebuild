@@ -27,7 +27,7 @@ REQUIRED_USE="
 	test? ( ${PYTHON_REQUIRED_USE} )
 " # test dep left here and elsewhere to not forget, as global python requirement is supposed to be temporary until a split package is made with meson
 
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
 
 # Added util-linux multilib dependency to have libmount support (which
 # is always turned on on linux systems, unless explicitly disabled, but

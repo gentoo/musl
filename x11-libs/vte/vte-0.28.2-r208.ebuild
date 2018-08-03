@@ -11,7 +11,7 @@ HOMEPAGE="https://wiki.gnome.org/Apps/Terminal/VTE"
 
 LICENSE="LGPL-2+"
 SLOT="0"
-KEYWORDS="amd64 arm ia64 ~mips ppc ~sh sparc x86"
+KEYWORDS="amd64 arm arm64 ia64 ~mips ppc ~sh sparc x86"
 IUSE="debug +introspection python"
 REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 

@@ -15,7 +15,7 @@ SRC_URI="mirror://gentoo/gentoo-headers-base-${PV}-r1.tar.xz
 	${PATCH_VER:+https://dev.gentoo.org/~slyfox/distfiles/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}
 "
 
-KEYWORDS="~amd64 ~arm ~mips ~ppc ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
 
 DEPEND="app-arch/xz-utils
 	dev-lang/perl"

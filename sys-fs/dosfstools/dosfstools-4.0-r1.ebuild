@@ -11,7 +11,7 @@ SRC_URI="https://github.com/dosfstools/dosfstools/releases/download/v${PV}/${P}.
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="amd64 ~arm ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
+KEYWORDS="amd64 ~arm ~arm64 ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
 IUSE="compat +udev"
 
 CDEPEND="udev? ( virtual/libudev )"

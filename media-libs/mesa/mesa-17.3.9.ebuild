@@ -25,7 +25,7 @@ if [[ $PV == 9999 ]]; then
 	SRC_URI=""
 else
 	SRC_URI="https://mesa.freedesktop.org/archive/${MY_P}.tar.xz"
-	KEYWORDS="amd64 arm ia64 ~mips ppc ~sh sparc x86"
+	KEYWORDS="amd64 arm arm64 ia64 ~mips ppc ~sh sparc x86"
 fi
 
 LICENSE="MIT"

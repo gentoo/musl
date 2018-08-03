@@ -10,7 +10,7 @@ HOMEPAGE="https://dracut.wiki.kernel.org"
 SRC_URI="mirror://kernel/linux/utils/boot/${PN}/${P}.tar.xz"
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 ~arm ia64 ~mips ppc sparc x86"
+KEYWORDS="amd64 ~arm ~arm64 ia64 ~mips ppc sparc x86"
 IUSE="debug selinux"
 
 RESTRICT="test"

@@ -7,7 +7,7 @@ inherit qt4-build-multilib
 DESCRIPTION="The Qt3Support module for the Qt toolkit"
 
 if [[ ${QT4_BUILD_TYPE} == release ]]; then
-	KEYWORDS="amd64 arm ia64 ~mips ppc sparc x86"
+	KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sparc x86"
 fi
 
 IUSE="+accessibility"

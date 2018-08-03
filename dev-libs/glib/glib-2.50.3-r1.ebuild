@@ -27,7 +27,7 @@ REQUIRED_USE="
 	test? ( ${PYTHON_REQUIRED_USE} )
 "
 
-KEYWORDS="amd64 arm ia64 ~mips ppc sh sparc x86"
+KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sh sparc x86"
 
 # Added util-linux multilib dependency to have libmount support (which
 # is always turned on on linux systems, unless explicitly disabled, but

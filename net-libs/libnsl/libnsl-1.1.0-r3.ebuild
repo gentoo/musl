@@ -13,7 +13,7 @@ SLOT="0/2"
 LICENSE="LGPL-2.1+"
 
 # Stabilize together with glibc-2.26!
-KEYWORDS="~amd64 ~arm ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
 
 IUSE=""
 

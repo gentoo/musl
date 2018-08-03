@@ -7,7 +7,7 @@ inherit qt4-build-multilib
 DESCRIPTION="Cross-platform application development framework"
 
 if [[ ${QT4_BUILD_TYPE} == release ]]; then
-	KEYWORDS="amd64 arm ia64 ~mips ppc sparc x86"
+	KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sparc x86"
 fi
 
 IUSE="+glib iconv icu libressl qt3support ssl"

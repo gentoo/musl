@@ -14,7 +14,7 @@ SRC_URI="http://www.netfilter.org/projects/iptables/files/${P}.tar.bz2"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm ia64 ~mips ppc sh sparc x86"
+KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sh sparc x86"
 IUSE="conntrack ipv6 netlink static-libs"
 
 RDEPEND="
