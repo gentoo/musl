@@ -31,7 +31,7 @@ LLVM_TARGET_USEDEPS=${ALL_LLVM_TARGETS[@]/%/?}
 
 LICENSE="UoI-NCSA"
 SLOT="$(ver_cut 1)"
-KEYWORDS="~amd64 ~arm64 ~ppc64 ~x86 ~amd64-fbsd ~amd64-linux ~ppc-macos ~x64-macos ~x86-macos"
+KEYWORDS="amd64 arm64 ~ppc64 x86"
 IUSE="debug default-compiler-rt default-libcxx doc hardened +static-analyzer
 	test xml z3 kernel_FreeBSD ${ALL_LLVM_TARGETS[*]}"
 RESTRICT="!test? ( test )"
@@ -70,7 +70,7 @@ CMAKE_BUILD_TYPE=RelWithDebInfo
 
 PATCHES=(
 	# add Prefix include paths for Darwin
-	"${FILESDIR}"/5.0.1/darwin_prefix-include-paths.patch
+	"${FILESDIR}"/6.0.1/darwin_prefix-include-paths.patch
 
 	# fix test failure with default-compiler-rt
 	# https://bugs.gentoo.org/650316
