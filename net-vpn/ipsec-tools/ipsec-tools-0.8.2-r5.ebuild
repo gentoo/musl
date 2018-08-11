@@ -192,6 +192,7 @@ src_prepare() {
 	# musl fixes
 	eapply "${FILESDIR}"/${PN}-remove__P.patch
 	eapply "${FILESDIR}"/${PN}-remove_GLOB_TILDE.patch
+	eapply "${FILESDIR}"/${PN}-replace-strtouq.patch
 
 	AT_M4DIR="${S}" eautoreconf
 
