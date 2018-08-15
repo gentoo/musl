@@ -1,55 +1,53 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
-inherit autotools eutils flag-o-matic pam qmake-utils readme.gentoo-r1 systemd versionator xdg-utils
 
-TRUNK_VERSION="$(get_version_component_range 1-2)"
+inherit autotools eutils flag-o-matic pam qmake-utils readme.gentoo-r1 systemd vala xdg-utils
+
 DESCRIPTION="A lightweight display manager"
 HOMEPAGE="https://www.freedesktop.org/wiki/Software/LightDM"
-SRC_URI="https://launchpad.net/${PN}/${TRUNK_VERSION}/${PV}/+download/${P}.tar.xz
+SRC_URI="https://github.com/CanonicalLtd/lightdm/releases/download/${PV}/${P}.tar.xz
 	mirror://gentoo/introspection-20110205.m4.tar.bz2"
 
 LICENSE="GPL-3 LGPL-3"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
-IUSE="audit +gtk +introspection qt4 qt5 +gnome"
+KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~ppc64 ~x86"
+IUSE="audit +gnome +gtk +introspection qt5 vala"
 
-COMMON_DEPEND="audit? ( sys-process/audit )
-	>=dev-libs/glib-2.32.3:2
+COMMON_DEPEND="
+	>=dev-libs/glib-2.44.0:2
 	dev-libs/libxml2
-	gnome? ( sys-apps/accountsservice )
 	virtual/pam
 	x11-libs/libX11
 	>=x11-libs/libxklavier-5
+	audit? ( sys-process/audit )
+	gnome? ( sys-apps/accountsservice )
 	introspection? ( >=dev-libs/gobject-introspection-1 )
-	qt4? (
-		dev-qt/qtcore:4
-		dev-qt/qtdbus:4
-		dev-qt/qtgui:4
-		)
 	qt5? (
 		dev-qt/qtcore:5
 		dev-qt/qtdbus:5
 		dev-qt/qtgui:5
-		)"
+	)
+"
 RDEPEND="${COMMON_DEPEND}
 	>=sys-auth/pambase-20101024-r2"
 DEPEND="${COMMON_DEPEND}
 	dev-util/gtk-doc-am
 	dev-util/intltool
-	gnome? ( gnome-base/gnome-common )
 	sys-devel/gettext
-	virtual/pkgconfig"
+	virtual/pkgconfig
+	gnome? ( gnome-base/gnome-common )
+	vala? ( $(vala_depend) )
+"
 PDEPEND="gtk? ( x11-misc/lightdm-gtk-greeter )"
 
 DOCS=( NEWS )
 RESTRICT="test"
 
 src_prepare() {
-	epatch "${FILESDIR}/${PN}-1.21.3-use-is-utf8.patch"
 	epatch "${FILESDIR}/${PN}-1.21.0-musl-is-linux.patch"
-	epatch "${FILESDIR}/${PN}-1.21.0-musl-language.patch"
+	epatch "${FILESDIR}/${PN}-1.26.0-musl-language.patch"
 	epatch "${FILESDIR}/${PN}-1.21.0-musl-updwtmpx.patch"
 
 	xdg_environment_reset
@@ -63,8 +61,9 @@ src_prepare() {
 		data/lightdm.conf || die "Failed to fix lightdm.conf"
 
 	# use correct version of qmake. bug #566950
-	sed -i -e "/AC_CHECK_TOOLS(MOC4/a AC_SUBST(MOC4,$(qt4_get_bindir)/moc)" configure.ac || die
-	sed -i -e "/AC_CHECK_TOOLS(MOC5/a AC_SUBST(MOC5,$(qt5_get_bindir)/moc)" configure.ac || die
+	sed \
+		-e "/AC_CHECK_TOOLS(MOC5/a AC_SUBST(MOC5,$(qt5_get_bindir)/moc)" \
+		-i configure.ac || die
 
 	default
 
@@ -75,6 +74,8 @@ src_prepare() {
 	else
 		AT_M4DIR=${WORKDIR} eautoreconf
 	fi
+
+	use vala && vala_src_prepare
 }
 
 src_configure() {
@@ -93,17 +94,20 @@ src_configure() {
 
 	# also disable tests because libsystem.c does not build. Tests are
 	# restricted so it does not matter anyway.
-	econf \
-		--localstatedir=/var \
-		--disable-static \
-		--disable-tests \
-		$(use_enable audit libaudit) \
-		$(use_enable introspection) \
-		$(use_enable qt4 liblightdm-qt) \
-		$(use_enable qt5 liblightdm-qt5) \
-		--with-user-session=${_session} \
-		--with-greeter-session=${_greeter} \
+	local myeconfargs=(
+		--localstatedir=/var
+		--disable-static
+		--disable-tests
+		$(use_enable audit libaudit)
+		$(use_enable introspection)
+		--disable-liblightdm-qt
+		$(use_enable qt5 liblightdm-qt5)
+		$(use_enable vala)
+		--with-user-session=${_session}
+		--with-greeter-session=${_greeter}
 		--with-greeter-user=${_user}
+	)
+	econf "${myeconfargs[@]}"
 }
 
 src_install() {
@@ -111,8 +115,8 @@ src_install() {
 
 	# Delete apparmor profiles because they only work with Ubuntu's
 	# apparmor package. Bug #494426
-	if [[ -d ${D}/etc/apparmor.d ]]; then
-		rm -r "${D}/etc/apparmor.d" || die \
+	if [[ -d ${ED%/}/etc/apparmor.d ]]; then
+		rm -r "${ED%/}/etc/apparmor.d" || die \
 			"Failed to remove apparmor profiles"
 	fi
 
@@ -123,11 +127,11 @@ src_install() {
 	# /var/lib/lightdm-data could be useful. Bug #522228
 	dodir /var/lib/lightdm-data
 
-	prune_libtool_files --all
-	rm -rf "${ED}"/etc/init
+	find "${ED}" \( -name '*.a' -o -name "*.la" \) -delete || die
+	rm -rf "${ED%/}"/etc/init
 
 	# Remove existing pam file. We will build a new one. Bug #524792
-	rm -rf "${ED}"/etc/pam.d/${PN}{,-greeter}
+	rm -rf "${ED%/}"/etc/pam.d/${PN}{,-greeter}
 	pamd_mimic system-local-login ${PN} auth account password session #372229
 	pamd_mimic system-local-login ${PN}-greeter auth account password session #372229
 	dopamd "${FILESDIR}"/${PN}-autologin #390863, #423163
@@ -135,4 +139,8 @@ src_install() {
 	readme.gentoo_create_doc
 
 	systemd_dounit "${FILESDIR}/${PN}.service"
+}
+
+pkg_postinst() {
+	systemd_reenable "${PN}.service"
 }
