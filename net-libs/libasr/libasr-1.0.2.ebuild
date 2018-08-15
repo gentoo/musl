@@ -18,7 +18,7 @@ DEPEND="dev-libs/libbsd"
 RDEPEND="${DEPEND}"
 
 src_prepare(){
-    # Patch from https://git.alpinelinux.org/cgit/aports/plain/main/libasr/0002-Replace-missing-res_randomid-with-the-more-secure-ar.patch, changed LIBS to incluse -lbsd
+	# Patch from https://git.alpinelinux.org/cgit/aports/plain/main/libasr/0002-Replace-missing-res_randomid-with-the-more-secure-ar.patch, changed LIBS to incluse -lbsd
 	epatch "${FILESDIR}/0002-Replace-missing-res_randomid-with-the-more-secure-ar.patch"
 	default
 	eautoreconf
