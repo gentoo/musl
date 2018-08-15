@@ -1,8 +1,7 @@
 # Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
 
-EAPI=5
+EAPI=6
 
 export CTARGET=${CTARGET:-${CHOST}}
 
@@ -34,13 +33,12 @@ STRIP_MASK="/usr/lib/go1.4/pkg/*.a
 
 S="${WORKDIR}"/go
 
-src_prepare()
-{
+src_prepare() {
 	sed -i -e 's/"-Werror",//g' src/cmd/dist/build.c
+	eapply_user
 }
 
-src_compile()
-{
+src_compile() {
 	export GOROOT_FINAL="${EPREFIX}"/usr/lib/go1.4
 	export GOROOT="$(pwd)"
 	export GOBIN="${GOROOT}/bin"
@@ -55,15 +53,13 @@ src_compile()
 	./make.bash || die "build failed"
 }
 
-src_test()
-{
+src_test() {
 	cd src
 	PATH="${GOBIN}:${PATH}" \
 		./run.bash --no-rebuild --banner || die "tests failed"
 }
 
-src_install()
-{
+src_install() {
 	dodir /usr/lib/go1.4
 	exeinto /usr/lib/go1.4/bin
 	doexe bin/*
@@ -72,8 +68,7 @@ src_install()
 	fperms -R +x /usr/lib/go1.4/pkg/tool
 }
 
-pkg_postinst()
-{
+pkg_postinst() {
 	# If the go tool sees a package file timestamped older than a dependancy it
 	# will rebuild that file.  So, in order to stop go from rebuilding lots of
 	# packages for every build we need to fix the timestamps.  The compiler and
