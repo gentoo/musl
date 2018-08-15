@@ -295,7 +295,6 @@ src_install() {
 	rm "${D}/usr/$(get_libdir)/rustlib/rust-installer-version" || die
 	rm "${D}/usr/$(get_libdir)/rustlib/uninstall.sh" || die
 
-
 	if use doc; then
 		rm "${D}/usr/$(get_libdir)/rustlib/manifest-rust-docs" || die
 	fi
