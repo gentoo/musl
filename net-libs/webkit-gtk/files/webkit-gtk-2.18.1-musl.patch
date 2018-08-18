@@ -1,55 +1,54 @@
-diff -Naur webkitgtk-2.18.1.orig/Source/JavaScriptCore/runtime/MachineContext.h webkitgtk-2.18.1/Source/JavaScriptCore/runtime/MachineContext.h
---- webkitgtk-2.18.1.orig/Source/JavaScriptCore/runtime/MachineContext.h	2017-08-09 02:13:46.000000000 -0700
-+++ webkitgtk-2.18.1/Source/JavaScriptCore/runtime/MachineContext.h	2017-10-23 13:37:19.427607525 -0700
-@@ -146,7 +146,7 @@
+--- a/Source/JavaScriptCore/runtime/MachineContext.h
++++ b/Source/JavaScriptCore/runtime/MachineContext.h
+@@ -146,7 +146,7 @@ inline void*& stackPointer(mcontext_t& machineContext)
  #error Unknown Architecture
  #endif
  
--#elif defined(__GLIBC__)
-+#elif OS(LINUX)
+-#elif defined(__GLIBC__) || defined(__BIONIC__)
++#elif defined(__linux__)
  
  #if CPU(X86)
      return reinterpret_cast<void*&>((uintptr_t&) machineContext.gregs[REG_ESP]);
-@@ -251,7 +251,7 @@
+@@ -251,7 +251,7 @@ inline void*& framePointer(mcontext_t& machineContext)
  #error Unknown Architecture
  #endif
  
--#elif defined(__GLIBC__)
-+#elif OS(LINUX)
+-#elif defined(__GLIBC__) || defined(__BIONIC__)
++#elif defined(__linux__)
  
  // The following sequence depends on glibc's sys/ucontext.h.
  #if CPU(X86)
-@@ -354,7 +354,7 @@
+@@ -354,7 +354,7 @@ inline void*& instructionPointer(mcontext_t& machineContext)
  #error Unknown Architecture
  #endif
  
--#elif defined(__GLIBC__)
-+#elif OS(LINUX)
+-#elif defined(__GLIBC__) || defined(__BIONIC__)
++#elif defined(__linux__)
  
  // The following sequence depends on glibc's sys/ucontext.h.
  #if CPU(X86)
-@@ -466,7 +466,7 @@
+@@ -466,7 +466,7 @@ inline void*& argumentPointer<1>(mcontext_t& machineContext)
  #error Unknown Architecture
  #endif
  
--#elif defined(__GLIBC__)
-+#elif OS(LINUX)
+-#elif defined(__GLIBC__) || defined(__BIONIC__)
++#elif defined(__linux__)
  
  // The following sequence depends on glibc's sys/ucontext.h.
  #if CPU(X86)
-@@ -583,7 +583,7 @@
+@@ -583,7 +583,7 @@ inline void*& llintInstructionPointer(mcontext_t& machineContext)
  #error Unknown Architecture
  #endif
  
--#elif defined(__GLIBC__)
-+#elif OS(LINUX)
+-#elif defined(__GLIBC__) || defined(__BIONIC__)
++#elif defined(__linux__)
  
  // The following sequence depends on glibc's sys/ucontext.h.
  #if CPU(X86)
-diff -Naur webkitgtk-2.18.1.orig/Source/JavaScriptCore/runtime/Options.h webkitgtk-2.18.1/Source/JavaScriptCore/runtime/Options.h
---- webkitgtk-2.18.1.orig/Source/JavaScriptCore/runtime/Options.h	2017-08-13 23:05:57.000000000 -0700
-+++ webkitgtk-2.18.1/Source/JavaScriptCore/runtime/Options.h	2017-10-23 13:37:19.428607525 -0700
-@@ -120,9 +120,9 @@
+ 
+--- a/Source/JavaScriptCore/runtime/Options.h
++++ b/Source/JavaScriptCore/runtime/Options.h
+@@ -126,9 +126,9 @@
      \
      v(bool, reportMustSucceedExecutableAllocations, false, Normal, nullptr) \
      \
@@ -62,10 +61,10 @@ diff -Naur webkitgtk-2.18.1.orig/Source/JavaScriptCore/runtime/Options.h webkitg
      \
      v(bool, crashIfCantAllocateJITMemory, false, Normal, nullptr) \
      v(unsigned, jitMemoryReservationSize, 0, Normal, "Set this number to change the executable allocation size in ExecutableAllocatorFixedVMPool. (In bytes.)") \
-diff -Naur webkitgtk-2.18.1.orig/Source/ThirdParty/ANGLE/src/compiler/preprocessor/ExpressionParser.cpp webkitgtk-2.18.1/Source/ThirdParty/ANGLE/src/compiler/preprocessor/ExpressionParser.cpp
---- webkitgtk-2.18.1.orig/Source/ThirdParty/ANGLE/src/compiler/preprocessor/ExpressionParser.cpp	2017-08-09 02:13:47.000000000 -0700
-+++ webkitgtk-2.18.1/Source/ThirdParty/ANGLE/src/compiler/preprocessor/ExpressionParser.cpp	2017-10-23 13:46:31.956597630 -0700
-@@ -839,7 +839,7 @@
+
+--- a/Source/ThirdParty/ANGLE/src/compiler/preprocessor/ExpressionParser.cpp
++++ b/Source/ThirdParty/ANGLE/src/compiler/preprocessor/ExpressionParser.cpp
+@@ -836,7 +836,7 @@
  #if YYERROR_VERBOSE
  
  # ifndef yystrlen
@@ -74,7 +73,7 @@ diff -Naur webkitgtk-2.18.1.orig/Source/ThirdParty/ANGLE/src/compiler/preprocess
  #   define yystrlen strlen
  #  else
  /* Return the length of YYSTR.  */
-@@ -855,7 +855,7 @@
+@@ -852,7 +852,7 @@
  # endif
  
  # ifndef yystpcpy
@@ -83,10 +82,10 @@ diff -Naur webkitgtk-2.18.1.orig/Source/ThirdParty/ANGLE/src/compiler/preprocess
  #   define yystpcpy stpcpy
  #  else
  /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-diff -Naur webkitgtk-2.18.1.orig/Source/ThirdParty/ANGLE/src/compiler/translator/glslang_tab.cpp webkitgtk-2.18.1/Source/ThirdParty/ANGLE/src/compiler/translator/glslang_tab.cpp
---- webkitgtk-2.18.1.orig/Source/ThirdParty/ANGLE/src/compiler/translator/glslang_tab.cpp	2017-08-09 02:13:47.000000000 -0700
-+++ webkitgtk-2.18.1/Source/ThirdParty/ANGLE/src/compiler/translator/glslang_tab.cpp	2017-10-23 13:46:13.605597959 -0700
-@@ -1994,7 +1994,7 @@
+
+--- a/Source/ThirdParty/ANGLE/src/compiler/translator/glslang_tab.cpp
++++ b/Source/ThirdParty/ANGLE/src/compiler/translator/glslang_tab.cpp
+@@ -1975,7 +1975,7 @@
  #if YYERROR_VERBOSE
  
  # ifndef yystrlen
@@ -95,7 +94,7 @@ diff -Naur webkitgtk-2.18.1.orig/Source/ThirdParty/ANGLE/src/compiler/translator
  #   define yystrlen strlen
  #  else
  /* Return the length of YYSTR.  */
-@@ -2010,7 +2010,7 @@
+@@ -1991,7 +1991,7 @@
  # endif
  
  # ifndef yystpcpy
@@ -104,21 +103,20 @@ diff -Naur webkitgtk-2.18.1.orig/Source/ThirdParty/ANGLE/src/compiler/translator
  #   define yystpcpy stpcpy
  #  else
  /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-diff -Naur webkitgtk-2.18.1.orig/Source/WTF/wtf/Platform.h webkitgtk-2.18.1/Source/WTF/wtf/Platform.h
---- webkitgtk-2.18.1.orig/Source/WTF/wtf/Platform.h	2017-10-16 05:18:56.000000000 -0700
-+++ webkitgtk-2.18.1/Source/WTF/wtf/Platform.h	2017-10-23 13:44:27.882599852 -0700
-@@ -676,7 +676,7 @@
+
+--- a/Source/WTF/wtf/Platform.h
++++ b/Source/WTF/wtf/Platform.h
+@@ -679,7 +679,7 @@
  #define HAVE_CFNETWORK_STORAGE_PARTITIONING 1
  #endif
  
--#if OS(DARWIN) || ((OS(FREEBSD) || defined(__GLIBC__)) && (CPU(X86) || CPU(X86_64) || CPU(ARM) || CPU(ARM64) || CPU(MIPS)))
-+#if OS(DARWIN) || ((OS(FREEBSD) || OS(LINUX)) && (CPU(X86) || CPU(X86_64) || CPU(ARM) || CPU(ARM64) || CPU(MIPS)))
+-#if OS(DARWIN) || ((OS(FREEBSD) || defined(__GLIBC__) || defined(__BIONIC__)) && (CPU(X86) || CPU(X86_64) || CPU(ARM) || CPU(ARM64) || CPU(MIPS)))
++#if OS(DARWIN) || ((OS(FREEBSD) || defined(__linux__)) && (CPU(X86) || CPU(X86_64) || CPU(ARM) || CPU(ARM64) || CPU(MIPS)))
  #define HAVE_MACHINE_CONTEXT 1
  #endif
- 
-diff -Naur webkitgtk-2.18.1.orig/Source/WebCore/xml/XPathGrammar.cpp webkitgtk-2.18.1/Source/WebCore/xml/XPathGrammar.cpp
---- webkitgtk-2.18.1.orig/Source/WebCore/xml/XPathGrammar.cpp	2017-08-09 02:13:52.000000000 -0700
-+++ webkitgtk-2.18.1/Source/WebCore/xml/XPathGrammar.cpp	2017-10-23 13:43:16.467601131 -0700
+
+--- a/Source/WebCore/xml/XPathGrammar.cpp
++++ b/Source/WebCore/xml/XPathGrammar.cpp
 @@ -967,7 +967,7 @@
  #if YYERROR_VERBOSE
  
@@ -136,4 +134,4 @@ diff -Naur webkitgtk-2.18.1.orig/Source/WebCore/xml/XPathGrammar.cpp webkitgtk-2
 +#  if defined __linux__ && defined _STRING_H && defined _GNU_SOURCE
  #   define yystpcpy stpcpy
  #  else
- /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
+ /* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in 
