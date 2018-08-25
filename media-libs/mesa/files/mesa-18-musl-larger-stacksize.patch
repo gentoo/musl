@@ -1,0 +1,52 @@
+# [main/mesa: use larger stack size for new threads #4847](https://github.com/alpinelinux/aports/pull/4847)
+
+[prspkt (prspkt) · GitHub](https://github.com/prspkt) commented
+2018-07-25T12:34:00Z
+
+Since the introduction of the mesa 18.1.* series, applications that use OpenGL
+have been consistently segfaulting. I can locally reproduce using
+`community/mpv` for video playback. This has also been discovered
+[here](https://github.com/gentoo/musl/issues/136) and the
+[patch](https://github.com/void-linux/void-packages/blob/18838a6cd6b00b1d309d6cc712b7d54660597221/srcpkgs/libGL/patches/musl-stacksize.patch)
+was imported after following a discussion
+[here](https://github.com/void-linux/void-packages/issues/933).
+
+Increasing the stacksise consistently fixes the issue.
+
+## References
+
+[Segfaults with mesa-18.1.0_rc* · Issue #136 · gentoo/musl · GitHub](https://github.com/gentoo/musl/issues/136)
+[RetroArch segfaults after recent update of various gfx libraries: mesa-ati-dri, libGL, etc. · Issue #933 · void-linux/void-packages · GitHub](https://github.com/void-linux/void-packages/issues/933)
+
+--- a/include/c11/threads_posix.h
++++ b/include/c11/threads_posix.h
+@@ -281,15 +281,29 @@ static inline int
+ thrd_create(thrd_t *thr, thrd_start_t func, void *arg)
+ {
+     struct impl_thrd_param *pack;
++#ifdef __GLIBC__
++    pthread_attr_t *attrp = NULL;
++#else
++    pthread_attr_t attr = { 0 };
++    pthread_attr_init(&attr);
++    pthread_attr_setstacksize(&attr, 8388608);
++    pthread_attr_t *attrp = &attr;
++#endif
+     assert(thr != NULL);
+     pack = (struct impl_thrd_param *)malloc(sizeof(struct impl_thrd_param));
+     if (!pack) return thrd_nomem;
+     pack->func = func;
+     pack->arg = arg;
+-    if (pthread_create(thr, NULL, impl_thrd_routine, pack) != 0) {
++    if (pthread_create(thr, attrp, impl_thrd_routine, pack) != 0) {
++#ifndef __GLIBC__
++        pthread_attr_destroy(&attr);
++#endif
+         free(pack);
+         return thrd_error;
+     }
++#ifndef __GLIBC__
++    pthread_attr_destroy(&attr);
++#endif
+     return thrd_success;
+ }
