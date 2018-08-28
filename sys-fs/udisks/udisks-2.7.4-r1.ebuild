@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -10,7 +10,7 @@ SRC_URI="https://github.com/storaged-project/${PN}/archive/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="2"
-KEYWORDS="amd64 x86"
+KEYWORDS="alpha amd64 arm ~arm64 ia64 ppc ppc64 x86"
 IUSE="acl cryptsetup debug elogind +gptfdisk +introspection lvm nls selinux systemd"
 
 REQUIRED_USE="?? ( elogind systemd )"
@@ -19,7 +19,7 @@ COMMON_DEPEND="
 	>=dev-libs/glib-2.36:2
 	>=dev-libs/libatasmart-0.19
 	>=sys-auth/polkit-0.110
-	>=sys-libs/libblockdev-2.14[crypt,lvm?]
+	>=sys-libs/libblockdev-2.14[cryptsetup,lvm?]
 	>=virtual/libgudev-165:=
 	virtual/udev
 	acl? ( virtual/acl )
@@ -55,8 +55,6 @@ DEPEND="${COMMON_DEPEND}
 
 S="${WORKDIR}/${PN}-${P}"
 
-QA_MULTILIB_PATHS="usr/lib/udisks2/udisksd"
-
 DOCS=( AUTHORS HACKING NEWS README.md )
 
 pkg_setup() {
@@ -64,7 +62,6 @@ pkg_setup() {
 	if use amd64 || use arm || use ppc || use ppc64 || use x86; then
 		CONFIG_CHECK="~!IDE" #319829
 		CONFIG_CHECK+=" ~TMPFS_POSIX_ACL" #412377
-		CONFIG_CHECK+=" ~SWAP" # https://forums.gentoo.org/viewtopic-t-923640.html
 		CONFIG_CHECK+=" ~NLS_UTF8" #425562
 		kernel_is lt 3 10 && CONFIG_CHECK+=" ~USB_SUSPEND" #331065, #477278
 		linux-info_pkg_setup
