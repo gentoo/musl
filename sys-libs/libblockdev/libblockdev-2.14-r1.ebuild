@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -10,22 +10,22 @@ MY_PV="${PV}-1"
 MY_P="${PN}-${MY_PV}"
 
 DESCRIPTION="A library for manipulating block devices"
-HOMEPAGE="https://github.com/rhinstaller/libblockdev"
-SRC_URI="https://github.com/rhinstaller/${PN}/archive/${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
+HOMEPAGE="https://github.com/storaged-project/libblockdev"
+SRC_URI="https://github.com/storaged-project/${PN}/archive/${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
 LICENSE="LGPL-2+"
 SLOT="0"
-KEYWORDS="amd64 x86"
-IUSE="bcache +crypt dmraid doc lvm kbd test"
+KEYWORDS="alpha amd64 arm ~arm64 ia64 ppc ppc64 ~sparc x86"
+IUSE="bcache +cryptsetup dmraid doc lvm kbd test"
 
 CDEPEND="
 	>=dev-libs/glib-2.42.2
 	dev-libs/libbytesize
 	>=sys-apps/util-linux-2.27
 	>=sys-block/parted-3.1
-	crypt? (
+	cryptsetup? (
 		>=dev-libs/nss-3.18.0
 		dev-libs/volume_key
-		>=sys-fs/cryptsetup-1.6.7
+		>=sys-fs/cryptsetup-1.6.7:=
 	)
 	dmraid? (
 		sys-fs/dmraid
@@ -73,7 +73,7 @@ src_configure() {
 		--without-mpath
 		$(use_enable test tests)
 		$(use_with bcache)
-		$(use_with crypt crypto)
+		$(use_with cryptsetup crypto)
 		$(use_with dmraid dm)
 		$(use_with doc gtk-doc)
 		$(use_with lvm lvm)
