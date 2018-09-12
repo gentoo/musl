@@ -1,0 +1,13 @@
+Fixes duplicate definition of struct sysinfo
+
+diff -Naur compiler-rt-6.0.1.src.old/lib/sanitizer_common/sanitizer_platform_limits_posix.cc compiler-rt-6.0.1.src/lib/sanitizer_common/sanitizer_platform_limits_posix.cc
+--- compiler-rt-6.0.1.src.old/lib/sanitizer_common/sanitizer_platform_limits_posix.cc
++++ compiler-rt-6.0.1.src/lib/sanitizer_common/sanitizer_platform_limits_posix.cc
+@@ -63,7 +63,6 @@
+ #include <malloc.h>
+ #include <mntent.h>
+ #include <netinet/ether.h>
+-#include <sys/sysinfo.h>
+ #include <sys/vt.h>
+ #include <linux/cdrom.h>
+ #include <linux/fd.h>

@@ -40,7 +40,10 @@ DEPEND="
 
 S=${WORKDIR}/${MY_P}
 
-PATCHES=( "${FILESDIR}"/${PN}-6.0.1-musl-patches.patch )
+PATCHES=(
+	"${FILESDIR}/${PN}-6.0.1-musl-patches.patch"
+	"${FILESDIR}/${PN}-6.0.1-musl-double-sysinfo-include.patch"
+)
 
 # least intrusive of all
 CMAKE_BUILD_TYPE=RelWithDebInfo
