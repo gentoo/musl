@@ -3,10 +3,10 @@
 
 EAPI="5"
 
-PATCH_VER="1.3"
+PATCH_VER="1.2"
 #UCLIBC_VER="1.0"
 
-inherit epatch toolchain
+inherit toolchain
 
 #needs minimal test before unkeywording
 #KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
