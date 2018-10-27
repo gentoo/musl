@@ -8,7 +8,7 @@ PATCH_VER="1.8"
 
 inherit epatch toolchain
 
-KEYWORDS="amd64 arm arm64 ~mips ppc x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
