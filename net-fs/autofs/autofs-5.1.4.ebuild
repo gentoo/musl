@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -47,6 +47,7 @@ CONFIG_CHECK="~AUTOFS4_FS"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-musl.patch
+	"${FILESDIR}"/${PN}-early-pthread_key_create.patch
 )
 
 src_prepare() {
