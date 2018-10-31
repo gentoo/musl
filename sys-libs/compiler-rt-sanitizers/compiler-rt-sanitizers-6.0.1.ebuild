@@ -22,7 +22,7 @@ SRC_URI="https://releases.llvm.org/${PV/_//}/${MY_P}.tar.xz
 
 LICENSE="|| ( UoI-NCSA MIT )"
 SLOT="${PV%_*}"
-KEYWORDS="~amd64 ~x86"
+KEYWORDS="amd64 x86"
 IUSE="+clang test elibc_glibc"
 RESTRICT="!test? ( test ) !clang? ( test )"
 
@@ -40,7 +40,9 @@ DEPEND="
 
 S=${WORKDIR}/${MY_P}
 
-PATCHES=( "${FILESDIR}"/${PN}-6.0.1-musl-patches.patch )
+PATCHES=( "${FILESDIR}"/${PN}-6.0.1-musl-patches.patch 
+	"${FILESDIR}"/0001-fixup-for-interception_type_test.patch
+	)
 
 # least intrusive of all
 CMAKE_BUILD_TYPE=RelWithDebInfo
