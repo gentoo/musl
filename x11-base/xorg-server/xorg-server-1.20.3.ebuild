@@ -11,7 +11,7 @@ EGIT_REPO_URI="https://anongit.freedesktop.org/git/xorg/xserver.git"
 DESCRIPTION="X.Org X servers"
 SLOT="0/${PV}"
 if [[ ${PV} != 9999* ]]; then
-	KEYWORDS="~arm"
+	KEYWORDS="arm"
 fi
 
 IUSE_SERVERS="dmx kdrive suid wayland xephyr xnest xorg xvfb"
