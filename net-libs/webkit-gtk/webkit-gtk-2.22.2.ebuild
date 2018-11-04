@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -39,6 +39,7 @@ RESTRICT="test"
 # Dependencies found at Source/cmake/OptionsGTK.cmake
 # Various compile-time optionals for gtk+-3.22.0 - ensure it
 # Missing OpenWebRTC checks and conditionals, but ENABLE_MEDIA_STREAM/ENABLE_WEB_RTC is experimental upstream (PRIVATE OFF)
+# TODO: Raise gst-plugins-opus dep to 1.14.4-r1 once we can, and eventually drop the blocker from epiphany; or remove the dep when older than -opus-1.14.4-r1 is not available anymore
 RDEPEND="
 	>=x11-libs/cairo-1.10.2:=[X?]
 	>=media-libs/fontconfig-2.8.0:1.0
@@ -67,8 +68,9 @@ RDEPEND="
 	nsplugin? ( >=x11-libs/gtk+-2.24.10:2 )
 	spell? ( >=app-text/enchant-0.22:= )
 	gstreamer? (
-		>=media-libs/gstreamer-1.2.3:1.0
-		>=media-libs/gst-plugins-base-1.2.3:1.0
+		>=media-libs/gstreamer-1.8.3:1.0
+		>=media-libs/gst-plugins-base-1.8.3:1.0
+		>=media-plugins/gst-plugins-opus-1.8.3:1.0
 		>=media-libs/gst-plugins-bad-1.10:1.0[egl?,gles2?,opengl?] )
 
 	X? (
@@ -96,10 +98,11 @@ DEPEND="${RDEPEND}
 	${RUBY_DEPS}
 	>=app-accessibility/at-spi2-core-2.5.3
 	>=dev-lang/perl-5.10
+	dev-util/glib-utils
 	>=dev-util/gtk-doc-am-1.10
 	>=dev-util/gperf-3.0.1
 	>=sys-devel/bison-2.4.3
-	|| ( >=sys-devel/gcc-4.9 >=sys-devel/clang-3.3 )
+	|| ( >=sys-devel/gcc-6.0 >=sys-devel/clang-3.3 )
 	sys-devel/gettext
 	virtual/pkgconfig
 
@@ -148,7 +151,7 @@ pkg_setup() {
 
 src_prepare() {
 	# musl and jit
-	eapply "${FILESDIR}"/${PN}-2.18.1-musl.patch
+	eapply "${FILESDIR}"/${PN}-2.22.2-musl.patch
 	cmake-utils_src_prepare
 	gnome2_src_prepare
 }
