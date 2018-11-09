@@ -77,4 +77,3 @@ src_test() {
 	cd tests || die
 	./run_tests.sh || die
 }
-
