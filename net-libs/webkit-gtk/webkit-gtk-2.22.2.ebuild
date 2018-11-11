@@ -151,6 +151,7 @@ pkg_setup() {
 
 src_prepare() {
 	# musl and jit
+	# patch taken from: https://git.alpinelinux.org/cgit/aports/tree/community/webkit2gtk/musl-fixes.patch
 	eapply "${FILESDIR}"/${PN}-2.22.2-musl.patch
 	cmake-utils_src_prepare
 	gnome2_src_prepare
