@@ -11,20 +11,22 @@ SRC_URI="mirror://debian/pool/main/w/whois/${MY_P}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 x86 ~x86-fbsd ~amd64-linux ~x86-linux"
+KEYWORDS="~amd64 ~arm ~arm64 ~x86 ~x86-fbsd ~amd64-linux ~x86-linux"
 IUSE="iconv idn nls"
 RESTRICT="test" #59327
 
 RDEPEND="iconv? ( virtual/libiconv )
-	idn? ( net-dns/libidn:= )
+	idn? ( net-dns/libidn2:= )
 	nls? ( virtual/libintl )"
 DEPEND="${RDEPEND}
 	app-arch/xz-utils
 	>=dev-lang/perl-5
+	virtual/pkgconfig
 	nls? ( sys-devel/gettext )"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-4.7.2-config-file.patch
+	"${FILESDIR}"/${PN}-5.3.0-libidn_automagic.patch
 )
 
 src_prepare() {
@@ -40,7 +42,7 @@ src_prepare() {
 	fi
 }
 
-src_configure() { :;} # expected no-op
+src_configure() { :; } # expected no-op
 
 src_compile() {
 	unset HAVE_ICONV HAVE_LIBIDN
