@@ -1,0 +1,13 @@
+Fixes "caddr_t undeclared" compile error
+
+diff -ur mozjs-52.9.1pre1.orig/python/psutil/psutil/_psutil_linux.c mozjs-52.9.1pre1/python/psutil/psutil/_psutil_linux.c
+--- mozjs-52.9.1pre1.orig/python/psutil/psutil/_psutil_linux.c	2018-07-23 18:00:01.000000000 +0000
++++ mozjs-52.9.1pre1/python/psutil/psutil/_psutil_linux.c	2018-11-25 20:07:15.365771007 +0000
+@@ -21,6 +21,7 @@
+ #include <sys/sysinfo.h>
+ #include <sys/ioctl.h>
+ #include <sys/socket.h>
++#include <sys/types.h>
+ #include <linux/sockios.h>
+ #include <linux/if.h>
+ #include <linux/ethtool.h>
