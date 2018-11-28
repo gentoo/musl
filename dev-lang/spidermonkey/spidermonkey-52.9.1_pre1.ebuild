@@ -50,6 +50,7 @@ src_prepare() {
 	eapply "${FILESDIR}"/moz38-dont-hardcode-libc-soname.patch
 	eapply "${FILESDIR}"/${PN}-52.0-fix-alpha-bitness.patch
 	use elibc_musl && eapply "${FILESDIR}"/${PN}-musl.patch
+	use elibc_musl && eapply "${FILESDIR}"/${PN}-threadlocal.patch
 
 	eapply_user
 
