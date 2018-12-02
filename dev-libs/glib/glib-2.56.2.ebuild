@@ -87,7 +87,7 @@ pkg_setup() {
 src_prepare() {
 
 	# Musl fix
-	eapply "${FILESDIR}"//"${PV}"-quark_init_on_demand.patch
+	eapply "${FILESDIR}"/"${PV}"-quark_init_on_demand.patch
         eapply "${FILESDIR}"/"${PV}"-gobject_init_on_demand.patch
 
 	# Prevent build failure in stage3 where pkgconfig is not available, bug #481056
