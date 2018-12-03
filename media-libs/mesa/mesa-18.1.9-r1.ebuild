@@ -106,7 +106,6 @@ RDEPEND="
 				virtual/libelf:0=[${MULTILIB_USEDEP}]
 			)
 	openmax? (
-		>=media-libs/libomxil-bellagio-0.9.3:=[${MULTILIB_USEDEP}]
 		x11-misc/xdg-utils
 	)
 	vaapi? (
@@ -317,7 +316,6 @@ multilib_src_configure() {
 		myconf+="
 			$(use_enable d3d9 nine)
 			$(use_enable llvm)
-			$(use_enable openmax omx-bellagio)
 			$(use_enable vaapi va)
 			$(use_enable vdpau)
 			$(use_enable xa)
@@ -467,15 +465,6 @@ pkg_postinst() {
 	# Switch to mesa opencl
 	if use opencl; then
 		eselect opencl set --use-old ${PN}
-	fi
-
-	# run omxregister-bellagio to make the OpenMAX drivers known system-wide
-	if use openmax; then
-		ebegin "Registering OpenMAX drivers"
-		BELLAGIO_SEARCH_PATH="${EPREFIX}/usr/$(get_libdir)/libomxil-bellagio0" \
-			OMX_BELLAGIO_REGISTRY=${EPREFIX}/usr/share/mesa/xdg/.omxregister \
-			omxregister-bellagio
-		eend $?
 	fi
 
 	# warn about patent encumbered texture-float
