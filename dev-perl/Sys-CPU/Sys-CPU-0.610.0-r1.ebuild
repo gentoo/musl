@@ -10,7 +10,7 @@ inherit perl-module
 DESCRIPTION="Access CPU info. number, etc on Win and UNIX"
 
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~ppc ~x86"
+KEYWORDS="amd64 arm ~mips ppc x86"
 IUSE=""
 
 PATCHES=( "${FILESDIR}"/${PN}-${DIST_VERSION}-fix-unistd-h.patch )
