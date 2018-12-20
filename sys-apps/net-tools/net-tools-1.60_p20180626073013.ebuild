@@ -33,7 +33,7 @@ RDEPEND+="
 	!<sys-apps/openrc-0.9.9.3"
 
 PATCHES=(
-	"${FILESDIR}/${PN}-fix-headers.patch"
+	"${FILESDIR}/${PN}-fix-headers-r1.patch"
 	)
 
 maint_pkg_create() {
