@@ -1,7 +1,7 @@
 # Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=6
 
 inherit flag-o-matic toolchain-funcs
 
@@ -10,7 +10,7 @@ if [[ ${PV} == "9999" ]] ; then
 	inherit git-r3
 else
 	SRC_URI="mirror://gentoo/${P}.tar.xz"
-	KEYWORDS="amd64 arm ~arm64 ~mips ppc x86"
+	KEYWORDS="alpha amd64 arm ~arm64 hppa ia64 m68k ~mips ppc ppc64 s390 sh sparc x86 ~amd64-linux ~x86-linux"
 fi
 
 DESCRIPTION="Standard Linux networking tools"
@@ -32,9 +32,7 @@ RDEPEND+="
 	hostname? ( !sys-apps/coreutils[hostname] )
 	!<sys-apps/openrc-0.9.9.3"
 
-PATCHES=(
-	"${FILESDIR}/${PN}-fix-headers-r1.patch"
-	)
+PATCHES=( "${FILESDIR}"/musl-fix-headers.patch )
 
 maint_pkg_create() {
 	cd /usr/local/src/net-tools

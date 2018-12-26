@@ -1,0 +1,10 @@
+--- a/iptunnel.c
++++ b/iptunnel.c
+@@ -27,7 +27,6 @@
+ #include <sys/ioctl.h>
+ #include <netinet/in.h>
+ #include <arpa/inet.h>
+-#include <net/if.h>
+ #include <net/if_arp.h>
+ /* We only care about linux/if_tunnel.h.  Unfortunately, older Linux headers
+  * (pre linux-4.8) did not include all the proper headers leading to missing
