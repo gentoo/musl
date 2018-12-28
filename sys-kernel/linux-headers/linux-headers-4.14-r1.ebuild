@@ -12,7 +12,7 @@ PATCH_VER="1"
 SRC_URI="mirror://gentoo/gentoo-headers-base-${PV}.tar.xz
 	${PATCH_VER:+mirror://gentoo/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}"
 
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 
 DEPEND="app-arch/xz-utils
 	dev-lang/perl"
