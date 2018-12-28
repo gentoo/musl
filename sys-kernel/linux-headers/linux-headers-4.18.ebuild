@@ -10,13 +10,16 @@ detect_version
 
 PATCH_VER="1"
 SRC_URI="mirror://gentoo/gentoo-headers-base-${PV}.tar.xz
-	${PATCH_VER:+mirror://gentoo/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}"
+	https://dev.gentoo.org/~slyfox/distfiles/gentoo-headers-base-${PV}.tar.xz
+	${PATCH_VER:+mirror://gentoo/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}
+	${PATCH_VER:+https://dev.gentoo.org/~slyfox/distfiles/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}
+"
 
 KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~amd64-linux ~x86-linux"
 
 DEPEND="app-arch/xz-utils
 	dev-lang/perl"
-RDEPEND="!!media-sound/alsa-headers"
+RDEPEND=""
 
 S=${WORKDIR}/gentoo-headers-base-${PV}
 
