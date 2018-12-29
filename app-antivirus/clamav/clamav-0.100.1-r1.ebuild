@@ -11,7 +11,7 @@ SRC_URI="https://www.clamav.net/downloads/production/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~ppc ~x86"
+KEYWORDS="amd64 arm ppc x86"
 IUSE="bzip2 doc clamdtop iconv ipv6 libressl milter metadata-analysis-api selinux static-libs system-libmspack test uclibc"
 
 CDEPEND="bzip2? ( app-arch/bzip2 )
