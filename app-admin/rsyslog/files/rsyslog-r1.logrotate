@@ -9,7 +9,11 @@
 #	delaycompress
 #	compress
 #	postrotate
-#		test -r /run/rsyslogd.pid && kill -HUP $(cat /run/rsyslogd.pid) &>/dev/null
+#		if type -p systemctl 2>&1 1>/dev/null && systemctl is-system-running 2>&1 1>/dev/null ; then
+#			systemctl kill -s HUP rsyslog.service
+#		else
+#			test -r /run/rsyslogd.pid && kill -HUP $(cat /run/rsyslogd.pid) 2>&1 1>/dev/null
+#		fi
 #	endscript
 #}
 
@@ -32,6 +36,10 @@
 	delaycompress
 	sharedscripts
 	postrotate
-		test -r /run/rsyslogd.pid && kill -HUP $(cat /run/rsyslogd.pid) &>/dev/null
+		if type -p systemctl 2>&1 1>/dev/null && systemctl is-system-running 2>&1 1>/dev/null ; then
+			systemctl kill -s HUP rsyslog.service
+		else
+			test -r /run/rsyslogd.pid && kill -HUP $(cat /run/rsyslogd.pid) 2>&1 1>/dev/null
+		fi
 	endscript
 }

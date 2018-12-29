@@ -1,15 +1,13 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
-PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
+PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6,3_7} )
 
 inherit autotools eutils linux-info python-any-r1 systemd
 
 DESCRIPTION="An enhanced multi-threaded syslogd with database support and more"
 HOMEPAGE="https://www.rsyslog.com/"
-
-BRANCH="8-stable"
 
 if [[ ${PV} == "9999" ]]; then
 	EGIT_REPO_URI="https://github.com/rsyslog/${PN}.git"
@@ -18,51 +16,26 @@ if [[ ${PV} == "9999" ]]; then
 
 	inherit git-r3
 else
-	MY_PV=${PV%_rc*}
-	MY_FILENAME="${PN}-${PV}.tar.gz"
-	MY_FILENAME_DOCS="${PN}-docs-${PV}.tar.gz"
-	S="${WORKDIR}/${PN}-${MY_PV}"
-
-	# Upstream URL schema:
-	# RC:      http://www.rsyslog.com/files/download/rsyslog/rc/rsyslog-8.18.0.tar.gz
-	#          http://www.rsyslog.com/files/download/rsyslog/rc2/rsyslog-8.18.0.tar.gz
-	# Release: http://www.rsyslog.com/files/download/rsyslog/rsyslog-8.18.0.tar.gz
-
-	MY_URL_PREFIX=
-	if [[ ${PV} = *_rc* ]]; then
-		_tmp_last_index=$(($(get_last_version_component_index ${PV})+1))
-		_tmp_suffix=$(get_version_component_range ${_tmp_last_index} ${PV})
-		if [[ ${_tmp_suffix} = *rc* ]]; then
-			MY_URL_PREFIX="${_tmp_suffix}/"
-		fi
-
-		# Cleaning up temporary variables
-		unset _tmp_last_index
-		unset _tmp_suffix
-	else
-		KEYWORDS="amd64 arm arm64 x86"
-	fi
+	KEYWORDS="~amd64 ~arm ~x86"
 
 	SRC_URI="
-		https://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-${MY_PV}.tar.gz -> ${MY_FILENAME}
-		doc? ( https://www.rsyslog.com/files/download/${PN}/${MY_URL_PREFIX}${PN}-doc-${MY_PV}.tar.gz -> ${MY_FILENAME_DOCS} )
+		https://www.rsyslog.com/files/download/${PN}/${P}.tar.gz
+		doc? ( https://www.rsyslog.com/files/download/${PN}/${PN}-doc-${PV}.tar.gz )
 	"
 
-	PATCHES=(
-		"${FILESDIR}"/8-stable/${PN}-8.32.0-fix-building-without-curl-r3.patch
-		"${FILESDIR}"/8-stable/${PN}-8.18.0-musl-fix.patch
-	)
+	PATCHES=( "${FILESDIR}"/${PN}-8.40.0-fix-omusrmsg.patch )
 fi
 
 LICENSE="GPL-3 LGPL-3 Apache-2.0"
 SLOT="0"
-IUSE="curl dbi debug doc elasticsearch +gcrypt grok jemalloc kafka kerberos libressl mdblookup mongodb mysql normalize omhttpfs"
-IUSE+=" omudpspoof postgres rabbitmq redis relp rfc3195 rfc5424hmac snmp ssl systemd test usertools +uuid zeromq"
+IUSE="curl dbi debug doc elasticsearch +gcrypt grok gnutls jemalloc kafka kerberos kubernetes libressl mdblookup"
+IUSE+=" mongodb mysql normalize omhttp omhttpfs omudpspoof openssl postgres rabbitmq redis relp rfc3195 rfc5424hmac"
+IUSE+=" snmp ssl systemd test usertools +uuid xxhash zeromq"
+RESTRICT="!test? ( test )"
 
 RDEPEND="
 	>=dev-libs/libfastjson-0.99.8:=
 	>=dev-libs/libestr-0.1.9
-	>=dev-libs/liblogging-1.0.1:=[stdlog]
 	>=sys-libs/zlib-1.2.5
 	curl? ( >=net-misc/curl-7.35.0 )
 	dbi? ( >=dev-db/libdbi-0.8.3 )
@@ -72,6 +45,7 @@ RDEPEND="
 	jemalloc? ( >=dev-libs/jemalloc-3.3.1:= )
 	kafka? ( >=dev-libs/librdkafka-0.9.0.99:= )
 	kerberos? ( virtual/krb5 )
+	kubernetes? ( >=net-misc/curl-7.35.0 )
 	mdblookup? ( dev-libs/libmaxminddb:= )
 	mongodb? ( >=dev-libs/mongo-c-driver-1.1.10:= )
 	mysql? ( virtual/libmysqlclient:= )
@@ -84,16 +58,23 @@ RDEPEND="
 	postgres? ( >=dev-db/postgresql-8.4.20:= )
 	rabbitmq? ( >=net-libs/rabbitmq-c-0.3.0:= )
 	redis? ( >=dev-libs/hiredis-0.11.0:= )
-	relp? ( >=dev-libs/librelp-1.2.14:= )
+	relp? ( >=dev-libs/librelp-1.2.17:= )
 	rfc3195? ( >=dev-libs/liblogging-1.0.1:=[rfc3195] )
 	rfc5424hmac? (
 		!libressl? ( >=dev-libs/openssl-0.9.8y:0= )
 		libressl? ( dev-libs/libressl:= )
 	)
 	snmp? ( >=net-analyzer/net-snmp-5.7.2 )
-	ssl? ( >=net-libs/gnutls-2.12.23:0= )
+	ssl? (
+		gnutls? ( >=net-libs/gnutls-2.12.23:0= )
+		openssl? (
+			!libressl? ( dev-libs/openssl:0= )
+			libressl? ( dev-libs/libressl:0= )
+		)
+	)
 	systemd? ( >=sys-apps/systemd-234 )
 	uuid? ( sys-apps/util-linux:0= )
+	xxhash? ( dev-libs/xxhash:= )
 	zeromq? (
 		>=net-libs/czmq-3.0.2
 	)"
@@ -102,10 +83,16 @@ DEPEND="${RDEPEND}
 	virtual/pkgconfig
 	elibc_musl? ( sys-libs/queue )
 	test? (
+		>=dev-libs/liblogging-1.0.1[stdlog]
 		jemalloc? ( <sys-libs/libfaketime-0.9.7 )
 		!jemalloc? ( sys-libs/libfaketime )
 		${PYTHON_DEPS}
 	)"
+
+REQUIRED_USE="
+	kubernetes? ( normalize )
+	ssl? ( || ( gnutls openssl ) )
+"
 
 if [[ ${PV} == "9999" ]]; then
 	DEPEND+=" doc? ( >=dev-python/sphinx-1.1.3-r7 )"
@@ -149,7 +136,7 @@ src_unpack() {
 			cd "${S}" || die "Cannot change dir into '${S}'"
 			mkdir docs || die "Failed to create docs directory"
 			cd docs || die "Failed to change dir into '${S}/docs'"
-			unpack ${MY_FILENAME_DOCS}
+			unpack ${PN}-doc-${PV}.tar.gz
 		fi
 	fi
 }
@@ -180,8 +167,10 @@ src_configure() {
 		--disable-debug-symbols
 		--disable-generate-man-pages
 		--without-valgrind-testbench
+		--disable-liblogging-stdlog
 		$(use_enable test testbench)
-		$(use_enable curl libcurl)
+		$(use_enable test libfaketime)
+		$(use_enable test extended-tests)
 		# Input Plugins without depedencies
 		--enable-imdiag
 		--enable-imfile
@@ -204,10 +193,15 @@ src_configure() {
 		--enable-omstdout
 		--enable-omuxsock
 		# Misc
+		--enable-fmhash
+		$(use_enable xxhash fmhash-xxhash)
 		--enable-pmaixforwardedfrom
 		--enable-pmciscoios
 		--enable-pmcisconames
 		--enable-pmlastmsg
+		$(use_enable normalize pmnormalize)
+		--enable-pmnull
+		--enable-pmpanngfw
 		--enable-pmsnare
 		# DB
 		$(use_enable dbi libdbi)
@@ -218,19 +212,20 @@ src_configure() {
 		# Debug
 		$(use_enable debug)
 		$(use_enable debug diagtools)
-		$(use_enable debug memcheck)
-		$(use_enable debug rtinst)
 		$(use_enable debug valgrind)
 		# Misc
+		$(use_enable curl fmhttp)
 		$(use_enable elasticsearch)
 		$(use_enable gcrypt libgcrypt)
 		$(use_enable jemalloc)
 		$(use_enable kafka imkafka)
 		$(use_enable kafka omkafka)
 		$(use_enable kerberos gssapi-krb5)
+		$(use_enable kubernetes mmkubernetes)
 		$(use_enable normalize mmnormalize)
 		$(use_enable mdblookup mmdblookup)
 		$(use_enable grok mmgrok)
+		$(use_enable omhttp)
 		$(use_enable omhttpfs)
 		$(use_enable omudpspoof)
 		$(use_enable rabbitmq omrabbitmq)
@@ -239,7 +234,8 @@ src_configure() {
 		$(use_enable rfc5424hmac mmrfc5424addhmac)
 		$(use_enable snmp)
 		$(use_enable snmp mmsnmptrapd)
-		$(use_enable ssl gnutls)
+		$(use_enable gnutls)
+		$(use_enable openssl)
 		$(use_enable systemd imjournal)
 		$(use_enable systemd omjournal)
 		$(use_enable usertools)
@@ -294,15 +290,15 @@ src_install() {
 	local DOCS=(
 		AUTHORS
 		ChangeLog
-		"${FILESDIR}"/${BRANCH}/README.gentoo
+		"${FILESDIR}"/README.gentoo
 	)
 
 	use doc && local HTML_DOCS=( "${S}/docs/build/." )
 
 	default
 
-	newconfd "${FILESDIR}/${BRANCH}/${PN}.confd-r1" ${PN}
-	newinitd "${FILESDIR}/${BRANCH}/${PN}.initd-r1" ${PN}
+	newconfd "${FILESDIR}/${PN}.confd-r1" ${PN}
+	newinitd "${FILESDIR}/${PN}.initd-r1" ${PN}
 
 	keepdir /var/empty/dev
 	keepdir /var/spool/${PN}
@@ -310,13 +306,13 @@ src_install() {
 	keepdir /etc/${PN}.d
 
 	insinto /etc
-	newins "${FILESDIR}/${BRANCH}/${PN}.conf" ${PN}.conf
+	newins "${FILESDIR}/${PN}.conf" ${PN}.conf
 
 	insinto /etc/rsyslog.d/
-	newins "${FILESDIR}/${BRANCH}/50-default-r1.conf" 50-default.conf
+	newins "${FILESDIR}/50-default-r1.conf" 50-default.conf
 
 	insinto /etc/logrotate.d/
-	newins "${FILESDIR}/${BRANCH}/${PN}.logrotate" ${PN}
+	newins "${FILESDIR}/${PN}-r1.logrotate" ${PN}
 
 	if use mysql; then
 		insinto /usr/share/doc/${PF}/scripts/mysql
@@ -459,5 +455,5 @@ pkg_config() {
 
 	echo
 	einfo "Here is the documentation on how to encrypt your log traffic:"
-	einfo " http://www.rsyslog.com/doc/rsyslog_tls.html"
+	einfo " https://www.rsyslog.com/doc/rsyslog_tls.html"
 }
