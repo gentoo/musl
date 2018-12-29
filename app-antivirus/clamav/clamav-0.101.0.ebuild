@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -11,21 +11,21 @@ SRC_URI="https://www.clamav.net/downloads/production/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~arm64 ~ia64 ~ppc64 ~sparc ~x86 ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~sparc-solaris ~x86-solaris"
-IUSE="bzip2 doc clamdtop iconv ipv6 libressl milter metadata-analysis-api selinux static-libs system-libmspack test uclibc"
+KEYWORDS="~amd64 ~arm ~hppa ~ia64 ~ppc ~ppc64 ~sparc ~x86 ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~sparc-solaris ~x86-solaris"
+IUSE="bzip2 doc clamdtop iconv ipv6 libressl milter metadata-analysis-api selinux static-libs test uclibc xml"
 
 CDEPEND="bzip2? ( app-arch/bzip2 )
 	clamdtop? ( sys-libs/ncurses:0 )
 	iconv? ( virtual/libiconv )
 	metadata-analysis-api? ( dev-libs/json-c:= )
 	milter? ( || ( mail-filter/libmilter mail-mta/sendmail ) )
-	dev-libs/libtommath
 	>=sys-libs/zlib-1.2.2:=
 	!libressl? ( dev-libs/openssl:0= )
 	libressl? ( dev-libs/libressl:0= )
 	sys-devel/libtool
 	|| ( dev-libs/libpcre2 >dev-libs/libpcre-6 )
-	system-libmspack? ( dev-libs/libmspack )
+	dev-libs/libmspack
+	xml? ( dev-libs/libxml2 )
 	elibc_musl? ( sys-libs/fts-standalone )
 	!!<app-antivirus/clamav-0.99"
 # hard block clamav < 0.99 due to linking problems Bug #567680
@@ -37,28 +37,34 @@ DEPEND="${CDEPEND}
 RDEPEND="${CDEPEND}
 	selinux? ( sec-policy/selinux-clamav )"
 
-DOCS=( docs/clamdoc.pdf docs/phishsigs_howto.pdf docs/signatures.pdf )
+DOCS=( docs/UserManual.md docs/UserManual )
 HTML_DOCS=( docs/html )
 
-PATCHES=(
-	"${FILESDIR}/${P}_autotools.patch"
-)
+#PATCHES=(
+#	"${FILESDIR}/clamav-0.100.0_autotools.patch"
+#)
 
 pkg_setup() {
 	enewgroup clamav
 	enewuser clamav -1 -1 /dev/null clamav
 }
 
-src_prepare() {
-	use elibc_musl && append-ldflags -lfts
-	default
-
-	eautoconf
-}
+#src_prepare() {
+#	default
+#
+#	eautoconf
+#}
 
 src_configure() {
+	use elibc_musl && append-ldflags -lfts
 	use ppc64 && append-flags -mminimal-toc
 	use uclibc && export ac_cv_type_error_t=yes
+
+	# according to configure help it should be
+	# $(use_enable xml)
+	# but that does not work
+	# do not add this, since --disable-xml seems to override
+	# --without-xml 
 
 	econf \
 		$(use_enable bzip2) \
@@ -67,16 +73,16 @@ src_configure() {
 		$(use_enable milter) \
 		$(use_enable static-libs static) \
 		$(use_enable test check) \
+		$(use_with xml) \
 		$(use_with iconv) \
 		$(use_with metadata-analysis-api libjson /usr) \
-		$(use_with system-libmspack) \
+		--with-system-libmspack \
 		--cache-file="${S}"/config.cache \
 		--disable-experimental \
 		--disable-gcc-vcheck \
 		--disable-zlib-vcheck \
 		--enable-id-check \
 		--with-dbdir="${EPREFIX}"/var/lib/clamav \
-		--with-system-tommath \
 		--with-zlib="${EPREFIX}"/usr \
 		--disable-llvm
 }

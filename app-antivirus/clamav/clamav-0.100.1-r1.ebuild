@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -11,20 +11,20 @@ SRC_URI="https://www.clamav.net/downloads/production/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="alpha amd64 ~arm ~arm64 hppa ia64 ~ppc ppc64 ~sparc x86 ~x86-fbsd ~amd64-linux ~x86-linux ~ppc-macos ~sparc-solaris ~x86-solaris"
-IUSE="bzip2 clamdtop iconv ipv6 libressl milter metadata-analysis-api selinux static-libs test uclibc"
+KEYWORDS="~amd64 ~arm ~ppc ~x86"
+IUSE="bzip2 doc clamdtop iconv ipv6 libressl milter metadata-analysis-api selinux static-libs system-libmspack test uclibc"
 
 CDEPEND="bzip2? ( app-arch/bzip2 )
 	clamdtop? ( sys-libs/ncurses:0 )
 	iconv? ( virtual/libiconv )
 	metadata-analysis-api? ( dev-libs/json-c:= )
 	milter? ( || ( mail-filter/libmilter mail-mta/sendmail ) )
-	dev-libs/libtommath
 	>=sys-libs/zlib-1.2.2:=
 	!libressl? ( dev-libs/openssl:0= )
 	libressl? ( dev-libs/libressl:0= )
 	sys-devel/libtool
 	|| ( dev-libs/libpcre2 >dev-libs/libpcre-6 )
+	system-libmspack? ( dev-libs/libmspack )
 	elibc_musl? ( sys-libs/fts-standalone )
 	!!<app-antivirus/clamav-0.99"
 # hard block clamav < 0.99 due to linking problems Bug #567680
@@ -36,10 +36,11 @@ DEPEND="${CDEPEND}
 RDEPEND="${CDEPEND}
 	selinux? ( sec-policy/selinux-clamav )"
 
-DOCS=( AUTHORS BUGS ChangeLog FAQ INSTALL NEWS README UPGRADE )
+DOCS=( docs/clamdoc.pdf docs/phishsigs_howto.pdf docs/signatures.pdf )
+HTML_DOCS=( docs/html )
+
 PATCHES=(
-	"${FILESDIR}"/${PN}-0.99.4-fix-newer-zlib.patch
-	"${FILESDIR}/${P}-pcre2-compile-erroffset.patch"
+	"${FILESDIR}/clamav-0.100.0_autotools.patch"
 )
 
 pkg_setup() {
@@ -48,13 +49,13 @@ pkg_setup() {
 }
 
 src_prepare() {
-	use elibc_musl && append-ldflags -lfts
 	default
 
 	eautoconf
 }
 
 src_configure() {
+	use elibc_musl && append-ldflags -lfts
 	use ppc64 && append-flags -mminimal-toc
 	use uclibc && export ac_cv_type_error_t=yes
 
@@ -67,13 +68,13 @@ src_configure() {
 		$(use_enable test check) \
 		$(use_with iconv) \
 		$(use_with metadata-analysis-api libjson /usr) \
+		$(use_with system-libmspack) \
 		--cache-file="${S}"/config.cache \
 		--disable-experimental \
 		--disable-gcc-vcheck \
 		--disable-zlib-vcheck \
 		--enable-id-check \
 		--with-dbdir="${EPREFIX}"/var/lib/clamav \
-		--with-system-tommath \
 		--with-zlib="${EPREFIX}"/usr \
 		--disable-llvm
 }
@@ -120,7 +121,7 @@ src_install() {
 	if use milter ; then
 		# MilterSocket one to include ' /' because there is a 2nd line for
 		# inet: which we want to leave
-		dodoc "${FILESDIR}"/clamav-milter.README.gentoo
+		##dodoc "${FILESDIR}"/clamav-milter.README.gentoo
 		sed -i -e "s:^\(Example\):\# \1:" \
 			-e "s:.*\(PidFile\) .*:\1 ${EPREFIX}/var/run/clamav/clamav-milter.pid:" \
 			-e "s+^\#\(ClamdSocket\) .*+\1 unix:${EPREFIX}/var/run/clamav/clamd.sock+" \
@@ -135,6 +136,11 @@ src_install() {
 		EOF
 
 		systemd_newunit "${FILESDIR}/clamav-milter.service-r1" clamav-milter.service
+	fi
+
+	if use doc; then
+	   einstalldocs
+	   doman docs/man/*.[1-8]
 	fi
 
 	for i in clamd freshclam clamav-milter
