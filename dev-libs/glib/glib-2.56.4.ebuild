@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Authors
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -21,7 +21,7 @@ LICENSE="LGPL-2.1+"
 SLOT="2"
 IUSE="dbus debug fam kernel_linux +mime selinux static-libs systemtap test utils xattr"
 
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
+KEYWORDS="amd64 ~arm ~arm64 ~mips ppc x86"
 
 # Added util-linux multilib dependency to have libmount support (which
 # is always turned on on linux systems, unless explicitly disabled, but
