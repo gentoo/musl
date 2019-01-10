@@ -24,7 +24,7 @@ DEPEND="
 "
 RDEPEND="${DEPEND}"
 
-PATCHES=( "${FILESDIR}"/${PN}-2.11-pulseaudio.patch )
+PATCHES=( "${FILESDIR}"/${PN}-2.11-pulseaudio.patch "${FILESDIR}"/${PN}-2.12-glob_tilde.patch )
 
 src_prepare() {
 	default
