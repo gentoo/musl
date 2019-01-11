@@ -1,0 +1,19 @@
+Index: perl-5.26.2/perl.h
+===================================================================
+--- perl-5.26.2.orig/perl.h
++++ perl-5.26.2/perl.h
+@@ -938,7 +938,13 @@ EXTERN_C int usleep(unsigned int);
+ 
+ #ifndef __SYMBIAN32__
+ #  if defined(I_STRING) || defined(__cplusplus)
+-#     include <string.h>
++#     if defined(HAS_MEMMEM) && defined(__linux__) && !defined(__GLIBC__) && !defined(_GNU_SOURCE)
++#        define _GNU_SOURCE 1
++#        include <string.h>
++#        undef _GNU_SOURCE
++#     else
++#        include <string.h>
++#     endif
+ #  else
+ #     include <strings.h>
+ #  endif
