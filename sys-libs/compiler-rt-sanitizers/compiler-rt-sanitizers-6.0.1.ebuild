@@ -23,7 +23,9 @@ SRC_URI="https://releases.llvm.org/${PV/_//}/${MY_P}.tar.xz
 LICENSE="|| ( UoI-NCSA MIT )"
 SLOT="${PV%_*}"
 KEYWORDS="amd64 x86"
-IUSE="+clang test elibc_glibc"
+IUSE="+clang +libfuzzer +profile +sanitize test +xray elibc_glibc"
+# FIXME: libfuzzer does not enable all its necessary dependencies
+REQUIRED_USE="libfuzzer? ( || ( sanitize xray ) )"
 RESTRICT="!test? ( test ) !clang? ( test )"
 
 CLANG_SLOT=${SLOT%%.*}
@@ -40,7 +42,7 @@ DEPEND="
 
 S=${WORKDIR}/${MY_P}
 
-PATCHES=( "${FILESDIR}"/${PN}-6.0.1-musl-patches.patch 
+PATCHES=( "${FILESDIR}"/${PN}-6.0.1-musl-patches.patch
 	"${FILESDIR}"/0001-fixup-for-interception_type_test.patch
 	)
 
@@ -114,10 +116,10 @@ src_configure() {
 		-DCOMPILER_RT_INCLUDE_TESTS=$(usex test)
 		# built-ins installed by sys-libs/compiler-rt
 		-DCOMPILER_RT_BUILD_BUILTINS=OFF
-		-DCOMPILER_RT_BUILD_LIBFUZZER=ON
-		-DCOMPILER_RT_BUILD_PROFILE=ON
-		-DCOMPILER_RT_BUILD_SANITIZERS=ON
-		-DCOMPILER_RT_BUILD_XRAY=ON
+		-DCOMPILER_RT_BUILD_LIBFUZZER=$(usex libfuzzer)
+		-DCOMPILER_RT_BUILD_PROFILE=$(usex profile)
+		-DCOMPILER_RT_BUILD_SANITIZERS=$(usex sanitize)
+		-DCOMPILER_RT_BUILD_XRAY=$(usex xray)
 	)
 	if use test; then
 		mycmakeargs+=(
