@@ -20,7 +20,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://mesa.freedesktop.org/archive/${MY_P}.tar.xz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
+	KEYWORDS="amd64 arm ~arm64 ~mips ppc x86"
 fi
 
 LICENSE="MIT"
@@ -41,7 +41,7 @@ IUSE="${IUSE_VIDEO_CARDS}
 	vulkan wayland xa xvmc"
 
 REQUIRED_USE="
-	d3d9?   ( dri3 )
+	d3d9?   ( dri3 || ( video_cards_r300 video_cards_r600 video_cards_radeonsi video_cards_nouveau video_cards_vmware ) )
 	gles1?  ( egl )
 	gles2?  ( egl )
 	vulkan? ( dri3
@@ -232,12 +232,12 @@ x86? (
 )"
 
 PATCHES=(
-	"${FILESDIR}"/${P}-meson-link-gallium-nine-with-pthreads.patch
 	"${FILESDIR}"/${PN}-17-execinfo.patch
 	"${FILESDIR}"/${PN}-17-musl-string_h.patch
 	"${FILESDIR}"/${PN}-18-musl-invocation_name.patch
 	"${FILESDIR}"/${PN}-18-musl-pthread.patch
 	"${FILESDIR}"/${PN}-18-musl-amdgpu-include-pthread.patch
+	"${FILESDIR}"/${PN}-18-musl-larger-stacksize.patch
 )
 
 llvm_check_deps() {
@@ -254,16 +254,6 @@ llvm_check_deps() {
 }
 
 pkg_pretend() {
-	if use d3d9; then
-		if ! use video_cards_r300 &&
-		   ! use video_cards_r600 &&
-		   ! use video_cards_radeonsi &&
-		   ! use video_cards_nouveau &&
-		   ! use video_cards_vmware; then
-			ewarn "Ignoring USE=d3d9       since VIDEO_CARDS does not contain r300, r600, radeonsi, nouveau, or vmware"
-		fi
-	fi
-
 	if use opencl; then
 		if ! use video_cards_r600 &&
 		   ! use video_cards_radeonsi; then
@@ -304,7 +294,6 @@ pkg_pretend() {
 	fi
 
 	if ! use gallium; then
-		use d3d9       && ewarn "Ignoring USE=d3d9       since USE does not contain gallium"
 		use lm_sensors && ewarn "Ignoring USE=lm_sensors since USE does not contain gallium"
 		use llvm       && ewarn "Ignoring USE=llvm       since USE does not contain gallium"
 		use opencl     && ewarn "Ignoring USE=opencl     since USE does not contain gallium"

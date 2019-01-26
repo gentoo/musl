@@ -3,10 +3,10 @@
 
 EAPI="5"
 
-PATCH_VER="1.5"
+PATCH_VER="1.1"
 #UCLIBC_VER="1.0"
 
-inherit toolchain
+inherit epatch toolchain
 
 KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
 
@@ -21,6 +21,8 @@ fi
 
 src_prepare() {
 	toolchain_src_prepare
+
+	epatch "${FILESDIR}"/gcc-7.2.0-pr69728.patch
 
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl* ]]; then
 		epatch "${FILESDIR}"/6.3.0/cpu_indicator.patch

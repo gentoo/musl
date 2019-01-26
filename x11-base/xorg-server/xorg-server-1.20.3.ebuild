@@ -13,8 +13,8 @@ if [[ ${PV} != 9999* ]]; then
 	KEYWORDS="arm"
 fi
 
-IUSE_SERVERS="dmx kdrive suid wayland xephyr xnest xorg xvfb"
-IUSE="${IUSE_SERVERS} debug +glamor ipv6 libressl minimal selinux systemd +udev unwind xcsecurity"
+IUSE_SERVERS="dmx kdrive wayland xephyr xnest xorg xvfb"
+IUSE="${IUSE_SERVERS} debug +glamor ipv6 libressl minimal selinux +suid systemd +udev unwind xcsecurity"
 
 CDEPEND=">=app-eselect/eselect-opengl-1.3.0
 	!libressl? ( dev-libs/openssl:0= )
@@ -106,6 +106,7 @@ PDEPEND="
 REQUIRED_USE="!minimal? (
 		|| ( ${IUSE_SERVERS} )
 	)
+	minimal? ( !glamor !wayland )
 	xephyr? ( kdrive )"
 
 UPSTREAMED_PATCHES=(
@@ -162,8 +163,8 @@ src_configure() {
 		$(use_with doc xmlto)
 		$(use_with systemd systemd-daemon)
 		$(use_enable systemd systemd-logind)
-		$(use_enable systemd suid-wrapper)
-		$(use_enable suid install-setuid)
+		$(usex suid $(use_enable systemd suid-wrapper) '--disable-suid-wrapper')
+		$(usex suid $(use_enable !systemd install-setuid) '--disable-install-setuid')
 		--enable-libdrm
 		--sysconfdir="${EPREFIX}"/etc/X11
 		--localstatedir="${EPREFIX}"/var
@@ -198,7 +199,7 @@ src_install() {
 	insinto /usr/share/portage/config/sets
 	newins "${FILESDIR}"/xorg-sets.conf xorg.conf
 
-	[ -d "${ED}"/var/log ] && rmdir "${ED}"/var/log || die
+	find "${ED}"/var -type d -empty -delete || die
 }
 
 pkg_postinst() {
