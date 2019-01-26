@@ -1,0 +1,26 @@
+diff --git a/lib/sanitizer_common/sanitizer_platform_limits_posix.cc b/lib/sanitizer_common/sanitizer_platform_limits_posix.cc
+index 2ea78c2..67f0f8a 100644
+--- a/lib/sanitizer_common/sanitizer_platform_limits_posix.cc
++++ b/lib/sanitizer_common/sanitizer_platform_limits_posix.cc
+@@ -1038,16 +1038,16 @@ CHECK_SIZE_AND_OFFSET(cmsghdr, cmsg_level);
+ CHECK_SIZE_AND_OFFSET(cmsghdr, cmsg_type);
+ #endif
+ 
+-COMPILER_CHECK(sizeof(__sanitizer_dirent) <= sizeof(dirent));
+-CHECK_SIZE_AND_OFFSET(dirent, d_ino);
+-#if SANITIZER_MAC
++// COMPILER_CHECK(sizeof(__sanitizer_dirent) <= sizeof(dirent));
++// CHECK_SIZE_AND_OFFSET(dirent, d_ino);
++#if SANITIZER_MAC
+ CHECK_SIZE_AND_OFFSET(dirent, d_seekoff);
+ #elif SANITIZER_FREEBSD
+ // There is no 'd_off' field on FreeBSD.
+ #else
+-CHECK_SIZE_AND_OFFSET(dirent, d_off);
++// CHECK_SIZE_AND_OFFSET(dirent, d_off);
+ #endif
+-CHECK_SIZE_AND_OFFSET(dirent, d_reclen);
++// CHECK_SIZE_AND_OFFSET(dirent, d_reclen);
+ 
+ #if SANITIZER_LINUX && !SANITIZER_ANDROID
+ COMPILER_CHECK(sizeof(__sanitizer_dirent64) <= sizeof(dirent64));
