@@ -1,0 +1,29 @@
+diff --git a/localdecls.h b/localdecls.h
+index ecc5856..22364f9 100644
+--- a/localdecls.h
++++ b/localdecls.h
+@@ -127,6 +127,24 @@ typedef struct user_regs_struct trace_regs;
+ 	__asm__ (".symver " #_real "," #_name "@@" #_version)
+ #endif
+ 
++#undef open
++#undef openat
++#undef creat
++#undef fopen
++#undef truncate
++#undef mkostemp
++#undef mkostemps
++#undef mkstemp
++#undef mkstemps
++#undef open64
++#undef openat64
++#undef creat64
++#undef fopen64
++#undef truncate64
++#undef mkostemp64
++#undef mkostemps64
++#undef mkstemp64
++#undef mkstemps64
+ /* Taken from glibc */
+ # define strong_alias(_name, _aliasname) \
+ 	extern __typeof (_name) _aliasname __attribute__ ((alias (#_name)));

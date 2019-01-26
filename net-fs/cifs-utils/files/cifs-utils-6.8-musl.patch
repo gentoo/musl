@@ -1,0 +1,26 @@
+diff --git a/setcifsacl.c b/setcifsacl.c
+index ba34403..89eded3 100755
+--- a/setcifsacl.c
++++ b/setcifsacl.c
+@@ -33,6 +33,8 @@
+ #include <stdlib.h>
+ #include <errno.h>
+ #include <limits.h>
++#include <linux/limits.h>
++#include <endian.h>
+ #include <ctype.h>
+ #include <sys/xattr.h>
+ 
+diff --git a/getcifsacl.c b/getcifsacl.c
+index f08cdea..2bc97a9 100755
+--- a/getcifsacl.c
++++ b/getcifsacl.c
+@@ -33,6 +33,8 @@
+ #include <stddef.h>
+ #include <errno.h>
+ #include <limits.h>
++#include <linux/limits.h>
++#include <endian.h>
+ #include <ctype.h>
+ #include <sys/xattr.h>
+ #include "cifsacl.h"
