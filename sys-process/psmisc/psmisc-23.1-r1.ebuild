@@ -37,8 +37,6 @@ src_configure() {
 }
 
 src_compile() {
-	# peekfd is a fragile crap hack #330631
-	nonfatal emake -C src peekfd || touch src/peekfd{.o,}
 	emake
 }
 
@@ -46,9 +44,6 @@ src_install() {
 	default
 
 	use X || rm -f "${ED%/}"/usr/bin/pstree.x11
-
-	[[ -s ${ED%/}/usr/bin/peekfd ]] || rm -f "${ED%/}"/usr/bin/peekfd
-	[[ -e ${ED%/}/usr/bin/peekfd ]] || rm -f "${ED%/}"/usr/share/man/man1/peekfd.1
 
 	# fuser is needed by init.d scripts; use * wildcard for #458250
 	dodir /bin
