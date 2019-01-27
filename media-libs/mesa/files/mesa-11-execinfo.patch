@@ -1,0 +1,68 @@
+diff -Naur mesa-11.1.2.orig/configure.ac mesa-11.1.2/configure.ac
+--- mesa-11.1.2.orig/configure.ac	2016-02-10 15:57:54.000000000 -0800
++++ mesa-11.1.2/configure.ac	2016-03-09 13:27:47.979302937 -0800
+@@ -681,6 +681,7 @@
+ AC_CHECK_HEADER([sys/sysctl.h], [DEFINES="$DEFINES -DHAVE_SYS_SYSCTL_H"])
+ AC_CHECK_FUNC([strtof], [DEFINES="$DEFINES -DHAVE_STRTOF"])
+ AC_CHECK_FUNC([mkostemp], [DEFINES="$DEFINES -DHAVE_MKOSTEMP"])
++AC_CHECK_HEADER([execinfo.h], [DEFINES="$DEFINES -DHAVE_EXECINFO_H"])
+ 
+ dnl Check to see if dlopen is in default libraries (like Solaris, which
+ dnl has it in libc), or if libdl is needed to get it.
+diff -Naur mesa-11.1.2.orig/src/gallium/auxiliary/util/u_debug_symbol.c mesa-11.1.2/src/gallium/auxiliary/util/u_debug_symbol.c
+--- mesa-11.1.2.orig/src/gallium/auxiliary/util/u_debug_symbol.c	2016-01-17 23:39:26.000000000 -0800
++++ mesa-11.1.2/src/gallium/auxiliary/util/u_debug_symbol.c	2016-03-09 13:29:27.255060988 -0800
+@@ -219,7 +219,7 @@
+ #endif /* PIPE_OS_WINDOWS */
+ 
+ 
+-#if defined(__GLIBC__) && !defined(__UCLIBC__)
++#if defined(HAVE_EXECINFO_H)
+ 
+ #include <execinfo.h>
+ 
+@@ -240,7 +240,7 @@
+    return TRUE;
+ }
+ 
+-#endif /* defined(__GLIBC__) && !defined(__UCLIBC__) */
++#endif /* defined(HAVE_EXECINFO_H) */
+ 
+ 
+ void
+diff -Naur mesa-11.1.2.orig/src/mapi/glapi/gen/gl_gentable.py mesa-11.1.2/src/mapi/glapi/gen/gl_gentable.py
+--- mesa-11.1.2.orig/src/mapi/glapi/gen/gl_gentable.py	2016-02-10 15:57:54.000000000 -0800
++++ mesa-11.1.2/src/mapi/glapi/gen/gl_gentable.py	2016-03-09 13:28:14.624506395 -0800
+@@ -44,7 +44,7 @@
+ #endif
+ 
+ #if (defined(GLXEXT) && defined(HAVE_BACKTRACE)) \\
+-	|| (!defined(GLXEXT) && defined(DEBUG) && !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__DragonFly__))
++	|| (!defined(GLXEXT) && defined(DEBUG) && defined(HAVE_EXECINFO_H))
+ #define USE_BACKTRACE
+ #endif
+ 
+diff -Naur mesa-11.1.2.orig/src/mapi/glapi/glapi_gentable.c mesa-11.1.2/src/mapi/glapi/glapi_gentable.c
+--- mesa-11.1.2.orig/src/mapi/glapi/glapi_gentable.c	2016-02-10 16:24:49.000000000 -0800
++++ mesa-11.1.2/src/mapi/glapi/glapi_gentable.c	2016-03-09 13:28:38.411688029 -0800
+@@ -36,7 +36,7 @@
+ #endif
+ 
+ #if (defined(GLXEXT) && defined(HAVE_BACKTRACE)) \
+-	|| (!defined(GLXEXT) && defined(DEBUG) && !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__DragonFly__))
++	|| (!defined(GLXEXT) && defined(DEBUG) && defined(HAVE_EXECINFO_H))
+ #define USE_BACKTRACE
+ #endif
+ 
+diff -Naur mesa-11.1.2.orig/src/mesa/drivers/dri/i915/intel_regions.c mesa-11.1.2/src/mesa/drivers/dri/i915/intel_regions.c
+--- mesa-11.1.2.orig/src/mesa/drivers/dri/i915/intel_regions.c	2016-01-17 23:39:26.000000000 -0800
++++ mesa-11.1.2/src/mesa/drivers/dri/i915/intel_regions.c	2016-03-09 13:30:18.483460168 -0800
+@@ -57,7 +57,7 @@
+  */
+ #define DEBUG_BACKTRACE_SIZE 0
+ 
+-#if DEBUG_BACKTRACE_SIZE == 0
++#if DEBUG_BACKTRACE_SIZE == 0 || !defined(HAVE_EXECINFO_H)
+ /* Use the standard debug output */
+ #define _DBG(...) DBG(__VA_ARGS__)
+ #else
