@@ -21,6 +21,11 @@ DEPEND="${RDEPEND}
 
 DOCS=( AUTHORS ChangeLog NEWS README )
 
+PATCHES=(
+	"${FILESDIR}"/${P}-include_limits.patch 
+	"${FILESDIR}"/${P}-musl_ptregs.patch
+)
+
 src_configure() {
 	local myeconfargs=(
 		$(use_enable selinux)
