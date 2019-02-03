@@ -384,6 +384,7 @@ multilib_src_configure() {
 		$(use_enable gbm) \
 		$(use_enable gles1) \
 		$(use_enable gles2) \
+		--disable-glx-tls \
 		$(use_enable unwind libunwind) \
 		--enable-valgrind=$(usex valgrind auto no) \
 		--enable-llvm-shared-libs \
