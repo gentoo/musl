@@ -30,7 +30,6 @@ fi
 
 LICENSE="MIT"
 SLOT="0"
-RESTRICT="!bindist? ( bindist )"
 
 RADEON_CARDS="r100 r200 r300 r600 radeon radeonsi"
 VIDEO_CARDS="${RADEON_CARDS} freedreno i915 i965 imx intel nouveau vc4 virgl vivante vmware"
@@ -39,8 +38,8 @@ for card in ${VIDEO_CARDS}; do
 done
 
 IUSE="${IUSE_VIDEO_CARDS}
-	bindist +classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 unwind
-	+llvm +nptl opencl osmesa pax_kernel pic selinux vaapi valgrind
+	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 unwind
+	+llvm opencl osmesa pax_kernel pic selinux vaapi valgrind
 	vdpau vulkan wayland xvmc xa"
 
 REQUIRED_USE="
@@ -378,7 +377,6 @@ multilib_src_configure() {
 		--enable-dri \
 		--enable-glx \
 		--enable-shared-glapi \
-		$(use_enable !bindist texture-float) \
 		$(use_enable d3d9 nine) \
 		$(use_enable debug) \
 		$(use_enable dri3) \
@@ -386,7 +384,6 @@ multilib_src_configure() {
 		$(use_enable gbm) \
 		$(use_enable gles1) \
 		$(use_enable gles2) \
-		$(use_enable nptl glx-tls) \
 		$(use_enable unwind libunwind) \
 		--enable-valgrind=$(usex valgrind auto no) \
 		--enable-llvm-shared-libs \
@@ -429,9 +426,6 @@ multilib_src_install_all() {
 	find "${ED}" -name '*.la' -delete
 	einstalldocs
 
-	if use !bindist; then
-		dodoc docs/patents.txt
-	fi
 }
 
 multilib_src_test() {
@@ -453,13 +447,6 @@ pkg_postinst() {
 	# Switch to mesa opencl
 	if use opencl; then
 		eselect opencl set --use-old ${PN}
-	fi
-
-	# warn about patent encumbered texture-float
-	if use !bindist; then
-		elog "USE=\"bindist\" was not set. Potentially patent encumbered code was"
-		elog "enabled. Please see /usr/share/doc/${P}/patents.txt.bz2 for an"
-		elog "explanation."
 	fi
 }
 
