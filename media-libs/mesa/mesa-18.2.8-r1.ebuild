@@ -25,7 +25,7 @@ if [[ $PV == 9999 ]]; then
 	SRC_URI=""
 else
 	SRC_URI="https://mesa.freedesktop.org/archive/${MY_P}.tar.xz"
-	KEYWORDS="amd64 arm arm64 ppc x86"
+	KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
 fi
 
 LICENSE="MIT"
@@ -270,6 +270,7 @@ src_prepare() {
 	eapply "${FILESDIR}"/${PN}-18-musl-invocation_name.patch
 	eapply "${FILESDIR}"/${PN}-18-musl-pthread.patch
 	eapply "${FILESDIR}"/${PN}-18-musl-amdgpu-include-pthread.patch
+	eapply "${FILESDIR}"/${PN}-18-musl-larger-stacksize.patch
 	eapply_user
 	eautoreconf
 }
