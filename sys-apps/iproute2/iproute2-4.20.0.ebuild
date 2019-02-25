@@ -10,7 +10,11 @@ if [[ ${PV} == "9999" ]] ; then
 	inherit git-r3
 else
 	SRC_URI="mirror://kernel/linux/utils/net/${PN}/${P}.tar.xz"
+<<<<<<< HEAD
 	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
+=======
+	KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
+>>>>>>> 0ef588b1aae7bcdf9fd93630dfd5f9bddf527fe3
 fi
 
 DESCRIPTION="kernel routing and traffic control utilities"
@@ -47,8 +51,12 @@ DEPEND="
 PATCHES=(
 	"${FILESDIR}"/${PN}-3.1.0-mtu.patch #291907
 	"${FILESDIR}"/${PN}-4.20.0-configure-nomagic.patch # bug 643722
+<<<<<<< HEAD
    "${FILESDIR}"/${PN}-4.17.0-musl.patch
    "${FILESDIR}"/${PN}-4.20.0-XATTR_SIZE_MAX.patch
+=======
+	"${FILESDIR}"/${PN}-4.20.0-limits.patch
+>>>>>>> 0ef588b1aae7bcdf9fd93630dfd5f9bddf527fe3
 )
 
 src_prepare() {

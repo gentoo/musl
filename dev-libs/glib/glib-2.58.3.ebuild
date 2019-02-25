@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2018 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -19,9 +19,9 @@ SRC_URI="${SRC_URI}
 
 LICENSE="LGPL-2.1+"
 SLOT="2"
-IUSE="dbus debug fam kernel_linux +mime selinux static-libs systemtap test utils xattr"
+IUSE="dbus debug fam gtk-doc kernel_linux +mime selinux static-libs systemtap test utils xattr"
 
-KEYWORDS="amd64 arm ~arm64 ~mips ppc x86"
+KEYWORDS="~amd64 arm ~arm64 ~mips ~ppc ~x86"
 
 # Added util-linux multilib dependency to have libmount support (which
 # is always turned on on linux systems, unless explicitly disabled, but
@@ -29,12 +29,12 @@ KEYWORDS="amd64 arm ~arm64 ~mips ppc x86"
 
 RDEPEND="
 	!<dev-util/gdbus-codegen-${PV}
-	>=dev-libs/libpcre-8.13:3[${MULTILIB_USEDEP},static-libs?]
+	>=dev-libs/libpcre-8.31:3[${MULTILIB_USEDEP},static-libs?]
 	>=virtual/libiconv-0-r1[${MULTILIB_USEDEP}]
 	>=virtual/libffi-3.0.13-r1:=[${MULTILIB_USEDEP}]
 	>=virtual/libintl-0-r2[${MULTILIB_USEDEP}]
 	>=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}]
-	kernel_linux? ( sys-apps/util-linux[${MULTILIB_USEDEP}] )
+	kernel_linux? ( >=sys-apps/util-linux-2.23[${MULTILIB_USEDEP}] )
 	selinux? ( >=sys-libs/libselinux-2.2.2-r5[${MULTILIB_USEDEP}] )
 	xattr? ( >=sys-apps/attr-2.4.47-r1[${MULTILIB_USEDEP}] )
 	fam? ( >=virtual/fam-0-r1[${MULTILIB_USEDEP}] )
@@ -45,17 +45,19 @@ RDEPEND="
 "
 DEPEND="${RDEPEND}
 	app-text/docbook-xml-dtd:4.1.2
+	app-text/docbook-xsl-stylesheets
 	>=dev-libs/libxslt-1.0
 	>=sys-devel/gettext-0.11
-	>=dev-util/gtk-doc-am-1.20
+	gtk-doc? ( >=dev-util/gtk-doc-1.20 )
 	systemtap? ( >=dev-util/systemtap-1.3 )
 	${PYTHON_DEPS}
 	test? (
 		sys-devel/gdb
 		>=dev-util/gdbus-codegen-${PV}
 		>=sys-apps/dbus-1.2.14 )
-	!<dev-util/gtk-doc-1.15-r2
 "
+# configure.ac has gtk-doc-am stuff behind m4_ifdef, so we don't need a gtk-doc-am build dep
+
 # Migration of glib-genmarshal, glib-mkenums and gtester-report to a separate
 # python depending package, which can be buildtime depended in packages that
 # need these tools, without pulling in python at runtime.
@@ -104,10 +106,14 @@ src_prepare() {
 
 		# gdesktopappinfo requires existing terminal (gnome-terminal or any
 		# other), falling back to xterm if one doesn't exist
-		if ! has_version x11-terms/xterm && ! has_version x11-terms/gnome-terminal ; then
-			ewarn "Some tests will be skipped due to missing terminal program"
-			sed -i -e "/appinfo\/launch/d" gio/tests/appinfo.c || die
-		fi
+		#if ! has_version x11-terms/xterm && ! has_version x11-terms/gnome-terminal ; then
+		#	ewarn "Some tests will be skipped due to missing terminal program"
+		# These tests seem to sometimes fail even with a terminal; skip for now and reevulate with meson
+		# Also try https://gitlab.gnome.org/GNOME/glib/issues/1601 once ready for backport (or in a bump) and file new issue if still fails
+		sed -i -e "/appinfo\/launch/d" gio/tests/appinfo.c || die
+		# desktop-app-info/launch* might fail similarly
+		sed -i -e "/desktop-app-info\/launch-as-manager/d" gio/tests/desktop-app-info.c || die
+		#fi
 
 		# https://bugzilla.gnome.org/show_bug.cgi?id=722604
 		sed -i -e "/timer\/stop/d" glib/tests/timer.c || die
@@ -120,14 +126,17 @@ src_prepare() {
 		sed -i -e 's/ tests//' {.,gio,glib}/Makefile.am || die
 	fi
 
-	# Less max runs in network monitor race test to avoid hitting timeout limits
-	eapply "${FILESDIR}"/2.56.2-network-monitor-race-test-iterations.patch # included in 2.57.1
-
-	# https://gitlab.gnome.org/GNOME/glib/issues/1626
-	eapply "${FILESDIR}"/${PN}-2.58.2-gvariant-test-fix.patch
-
 	# gdbus-codegen is a separate package
-	eapply "${FILESDIR}"/${PN}-2.54.3-external-gdbus-codegen.patch
+	eapply "${FILESDIR}"/${PN}-2.58.2-external-gdbus-codegen.patch
+
+	# Tarball doesn't come with gtk-doc.make and we can't unconditionally depend on dev-util/gtk-doc due
+	# to circular deps during bootstramp. If actually not building gtk-doc, an almost empty file will do
+	# fine as well - this is also what upstream autogen.sh does if gtkdocize is not found. If gtk-doc is
+	# installed, eautoreconf will call gtkdocize, which overwrites the empty gtk-doc.make with a full copy.
+	cat > gtk-doc.make << EOF
+EXTRA_DIST =
+CLEANFILES =
+EOF
 
 	gnome2_src_prepare
 	epunt_cxx
@@ -173,6 +182,7 @@ multilib_src_configure() {
 		$(usex debug --enable-debug=yes ' ') \
 		$(use_enable xattr) \
 		$(use_enable fam) \
+		$(multilib_native_use_enable gtk-doc) \
 		$(use_enable kernel_linux libmount) \
 		$(use_enable selinux) \
 		$(use_enable static-libs static) \

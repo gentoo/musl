@@ -1,0 +1,11 @@
+diff -Naur mesa-18.1.0-rc1.orig/src/mesa/drivers/dri/i965/brw_bufmgr.h mesa-18.1.0-rc1/src/mesa/drivers/dri/i965/brw_bufmgr.h
+--- mesa-18.1.0-rc1.orig/src/mesa/drivers/dri/i965/brw_bufmgr.h	2018-04-22 12:42:46.505947484 -0700
++++ mesa-18.1.0-rc1/src/mesa/drivers/dri/i965/brw_bufmgr.h	2018-04-22 12:44:09.720945994 -0700
+@@ -37,6 +37,7 @@
+ #include <stdbool.h>
+ #include <stdint.h>
+ #include <stdio.h>
++#include <time.h>
+ #include "util/u_atomic.h"
+ #include "util/list.h"
+ 
