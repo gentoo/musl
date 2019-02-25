@@ -1,0 +1,35 @@
+diff --git a/modules/pam_exec/pam_exec.c b/modules/pam_exec/pam_exec.c
+index 17ba6ca..d5ccfeb 100644
+--- a/modules/pam_exec/pam_exec.c
++++ b/modules/pam_exec/pam_exec.c
+@@ -102,6 +102,7 @@ call_exec (const char *pam_type, pam_handle_t *pamh,
+   int use_stdout = 0;
+   int optargc;
+   const char *logfile = NULL;
++  char *_authtok[PAM_MAX_RESP_SIZE];
+   const char *authtok = NULL;
+   pid_t pid;
+   int fds[2];
+diff --git a/modules/pam_exec/pam_exec.c b/modules/pam_exec/pam_exec.c
+index 561c277..6f599ec 100755
+--- a/modules/pam_exec/pam_exec.c
++++ b/modules/pam_exec/pam_exec.c
+@@ -181,12 +181,16 @@ call_exec (const char *pam_type, pam_handle_t *pamh,
+ 	      if (resp)
+ 		{
+ 		  pam_set_item (pamh, PAM_AUTHTOK, resp);
+-		  authtok = strndupa (resp, PAM_MAX_RESP_SIZE);
++		  _authtok[PAM_MAX_RESP_SIZE-1] = '\0';
++        authtok = strncpy(_authtok, resp, PAM_MAX_RESP_SIZE-1);
+ 		  _pam_drop (resp);
+ 		}
+ 	    }
+ 	  else
+-	    authtok = strndupa (void_pass, PAM_MAX_RESP_SIZE);
++     {
++        _authtok[PAM_MAX_RESP_SIZE-1] = '\0';
++        authtok = strncpy(_authtok, void_pass, PAM_MAX_RESP_SIZE-1);
++     }
+ 
+ 	  if (pipe(fds) != 0)
+ 	    {
