@@ -11,7 +11,7 @@ SRC_URI="https://dev.gentoo.org/~mgorny/dist/${P}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~m68k ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
 IUSE=""
 
 DEPEND="app-arch/xz-utils
@@ -26,9 +26,9 @@ sandbox_death_notice() {
 }
 
 src_prepare() {
-   eapply "${FILESDIR}"/${PN}-2.11-musl.patch
-   eapply "${FILESDIR}"/${PN}-2.10-fix-visibility-musl.patch
-   eapply_user
+	eapply "${FILESDIR}"/${PN}-2.11-musl.patch
+	eapply "${FILESDIR}"/${PN}-2.10-fix-visibility-musl.patch
+	eapply_user
 }
 
 multilib_src_configure() {
