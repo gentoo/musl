@@ -238,6 +238,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-18-musl-invocation_name.patch
 	"${FILESDIR}"/${PN}-18-musl-pthread.patch
 	"${FILESDIR}"/${PN}-18-musl-amdgpu-include-pthread.patch
+	"${FILESDIR}"/${P}-add-disable-tls-support.patch
 )
 
 llvm_check_deps() {
@@ -449,6 +450,11 @@ multilib_src_configure() {
 	# x86 hardened pax_kernel needs glx-rts, bug 240956
 	if [[ ${ABI} == x86 ]]; then
 		emesonargs+=( $(meson_use pax_kernel glx-read-only-text) )
+	fi
+
+	# Disable glx tls support on musl
+	if use elibc_musl; then
+		emesonargs+=( -Dglx-tls=false )
 	fi
 
 	# on abi_x86_32 hardened we need to have asm disable
