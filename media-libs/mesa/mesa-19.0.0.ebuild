@@ -1,9 +1,9 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
-PYTHON_COMPAT=( python2_7 )
+PYTHON_COMPAT=( python3_4 python3_5 python3_6 python3_7 )
 
 inherit llvm meson multilib-minimal pax-utils python-any-r1
 
@@ -36,12 +36,12 @@ for card in ${VIDEO_CARDS}; do
 done
 
 IUSE="${IUSE_VIDEO_CARDS}
-	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 gles2 +llvm lm_sensors
-	opencl osmesa pax_kernel pic selinux test unwind vaapi valgrind vdpau
-	vulkan wayland xa xvmc"
+	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 +gles2 +libglvnd +llvm
+	lm_sensors opencl osmesa pax_kernel pic selinux test unwind vaapi valgrind
+	vdpau vulkan wayland xa xvmc"
 
 REQUIRED_USE="
-	d3d9?   ( dri3 )
+	d3d9?   ( dri3 || ( video_cards_r300 video_cards_r600 video_cards_radeonsi video_cards_nouveau video_cards_vmware ) )
 	gles1?  ( egl )
 	gles2?  ( egl )
 	vulkan? ( dri3
@@ -67,10 +67,9 @@ REQUIRED_USE="
 	video_cards_vmware? ( gallium )
 "
 
-LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.93"
+LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.97"
 RDEPEND="
 	!app-eselect/eselect-mesa
-	>=app-eselect/eselect-opengl-1.3.0
 	>=dev-libs/expat-2.1.0-r3:=[${MULTILIB_USEDEP}]
 	>=sys-libs/zlib-1.2.8[${MULTILIB_USEDEP}]
 	>=x11-libs/libX11-1.6.2:=[${MULTILIB_USEDEP}]
@@ -80,6 +79,13 @@ RDEPEND="
 	>=x11-libs/libXxf86vm-1.1.3:=[${MULTILIB_USEDEP}]
 	>=x11-libs/libxcb-1.13:=[${MULTILIB_USEDEP}]
 	x11-libs/libXfixes:=[${MULTILIB_USEDEP}]
+	libglvnd? (
+		media-libs/libglvnd[${MULTILIB_USEDEP}]
+		!app-eselect/eselect-opengl
+	)
+	!libglvnd? (
+		>=app-eselect/eselect-opengl-1.3.0
+	)
 	gallium? (
 		unwind? ( sys-libs/libunwind[${MULTILIB_USEDEP}] )
 		llvm? (
@@ -95,7 +101,7 @@ RDEPEND="
 		)
 		lm_sensors? ( sys-apps/lm_sensors:=[${MULTILIB_USEDEP}] )
 		opencl? (
-					app-eselect/eselect-opencl
+					dev-libs/ocl-icd[khronos-headers,${MULTILIB_USEDEP}]
 					dev-libs/libclc
 					virtual/libelf:0=[${MULTILIB_USEDEP}]
 				)
@@ -132,18 +138,15 @@ RDEPEND="${RDEPEND}
 #
 # How to use it:
 # 1. List all the working slots (with min versions) in ||, newest first.
-# 2. Update the := to specify *max* version, e.g. < 7.
-# 3. Specify LLVM_MAX_SLOT, e.g. 6.
-LLVM_MAX_SLOT="7"
+# 2. Update the := to specify *max* version, e.g. < 9.
+# 3. Specify LLVM_MAX_SLOT, e.g. 8.
+LLVM_MAX_SLOT="8"
 LLVM_DEPSTR="
 	|| (
+		sys-devel/llvm:8[${MULTILIB_USEDEP}]
 		sys-devel/llvm:7[${MULTILIB_USEDEP}]
-		sys-devel/llvm:6[${MULTILIB_USEDEP}]
-		sys-devel/llvm:5[${MULTILIB_USEDEP}]
-		sys-devel/llvm:4[${MULTILIB_USEDEP}]
-		>=sys-devel/llvm-3.9.0:0[${MULTILIB_USEDEP}]
 	)
-	sys-devel/llvm:=[${MULTILIB_USEDEP}]
+	<sys-devel/llvm-9:=[${MULTILIB_USEDEP}]
 "
 LLVM_DEPSTR_AMDGPU=${LLVM_DEPSTR//]/,llvm_targets_AMDGPU(-)]}
 CLANG_DEPSTR=${LLVM_DEPSTR//llvm/clang}
@@ -231,6 +234,15 @@ x86? (
 	)
 )"
 
+PATCHES=(
+	"${FILESDIR}"/${PN}-17-execinfo.patch
+	"${FILESDIR}"/${PN}-17-musl-string_h.patch
+	"${FILESDIR}"/${PN}-18-musl-invocation_name.patch
+	"${FILESDIR}"/${PN}-18-musl-pthread.patch
+	"${FILESDIR}"/${PN}-18-musl-amdgpu-include-pthread.patch
+	"${FILESDIR}"/${PN}-18.2.4-add-disable-tls-support.patch
+)
+
 llvm_check_deps() {
 	local flags=${MULTILIB_USEDEP}
 	if use video_cards_r600 || use video_cards_radeon || use video_cards_radeonsi
@@ -245,16 +257,6 @@ llvm_check_deps() {
 }
 
 pkg_pretend() {
-	if use d3d9; then
-		if ! use video_cards_r300 &&
-		   ! use video_cards_r600 &&
-		   ! use video_cards_radeonsi &&
-		   ! use video_cards_nouveau &&
-		   ! use video_cards_vmware; then
-			ewarn "Ignoring USE=d3d9       since VIDEO_CARDS does not contain r300, r600, radeonsi, nouveau, or vmware"
-		fi
-	fi
-
 	if use opencl; then
 		if ! use video_cards_r600 &&
 		   ! use video_cards_radeonsi; then
@@ -295,7 +297,6 @@ pkg_pretend() {
 	fi
 
 	if ! use gallium; then
-		use d3d9       && ewarn "Ignoring USE=d3d9       since USE does not contain gallium"
 		use lm_sensors && ewarn "Ignoring USE=lm_sensors since USE does not contain gallium"
 		use llvm       && ewarn "Ignoring USE=llvm       since USE does not contain gallium"
 		use opencl     && ewarn "Ignoring USE=opencl     since USE does not contain gallium"
@@ -311,6 +312,10 @@ pkg_pretend() {
 	fi
 }
 
+python_check_deps() {
+	has_version --host-root ">=dev-python/mako-0.8.0[${PYTHON_USEDEP}]"
+}
+
 pkg_setup() {
 	# warning message for bug 459306
 	if use llvm && has_version sys-devel/llvm[!debug=]; then
@@ -322,16 +327,6 @@ pkg_setup() {
 		llvm_pkg_setup
 	fi
 	python-any-r1_pkg_setup
-}
-
-src_prepare() {
-	eapply "${FILESDIR}"/${PN}-17-execinfo.patch
-	eapply "${FILESDIR}"/${PN}-17-musl-string_h.patch
-	eapply "${FILESDIR}"/${PN}-18-musl-invocation_name.patch
-	eapply "${FILESDIR}"/${PN}-18-musl-pthread.patch
-	#eapply "${FILESDIR}"/${PN}-18-intel-missing-time_t.patch
-	eapply "${FILESDIR}"/${PN}-18-musl-amdgpu-include-pthread.patch
-	eapply_user
 }
 
 multilib_src_configure() {
@@ -381,7 +376,7 @@ multilib_src_configure() {
 		   use video_cards_radeonsi ||
 		   use video_cards_nouveau; then
 			emesonargs+=($(meson_use vaapi gallium-va))
-			use vaapi && emesonargs+=( -Dva-libs-path=/usr/$(get_libdir)/va/drivers )
+			use vaapi && emesonargs+=( -Dva-libs-path="${EPREFIX}"/usr/$(get_libdir)/va/drivers )
 		else
 			emesonargs+=(-Dgallium-va=false)
 		fi
@@ -434,14 +429,12 @@ multilib_src_configure() {
 		fi
 
 		gallium_enable video_cards_freedreno freedreno
-		# opencl stuff
-		if use opencl; then
-			emesonargs+=(
-				-Dgallium-opencl="$(usex opencl standalone disabled)"
-			)
-		fi
-
 		gallium_enable video_cards_virgl virgl
+
+		# opencl stuff
+		emesonargs+=(
+			-Dgallium-opencl="$(usex opencl icd disabled)"
+		)
 	fi
 
 	if use vulkan; then
@@ -452,6 +445,11 @@ multilib_src_configure() {
 	# x86 hardened pax_kernel needs glx-rts, bug 240956
 	if [[ ${ABI} == x86 ]]; then
 		emesonargs+=( $(meson_use pax_kernel glx-read-only-text) )
+	fi
+
+	# Disable glx tls support on musl
+	if use elibc_musl; then
+		emesonargs+=( -Dglx-tls=false )
 	fi
 
 	# on abi_x86_32 hardened we need to have asm disable
@@ -481,6 +479,7 @@ multilib_src_configure() {
 		$(meson_use gbm)
 		$(meson_use gles1)
 		$(meson_use gles2)
+		$(meson_use libglvnd glvnd)
 		$(meson_use selinux)
 		-Dvalgrind=$(usex valgrind auto false)
 		-Ddri-drivers=$(driver_list "${DRI_DRIVERS[*]}")
@@ -499,20 +498,7 @@ multilib_src_compile() {
 multilib_src_install() {
 	meson_src_install
 
-	if use opencl; then
-		ebegin "Moving Gallium/Clover OpenCL implementation for dynamic switching"
-		local cl_dir="/usr/$(get_libdir)/OpenCL/vendors/mesa"
-		dodir ${cl_dir}/{lib,include}
-		if [ -f "${ED}/usr/$(get_libdir)/libOpenCL.so" ]; then
-			mv -f "${ED}"/usr/$(get_libdir)/libOpenCL.so* \
-			"${ED}"${cl_dir}
-		fi
-		if [ -f "${ED}/usr/include/CL/opencl.h" ]; then
-			mv -f "${ED}"/usr/include/CL \
-			"${ED}"${cl_dir}/include
-		fi
-		eend $?
-	fi
+	use libglvnd && rm -f "${D}"/usr/$(get_libdir)/libGLESv{1_CM,2}.so*
 }
 
 multilib_src_install_all() {
@@ -527,11 +513,6 @@ pkg_postinst() {
 	# Switch to the xorg implementation.
 	echo
 	eselect opengl set --use-old ${OPENGL_DIR}
-
-	# Switch to mesa opencl
-	if use opencl; then
-		eselect opencl set --use-old ${PN}
-	fi
 }
 
 # $1 - VIDEO_CARDS flag (check skipped for "--")
