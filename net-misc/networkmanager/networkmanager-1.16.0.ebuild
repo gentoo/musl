@@ -1,14 +1,14 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 GNOME_ORG_MODULE="NetworkManager"
 GNOME2_LA_PUNT="yes"
 VALA_USE_DEPEND="vapigen"
-PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6} )
+PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6,3_7} )
 
-inherit autotools bash-completion-r1 gnome2 linux-info multilib python-any-r1 systemd flag-o-matic \
-	user readme.gentoo-r1 toolchain-funcs vala versionator virtualx udev multilib-minimal
+inherit bash-completion-r1 gnome2 linux-info multilib python-any-r1 systemd \
+	user readme.gentoo-r1 vala virtualx udev multilib-minimal flag-o-matic
 
 DESCRIPTION="A set of co-operative tools that make networking simple and straightforward"
 HOMEPAGE="https://wiki.gnome.org/Projects/NetworkManager"
@@ -16,10 +16,11 @@ HOMEPAGE="https://wiki.gnome.org/Projects/NetworkManager"
 LICENSE="GPL-2+"
 SLOT="0" # add subslot if libnm-util.so.2 or libnm-glib.so.4 bumps soname version
 
-IUSE="audit bluetooth connection-sharing consolekit +dhclient dhcpcd elogind gnutls +introspection json kernel_linux +nss +modemmanager ncurses ofono ovs policykit +ppp resolvconf selinux systemd teamd test vala +wext +wifi"
+IUSE="audit bluetooth connection-sharing consolekit +dhclient dhcpcd elogind gnutls +introspection iwd json kernel_linux +nss +modemmanager ncurses ofono ovs policykit +ppp resolvconf selinux systemd teamd test vala +wext +wifi"
 
 REQUIRED_USE="
-	modemmanager? ( ppp )
+	bluetooth? ( modemmanager )
+	iwd? ( wifi )
 	vala? ( introspection )
 	wext? ( wifi )
 	^^ ( nss gnutls )
@@ -33,8 +34,7 @@ KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~ia64 ~ppc ~ppc64 ~sparc ~x86"
 COMMON_DEPEND="
 	>=sys-apps/dbus-1.2[${MULTILIB_USEDEP}]
 	>=dev-libs/dbus-glib-0.100[${MULTILIB_USEDEP}]
-	>=dev-libs/glib-2.37.6:2[${MULTILIB_USEDEP}]
-	>=dev-libs/libnl-3.2.8:3=[${MULTILIB_USEDEP}]
+	>=dev-libs/glib-2.40:2[${MULTILIB_USEDEP}]
 	policykit? ( >=sys-auth/polkit-0.106 )
 	net-libs/libndp[${MULTILIB_USEDEP}]
 	>=net-misc/curl-7.24
@@ -55,7 +55,7 @@ COMMON_DEPEND="
 		dev-libs/libgcrypt:0=[${MULTILIB_USEDEP}]
 		>=net-libs/gnutls-2.12:=[${MULTILIB_USEDEP}] )
 	introspection? ( >=dev-libs/gobject-introspection-0.10.3:= )
-	json? ( dev-libs/jansson[${MULTILIB_USEDEP}] )
+	json? ( >=dev-libs/jansson-2.5[${MULTILIB_USEDEP}] )
 	modemmanager? ( >=net-misc/modemmanager-0.7.991:0= )
 	ncurses? ( >=dev-libs/newt-0.52.15 )
 	nss? ( >=dev-libs/nss-3.11:=[${MULTILIB_USEDEP}] )
@@ -75,14 +75,18 @@ RDEPEND="${COMMON_DEPEND}
 		net-misc/iputils[arping(+)]
 		net-analyzer/arping
 	)
-	wifi? ( >=net-wireless/wpa_supplicant-0.7.3-r3[dbus] )
+	wifi? (
+		!iwd? ( >=net-wireless/wpa_supplicant-0.7.3-r3[dbus] )
+		iwd? ( net-wireless/iwd )
+	)
 "
 DEPEND="${COMMON_DEPEND}
 	dev-util/gdbus-codegen
+	dev-util/glib-utils
 	dev-util/gtk-doc-am
 	>=dev-util/intltool-0.40
 	>=sys-devel/gettext-0.17
-	>=sys-kernel/linux-headers-2.6.29
+	>=sys-kernel/linux-headers-3.18
 	virtual/pkgconfig[${MULTILIB_USEDEP}]
 	introspection? (
 		$(python_gen_any_dep 'dev-python/pygobject:3[${PYTHON_USEDEP}]')
@@ -98,9 +102,12 @@ DEPEND="${COMMON_DEPEND}
 "
 
 PATCHES=(
+	"${FILESDIR}"/fix-busted-configure.patch
 	"${FILESDIR}"/musl-basic.patch
-	"${FILESDIR}"/musl-dlopen-configure-ac.patch
+	"${FILESDIR}"/musl-fix-includes.patch
+	"${FILESDIR}"/musl-has-not-secure-gentenv.patch
 	"${FILESDIR}"/musl-network-support.patch
+	"${FILESDIR}"/musl-process-util.patch
 )
 
 python_check_deps() {
@@ -156,34 +163,31 @@ src_prepare() {
 
 	use vala && vala_src_prepare
 	gnome2_src_prepare
-	eautoconf
 }
 
 multilib_src_configure() {
-	use elibc_musl && append-cflags -DHAVE_SECURE_GETENV -Dsecure_getenv=getenv -D__USE_POSIX199309
-
 	local myconf=(
 		--disable-more-warnings
 		--disable-static
 		--localstatedir=/var
 		--disable-lto
 		--disable-config-plugin-ibft
-		# ifnet plugin always disabled until someone volunteers to actively
-		# maintain and fix it
-		--disable-ifnet
 		--disable-qt
 		--without-netconfig
 		--with-dbus-sys-dir=/etc/dbus-1/system.d
 		# We need --with-libnm-glib (and dbus-glib dep) as reverse deps are
-		# still not ready for removing that lib
+		# still not ready for removing that lib, bug #665338
 		--with-libnm-glib
 		--with-nmcli=yes
 		--with-udev-dir="$(get_udevdir)"
 		--with-config-plugins-default=keyfile
 		--with-iptables=/sbin/iptables
+		--with-ebpf=yes
 		$(multilib_native_enable concheck)
 		--with-crypto=$(usex nss nss gnutls)
 		--with-session-tracking=$(multilib_native_usex systemd systemd $(multilib_native_usex elogind elogind $(multilib_native_usex consolekit consolekit no)))
+		# ConsoleKit has no build-time dependency, so use it as the default case.
+		# There is no off switch, and we do not support upower.
 		--with-suspend-resume=$(multilib_native_usex systemd systemd $(multilib_native_usex elogind elogind consolekit))
 		$(multilib_native_use_with audit libaudit)
 		$(multilib_native_use_enable bluetooth bluez5-dun)
@@ -204,6 +208,7 @@ multilib_src_configure() {
 		$(multilib_native_use_enable test tests)
 		$(multilib_native_use_enable vala)
 		--without-valgrind
+		$(multilib_native_use_with wifi iwd)
 		$(multilib_native_use_with wext)
 		$(multilib_native_use_enable wifi)
 	)
@@ -231,6 +236,8 @@ multilib_src_configure() {
 		ln -s "${S}/docs" docs || die
 		ln -s "${S}/man" man || die
 	fi
+
+	append-cflags -DRTLD_DEEPBIND=0
 
 	ECONF_SOURCE=${S} runstatedir="/run" gnome2_src_configure "${myconf[@]}"
 }
@@ -279,6 +286,7 @@ multilib_src_install() {
 }
 
 multilib_src_install_all() {
+	einstalldocs
 	! use systemd && readme.gentoo_create_doc
 
 	newinitd "${FILESDIR}/init.d.NetworkManager-r1" NetworkManager
@@ -299,6 +307,14 @@ multilib_src_install_all() {
 	# Allow users in plugdev group to modify system connections
 	insinto /usr/share/polkit-1/rules.d/
 	doins "${FILESDIR}/01-org.freedesktop.NetworkManager.settings.modify.system.rules"
+
+	if use iwd; then
+		# This goes to $nmlibdir/conf.d/ and $nmlibdir is '${prefix}'/lib/$PACKAGE, thus always lib, not get_libdir
+		cat <<-EOF > "${ED%/}"/usr/lib/NetworkManager/conf.d/iwd.conf
+		[device]
+		wifi.backend=iwd
+		EOF
+	fi
 
 	# Empty
 	rmdir "${ED%/}"/var{/lib{/NetworkManager,},} || die

@@ -1,0 +1,54 @@
+From 0777360a2d8baa5c297bfa017bfaa1caf111d720 Mon Sep 17 00:00:00 2001
+From: 
+Date: Thu, 28 Mar 2019 11:50:23 -0500
+Subject: [PATCH 5/5] musl process util
+
+---
+ shared/systemd/src/basic/process-util.c | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/shared/systemd/src/basic/process-util.c b/shared/systemd/src/basic/process-util.c
+index b0afb5c..f72e346 100644
+--- a/shared/systemd/src/basic/process-util.c
++++ b/shared/systemd/src/basic/process-util.c
+@@ -21,6 +21,9 @@
+ #include <sys/wait.h>
+ #include <syslog.h>
+ #include <unistd.h>
++#ifndef __GLIBC__
++#include <pthread.h>
++#endif
+ #if 0 /* NM_IGNORED */
+ #if HAVE_VALGRIND_VALGRIND_H
+ #include <valgrind/valgrind.h>
+@@ -1168,11 +1171,13 @@ void reset_cached_pid(void) {
+         cached_pid = CACHED_PID_UNSET;
+ }
+ 
++#ifdef __GLIBC__
+ /* We use glibc __register_atfork() + __dso_handle directly here, as they are not included in the glibc
+  * headers. __register_atfork() is mostly equivalent to pthread_atfork(), but doesn't require us to link against
+  * libpthread, as it is part of glibc anyway. */
+ extern int __register_atfork(void (*prepare) (void), void (*parent) (void), void (*child) (void), void *dso_handle);
+ extern void* __dso_handle _weak_;
++#endif
+ 
+ pid_t getpid_cached(void) {
+         static bool installed = false;
+@@ -1201,7 +1206,12 @@ pid_t getpid_cached(void) {
+                          * only half-documented (glibc doesn't document it but LSB does — though only superficially)
+                          * we'll check for errors only in the most generic fashion possible. */
+ 
+-                        if (__register_atfork(NULL, NULL, reset_cached_pid, __dso_handle) != 0) {
++                        #ifdef __GLIBC__
++                            if (__register_atfork(NULL, NULL, reset_cached_pid, __dso_handle) != 0) {
++                        #else
++                            if (pthread_atfork(NULL, NULL, reset_cached_pid) != 0) {
++                        #endif
++
+                                 /* OOM? Let's try again later */
+                                 cached_pid = CACHED_PID_UNSET;
+                                 return new_pid;
+-- 
+2.21.0
+

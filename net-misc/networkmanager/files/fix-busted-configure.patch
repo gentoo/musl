@@ -1,0 +1,25 @@
+From 9ce527c9e179ecd3c01c684ca4c6747349a7ec99 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Thu, 28 Mar 2019 14:21:48 -0500
+Subject: [PATCH] Fix up configure
+
+---
+ configure | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index b3e14a3..dde9a93 100755
+--- a/configure
++++ b/configure
+@@ -21127,7 +21127,7 @@ return dlopen ();
+ _ACEOF
+ for ac_lib in '' dl dld; do
+   if test -z "$ac_lib"; then
+-    ac_res="none required"
++    ac_res=""
+   else
+     ac_res=-l$ac_lib
+     LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+-- 
+2.21.0
+
