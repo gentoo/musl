@@ -1104,6 +1104,9 @@ toolchain_src_configure() {
 	*-elf|*-eabi)
 		confgcc+=( --with-newlib )
 		;;
+	*-musl*)
+		confgcc+=( --enable-__cxa_atexit )
+		;;
 	*-gnu*)
 		confgcc+=(
 			--enable-__cxa_atexit
@@ -2455,12 +2458,16 @@ hardened_gcc_is_stable() {
 	if [[ $1 == "pie" ]] ; then
 		if [[ ${CTARGET} == *-uclibc* ]] ; then
 			tocheck=${PIE_UCLIBC_STABLE}
-		else
+		elif [[ ${CTARGET} == *-musl* ]] ; then
+			tocheck=${PIE_MUSL_STABLE}
+		elif [[ ${CTARGET} == *-gnu* ]] ; then
 			tocheck=${PIE_GLIBC_STABLE}
 		fi
 	elif [[ $1 == "ssp" ]] ; then
 		if [[ ${CTARGET} == *-uclibc* ]] ; then
 			tocheck=${SSP_UCLIBC_STABLE}
+		elif [[ ${CTARGET} == *-musl* ]] ; then
+			tocheck=${SSP_MUSL_STABLE}
 		elif  [[ ${CTARGET} == *-gnu* ]] ; then
 			tocheck=${SSP_STABLE}
 		fi
