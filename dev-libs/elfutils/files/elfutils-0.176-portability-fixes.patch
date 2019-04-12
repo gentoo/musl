@@ -1,8 +1,9 @@
 From de94a67137e483db97efd40e7d13f0148e43e95c Mon Sep 17 00:00:00 2001
-From: Jory Pratt <anarchy@gentoo.org>
+From: 
 Date: Thu, 11 Apr 2019 22:58:38 -0500
 Subject: [PATCH] portability fixes
 
+Voidlinux fixes combined and modified for use in gentoo.
 ---
  configure.ac         | 56 ++++++++++++++++++++++++++++++++++++++++++++
  lib/error.h          | 27 +++++++++++++++++++++
