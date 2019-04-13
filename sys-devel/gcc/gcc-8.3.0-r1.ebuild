@@ -24,7 +24,9 @@ src_prepare() {
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl* ]]; then
 		eapply "${FILESDIR}"/6.3.0/cpu_indicator.patch
 		eapply "${FILESDIR}"/7.1.0/posix_memalign.patch
-		eapply "${FILESDIR}"/8.3.0/gcc-pure64.patch
+		case $(tc-arch) in
+			amd64|arm64) eapply "${FILESDIR}"/8.3.0/gcc-pure64.patch ;;
+		esac
 	fi
 
 	eapply_user
