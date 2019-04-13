@@ -1,0 +1,25 @@
+Adopted from https://git.alpinelinux.org/aports/tree/main/gcc/gcc-pure64.patch
+
+diff -Naur gcc-8.3.0.orig/gcc/config/aarch64/t-aarch64-linux gcc-8.3.0/gcc/config/aarch64/t-aarch64-linux
+--- gcc-8.3.0.orig/gcc/config/aarch64/t-aarch64-linux	2018-01-03 05:03:58.000000000 -0500
++++ gcc-8.3.0/gcc/config/aarch64/t-aarch64-linux	2019-04-13 14:07:21.580151954 -0400
+@@ -22,7 +22,7 @@
+ LIB1ASMFUNCS = _aarch64_sync_cache_range
+ 
+ AARCH_BE = $(if $(findstring TARGET_BIG_ENDIAN_DEFAULT=1, $(tm_defines)),_be)
+-MULTILIB_OSDIRNAMES = mabi.lp64=../lib64$(call if_multiarch,:aarch64$(AARCH_BE)-linux-gnu)
++MULTILIB_OSDIRNAMES = mabi.lp64=../lib
+ MULTIARCH_DIRNAME = $(call if_multiarch,aarch64$(AARCH_BE)-linux-gnu)
+ 
+ MULTILIB_OSDIRNAMES += mabi.ilp32=../libilp32$(call if_multiarch,:aarch64$(AARCH_BE)-linux-gnu_ilp32)
+diff -Naur gcc-8.3.0.orig/gcc/config/i386/t-linux64 gcc-8.3.0/gcc/config/i386/t-linux64
+--- gcc-8.3.0.orig/gcc/config/i386/t-linux64	2019-04-13 13:58:55.047489953 -0400
++++ gcc-8.3.0/gcc/config/i386/t-linux64	2019-04-13 14:09:48.131716954 -0400
+@@ -33,6 +33,6 @@
+ comma=,
+ MULTILIB_OPTIONS    = $(subst $(comma),/,$(TM_MULTILIB_CONFIG))
+ MULTILIB_DIRNAMES   = $(patsubst m%, %, $(subst /, ,$(MULTILIB_OPTIONS)))
+-MULTILIB_OSDIRNAMES = m64=../lib64
++MULTILIB_OSDIRNAMES = m64=../lib
+ MULTILIB_OSDIRNAMES+= m32=../lib32
+ MULTILIB_OSDIRNAMES+= mx32=../libx32

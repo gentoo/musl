@@ -1,7 +1,7 @@
 # Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI="6"
 
 PATCH_VER="1.1"
 
@@ -24,5 +24,6 @@ src_prepare() {
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl* ]]; then
 		epatch "${FILESDIR}"/6.3.0/cpu_indicator.patch
 		epatch "${FILESDIR}"/7.1.0/posix_memalign.patch
+		epatch "${FILESDIR}"/8.3.0/gcc-pure64.patch
 	fi
 }
