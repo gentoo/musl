@@ -1,0 +1,27 @@
+From 63c1fa6a98bc60234a21de83dd191cd581a5d073 Mon Sep 17 00:00:00 2001
+From: Andy Dougherty <doughera@lafayette.edu>
+Date: Wed, 23 Jan 2019 21:12:29 -0500
+Subject: [PATCH] Add ability to include literal text in the prototype check.
+
+This is the same technique as in the metaconfig unit Protochk.U.
+See that unit for more usage information.  It is a bit clunky,
+but does work.
+---
+ Configure | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Configure b/Configure
+index a83cbdf2f8..179545727e 100755
+--- a/Configure
++++ b/Configure
+@@ -10739,6 +10739,7 @@ hasproto='varname=$1; func=$2; shift; shift;
+ while $test $# -ge 2; do
+ 	case "$1" in
+ 	$define) echo "#include <$2>";;
++	literal) echo "$2" ;;
+ 	esac ;
+     shift 2;
+ done > try.c;
+-- 
+2.15.1-424-g9478a660812
+

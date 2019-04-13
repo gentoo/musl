@@ -1,0 +1,103 @@
+From ba73a4cb8f472480a2d630613d1e9e1172d518d3 Mon Sep 17 00:00:00 2001
+From: Andy Dougherty <doughera@lafayette.edu>
+Date: Thu, 31 Jan 2019 13:04:32 -0500
+Subject: [PATCH] Improve detection of memrchr, strlcat, and strlcpy.
+
+This is continuation of commit f8d82a1010 addressing [perl #133760].
+Linux systems using the musl C library have memmem, memrchr, strlcat, and
+strlcpy, but the prototypes are only visible if _GNU_SOURCE is defined.
+This patch makes Configure test both whether the prototype is visible
+and whether the C symbol is visible.
+
+Still to be done is automatically adding _GNU_SOURCE if the musl library
+is being used -- probably in hints/linux.sh.
+---
+ Configure | 63 +++++++++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 57 insertions(+), 6 deletions(-)
+
+diff --git a/Configure b/Configure
+index abbfdf6..427dd9d 100755
+--- a/Configure
++++ b/Configure
+@@ -16354,8 +16354,25 @@ set mbtowc d_mbtowc
+ eval $inlibc
+ 
+ : see if memchr exists
+-set memchr d_memchr
+-eval $inlibc
++: We need both a prototype in string.h and the symbol in libc.
++echo " "
++d_memchr_proto=''
++xx1="#$d_gnulibc HAS_GNULIBC"
++xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
++xx3='#   define _GNU_SOURCE'
++xx4='#endif'
++set d_memchr_proto memchr literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
++eval $hasproto
++case "$d_memchr_proto" in
++    define) # see if memchr exists
++	set memchr d_memchr
++	eval $inlibc
++	;;
++    *)  val=$undef
++	set d_memchr
++	eval $setvar
++	;;
++esac
+ 
+ : see if memcmp exists
+ set memcmp d_memcmp
+@@ -19387,12 +19404,46 @@ set strftime d_strftime
+ eval $inlibc
+ 
+ : see if strlcat exists
+-set strlcat d_strlcat
+-eval $inlibc
++: We need both a prototype in string.h and the symbol in libc.
++echo " "
++d_strlcat_proto=''
++xx1="#$d_gnulibc HAS_GNULIBC"
++xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
++xx3='#   define _GNU_SOURCE'
++xx4='#endif'
++set d_strlcat_proto strlcat literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
++eval $hasproto
++case "$d_strlcat_proto" in
++    define) # see if strlcat exists
++	set strlcat d_strlcat
++	eval $inlibc
++	;;
++    *)  val=$undef
++	set d_strlcat
++	eval $setvar
++	;;
++esac
+ 
+ : see if strlcpy exists
+-set strlcpy d_strlcpy
+-eval $inlibc
++: We need both a prototype in string.h and the symbol in libc.
++echo " "
++d_strlcpy_proto=''
++xx1="#$d_gnulibc HAS_GNULIBC"
++xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
++xx3='#   define _GNU_SOURCE'
++xx4='#endif'
++set d_strlcpy_proto strlcpy literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
++eval $hasproto
++case "$d_strlcpy_proto" in
++    define) # see if strlcpy exists
++	set strlcpy d_strlcpy
++	eval $inlibc
++	;;
++    *)  val=$undef
++	set d_strlcpy
++	eval $setvar
++	;;
++esac
+ 
+ : see if strtod exists
+ set strtod d_strtod
+-- 
+2.21.0
+

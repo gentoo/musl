@@ -1,0 +1,88 @@
+From f8d82a1010426d0eb49c33cb903413b882c85c3e Mon Sep 17 00:00:00 2001
+From: Andy Dougherty <doughera@lafayette.edu>
+Date: Wed, 23 Jan 2019 21:39:39 -0500
+Subject: [PATCH] Another attempt to improve Configure detection of memmem()
+ [perl #133760].
+
+This updates commit ca152fd8207cf53816b1407d5f54f6ea160a3ef8.
+Linux systems have memmem, but the prototype in <string.h> is only
+visible if __GNU_SOURCE is defined.  This version tests for both the
+prototype in <string.h> and the symbol in libc.  (Thanks to Tony C. for
+the suggestion.)  (For BSD systems, no extra define is needed.)
+---
+ Configure | 58 ++++++++++++++++++----------------------------------------
+ 1 file changed, 18 insertions(+), 40 deletions(-)
+
+diff --git a/Configure b/Configure
+index 179545727e..ad17948a2c 100755
+--- a/Configure
++++ b/Configure
+@@ -16156,47 +16156,25 @@ set mbtowc d_mbtowc
+ eval $inlibc
+ 
+ : see if memmem exists
++: We need both a prototype in string.h and the symbol in libc.
+ echo " "
+-echo "Checking if you have a working memmem()" >&4
+-$cat >try.c <<EOCP
+-#$d_gnulibc HAS_GNULIBC         /**/
+-#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
+-#   define _GNU_SOURCE
+-#endif
+-#include <stdio.h>
+-#include <stdlib.h>
+-#include <stddef.h>
+-#include <string.h>
+-int main(int argc, char **argv)
+-{
+-    char *big = "abcdefghiabcdefghi";
+-    char *little = "def";
+-    char *rtn;
+-    ptrdiff_t diff;
+-    rtn = (char *) memmem(big, strlen(big), little, strlen(little));
+-    diff = rtn - big;
+-    exit(diff == 3 ?  EXIT_SUCCESS : EXIT_FAILURE);
+-}
+-EOCP
+-set try
+-if eval $compile; then
+-    `$run ./try`
+-    rc=$?
+-    case "$rc" in
+-        0)  echo "Yes, you do." >&4
+-            val="$define"
+-            ;;
+-        *)  echo "Well, you have memmem, but it isn't working." >&4
+-            val="$undef"
+-            ;;
+-    esac
+-else
+-    echo "No, you do not." >&4
+-    val="$undef"
+-fi
+-set d_memmem
+-eval $setvar
+-$rm_try
++d_memmem_proto=''
++xx1="#$d_gnulibc HAS_GNULIBC"
++xx2='#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)'
++xx3='#   define _GNU_SOURCE'
++xx4='#endif'
++set d_memmem_proto memmem literal "$xx1" literal "$xx2" literal "$xx3" literal "$xx4" define string.h
++eval $hasproto
++case "$d_memmem_proto" in
++    define) # see if memmem exists
++	set memmem d_memmem
++	eval $inlibc
++	;;
++    *)  val=$undef
++	set d_memmem
++	eval $setvar
++	;;
++esac
+ 
+ : see if memrchr exists
+ set memrchr d_memrchr
+-- 
+2.15.1-424-g9478a660812
+

@@ -1,0 +1,75 @@
+From ca152fd8207cf53816b1407d5f54f6ea160a3ef8 Mon Sep 17 00:00:00 2001
+From: Andy Dougherty <doughera@lafayette.edu>
+Date: Tue, 22 Jan 2019 14:17:05 -0500
+Subject: [PATCH] Improve Configure detection of memmem() [perl #133760].
+
+Linux systems have memmem, but the header prototype is only visible if
+the C library, but didn't check if the correct prototype is available.
+This patch compiles & runs a test program that will fail if the prototype
+is needed but not available.
+
+This does not completely close [perl #133760].  The tests for strlcat()
+and strlcpy() may also need to be similarly changed.  Also, this patch
+does not change whether _GNU_SOURCE is defined or not.  Presumably that
+would be done separately in the linux hints file.
+---
+ Configure | 43 +++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 41 insertions(+), 2 deletions(-)
+
+diff --git a/Configure b/Configure
+index 6041b0bbb0..a83cbdf2f8 100755
+--- a/Configure
++++ b/Configure
+@@ -16155,8 +16155,47 @@ set mbtowc d_mbtowc
+ eval $inlibc
+ 
+ : see if memmem exists
+-set memmem d_memmem
+-eval $inlibc
++echo " "
++echo "Checking if you have a working memmem()" >&4
++$cat >try.c <<EOCP
++#$d_gnulibc HAS_GNULIBC         /**/
++#if defined(HAS_GNULIBC) && !defined(_GNU_SOURCE)
++#   define _GNU_SOURCE
++#endif
++#include <stdio.h>
++#include <stdlib.h>
++#include <stddef.h>
++#include <string.h>
++int main(int argc, char **argv)
++{
++    char *big = "abcdefghiabcdefghi";
++    char *little = "def";
++    char *rtn;
++    ptrdiff_t diff;
++    rtn = (char *) memmem(big, strlen(big), little, strlen(little));
++    diff = rtn - big;
++    exit(diff == 3 ?  EXIT_SUCCESS : EXIT_FAILURE);
++}
++EOCP
++set try
++if eval $compile; then
++    `$run ./try`
++    rc=$?
++    case "$rc" in
++        0)  echo "Yes, you do." >&4
++            val="$define"
++            ;;
++        *)  echo "Well, you have memmem, but it isn't working." >&4
++            val="$undef"
++            ;;
++    esac
++else
++    echo "No, you do not." >&4
++    val="$undef"
++fi
++set d_memmem
++eval $setvar
++$rm_try
+ 
+ : see if memrchr exists
+ set memrchr d_memrchr
+-- 
+2.15.1-424-g9478a660812
+
