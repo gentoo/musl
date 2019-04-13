@@ -22,8 +22,10 @@ src_prepare() {
 	toolchain_src_prepare
 
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl* ]]; then
-		epatch "${FILESDIR}"/6.3.0/cpu_indicator.patch
-		epatch "${FILESDIR}"/7.1.0/posix_memalign.patch
-		epatch "${FILESDIR}"/8.3.0/gcc-pure64.patch
+		eapply "${FILESDIR}"/6.3.0/cpu_indicator.patch
+		eapply "${FILESDIR}"/7.1.0/posix_memalign.patch
+		eapply "${FILESDIR}"/8.3.0/gcc-pure64.patch
 	fi
+
+	eapply_user
 }
