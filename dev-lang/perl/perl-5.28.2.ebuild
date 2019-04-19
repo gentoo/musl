@@ -5,18 +5,18 @@ EAPI=6
 
 inherit eutils alternatives flag-o-matic toolchain-funcs multilib multiprocessing
 
-PATCH_VER=1
+PATCH_VER=2
 CROSS_VER=1.2.2
-PATCH_BASE="perl-5.28.0-patches-${PATCH_VER}"
+PATCH_BASE="perl-5.28.2-patches-${PATCH_VER}"
+PATCH_DEV=dilfridge
 
-PATCHES=( "${FILESDIR}"/5.28/${PN}-5.28.1-part{1,2,3,4,5}.patch )
-
-DIST_AUTHOR=XSAWYERX
+DIST_AUTHOR=SHAY
 
 # Greatest first, don't include yourself
 # Devel point-releases are not ABI-intercompatible, but stable point releases are
 # BIN_OLDVERSEN is contains only C-ABI-intercompatible versions
-PERL_BIN_OLDVERSEN=""
+PERL_BIN_OLDVERSEN="5.28.0"
+
 if [[ "${PV##*.}" == "9999" ]]; then
 	DIST_VERSION=5.28.0
 else
@@ -42,7 +42,7 @@ SRC_URI="
 	mirror://cpan/authors/id/${DIST_AUTHOR:0:1}/${DIST_AUTHOR:0:2}/${DIST_AUTHOR}/${MY_P}.tar.xz
 	https://github.com/gentoo-perl/perl-patchset/releases/download/${PATCH_BASE}/${PATCH_BASE}.tar.xz
 	mirror://gentoo/${PATCH_BASE}.tar.xz
-	https://dev.gentoo.org/~kentnl/distfiles/${PATCH_BASE}.tar.xz
+	https://dev.gentoo.org/~${PATCH_DEV}/distfiles/${PATCH_BASE}.tar.xz
 	https://github.com/arsv/perl-cross/releases/download/${CROSS_VER}/perl-cross-${CROSS_VER}.tar.gz
 "
 HOMEPAGE="https://www.perl.org/"
@@ -77,7 +77,7 @@ PDEPEND="
 S="${WORKDIR}/${MY_P}"
 
 dual_scripts() {
-	src_remove_dual      perl-core/Archive-Tar        2.280.0       ptar ptardiff ptargrep
+	src_remove_dual      perl-core/Archive-Tar        2.300.0       ptar ptardiff ptargrep
 	src_remove_dual      perl-core/CPAN               2.200.0       cpan
 	src_remove_dual      perl-core/Digest-SHA         6.10.0        shasum
 	src_remove_dual      perl-core/Encode             2.970.0       enc2xs piconv
@@ -85,7 +85,7 @@ dual_scripts() {
 	src_remove_dual      perl-core/ExtUtils-ParseXS   3.390.0       xsubpp
 	src_remove_dual      perl-core/IO-Compress        2.74.0        zipdetails
 	src_remove_dual      perl-core/JSON-PP            2.970.10      json_pp
-	src_remove_dual      perl-core/Module-CoreList    5.201.806.220 corelist
+	src_remove_dual      perl-core/Module-CoreList    5.201.904.190 corelist
 	src_remove_dual      perl-core/Pod-Parser         1.630.0       pod2usage podchecker podselect
 	src_remove_dual      perl-core/Pod-Perldoc        3.280.100     perldoc
 	src_remove_dual      perl-core/Test-Harness       3.420.0       prove
@@ -305,6 +305,9 @@ src_prepare() {
 		epatch "${FILESDIR}/${PN}-5.26.2-hppa.patch" # bug 634162
 	fi
 
+	# This fixes Storage/libperl segfaults on non glibc platforms
+	epatch "${FILESDIR}/5.28/${P}-portability.patch"
+
 	if [[ ${CHOST} == *-solaris* ]] ; then
 		# do NOT mess with nsl, on Solaris this is always necessary,
 		# when -lsocket is used e.g. to get h_errno
@@ -482,7 +485,7 @@ src_configure() {
 
 		# Use all host paths that might contain useful stuff, the hook above will filter out bad choices.
 		local paths="/lib/*-linux-gnu /usr/lib/*-linux-gnu /lib64 /lib/64 /usr/lib64 /usr/lib/64 /lib32 /usr/lib32 /lib /usr/lib"
-		myconf "-Dlibpth="${EPREFIX}"/$(get_libdir) "${EPREFIX}"/usr/$(get_libdir) ${paths}"
+		myconf "-Dlibpth=${EPREFIX}/$(get_libdir) ${EPREFIX}/usr/$(get_libdir) ${paths}"
 	elif [[ $(get_libdir) != "lib" ]] ; then
 		# We need to use " and not ', as the written config.sh use ' ...
 		myconf "-Dlibpth=/usr/local/$(get_libdir) /$(get_libdir) /usr/$(get_libdir)"
