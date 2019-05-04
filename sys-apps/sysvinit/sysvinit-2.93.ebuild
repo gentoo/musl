@@ -12,7 +12,7 @@ SRC_URI="mirror://nongnu/${PN}/${P/_/-}.tar.xz"
 LICENSE="GPL-2"
 SLOT="0"
 [[ "${PV}" == *beta* ]] || \
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~mips ppc x86"
 IUSE="selinux ibm static kernel_FreeBSD"
 
 CDEPEND="
