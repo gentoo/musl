@@ -240,7 +240,6 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-19.1.0-execinfo.patch
 	"${FILESDIR}"/${PN}-18-musl-invocation_name.patch
 	"${FILESDIR}"/${PN}-18-musl-pthread.patch
-	"${FILESDIR}"/${PN}-18-musl-amdgpu-include-pthread.patch
 	"${FILESDIR}"/${PN}-18.2.4-add-disable-tls-support.patch
 )
 
