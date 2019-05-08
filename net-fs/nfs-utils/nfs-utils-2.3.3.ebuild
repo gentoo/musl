@@ -68,7 +68,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-1.2.8-cross-build.patch
 	"${FILESDIR}"/${PN}-2.3.2-junction_libs.patch
 	"${FILESDIR}"/${PN}-2.3.2-no-werror.patch
-   "${FILESDIR}"/${PN}-musl.patch
+	"${FILESDIR}"/${PN}-musl.patch
 )
 
 src_prepare() {
