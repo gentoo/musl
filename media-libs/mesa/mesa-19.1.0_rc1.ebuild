@@ -457,6 +457,11 @@ multilib_src_configure() {
 		emesonargs+=( $(meson_use pax_kernel glx-read-only-text) )
 	fi
 
+	# Disable glx tls support on musl
+	if use elibc_musl; then
+		emesonargs+=( -Dglx-tls=false )
+	fi
+
 	# on abi_x86_32 hardened we need to have asm disable
 	if [[ ${ABI} == x86* ]] && use pic; then
 		emesonargs+=( -Dasm=false )
