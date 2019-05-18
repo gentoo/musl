@@ -27,10 +27,11 @@ src_prepare() {
 		#eautoreconf
 	fi
 	epatch "${FILESDIR}"/${P}-gcc5.patch #570486
-	epatch "${FILESDIR}"/${PN}-1.2.10-musl.patch
 	epatch "${FILESDIR}"/${PN}-1.2.10-netdb.patch
 	epatch "${FILESDIR}"/${PN}-1.2.10-dn_skipname.patch
 	epatch "${FILESDIR}"/${PN}-1.2.10-expand.patch
+	epatch "${FILESDIR}"/${PN}-1.2.10-musl.patch
+   
 	sed -i 's/AM_CONFIG_HEADER/AC_CONFIG_HEADERS/' configure.ac || die
 	eautoreconf
 }
