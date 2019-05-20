@@ -1,12 +1,12 @@
-# Copyright 1999-2018 Gentoo Authors
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 CMAKE_MAKEFILE_GENERATOR="ninja"
-PYTHON_COMPAT=( python2_7 )
-USE_RUBY="ruby23 ruby24 ruby25"
+PYTHON_COMPAT=( python{2_7,3_5,3_6,3_7} )
+USE_RUBY="ruby24 ruby25 ruby26"
 
-inherit check-reqs cmake-utils eutils flag-o-matic gnome2 pax-utils python-any-r1 ruby-single toolchain-funcs virtualx
+inherit check-reqs cmake-utils flag-o-matic gnome2 pax-utils python-any-r1 ruby-single toolchain-funcs virtualx
 
 MY_P="webkitgtk-${PV}"
 DESCRIPTION="Open source web browser engine"
@@ -15,15 +15,16 @@ SRC_URI="https://www.webkitgtk.org/releases/${MY_P}.tar.xz"
 
 LICENSE="LGPL-2+ BSD"
 SLOT="4/37" # soname version of libwebkit2gtk-4.0
-KEYWORDS="amd64 ~arm ~arm64 ~ia64 ~ppc ~ppc64 ~sparc x86 ~amd64-linux ~x86-linux ~x86-macos"
+KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
 
-IUSE="aqua coverage doc +egl +geolocation gles2 gnome-keyring +gstreamer +introspection +jit libnotify nsplugin +opengl spell wayland +webgl +X"
+IUSE="aqua coverage doc +egl +geolocation gles2 gnome-keyring +gstreamer +introspection jpeg2k libnotify nsplugin +opengl spell wayland +webgl +X"
 
 # webgl needs gstreamer, bug #560612
+# gstreamer with opengl/gles2 needs egl
 REQUIRED_USE="
 	geolocation? ( introspection )
 	gles2? ( egl !opengl )
-	introspection? ( gstreamer )
+	gstreamer? ( opengl? ( egl ) )
 	nsplugin? ( X )
 	webgl? ( gstreamer
 		|| ( gles2 opengl ) )
@@ -39,14 +40,14 @@ RESTRICT="test"
 # Dependencies found at Source/cmake/OptionsGTK.cmake
 # Various compile-time optionals for gtk+-3.22.0 - ensure it
 # Missing OpenWebRTC checks and conditionals, but ENABLE_MEDIA_STREAM/ENABLE_WEB_RTC is experimental upstream (PRIVATE OFF)
-# TODO: Raise gst-plugins-opus dep to 1.14.4-r1 once we can, and eventually drop the blocker from epiphany; or remove the dep when older than -opus-1.14.4-r1 is not available anymore
+# >=gst-plugins-opus-1.14.4-r1 for opusparse (required by MSE)
 RDEPEND="
-	>=x11-libs/cairo-1.10.2:=[X?]
-	>=media-libs/fontconfig-2.8.0:1.0
-	>=media-libs/freetype-2.4.2:2
-	>=dev-libs/libgcrypt-1.6.0:0=
+	>=x11-libs/cairo-1.16.0:=[X?]
+	>=media-libs/fontconfig-2.13.0:1.0
+	>=media-libs/freetype-2.9.0:2
+	>=dev-libs/libgcrypt-1.7.0:0=
 	>=x11-libs/gtk+-3.22:3[aqua?,introspection?,wayland?,X?]
-	>=media-libs/harfbuzz-1.3.3:=[icu(+)]
+	>=media-libs/harfbuzz-1.4.2:=[icu(+)]
 	>=dev-libs/icu-3.8.1-r1:=
 	virtual/jpeg:0=
 	>=net-libs/libsoup-2.48:2.4[introspection?]
@@ -64,14 +65,13 @@ RDEPEND="
 	geolocation? ( >=app-misc/geoclue-2.1.5:2.0 )
 	introspection? ( >=dev-libs/gobject-introspection-1.32.0:= )
 	dev-libs/libtasn1:=
-	>=dev-libs/libgcrypt-1.7.0:0=
 	nsplugin? ( >=x11-libs/gtk+-2.24.10:2 )
 	spell? ( >=app-text/enchant-0.22:= )
 	gstreamer? (
-		>=media-libs/gstreamer-1.8.3:1.0
-		>=media-libs/gst-plugins-base-1.8.3:1.0
-		>=media-plugins/gst-plugins-opus-1.8.3:1.0
-		>=media-libs/gst-plugins-bad-1.10:1.0[egl?,gles2?,opengl?] )
+		>=media-libs/gstreamer-1.14:1.0
+		>=media-libs/gst-plugins-base-1.14:1.0[egl?,gles2?,opengl?]
+		>=media-plugins/gst-plugins-opus-1.14.4-r1:1.0
+		>=media-libs/gst-plugins-bad-1.14:1.0 )
 
 	X? (
 		x11-libs/libX11
@@ -82,6 +82,7 @@ RDEPEND="
 
 	libnotify? ( x11-libs/libnotify )
 	dev-libs/hyphen
+	jpeg2k? ( >=media-libs/openjpeg-2.2.0:2= )
 
 	egl? ( media-libs/mesa[egl] )
 	gles2? ( media-libs/mesa[gles2] )
@@ -97,7 +98,6 @@ DEPEND="${RDEPEND}
 	${PYTHON_DEPS}
 	${RUBY_DEPS}
 	>=app-accessibility/at-spi2-core-2.5.3
-	>=dev-lang/perl-5.10
 	dev-util/glib-utils
 	>=dev-util/gtk-doc-am-1.10
 	>=dev-util/gperf-3.0.1
@@ -106,14 +106,13 @@ DEPEND="${RDEPEND}
 	sys-devel/gettext
 	virtual/pkgconfig
 
-	dev-lang/perl
+	>=dev-lang/perl-5.10
 	virtual/perl-Data-Dumper
 	virtual/perl-Carp
 	virtual/perl-JSON-PP
 
 	doc? ( >=dev-util/gtk-doc-1.10 )
 	geolocation? ( dev-util/gdbus-codegen )
-	introspection? ( jit? ( sys-apps/paxctl ) )
 "
 #	test? (
 #		dev-python/pygobject:3[python_targets_python2_7]
@@ -139,6 +138,16 @@ pkg_pretend() {
 			die 'The active compiler needs to be gcc 4.9 (or newer)'
 		fi
 	fi
+
+	if ! use opengl && ! use gles2; then
+		ewarn
+		ewarn "You are disabling OpenGL usage (USE=opengl or USE=gles) completely."
+		ewarn "This is an unsupported configuration meant for very specific embedded"
+		ewarn "use cases, where there truly is no GL possible (and even that use case"
+		ewarn "is very unlikely to come by). If you have GL (even software-only), you"
+		ewarn "really really should be enabling OpenGL!"
+		ewarn
+	fi
 }
 
 pkg_setup() {
@@ -160,9 +169,6 @@ src_prepare() {
 src_configure() {
 	# Respect CC, otherwise fails on prefix #395875
 	tc-export CC
-
-	# Arches without JIT support also need this to really disable it in all places
-	use jit || append-cppflags -DENABLE_JIT=0 -DENABLE_YARR_JIT=0 -DENABLE_ASSEMBLER=0
 
 	# It does not compile on alpha without this in LDFLAGS
 	# https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=648761
@@ -218,6 +224,7 @@ src_configure() {
 	fi
 
 	local mycmakeargs=(
+		#-DENABLE_UNIFIED_BUILDS=$(usex jumbo-build) # broken in 2.24.1
 		-DENABLE_QUARTZ_TARGET=$(usex aqua)
 		-DENABLE_API_TESTS=$(usex test)
 		-DENABLE_GTKDOC=$(usex doc)
@@ -227,9 +234,9 @@ src_configure() {
 		-DENABLE_VIDEO=$(usex gstreamer)
 		-DENABLE_WEB_AUDIO=$(usex gstreamer)
 		-DENABLE_INTROSPECTION=$(usex introspection)
-		-DENABLE_JIT=$(usex jit)
 		-DUSE_LIBNOTIFY=$(usex libnotify)
 		-DUSE_LIBSECRET=$(usex gnome-keyring)
+		-DUSE_OPENJPEG=$(usex jpeg2k)
 		-DUSE_WOFF2=ON
 		-DENABLE_PLUGIN_PROCESS_GTK2=$(usex nsplugin)
 		-DENABLE_SPELLCHECK=$(usex spell)
@@ -262,7 +269,7 @@ src_compile() {
 
 src_test() {
 	# Prevents test failures on PaX systems
-	use jit && pax-mark m $(list-paxables Programs/*[Tt]ests/*) # Programs/unittests/.libs/test*
+	pax-mark m $(list-paxables Programs/*[Tt]ests/*) # Programs/unittests/.libs/test*
 
 	cmake-utils_src_test
 }
@@ -271,7 +278,7 @@ src_install() {
 	cmake-utils_src_install
 
 	# Prevents crashes on PaX systems, bug #522808
-	use jit && pax-mark m "${ED}usr/libexec/webkit2gtk-4.0/jsc" "${ED}usr/libexec/webkit2gtk-4.0/WebKitWebProcess"
+	pax-mark m "${ED}usr/libexec/webkit2gtk-4.0/jsc" "${ED}usr/libexec/webkit2gtk-4.0/WebKitWebProcess"
 	pax-mark m "${ED}usr/libexec/webkit2gtk-4.0/WebKitPluginProcess"
 	use nsplugin && pax-mark m "${ED}usr/libexec/webkit2gtk-4.0/WebKitPluginProcess"2
 }
