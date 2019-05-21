@@ -57,7 +57,7 @@ PATCHES=(
 	# bug 660880
 	"${FILESDIR}"/polkit-0.115-elogind.patch
 
-	"${FILESDIR}"/polkit-0.116-make-netgroup-support-optional.patch
+	"${FILESDIR}"/polkit-0.116-make-netgroup-support-optional-1.patch
 )
 
 QA_MULTILIB_PATHS="
