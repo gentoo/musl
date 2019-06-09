@@ -40,7 +40,7 @@ COMMON_DEPEND="
 	>=net-misc/curl-7.24
 	net-misc/iputils
 	sys-apps/util-linux[${MULTILIB_USEDEP}]
-	sys-libs/readline:0=
+	sys-libs/readline:0=[${MULTILIB_USEDEP}]
 	>=virtual/libudev-175:=[${MULTILIB_USEDEP}]
 	audit? ( sys-process/audit )
 	bluetooth? ( >=net-wireless/bluez-5 )
@@ -344,7 +344,7 @@ pkg_postinst() {
 		fi
 	fi
 
-	# NM shows lots of errors making nmcli neither unusable, bug #528748 upstream bug #690457
+	# NM shows lots of errors making nmcli almost unusable, bug #528748 upstream bug #690457
 	if grep -r "psk-flags=1" "${EROOT}"/etc/NetworkManager/; then
 		ewarn "You have psk-flags=1 setting in above files, you will need to"
 		ewarn "either reconfigure affected networks or, at least, set the flag"
