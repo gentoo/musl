@@ -244,6 +244,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-18-musl-invocation_name.patch
 	"${FILESDIR}"/${PN}-18-musl-pthread.patch
 	"${FILESDIR}"/${PN}-18.2.4-add-disable-tls-support.patch
+	"${FILESDIR}"/${PN}-19.1.0-cache_stack_overflow.patch
 )
 
 llvm_check_deps() {
