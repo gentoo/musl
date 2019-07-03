@@ -31,6 +31,7 @@ RDEPEND="
 	berkdb? ( sys-libs/db:= )
 	atm? ( net-dialup/linux-atm )
 	selinux? ( sys-libs/libselinux )
+	elibc_musl? ( sys-libs/queue-standalone )
 "
 # We require newer linux-headers for ipset support #549948 and some defines #553876
 DEPEND="
