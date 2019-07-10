@@ -22,7 +22,6 @@ DEPEND="${RDEPEND}
 	>=virtual/pkgconfig-0-r1[${MULTILIB_USEDEP}]"
 
 PATCHES=(
-	"${FILESDIR}/${PN}-1.0.2-bcopy-to-memmove.patch"
 	"${FILESDIR}/${PN}-1.0.3-musl_types.patch"
 )
 

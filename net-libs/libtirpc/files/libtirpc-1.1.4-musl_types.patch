@@ -1,0 +1,29 @@
+From 45eb8f19128d061936237bf7f827671310161b82 Mon Sep 17 00:00:00 2001
+From: Khem Raj <raj.khem@gmail.com>
+Date: Wed, 10 Jul 2019 00:39:09 -0500
+Subject: [PATCH 2/2] Consider musl provided built-in defines
+
+Helps compile libtirpc with musl
+
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+Signed-off-by: Jory Pratt <anarchy@gentoo.org>
+---
+ tirpc/rpc/types.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tirpc/rpc/types.h b/tirpc/rpc/types.h
+index f069efa..36299df 100644
+--- a/tirpc/rpc/types.h
++++ b/tirpc/rpc/types.h
+@@ -66,7 +66,7 @@ typedef   int32_t rpc_inline_t;
+ #define mem_free(ptr, bsize)	free(ptr)
+ 
+ 
+-#if defined __APPLE_CC__ || defined __FreeBSD__
++#if defined __APPLE_CC__ || defined __FreeBSD__ || !defined(__GLIBC__)
+ # define __u_char_defined
+ # define __daddr_t_defined
+ #endif
+-- 
+2.22.0
+
