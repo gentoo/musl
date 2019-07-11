@@ -1,6 +1,17 @@
-diff -Naur gentoo-headers-base-4.16.orig/include/uapi/linux/libc-compat.h gentoo-headers-base-4.16/include/uapi/linux/libc-compat.h
---- gentoo-headers-base-4.16.orig/include/uapi/linux/libc-compat.h	2018-04-04 23:45:32.000000000 -0700
-+++ gentoo-headers-base-4.16/include/uapi/linux/libc-compat.h	2018-04-08 17:53:43.004162639 -0700
+From 92982d8d0757a991d2dcf9a872d97a79969b611a Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Thu, 11 Jul 2019 12:45:59 -0500
+Subject: [PATCH 2/2] Cleanup for portability with non GLIBC systems
+
+Signed-off-by: Jory Pratt <anarchy@gentoo.org>
+---
+ include/uapi/linux/libc-compat.h | 57 ++++++++++++++++++--------------
+ 1 file changed, 32 insertions(+), 25 deletions(-)
+
+diff --git a/include/uapi/linux/libc-compat.h b/include/uapi/linux/libc-compat.h
+index 8254c937c9f4..233069447934 100644
+--- a/include/uapi/linux/libc-compat.h
++++ b/include/uapi/linux/libc-compat.h
 @@ -49,47 +49,57 @@
  #ifndef _UAPI_LIBC_COMPAT_H
  #define _UAPI_LIBC_COMPAT_H
@@ -144,3 +155,6 @@ diff -Naur gentoo-headers-base-4.16.orig/include/uapi/linux/libc-compat.h gentoo
 +#endif /* defined(__KERNEL__) */
  
  #endif /* _UAPI_LIBC_COMPAT_H */
+-- 
+2.22.0
+
