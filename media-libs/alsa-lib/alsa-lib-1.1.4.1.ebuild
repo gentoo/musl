@@ -17,11 +17,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~arm ~arm64 ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
 IUSE="alisp debug doc elibc_uclibc python"
 
-RDEPEND="python? ( ${PYTHON_DEPS} )
-	abi_x86_32? (
-		!<=app-emulation/emul-linux-x86-soundlibs-20130224-r1
-		!app-emulation/emul-linux-x86-soundlibs[-abi_x86_32(-)]
-	)"
+RDEPEND="python? ( ${PYTHON_DEPS} )"
 DEPEND="${RDEPEND}
 	doc? ( >=app-doc/doxygen-1.2.6 )"
 

@@ -14,11 +14,7 @@ SLOT="0"
 KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="test"
 
-RDEPEND="
-	abi_x86_32? (
-		!<=app-emulation/emul-linux-x86-baselibs-20140508-r1
-		!app-emulation/emul-linux-x86-baselibs[-abi_x86_32(-)]
-	)"
+RDEPEND=""
 DEPEND="!prefix? ( >=sys-kernel/linux-headers-2.6.11 )"
 
 pkg_setup() {

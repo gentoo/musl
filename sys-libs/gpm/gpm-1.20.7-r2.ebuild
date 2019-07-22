@@ -18,11 +18,7 @@ KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sh sparc x86"
 IUSE="selinux static-libs"
 
 RDEPEND=">=sys-libs/ncurses-5.9-r3:0=[${MULTILIB_USEDEP}]
-	selinux? ( sec-policy/selinux-gpm )
-	abi_x86_32? (
-		!<=app-emulation/emul-linux-x86-baselibs-20130224-r12
-		!app-emulation/emul-linux-x86-baselibs[-abi_x86_32(-)]
-	)"
+	selinux? ( sec-policy/selinux-gpm )"
 DEPEND=">=sys-libs/ncurses-5.9-r3:0=[${MULTILIB_USEDEP}]
 	app-arch/xz-utils
 	sys-apps/texinfo
