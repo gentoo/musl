@@ -20,11 +20,7 @@ RDEPEND="sys-libs/ncurses:0=
 	png? ( >=media-libs/libpng-1.6.10:0[${MULTILIB_USEDEP}] )
 	cjk? ( >=dev-libs/oniguruma-5.9.5[${MULTILIB_USEDEP}] )
 	readline? ( >=sys-libs/readline-6.2_p5-r1:0=[${MULTILIB_USEDEP}] )
-	zlib? ( >=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}] )
-	abi_x86_32? (
-		!app-emulation/emul-linux-x86-baselibs[-abi_x86_32(-)]
-		!<=app-emulation/emul-linux-x86-baselibs-20140406-r1
-	)"
+	zlib? ( >=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}] )"
 DEPEND="${RDEPEND}"
 
 MAKEOPTS="${MAKEOPTS} -j1"

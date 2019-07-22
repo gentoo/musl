@@ -15,9 +15,7 @@ SLOT="0"
 KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sparc x86"
 IUSE="static-libs"
 
-RDEPEND="app-eselect/eselect-cdparanoia
-	abi_x86_32? ( !<=app-emulation/emul-linux-x86-soundlibs-20130224-r4
-					!app-emulation/emul-linux-x86-soundlibs[-abi_x86_32(-)] )"
+RDEPEND=""
 DEPEND=${RDEPEND}
 
 S=${WORKDIR}/${MY_P}
