@@ -91,7 +91,7 @@ CDEPEND=">=app-eselect/eselect-opengl-1.3.0
 
 DEPEND="${CDEPEND}
 	sys-devel/flex
-	>=x11-base/xorg-proto-2018.3
+	>=x11-base/xorg-proto-2018.4
 	dmx? (
 		doc? (
 			|| (
@@ -119,9 +119,9 @@ REQUIRED_USE="!minimal? (
 	xephyr? ( kdrive )"
 
 UPSTREAMED_PATCHES=(
-	"${FILESDIR}"/${P}-shm-reindent-shm_tmpfile-to-follow-our-standards.patch
-	"${FILESDIR}"/${P}-shm-Pick-the-shm-dir-at-run-time-not-build-time.patch
-	"${FILESDIR}"/${P}-shm-Use-memfd_create-when-possible.patch
+	"${FILESDIR}"/${PN}-1.20.4-shm-reindent-shm_tmpfile-to-follow-our-standards.patch
+	"${FILESDIR}"/${PN}-1.20.4-shm-Pick-the-shm-dir-at-run-time-not-build-time.patch
+	"${FILESDIR}"/${PN}-1.20.4-shm-Use-memfd_create-when-possible.patch
 )
 
 PATCHES=(
