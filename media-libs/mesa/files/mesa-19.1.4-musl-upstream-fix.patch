@@ -1,0 +1,227 @@
+From 9c411e020d164563fb6fcd92a28a435277bf0745 Mon Sep 17 00:00:00 2001
+From: Matt Turner <mattst88@gmail.com>
+Date: Wed, 24 Jul 2019 18:26:49 -0700
+Subject: [PATCH 1/5] util: Drop preprocessor guards for glibc-2.12
+
+glibc-2.12 was released in 2010. No one is building new Mesa against 9
+year old glibc, and removing these checks allows the code to work on
+other C libraries like musl.
+
+Acked-by: Eric Engestrom <eric.engestrom@intel.com>
+---
+ src/util/u_thread.h | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/src/util/u_thread.h b/src/util/u_thread.h
+index a46c18d3db2..8c8cc803199 100644
+--- a/src/util/u_thread.h
++++ b/src/util/u_thread.h
+@@ -61,11 +61,7 @@ static inline thrd_t u_thread_create(int (*routine)(void *), void *param)
+ static inline void u_thread_setname( const char *name )
+ {
+ #if defined(HAVE_PTHREAD)
+-#  if defined(__GNU_LIBRARY__) && defined(__GLIBC__) && defined(__GLIBC_MINOR__) && \
+-      (__GLIBC__ >= 3 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12)) && \
+-      defined(__linux__)
+    pthread_setname_np(pthread_self(), name);
+-#  endif
+ #endif
+    (void)name;
+ }
+@@ -150,10 +146,7 @@ u_thread_get_time_nano(thrd_t thread)
+ static inline bool u_thread_is_self(thrd_t thread)
+ {
+ #if defined(HAVE_PTHREAD)
+-#  if defined(__GNU_LIBRARY__) && defined(__GLIBC__) && defined(__GLIBC_MINOR__) && \
+-      (__GLIBC__ >= 3 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12))
+    return pthread_equal(pthread_self(), thread);
+-#  endif
+ #endif
+    return false;
+ }
+-- 
+2.21.0
+
+
+From 9cc4311d86a797bba26448bcaf24db4887c6ec8d Mon Sep 17 00:00:00 2001
+From: Matt Turner <mattst88@gmail.com>
+Date: Wed, 24 Jul 2019 18:28:38 -0700
+Subject: [PATCH 2/5] st/nine: Drop preprocessor guards for glibc-2.12
+
+Same rationale as the previous patch, but additionally these checks just
+seem entirely unnecessary. pthread_self() has been used in Mesa since at
+least 1999.
+
+Acked-by: Eric Engestrom <eric.engestrom@intel.com>
+---
+ src/gallium/state_trackers/nine/nine_debug.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/src/gallium/state_trackers/nine/nine_debug.c b/src/gallium/state_trackers/nine/nine_debug.c
+index 904a40fde83..784d535d213 100644
+--- a/src/gallium/state_trackers/nine/nine_debug.c
++++ b/src/gallium/state_trackers/nine/nine_debug.c
+@@ -73,11 +73,8 @@ _nine_debug_printf( unsigned long flag,
+     }
+ 
+ #if defined(HAVE_PTHREAD)
+-#  if defined(__GNU_LIBRARY__) && defined(__GLIBC__) && defined(__GLIBC_MINOR__) && \
+-      (__GLIBC__ >= 3 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12))
+     if (dbg_flags & DBG_TID)
+         tid = pthread_self();
+-#  endif
+ #endif
+ 
+     if (dbg_flags & flag) {
+-- 
+2.21.0
+
+
+From c96407f37ef8325db11ae5fdb16e372cbc663bf4 Mon Sep 17 00:00:00 2001
+From: Matt Turner <mattst88@gmail.com>
+Date: Wed, 24 Jul 2019 18:44:35 -0700
+Subject: [PATCH 3/5] meson: Test for random_r()
+
+It's better to test for needed functions instead of using external
+knowledge about presence in this or that C library.
+
+Reviewed-by: Eric Engestrom <eric.engestrom@intel.com>
+---
+ meson.build       | 2 +-
+ src/glx/glxhash.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 542c35d525b..8dc431cfc5b 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1029,7 +1029,7 @@ foreach h : ['xlocale.h', 'sys/sysctl.h', 'linux/futex.h', 'endian.h', 'dlfcn.h'
+   endif
+ endforeach
+ 
+-foreach f : ['strtof', 'mkostemp', 'posix_memalign', 'timespec_get', 'memfd_create']
++foreach f : ['strtof', 'mkostemp', 'posix_memalign', 'timespec_get', 'memfd_create', 'random_r']
+   if cc.has_function(f)
+     pre_args += '-DHAVE_@0@'.format(f.to_upper())
+   endif
+diff --git a/src/glx/glxhash.c b/src/glx/glxhash.c
+index b76ec323459..5a89bf99b1c 100644
+--- a/src/glx/glxhash.c
++++ b/src/glx/glxhash.c
+@@ -88,7 +88,7 @@
+ 
+ #define HASH_ALLOC malloc
+ #define HASH_FREE  free
+-#ifndef __GLIBC__
++#ifndef HAVE_RANDOM_R
+ #define HASH_RANDOM_DECL	char *ps, rs[256]
+ #define HASH_RANDOM_INIT(seed)	ps = initstate(seed, rs, sizeof(rs))
+ #define HASH_RANDOM		random()
+-- 
+2.21.0
+
+
+From 597bddad47e831474a33cde054c40bbd2cbc0600 Mon Sep 17 00:00:00 2001
+From: Matt Turner <mattst88@gmail.com>
+Date: Mon, 29 Jul 2019 15:31:34 -0700
+Subject: [PATCH 4/5] scons: Test for random_r()
+
+Suggested-by: Eric Engestrom <eric.engestrom@intel.com>
+---
+ scons/gallium.py | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/scons/gallium.py b/scons/gallium.py
+index 27727612d14..6d5b2fccc17 100755
+--- a/scons/gallium.py
++++ b/scons/gallium.py
+@@ -368,6 +368,9 @@ def generate(env):
+         if check_functions(env, ['strtod_l', 'strtof_l']):
+             cppdefines += ['HAVE_STRTOD_L']
+ 
++        if check_functions(env, 'random_r'):
++            cppdefines += ['HAVE_RANDOM_R']
++
+         if check_functions(env, ['timespec_get']):
+             cppdefines += ['HAVE_TIMESPEC_GET']
+ 
+-- 
+2.21.0
+
+
+From c9b86cf52692f1d76314dce345080af8ce786792 Mon Sep 17 00:00:00 2001
+From: Matt Turner <mattst88@gmail.com>
+Date: Mon, 29 Jul 2019 13:51:55 -0700
+Subject: [PATCH 5/5] meson: Test for program_invocation_name
+
+program_invocation_name and program_invocation_short_name are both GNU
+extensions. I don't believe one can exist without the other, so only
+check for program_invocation_name.
+
+Reviewed-by: Eric Engestrom <eric.engestrom@intel.com>
+---
+ meson.build                                         | 7 +++++++
+ src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c | 2 +-
+ src/util/u_process.c                                | 8 ++------
+ 3 files changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 8dc431cfc5b..c9f96e7135d 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1035,6 +1035,13 @@ foreach f : ['strtof', 'mkostemp', 'posix_memalign', 'timespec_get', 'memfd_crea
+   endif
+ endforeach
+ 
++if cc.has_header_symbol('errno.h', 'program_invocation_name',
++                        args : '-D_GNU_SOURCE')
++   pre_args += '-DHAVE_PROGRAM_INVOCATION_NAME'
++elif with_tools.contains('intel')
++  error('Intel tools require the program_invocation_name variable')
++endif
++
+ # strtod locale support
+ if cc.links('''
+     #define _GNU_SOURCE
+diff --git a/src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c b/src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c
+index 58005df5595..42a58a6dcc1 100644
+--- a/src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c
++++ b/src/gallium/winsys/virgl/vtest/virgl_vtest_socket.c
+@@ -125,7 +125,7 @@ static int virgl_vtest_send_init(struct virgl_vtest_winsys *vws)
+    ret = os_get_process_name(cmdline, 63);
+    if (ret == FALSE)
+       strcpy(cmdline, nstr);
+-#if defined(__GLIBC__) || defined(__CYGWIN__)
++#if defined(HAVE_PROGRAM_INVOCATION_NAME)
+    if (!strcmp(cmdline, "shader_runner")) {
+       const char *name;
+       /* hack to get better testname */
+diff --git a/src/util/u_process.c b/src/util/u_process.c
+index 94c975df396..cbccf48ed01 100644
+--- a/src/util/u_process.c
++++ b/src/util/u_process.c
+@@ -32,11 +32,7 @@
+ 
+ #undef GET_PROGRAM_NAME
+ 
+-#if (defined(__GNU_LIBRARY__) || defined(__GLIBC__)) && !defined(__UCLIBC__)
+-#    if !defined(__GLIBC__) || (__GLIBC__ < 2)
+-/* These aren't declared in any libc5 header */
+-extern char *program_invocation_name, *program_invocation_short_name;
+-#    endif
++#if defined(__linux__) && defined(HAVE_PROGRAM_INVOCATION_NAME)
+ static const char *
+ __getProgramName()
+ {
+@@ -79,7 +75,7 @@ __getProgramName()
+    return program_invocation_name;
+ }
+ #    define GET_PROGRAM_NAME() __getProgramName()
+-#elif defined(__CYGWIN__)
++#elif defined(HAVE_PROGRAM_INVOCATION_NAME)
+ #    define GET_PROGRAM_NAME() program_invocation_short_name
+ #elif defined(__FreeBSD__) && (__FreeBSD__ >= 2)
+ #    include <osreldate.h>
+-- 
+2.21.0
+

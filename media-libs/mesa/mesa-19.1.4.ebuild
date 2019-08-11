@@ -240,8 +240,7 @@ x86? (
 )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-18-musl-invocation_name.patch
-	"${FILESDIR}"/${PN}-18-musl-pthread.patch
+	"${FILESDIR}"/${PN}-19.1.4-musl-upstream-fix.patch
 	"${FILESDIR}"/${PN}-18.2.4-add-disable-tls-support.patch
 )
 
