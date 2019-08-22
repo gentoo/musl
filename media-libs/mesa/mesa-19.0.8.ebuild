@@ -235,8 +235,8 @@ x86? (
 )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-execinfo.patch
-	"${FILESDIR}"/${PN}-heap-allocation.patch
+	"${FILESDIR}"/${PN}-19.0.8-execinfo.patch
+	"${FILESDIR}"/${PN}-19.0.8-heap-allocation.patch
 	"${FILESDIR}"/${PN}-19.1.4-musl-upstream-fix.patch
 	"${FILESDIR}"/${PN}-18.2.4-add-disable-tls-support.patch
 )
