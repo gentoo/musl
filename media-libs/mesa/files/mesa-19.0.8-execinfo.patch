@@ -1,0 +1,97 @@
+From 10e8d466011076a0453368cb976d9f6b06af0e94 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Tue, 7 May 2019 21:47:40 -0500
+Subject: [PATCH] meson: Search for execinfo.h
+
+Rather than checking __GLIBC__/__UCLIBC__ macros as a proxy for
+execinfo.h presence, just check directly. This allows the build to work
+on musl.
+
+Reviewed-by: Matt Turner <mattst88@gmail.com>
+Reviewed-by: Eric Anholt <eric@anholt.net>
+Reviewed-by: Eric Engestrom <eric.engestrom@intel.com>
+---
+ meson.build                                 | 2 +-
+ src/gallium/auxiliary/util/u_debug_symbol.c | 8 ++++----
+ src/mapi/glapi/gen/gl_gentable.py           | 2 +-
+ src/mesa/drivers/dri/i915/intel_regions.c   | 2 +-
+ 4 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index a2978117409..a0c965efc32 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1036,7 +1036,7 @@ elif cc.has_header_symbol('sys/mkdev.h', 'major')
+   pre_args += '-DMAJOR_IN_MKDEV'
+ endif
+ 
+-foreach h : ['xlocale.h', 'sys/sysctl.h', 'linux/futex.h', 'endian.h', 'dlfcn.h']
++foreach h : ['xlocale.h', 'sys/sysctl.h', 'linux/futex.h', 'endian.h', 'dlfcn.h', 'execinfo.h']
+   if cc.compiles('#include <@0@>'.format(h), name : '@0@'.format(h))
+     pre_args += '-DHAVE_@0@'.format(h.to_upper().underscorify())
+   endif
+diff --git a/src/gallium/auxiliary/util/u_debug_symbol.c b/src/gallium/auxiliary/util/u_debug_symbol.c
+index 22e6c8ce771..d8380b76bf6 100644
+--- a/src/gallium/auxiliary/util/u_debug_symbol.c
++++ b/src/gallium/auxiliary/util/u_debug_symbol.c
+@@ -219,7 +219,7 @@ debug_symbol_name_dbghelp(const void *addr, char* buf, unsigned size)
+ #endif /* PIPE_OS_WINDOWS */
+ 
+ 
+-#if defined(__GLIBC__) && !defined(__UCLIBC__)
++#if defined(HAVE_EXECINFO_H)
+ 
+ #include <execinfo.h>
+ 
+@@ -240,7 +240,7 @@ debug_symbol_name_glibc(const void *addr, char* buf, unsigned size)
+    return TRUE;
+ }
+ 
+-#endif /* defined(__GLIBC__) && !defined(__UCLIBC__) */
++#endif /* defined(HAVE_EXECINFO_H) */
+ 
+ 
+ void
+@@ -252,11 +252,11 @@ debug_symbol_name(const void *addr, char* buf, unsigned size)
+    }
+ #endif
+ 
+-#if defined(__GLIBC__) && !defined(__UCLIBC__)
++#if defined(HAVE_EXECINFO_H)
+    if (debug_symbol_name_glibc(addr, buf, size)) {
+        return;
+    }
+-#endif
++#endif /* defined(HAVE_EXECINFO_H) */
+ 
+    util_snprintf(buf, size, "%p", addr);
+    buf[size - 1] = 0;
+diff --git a/src/mapi/glapi/gen/gl_gentable.py b/src/mapi/glapi/gen/gl_gentable.py
+index 9d8923cf8db..92e1a546cff 100644
+--- a/src/mapi/glapi/gen/gl_gentable.py
++++ b/src/mapi/glapi/gen/gl_gentable.py
+@@ -45,7 +45,7 @@ header = """/* GLXEXT is the define used in the xserver when the GLX extension i
+ #endif
+ 
+ #if (defined(GLXEXT) && defined(HAVE_BACKTRACE)) \\
+-	|| (!defined(GLXEXT) && defined(DEBUG) && !defined(__CYGWIN__) && !defined(__MINGW32__) && !defined(__OpenBSD__) && !defined(__NetBSD__) && !defined(__DragonFly__))
++	|| (!defined(GLXEXT) && defined(DEBUG) && defined(HAVE_EXECINFO_H))
+ #define USE_BACKTRACE
+ #endif
+ 
+diff --git a/src/mesa/drivers/dri/i915/intel_regions.c b/src/mesa/drivers/dri/i915/intel_regions.c
+index fee734801cd..803ea9326e8 100644
+--- a/src/mesa/drivers/dri/i915/intel_regions.c
++++ b/src/mesa/drivers/dri/i915/intel_regions.c
+@@ -57,7 +57,7 @@
+  */
+ #define DEBUG_BACKTRACE_SIZE 0
+ 
+-#if DEBUG_BACKTRACE_SIZE == 0
++#if DEBUG_BACKTRACE_SIZE == 0 || !defined(HAVE_EXECINFO_H)
+ /* Use the standard debug output */
+ #define _DBG(...) DBG(__VA_ARGS__)
+ #else
+-- 
+2.21.0
+
