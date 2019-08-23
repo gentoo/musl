@@ -73,7 +73,6 @@ REQUIRED_USE="
 
 LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.99"
 RDEPEND="
-	!app-eselect/eselect-mesa
 	>=dev-libs/expat-2.1.0-r3:=[${MULTILIB_USEDEP}]
 	>=sys-libs/zlib-1.2.8[${MULTILIB_USEDEP}]
 	libglvnd? (
@@ -104,7 +103,6 @@ RDEPEND="
 				)
 		vaapi? (
 			>=x11-libs/libva-1.7.3:=[${MULTILIB_USEDEP}]
-			video_cards_nouveau? ( !<=x11-libs/libva-vdpau-driver-0.7.4-r3 )
 		)
 		vdpau? ( >=x11-libs/libvdpau-1.1:=[${MULTILIB_USEDEP}] )
 		xvmc? ( >=x11-libs/libXvMC-1.0.8:=[${MULTILIB_USEDEP}] )
