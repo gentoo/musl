@@ -8,7 +8,7 @@ if [[ ${PV} == 9999* ]]; then
 	EGIT_REPO_URI="https://github.com/gentoo/${PN}.git"
 else
 	SRC_URI="https://github.com/gentoo/${PN}/archive/${PV}.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
+	KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 fi
 
 inherit toolchain-funcs flag-o-matic
