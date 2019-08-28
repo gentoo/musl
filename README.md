@@ -6,6 +6,7 @@ http://www.musl-libc.org/
 
 ### Maintainers
 * Anthony G. Basile <blueness@gentoo.org>
+* Jory A. Pratt <anarchy@gentoo.org>
 * Aric Belsito <lluixhi@gmail.com>
 * Felix Janda <felix.janda@posteo.de>
 
