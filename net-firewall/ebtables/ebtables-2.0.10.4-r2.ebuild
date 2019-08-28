@@ -1,9 +1,9 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="4"
+EAPI="6"
 
-inherit versionator eutils toolchain-funcs multilib flag-o-matic
+inherit versionator toolchain-funcs flag-o-matic
 
 MY_PV=$(replace_version_separator 3 '-' )
 MY_P=${PN}-v${MY_PV}
@@ -18,7 +18,8 @@ KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
 IUSE="+perl static"
 
 # The ebtables-save script is written in perl.
-RDEPEND="perl? ( dev-lang/perl )"
+RDEPEND="perl? ( dev-lang/perl )
+	net-misc/ethertypes"
 
 S=${WORKDIR}/${MY_P}
 
@@ -31,7 +32,9 @@ pkg_setup() {
 
 src_prepare() {
 	# Enhance ebtables-save to take table names as parameters bug #189315
-	epatch "${FILESDIR}/${PN}-2.0.8.1-ebt-save.diff"
+	local PATCHES=( "${FILESDIR}/${PN}-2.0.8.1-ebt-save.diff" )
+
+	default
 
 	# Musl fixes
 	epatch "${FILESDIR}/musl-fixes.patch"
@@ -64,11 +67,11 @@ src_install() {
 		if ! use perl; then
 			rm "${ED}"/sbin/ebtables-save || die
 		fi
+		# Bug 647458
+		rm "${ED%/}"/etc/ethertypes || die
 	else
 		into /
 		newsbin static ebtables
-		insinto /etc
-		doins ethertypes
 	fi
 	dodoc ChangeLog THANKS
 }
