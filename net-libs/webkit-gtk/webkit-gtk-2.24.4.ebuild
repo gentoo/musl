@@ -15,9 +15,9 @@ SRC_URI="https://www.webkitgtk.org/releases/${MY_P}.tar.xz"
 
 LICENSE="LGPL-2+ BSD"
 SLOT="4/37" # soname version of libwebkit2gtk-4.0
-KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~x86"
 
-IUSE="aqua coverage doc +egl +geolocation gles2 gnome-keyring +gstreamer +introspection jpeg2k libnotify nsplugin +opengl spell wayland +webgl +X"
+IUSE="aqua coverage doc +egl +geolocation gles2 gnome-keyring +gstreamer +introspection +jpeg2k libnotify nsplugin +opengl spell wayland +webgl +X"
 
 # webgl needs gstreamer, bug #560612
 # gstreamer with opengl/gles2 needs egl
@@ -159,9 +159,8 @@ pkg_setup() {
 }
 
 src_prepare() {
-	# musl and jit
-	# patch taken from: https://git.alpinelinux.org/cgit/aports/tree/community/webkit2gtk/musl-fixes.patch
-	eapply "${FILESDIR}"/${PN}-2.22.2-musl.patch
+	# Taken from https://git.alpinelinux.org/aports/tree/community/webkit2gtk/musl-fixes.patch?id=ae4a15801816b7f140076fa8f636d46247902af3
+	eapply "${FILESDIR}"/${PN}-2.22.4-musl.patch
 	cmake-utils_src_prepare
 	gnome2_src_prepare
 }
