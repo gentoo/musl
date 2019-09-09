@@ -26,7 +26,7 @@ sandbox_death_notice() {
 }
 
 src_prepare() {
-	eapply "${FILESDIR}"/${PN}-2.11-musl.patch
+	eapply "${FILESDIR}"/${PN}-2.14-musl.patch
 	eapply "${FILESDIR}"/${PN}-2.10-fix-visibility-musl.patch
 	eapply_user
 }
