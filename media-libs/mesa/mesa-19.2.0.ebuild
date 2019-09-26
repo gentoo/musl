@@ -35,7 +35,7 @@ for card in ${VIDEO_CARDS}; do
 done
 
 IUSE="${IUSE_VIDEO_CARDS}
-	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 +gles2 +libglvnd +llvm
+	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 +gles2 libglvnd +llvm
 	lm-sensors opencl osmesa pax_kernel selinux test unwind vaapi valgrind
 	vdpau vulkan vulkan-overlay wayland +X xa xvmc"
 
@@ -77,7 +77,7 @@ RDEPEND="
 	>=dev-libs/expat-2.1.0-r3:=[${MULTILIB_USEDEP}]
 	>=sys-libs/zlib-1.2.8[${MULTILIB_USEDEP}]
 	libglvnd? (
-		media-libs/libglvnd[${MULTILIB_USEDEP}]
+		>=media-libs/libglvnd-1.2.0[${MULTILIB_USEDEP}]
 		!app-eselect/eselect-opengl
 	)
 	!libglvnd? (
@@ -243,6 +243,7 @@ x86? (
 	usr/lib*/libGLESv2.so.2.0.0
 	usr/lib*/libGL.so.1.2.0
 	usr/lib*/libOSMesa.so.8.0.0
+	libglvnd? ( usr/lib/libGLX_mesa.so.0.0.0 )
 )"
 
 PATCHES=(
@@ -512,6 +513,8 @@ multilib_src_compile() {
 
 multilib_src_install() {
 	meson_src_install
+
+	use libglvnd && rm -f "${D}"/usr/$(get_libdir)/pkgconfig/{egl,gl}.pc
 }
 
 multilib_src_install_all() {
@@ -523,9 +526,11 @@ multilib_src_test() {
 }
 
 pkg_postinst() {
-	# Switch to the xorg implementation.
-	echo
-	eselect opengl set --use-old ${OPENGL_DIR}
+	if ! use libglvnd; then
+		# Switch to the xorg implementation.
+		echo
+		eselect opengl set --use-old ${OPENGL_DIR}
+	fi
 }
 
 # $1 - VIDEO_CARDS flag (check skipped for "--")
