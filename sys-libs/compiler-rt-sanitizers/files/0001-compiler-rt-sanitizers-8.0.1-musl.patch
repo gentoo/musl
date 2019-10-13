@@ -1,0 +1,134 @@
+--- a/lib/asan/asan_linux.cc
++++ b/lib/asan/asan_linux.cc
+@@ -46,7 +46,7 @@
+ #include <link.h>
+ #endif
+ 
+-#if SANITIZER_ANDROID || SANITIZER_FREEBSD || SANITIZER_SOLARIS
++#if SANITIZER_ANDROID || SANITIZER_FREEBSD || SANITIZER_SOLARIS || SANITIZER_NONGNU
+ #include <ucontext.h>
+ extern "C" void* _DYNAMIC;
+ #elif SANITIZER_NETBSD
+@@ -139,7 +139,7 @@
+   UNIMPLEMENTED();
+ }
+ 
+-#if SANITIZER_ANDROID
++#if SANITIZER_ANDROID || SANITIZER_NONGNU
+ // FIXME: should we do anything for Android?
+ void AsanCheckDynamicRTPrereqs() {}
+ void AsanCheckIncompatibleRT() {}
+
+--- a/lib/interception/interception_linux.cc
++++ b/lib/interception/interception_linux.cc
+@@ -43,7 +43,7 @@
+ }
+ 
+ // Android and Solaris do not have dlvsym
+-#if !SANITIZER_ANDROID && !SANITIZER_SOLARIS && !SANITIZER_OPENBSD
++#if !SANITIZER_ANDROID && !SANITIZER_SOLARIS && !SANITIZER_OPENBSD && defined(__GLIBC__)
+ void *GetFuncAddrVer(const char *func_name, const char *ver) {
+   return dlvsym(RTLD_NEXT, func_name, ver);
+ }
+
+--- a/lib/msan/msan_interceptors.cc
++++ b/lib/msan/msan_interceptors.cc
+@@ -1406,6 +1406,7 @@
+   return cbdata->callback(info, size, cbdata->data);
+ }
+ 
++/* does not compile with musl
+ INTERCEPTOR(void *, shmat, int shmid, const void *shmaddr, int shmflg) {
+   ENSURE_MSAN_INITED();
+   void *p = REAL(shmat)(shmid, shmaddr, shmflg);
+@@ -1418,6 +1419,7 @@
+   }
+   return p;
+ }
++*/
+ 
+ INTERCEPTOR(int, dl_iterate_phdr, dl_iterate_phdr_cb callback, void *data) {
+   void *ctx;
+@@ -1630,7 +1632,7 @@
+   INTERCEPT_FUNCTION(pthread_join);
+   INTERCEPT_FUNCTION(tzset);
+   INTERCEPT_FUNCTION(__cxa_atexit);
+-  INTERCEPT_FUNCTION(shmat);
++  //INTERCEPT_FUNCTION(shmat); /* Does not compile with musl */
+   INTERCEPT_FUNCTION(fork);
+   MSAN_MAYBE_INTERCEPT_OPENPTY;
+   MSAN_MAYBE_INTERCEPT_FORKPTY;
+
+--- a/lib/msan/msan_linux.cc
++++ b/lib/msan/msan_linux.cc
+@@ -13,7 +13,7 @@
+ //===----------------------------------------------------------------------===//
+ 
+ #include "sanitizer_common/sanitizer_platform.h"
+-#if SANITIZER_FREEBSD || SANITIZER_LINUX || SANITIZER_NETBSD
++#if SANITIZER_FREEBSD || SANITIZER_LINUX && !SANITIZER_NONGNU || SANITIZER_NETBSD
+ 
+ #include "msan.h"
+ #include "msan_report.h"
+
+--- a/lib/sanitizer_common/sanitizer_common_interceptors_ioctl.inc
++++ b/lib/sanitizer_common/sanitizer_common_interceptors_ioctl.inc
+@@ -104,7 +104,7 @@
+   _(SIOCGETVIFCNT, WRITE, struct_sioc_vif_req_sz);
+ #endif
+ 
+-#if SANITIZER_LINUX
++#if SANITIZER_LINUX && !SANITIZER_NONGNU
+   // Conflicting request ids.
+   // _(CDROMAUDIOBUFSIZ, NONE, 0);
+   // _(SNDCTL_TMR_CONTINUE, NONE, 0);
+@@ -365,7 +365,7 @@
+   _(VT_WAITACTIVE, NONE, 0);
+ #endif
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+   // _(SIOCDEVPLIP, WRITE, struct_ifreq_sz); // the same as EQL_ENSLAVE
+   _(CYGETDEFTHRESH, WRITE, sizeof(int));
+   _(CYGETDEFTIMEOUT, WRITE, sizeof(int));
+
+--- a/lib/sanitizer_common/sanitizer_common_syscalls.inc
++++ b/lib/sanitizer_common/sanitizer_common_syscalls.inc
+@@ -2038,7 +2038,7 @@
+   }
+ }
+ 
+-#if !SANITIZER_ANDROID
++#if !SANITIZER_ANDROID && !SANITIZER_NONGNU
+ PRE_SYSCALL(prlimit64)(long pid, long resource, const void *new_rlim,
+                        void *old_rlim) {
+   if (new_rlim) PRE_READ(new_rlim, struct_rlimit64_sz);
+
+--- a/lib/sanitizer_common/sanitizer_platform.h
++++ b/lib/sanitizer_common/sanitizer_platform.h
+@@ -26,6 +26,13 @@
+ # define SANITIZER_LINUX   0
+ #endif
+ 
++#if defined(__linux__) && !defined(__GLIBC__)
++# define SANITIZER_NONGNU 1
++#else
++# define SANITIZER_NONGNU 0
++#endif
++
++
+ #if defined(__FreeBSD__)
+ # define SANITIZER_FREEBSD 1
+ #else
+
+--- a/lib/sanitizer_common/sanitizer_platform_interceptors.h
++++ b/lib/sanitizer_common/sanitizer_platform_interceptors.h
+@@ -39,7 +39,7 @@
+ # include "sanitizer_platform_limits_solaris.h"
+ #endif
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+ # define SI_LINUX_NOT_ANDROID 1
+ #else
+ # define SI_LINUX_NOT_ANDROID 0
