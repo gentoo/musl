@@ -1,0 +1,14 @@
+diff --git a/lib/interception/interception_type_test.cc b/lib/interception/interception_type_test.cc
+index 2b3a6d5..21c2fb3 100644
+--- a/lib/interception/interception_type_test.cc
++++ b/lib/interception/interception_type_test.cc
+@@ -32,8 +32,8 @@ COMPILER_CHECK(sizeof(::OFF64_T) == sizeof(off64_t));
+ // The following are the cases when pread (and friends) is used instead of
+ // pread64. In those cases we need OFF_T to match off_t. We don't care about the
+ // rest (they depend on _FILE_OFFSET_BITS setting when building an application).
+-# if SANITIZER_ANDROID || !defined _FILE_OFFSET_BITS || \
+-  _FILE_OFFSET_BITS != 64
++# if SANITIZER_ANDROID || !defined _FILE_OFFSET_BITS && !SANITIZER_NONGNU || \
++  _FILE_OFFSET_BITS != 64 && !SANITIZER_NONGNU
+ COMPILER_CHECK(sizeof(::OFF_T) == sizeof(off_t));
+ # endif

@@ -1,0 +1,179 @@
+--- a/lib/sanitizer_common/sanitizer_platform_limits_posix.cc
++++ b/lib/sanitizer_common/sanitizer_platform_limits_posix.cc
+@@ -55,7 +55,7 @@
+ #endif
+ 
+ #if !SANITIZER_ANDROID
+-#include <fstab.h>
++//#include <fstab.h>
+ #include <sys/mount.h>
+ #include <sys/timeb.h>
+ #include <utmpx.h>
+@@ -138,12 +138,14 @@
+
+ #if SANITIZER_LINUX && !SANITIZER_ANDROID
+ #include <glob.h>
+-#include <obstack.h>
++#if !SANITIZER_NONGNU
++# include <obstack.h>
++#endif
+ #include <mqueue.h>
+-#include <net/if_ppp.h>
+-#include <netax25/ax25.h>
+-#include <netipx/ipx.h>
+-#include <netrom/netrom.h>
++#include <linux/if_ppp.h>
++#include <linux/ax25.h>
++#include <linux/ipx.h>
++#include <linux/netrom.h>
+ #if HAVE_RPC_XDR_H
+ # include <rpc/xdr.h>
+ #endif
+@@ -198,7 +198,7 @@
+   unsigned struct_statfs64_sz = sizeof(struct statfs64);
+ #endif // SANITIZER_MAC && !SANITIZER_IOS
+ 
+-#if !SANITIZER_ANDROID
++#if !SANITIZER_ANDROID && !SANITIZER_NONGNU
+   unsigned struct_fstab_sz = sizeof(struct fstab);
+   unsigned struct_statfs_sz = sizeof(struct statfs);
+   unsigned struct_sockaddr_sz = sizeof(struct sockaddr);
+@@ -249,7 +251,7 @@
+   unsigned struct_itimerspec_sz = sizeof(struct itimerspec);
+ #endif // SANITIZER_LINUX || SANITIZER_FREEBSD
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+   // Use pre-computed size of struct ustat to avoid <sys/ustat.h> which
+   // has been removed from glibc 2.28.
+ #if defined(__aarch64__) || defined(__s390x__) || defined (__mips64) \
+@@ -258,9 +258,9 @@
+ #endif
+ 
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if (SANITIZER_LINUX && !SANITIZER_NONGNU || SANITIZER_FREEBSD) && !SANITIZER_ANDROID
+   unsigned struct_shminfo_sz = sizeof(struct shminfo);
+-  unsigned struct_shm_info_sz = sizeof(struct shm_info);
++  unsigned struct_shm_info_sz = sizeof(nstruct shm_info);
+   int shmctl_ipc_stat = (int)IPC_STAT;
+   int shmctl_ipc_info = (int)IPC_INFO;
+   int shmctl_shm_info = (int)SHM_INFO;
+@@ -294,7 +294,7 @@
+ unsigned struct_ElfW_Phdr_sz = sizeof(Elf_Phdr);
+ #endif
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if (SANITIZER_LINUX || SANITIZER_FREEBSD) && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+   int glob_nomatch = GLOB_NOMATCH;
+   int glob_altdirfunc = GLOB_ALTDIRFUNC;
+ #endif
+@@ -414,7 +416,7 @@
+   unsigned struct_termios_sz = sizeof(struct termios);
+   unsigned struct_winsize_sz = sizeof(struct winsize);
+ 
+-#if SANITIZER_LINUX
++#if SANITIZER_LINUX  && !SANITIZER_NONGNU
+   unsigned struct_arpreq_sz = sizeof(struct arpreq);
+   unsigned struct_cdrom_msf_sz = sizeof(struct cdrom_msf);
+   unsigned struct_cdrom_multisession_sz = sizeof(struct cdrom_multisession);
+@@ -464,7 +466,7 @@
+   unsigned struct_vt_mode_sz = sizeof(struct vt_mode);
+ #endif // SANITIZER_LINUX || SANITIZER_FREEBSD
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+   unsigned struct_ax25_parms_struct_sz = sizeof(struct ax25_parms_struct);
+   unsigned struct_cyclades_monitor_sz = sizeof(struct cyclades_monitor);
+ #if EV_VERSION > (0x010000)
+@@ -473,7 +473,7 @@
+   unsigned struct_sioc_vif_req_sz = sizeof(struct sioc_vif_req);
+ #endif
+ 
+-  const unsigned long __sanitizer_bufsiz = BUFSIZ;
++  //const unsigned long __sanitizer_bufsiz = BUFSIZ;
+ 
+   const unsigned IOCTL_NOT_PRESENT = 0;
+
+@@ -832,7 +834,7 @@
+   unsigned IOCTL_VT_WAITACTIVE = VT_WAITACTIVE;
+ #endif // SANITIZER_LINUX || SANITIZER_FREEBSD
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+   unsigned IOCTL_CYGETDEFTHRESH = CYGETDEFTHRESH;
+   unsigned IOCTL_CYGETDEFTIMEOUT = CYGETDEFTIMEOUT;
+   unsigned IOCTL_CYGETMON = CYGETMON;
+@@ -987,7 +989,7 @@
+ CHECK_SIZE_AND_OFFSET(dl_phdr_info, dlpi_phnum);
+ #endif // SANITIZER_LINUX || SANITIZER_FREEBSD
+ 
+-#if (SANITIZER_LINUX || SANITIZER_FREEBSD) && !SANITIZER_ANDROID
++#if (SANITIZER_LINUX || SANITIZER_FREEBSD) && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+ CHECK_TYPE_SIZE(glob_t);
+ CHECK_SIZE_AND_OFFSET(glob_t, gl_pathc);
+ CHECK_SIZE_AND_OFFSET(glob_t, gl_pathv);
+@@ -1021,6 +1023,7 @@
+ CHECK_SIZE_AND_OFFSET(iovec, iov_base);
+ CHECK_SIZE_AND_OFFSET(iovec, iov_len);
+ 
++#if  !SANITIZER_NONGNU
+ CHECK_TYPE_SIZE(msghdr);
+ CHECK_SIZE_AND_OFFSET(msghdr, msg_name);
+ CHECK_SIZE_AND_OFFSET(msghdr, msg_namelen);
+@@ -1034,6 +1037,7 @@
+ CHECK_SIZE_AND_OFFSET(cmsghdr, cmsg_len);
+ CHECK_SIZE_AND_OFFSET(cmsghdr, cmsg_level);
+ CHECK_SIZE_AND_OFFSET(cmsghdr, cmsg_type);
++#endif
+ 
+ #ifndef __GLIBC_PREREQ
+ #define __GLIBC_PREREQ(x, y) 0
+@@ -1143,7 +1147,7 @@
+ 
+ CHECK_TYPE_SIZE(ether_addr);
+ 
+-#if (SANITIZER_LINUX || SANITIZER_FREEBSD) && !SANITIZER_ANDROID
++#if (SANITIZER_LINUX || SANITIZER_FREEBSD) && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+ CHECK_TYPE_SIZE(ipc_perm);
+ # if SANITIZER_FREEBSD
+ CHECK_SIZE_AND_OFFSET(ipc_perm, key);
+@@ -1179,7 +1179,7 @@
+ CHECK_SIZE_AND_OFFSET(ifaddrs, ifa_data);
+ #endif
+ 
+-#if SANITIZER_LINUX
++#if SANITIZER_LINUX && !SANITIZER_NONGNU
+ COMPILER_CHECK(sizeof(__sanitizer_struct_mallinfo) == sizeof(struct mallinfo));
+ #endif
+ 
+@@ -1254,7 +1258,7 @@
+ COMPILER_CHECK(__sanitizer_XDR_FREE == XDR_FREE);
+ #endif
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+ COMPILER_CHECK(sizeof(__sanitizer_FILE) <= sizeof(FILE));
+ CHECK_SIZE_AND_OFFSET(FILE, _flags);
+ CHECK_SIZE_AND_OFFSET(FILE, _IO_read_ptr);
+@@ -1273,7 +1277,7 @@
+ CHECK_SIZE_AND_OFFSET(FILE, _fileno);
+ #endif
+ 
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+ COMPILER_CHECK(sizeof(__sanitizer__obstack_chunk) <= sizeof(_obstack_chunk));
+ CHECK_SIZE_AND_OFFSET(_obstack_chunk, limit);
+ CHECK_SIZE_AND_OFFSET(_obstack_chunk, prev);
+
+--- a/lib/tsan/rtl/tsan_platform_linux.cc
++++ b/lib/tsan/rtl/tsan_platform_linux.cc
+@@ -294,7 +294,7 @@
+ // This is required to properly "close" the fds, because we do not see internal
+ // closes within glibc. The code is a pure hack.
+ int ExtractResolvFDs(void *state, int *fds, int nfd) {
+-#if SANITIZER_LINUX && !SANITIZER_ANDROID
++#if SANITIZER_LINUX && !SANITIZER_ANDROID && !SANITIZER_NONGNU
+   int cnt = 0;
+   struct __res_state *statp = (struct __res_state*)state;
+   for (int i = 0; i < MAXNS && cnt < nfd; i++) {
