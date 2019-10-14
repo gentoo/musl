@@ -13,7 +13,7 @@ LICENSE="ISC BSD BSD-2 GPL-2"
 KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="+anacron +inotify pam selinux"
 
-DEPEND="pam? ( virtual/pam )
+DEPEND="pam? ( sys-libs/pam )
 	anacron? ( !sys-process/anacron
 		elibc_musl? ( sys-libs/obstack-standalone )
 	)"

@@ -26,7 +26,7 @@ RDEPEND="x11-libs/libXmu
 	x11-apps/sessreg
 	consolekit? ( sys-auth/consolekit
 		sys-apps/dbus )
-	pam? (	virtual/pam
+	pam? (	sys-libs/pam
 		!x11-misc/slimlock )"
 DEPEND="${RDEPEND}
 	virtual/pkgconfig

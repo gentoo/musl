@@ -27,7 +27,7 @@ DEPEND=">=dev-libs/libpcre-3.4
 	ldap-bind? ( net-nds/openldap[sasl] )
 	lmdb? ( >=dev-db/lmdb-0.9.11 )
 	mysql? ( virtual/mysql )
-	pam? ( virtual/pam )
+	pam? ( sys-libs/pam )
 	postgres? ( dev-db/postgresql:* )
 	sasl? (  >=dev-libs/cyrus-sasl-2 )
 	sqlite? ( dev-db/sqlite:3 )

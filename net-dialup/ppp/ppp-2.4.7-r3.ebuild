@@ -19,7 +19,7 @@ IUSE="activefilter atm dhcp eap-tls gtk ipv6 libressl pam radius"
 
 DEPEND="activefilter? ( net-libs/libpcap )
 	atm? ( net-dialup/linux-atm )
-	pam? ( virtual/pam )
+	pam? ( sys-libs/pam )
 	gtk? ( x11-libs/gtk+:2 )
 	eap-tls? (
 		net-misc/curl
