@@ -95,7 +95,7 @@ DEPEND="${RDEPEND}
 	)
 	dev-libs/libatomic_ops
 	virtual/pkgconfig
-	system-wide? ( || ( dev-util/unifdef sys-freebsd/freebsd-ubin ) )
+	system-wide? ( dev-util/unifdef )
 	dev-util/intltool
 	>=sys-devel/gettext-0.18.1
 "

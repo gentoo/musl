@@ -16,7 +16,7 @@ SRC_URI="http://ftp.mozilla.org/pub/spidermonkey/prereleases/52/pre1/mozjs-52.9.
 
 LICENSE="NPL-1.1"
 SLOT="52"
-KEYWORDS="~alpha amd64 arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc x86 ~x86-fbsd"
+KEYWORDS="~alpha amd64 arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc x86"
 IUSE="debug elibc_musl minimal +system-icu test"
 
 RESTRICT="ia64? ( test )"
@@ -53,11 +53,6 @@ src_prepare() {
 	use elibc_musl && eapply "${FILESDIR}"/${PN}-threadlocal.patch
 
 	eapply_user
-
-	if [[ ${CHOST} == *-freebsd* ]]; then
-		# Don't try to be smart, this does not work in cross-compile anyway
-		ln -sfn "${BUILDDIR}/config/Linux_All.mk" "${S}/config/$(uname -s)$(uname -r).mk" || die
-	fi
 
 	cd "${S}"/js/src || die
 	eautoconf old-configure.in

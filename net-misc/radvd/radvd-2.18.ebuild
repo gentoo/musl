@@ -11,8 +11,8 @@ SRC_URI="http://v6web.litech.org/radvd/dist/${P}.tar.gz"
 
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~ppc ~sparc ~x86 ~x86-fbsd"
-IUSE="kernel_FreeBSD selinux test"
+KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~ppc ~sparc ~x86"
+IUSE="selinux test"
 
 CDEPEND="dev-libs/libdaemon"
 DEPEND="${CDEPEND}
