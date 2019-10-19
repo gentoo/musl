@@ -11,7 +11,7 @@ HOMEPAGE="https://git.gnome.org/browse/gnome-session"
 LICENSE="GPL-2 LGPL-2 FDL-1.1"
 SLOT="0"
 KEYWORDS="amd64 ~arm ~arm64 ~ia64 ~ppc ~sparc x86"
-IUSE="doc elibc_FreeBSD ipv6 systemd"
+IUSE="doc ipv6 systemd"
 
 # x11-misc/xdg-user-dirs{,-gtk} are needed to create the various XDG_*_DIRs, and
 # create .config/user-dirs.dirs which is read by glib to get G_USER_DIRECTORY_*
@@ -23,10 +23,7 @@ COMMON_DEPEND="
 	>=x11-libs/gtk+-3.18.0:3
 	>=dev-libs/json-glib-0.10
 	>=gnome-base/gnome-desktop-3.18:3=
-	elibc_FreeBSD? ( dev-libs/libexecinfo )
-
 	media-libs/mesa[egl,gles2]
-
 	media-libs/libepoxy
 	x11-libs/libSM
 	x11-libs/libICE

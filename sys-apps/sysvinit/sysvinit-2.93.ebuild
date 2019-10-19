@@ -13,7 +13,7 @@ LICENSE="GPL-2"
 SLOT="0"
 [[ "${PV}" == *beta* ]] || \
 KEYWORDS="~amd64 ~arm ~arm64 ~mips ppc x86"
-IUSE="selinux ibm static kernel_FreeBSD"
+IUSE="selinux ibm static"
 
 CDEPEND="
 	selinux? (
@@ -69,13 +69,6 @@ src_prepare() {
 		)
 	fi
 	(use arm || use mips || use sh || use sparc) && sed -i '/ttyS0/s:#::' inittab
-	if use kernel_FreeBSD ; then
-		sed -i \
-			-e 's/linux/cons25/g' \
-			-e 's/ttyS0/cuaa0/g' \
-			-e 's/ttyS1/cuaa1/g' \
-			inittab #121786
-	fi
 	if use x86 || use amd64 ; then
 		sed -i \
 			-e '/ttyS[01]/s:9600:115200:' \
