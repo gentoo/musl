@@ -13,7 +13,7 @@ HOMEPAGE="https://wiki.gnome.org/Apps/Terminal/VTE"
 LICENSE="LGPL-2+"
 SLOT="2.91"
 IUSE="+crypt debug glade +introspection vala vanilla"
-KEYWORDS="amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 x86"
+KEYWORDS="amd64 arm ~arm64 ~mips ppc ppc64 x86"
 REQUIRED_USE="vala? ( introspection )"
 
 SRC_URI="${SRC_URI} !vanilla? ( https://dev.gentoo.org/~leio/distfiles/${PN}-0.54.1-command-notify.patch.xz )"
