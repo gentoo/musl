@@ -1,9 +1,9 @@
 # Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI="6"
 
-PATCH_VER="1.0"
+PATCH_VER="2"
 
 inherit toolchain
 
@@ -22,10 +22,12 @@ src_prepare() {
 	toolchain_src_prepare
 
 	if use elibc_musl || [[ ${CATEGORY} = cross-*-musl* ]]; then
-		epatch "${FILESDIR}"/6.3.0/cpu_indicator.patch
-		epatch "${FILESDIR}"/7.1.0/posix_memalign.patch
+		eapply "${FILESDIR}"/6.3.0/cpu_indicator.patch
+		eapply "${FILESDIR}"/7.1.0/posix_memalign.patch
 		case $(tc-arch) in
-			amd64|arm64) epatch "${FILESDIR}"/8.3.0/gcc-pure64.patch ;;
+			amd64|arm64) eapply "${FILESDIR}"/8.3.0/gcc-pure64.patch ;;
 		esac
 	fi
+
+	eapply_user
 }
