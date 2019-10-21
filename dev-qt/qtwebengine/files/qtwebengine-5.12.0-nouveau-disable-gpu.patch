@@ -7,11 +7,11 @@ It also crashes when running on wayland, the cause is not yet known.
 Work around these issues by not doing GPU-accelerated rendering in such
 cases.
 
-Index: qtwebengine-everywhere-src-5.11.0/src/core/web_engine_context.cpp
+Index: qtwebengine-everywhere-src-5.12.0-alpha/src/core/web_engine_context.cpp
 ===================================================================
---- qtwebengine-everywhere-src-5.11.0.orig/src/core/web_engine_context.cpp
-+++ qtwebengine-everywhere-src-5.11.0/src/core/web_engine_context.cpp
-@@ -100,6 +100,7 @@
+--- qtwebengine-everywhere-src-5.12.0-alpha.orig/src/core/web_engine_context.cpp
++++ qtwebengine-everywhere-src-5.12.0-alpha/src/core/web_engine_context.cpp
+@@ -101,6 +101,7 @@
  #include <QOffscreenSurface>
  #ifndef QT_NO_OPENGL
  # include <QOpenGLContext>
@@ -19,7 +19,7 @@ Index: qtwebengine-everywhere-src-5.11.0/src/core/web_engine_context.cpp
  #endif
  #include <QQuickWindow>
  #include <QStringList>
-@@ -178,6 +179,39 @@ void dummyGetPluginCallback(const std::v
+@@ -162,6 +163,39 @@ void dummyGetPluginCallback(const std::v
  }
  #endif
  
@@ -59,13 +59,13 @@ Index: qtwebengine-everywhere-src-5.11.0/src/core/web_engine_context.cpp
  } // namespace
  
  namespace QtWebEngineCore {
-@@ -414,6 +448,27 @@ WebEngineContext::WebEngineContext()
+@@ -440,6 +474,27 @@ WebEngineContext::WebEngineContext()
      const char *glType = 0;
  #ifndef QT_NO_OPENGL
  
 +    bool disableGpu = qEnvironmentVariableIsSet("QT_WEBENGINE_DISABLE_GPU");
 +
-+    if (!qEnvironmentVariableIsSet("QT_WEBENGINE_DISABLE_WAYLAND_WORKAROUND") && platform.startsWith("wayland", Qt::CaseInsensitive))
++    if (!qEnvironmentVariableIsSet("QT_WEBENGINE_DISABLE_WAYLAND_WORKAROUND") && qApp->platformName().startsWith("wayland", Qt::CaseInsensitive))
 +    {
 +        qWarning() << "Running on wayland. Qt WebEngine will disable usage of the GPU.\n"
 +                      "Note: you can set the QT_WEBENGINE_DISABLE_WAYLAND_WORKAROUND\n"
@@ -87,7 +87,7 @@ Index: qtwebengine-everywhere-src-5.11.0/src/core/web_engine_context.cpp
      bool tryGL =
              !usingANGLE()
              && (!usingSoftwareDynamicGL()
-@@ -424,7 +479,7 @@ WebEngineContext::WebEngineContext()
+@@ -450,7 +505,7 @@ WebEngineContext::WebEngineContext()
                  || enableWebGLSoftwareRendering
  #endif
                  )

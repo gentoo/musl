@@ -1,43 +1,6 @@
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/leak_tracker.h qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/leak_tracker.h
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/leak_tracker.h	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/leak_tracker.h	2019-01-03 16:49:39.751073711 +0000
-@@ -10,7 +10,7 @@
- #include "build/build_config.h"
- 
- // Only enable leak tracking in non-uClibc debug builds.
--#if !defined(NDEBUG) && !defined(__UCLIBC__)
-+#if !defined(NDEBUG) && defined(__GLIBC__)
- #define ENABLE_LEAK_TRACKER
- #endif
- 
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/stack_trace.cc qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/stack_trace.cc
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/stack_trace.cc	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/stack_trace.cc	2019-01-03 16:49:46.971351734 +0000
-@@ -214,7 +214,7 @@
- 
- std::string StackTrace::ToString() const {
-   std::stringstream stream;
--#if !defined(__UCLIBC__) && !defined(_AIX)
-+#if defined(__GLIBC__) && !defined(_AIX)
-   OutputToStream(&stream);
- #endif
-   return stream.str();
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/stack_trace.h qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/stack_trace.h
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/stack_trace.h	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/stack_trace.h	2019-01-03 16:49:59.271825377 +0000
-@@ -83,7 +83,7 @@
-   // Prints the stack trace to stderr.
-   void Print() const;
- 
--#if !defined(__UCLIBC__) & !defined(_AIX)
-+#if defined(__GLIBC__) & !defined(_AIX)
-   // Resolves backtrace to symbols and write to stream.
-   void OutputToStream(std::ostream* os) const;
- #endif
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/stack_trace_posix.cc qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/stack_trace_posix.cc
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/stack_trace_posix.cc	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/stack_trace_posix.cc	2019-01-03 16:48:39.980772200 +0000
-@@ -27,7 +27,7 @@
+--- qtwebengine/src/3rdparty/chromium/base/debug/stack_trace_posix.cc	2017-11-28 14:06:53.000000000 +0100
++++ qtwebengine/src/3rdparty/chromium/base/debug/stack_trace_posix.cc	2018-01-27 21:50:04.693231905 +0100
+@@ -26,7 +26,7 @@
  #if !defined(USE_SYMBOLIZE)
  #include <cxxabi.h>
  #endif
@@ -46,7 +9,7 @@ diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/deb
  #include <execinfo.h>
  #endif
  
-@@ -85,7 +85,7 @@
+@@ -82,7 +82,7 @@
    // Note: code in this function is NOT async-signal safe (std::string uses
    // malloc internally).
  
@@ -55,17 +18,17 @@ diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/deb
    std::string::size_type search_from = 0;
    while (search_from < text->size()) {
      // Look for the start of a mangled symbol, from search_from.
-@@ -120,7 +120,7 @@
+@@ -117,7 +117,7 @@
        search_from = mangled_start + 2;
      }
    }
 -#endif  // !defined(__UCLIBC__) && !defined(_AIX)
-+#endif  // defined(__GLIBC__) && !defined(_AIX)
++#endif  // !defined(__GLIBC__) && !defined(_AIX)
  }
  #endif  // !defined(USE_SYMBOLIZE)
  
-@@ -132,7 +132,7 @@
-   virtual ~BacktraceOutputHandler() = default;
+@@ -129,7 +129,7 @@
+   virtual ~BacktraceOutputHandler() {}
  };
  
 -#if !defined(__UCLIBC__) && !defined(_AIX)
@@ -73,16 +36,16 @@ diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/deb
  void OutputPointer(void* pointer, BacktraceOutputHandler* handler) {
    // This should be more than enough to store a 64-bit number in hex:
    // 16 hex digits + 1 for null-terminator.
-@@ -209,7 +209,7 @@
+@@ -206,7 +206,7 @@
    }
  #endif  // defined(USE_SYMBOLIZE)
  }
 -#endif  // !defined(__UCLIBC__) && !defined(_AIX)
-+#endif  // defined(__GLIBC__) && !defined(_AIX)
++#endif  // !defined(__GLIBC__) && !defined(_AIX)
  
  void PrintToStderr(const char* output) {
    // NOTE: This code MUST be async-signal safe (it's used by in-process
-@@ -800,7 +800,7 @@
+@@ -749,7 +749,7 @@
  // NOTE: This code MUST be async-signal safe (it's used by in-process
  // stack dumping signal handler). NO malloc or stdio is allowed here.
  
@@ -91,7 +54,7 @@ diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/deb
    count = std::min(arraysize(trace_), count);
  
    // Though the backtrace API man page does not list any possible negative
-@@ -815,13 +815,13 @@
+@@ -764,13 +764,13 @@
    // NOTE: This code MUST be async-signal safe (it's used by in-process
    // stack dumping signal handler). NO malloc or stdio is allowed here.
  
@@ -107,31 +70,20 @@ diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/deb
  void StackTrace::OutputToStream(std::ostream* os) const {
    StreamBacktraceOutputHandler handler(os);
    ProcessBacktrace(trace_, count_, &handler);
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/stack_trace_unittest.cc qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/stack_trace_unittest.cc
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/debug/stack_trace_unittest.cc	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/debug/stack_trace_unittest.cc	2019-01-03 16:49:05.605758913 +0000
-@@ -39,7 +39,7 @@
- #else
- #define MAYBE_OutputToStream OutputToStream
- #endif
+--- qtwebengine/src/3rdparty/chromium/base/debug/stack_trace.cc	2017-11-28 14:06:53.000000000 +0100
++++ qtwebengine/src/3rdparty/chromium/base/debug/stack_trace.cc	2018-01-27 22:31:08.296359000 +0100
+@@ -214,7 +214,7 @@
+ 
+ std::string StackTrace::ToString() const {
+   std::stringstream stream;
 -#if !defined(__UCLIBC__) && !defined(_AIX)
 +#if defined(__GLIBC__) && !defined(_AIX)
- TEST_F(StackTraceTest, MAYBE_OutputToStream) {
-   StackTrace trace;
- 
-@@ -151,7 +151,7 @@
- TEST_F(StackTraceTest, DebugPrintBacktrace) {
-   StackTrace().Print();
- }
--#endif  // !defined(__UCLIBC__)
-+#endif  // defined(__GLIBC__)
- 
- #if defined(OS_POSIX) && !defined(OS_ANDROID) && !defined(OS_FUCHSIA)
- #if !defined(OS_IOS)
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/logging.cc qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/logging.cc
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/logging.cc	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/base/logging.cc	2019-01-03 16:50:39.137361583 +0000
-@@ -574,7 +574,7 @@
+   OutputToStream(&stream);
+ #endif
+   return stream.str();
+--- qtwebengine/src/3rdparty/chromium/base/logging.cc	2017-11-28 14:06:53.000000000 +0100
++++ qtwebengine/src/3rdparty/chromium/base/logging.cc	2018-01-27 22:46:34.970406807 +0100
+@@ -546,7 +546,7 @@
  
  LogMessage::~LogMessage() {
    size_t stack_start = stream_.tellp();
@@ -140,120 +92,15 @@ diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/base/log
      !defined(OS_AIX)
    if (severity_ == LOG_FATAL && !base::debug::BeingDebugged()) {
      // Include a stack trace on a fatal, unless a debugger is attached.
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/build/build_config.h qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/build/build_config.h
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/build/build_config.h	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/build/build_config.h	2019-01-03 16:47:30.314089618 +0000
-@@ -43,7 +43,7 @@
- #define OS_LINUX 1
- // include a system header to pull in features.h for glibc/uclibc macros.
- #include <unistd.h>
--#if defined(__GLIBC__) && !defined(__UCLIBC__)
-+#if defined(__GLIBC__)
- // we really are using glibc, not uClibc pretending to be glibc
- #define LIBC_GLIBC 1
- #endif
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/WebKit/Source/platform/wtf/Assertions.cpp qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/WebKit/Source/platform/wtf/Assertions.cpp
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/WebKit/Source/platform/wtf/Assertions.cpp	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/WebKit/Source/platform/wtf/Assertions.cpp	2019-01-03 16:53:50.292728521 +0000
-@@ -49,7 +49,7 @@
- #include <windows.h>
- #endif
- 
--#if defined(OS_MACOSX) || (defined(OS_LINUX) && !defined(__UCLIBC__))
-+#if defined(OS_MACOSX) || (defined(OS_LINUX) && defined(__GLIBC__))
+diff --git a/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/assertions.cc b/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/assertions.cc
+index c7ecc7f..96ba0e4 100644
+--- a/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/assertions.cc
++++ b/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/assertions.cc
+@@ -51,7 +51,6 @@
+ #if defined(OS_MACOSX) || (defined(OS_LINUX) && !defined(__UCLIBC__))
  #include <cxxabi.h>
  #include <dlfcn.h>
- #include <execinfo.h>
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/mesa/src/src/glsl/strtod.c qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/mesa/src/src/glsl/strtod.c
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/mesa/src/src/glsl/strtod.c	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/mesa/src/src/glsl/strtod.c	2019-01-03 16:51:04.446336966 +0000
-@@ -45,7 +45,7 @@
- glsl_strtod(const char *s, char **end)
- {
- #if defined(_GNU_SOURCE) && !defined(__CYGWIN__) && !defined(__FreeBSD__) && \
--   !defined(__HAIKU__) && !defined(__UCLIBC__) && !defined(ANDROID)
-+   !defined(__HAIKU__) && defined(__GLIBC__) && !defined(ANDROID)
-    static locale_t loc = NULL;
-    if (!loc) {
-       loc = newlocale(LC_CTYPE_MASK, "C", NULL);
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/mesa/src/src/mesa/drivers/dri/common/xmlconfig.c qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/mesa/src/src/mesa/drivers/dri/common/xmlconfig.c
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/mesa/src/src/mesa/drivers/dri/common/xmlconfig.c	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/mesa/src/src/mesa/drivers/dri/common/xmlconfig.c	2019-01-03 16:52:43.126139986 +0000
-@@ -41,7 +41,7 @@
- 
- #undef GET_PROGRAM_NAME
- 
--#if (defined(__GNU_LIBRARY__) || defined(__GLIBC__)) && !defined(__UCLIBC__)
-+#if (defined(__GNU_LIBRARY__) || defined(__GLIBC__))
- #    if !defined(__GLIBC__) || (__GLIBC__ < 2)
- /* These aren't declared in any libc5 header */
- extern char *program_invocation_name, *program_invocation_short_name;
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/mesa/src/src/mesa/main/imports.c qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/mesa/src/src/mesa/main/imports.c
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/mesa/src/src/mesa/main/imports.c	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/mesa/src/src/mesa/main/imports.c	2019-01-03 16:52:34.009788651 +0000
-@@ -542,7 +542,7 @@
- _mesa_strtof( const char *s, char **end )
- {
- #if defined(_GNU_SOURCE) && !defined(__CYGWIN__) && !defined(__FreeBSD__) && \
--   !defined(ANDROID) && !defined(__HAIKU__) && !defined(__UCLIBC__)
-+   !defined(ANDROID) && !defined(__HAIKU__) && defined(__GLIBC__)
-    static locale_t loc = NULL;
-    if (!loc) {
-       loc = newlocale(LC_CTYPE_MASK, "C", NULL);
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/pdfium/third_party/build/build_config.h qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/pdfium/third_party/build/build_config.h
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/pdfium/third_party/build/build_config.h	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/pdfium/third_party/build/build_config.h	2019-01-03 16:51:13.710694002 +0000
-@@ -43,7 +43,7 @@
- #define OS_LINUX 1
- // include a system header to pull in features.h for glibc/uclibc macros.
- #include <unistd.h>
--#if defined(__GLIBC__) && !defined(__UCLIBC__)
-+#if defined(__GLIBC__)
- // we really are using glibc, not uClibc pretending to be glibc
- #define LIBC_GLIBC 1
+-#include <execinfo.h>
  #endif
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/skia/src/ports/SkOSFile_stdio.cpp qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/skia/src/ports/SkOSFile_stdio.cpp
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/skia/src/ports/SkOSFile_stdio.cpp	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/skia/src/ports/SkOSFile_stdio.cpp	2019-01-03 16:50:46.693652796 +0000
-@@ -88,7 +88,7 @@
- }
  
- void sk_fsync(FILE* f) {
--#if !defined(_WIN32) && !defined(SK_BUILD_FOR_ANDROID) && !defined(__UCLIBC__) \
-+#if !defined(_WIN32) && !defined(SK_BUILD_FOR_ANDROID) && defined(__GLIBC__) \
-         && !defined(_NEWLIB_VERSION)
-     int fd = fileno(f);
-     fsync(fd);
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/sqlite/amalgamation/config.h qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/sqlite/amalgamation/config.h
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/sqlite/amalgamation/config.h	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/sqlite/amalgamation/config.h	2019-01-03 16:53:47.012602106 +0000
-@@ -33,7 +33,7 @@
-  * malloc_usable_size() is not exported by the Android NDK.  It is not
-  * implemented by uclibc.
-  */
--#if defined(__linux__) && !defined(__UCLIBC__)
-+#if defined(__linux__) && defined(__GLIBC__)
- #define HAVE_MALLOC_H 1
- #define HAVE_MALLOC_USABLE_SIZE 1
- #endif
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/webrtc/rtc_base/checks.cc qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/webrtc/rtc_base/checks.cc
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/webrtc/rtc_base/checks.cc	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/webrtc/rtc_base/checks.cc	2019-01-03 16:53:17.723473331 +0000
-@@ -16,7 +16,7 @@
- #include <cstdio>
- #include <cstdlib>
- 
--#if defined(__GLIBCXX__) && !defined(__UCLIBC__)
-+#if defined(__GLIBCXX__) && defined(__GLIBC__)
- #include <cxxabi.h>
- #include <execinfo.h>
- #endif
-@@ -73,7 +73,7 @@
- // to get usable symbols on Linux. This is copied from V8. Chromium has a more
- // advanced stace trace system; also more difficult to copy.
- void DumpBacktrace() {
--#if defined(__GLIBCXX__) && !defined(__UCLIBC__)
-+#if defined(__GLIBCXX__) && defined(__GLIBC__)
-   void* trace[100];
-   int size = backtrace(trace, sizeof(trace) / sizeof(*trace));
-   char** symbols = backtrace_symbols(trace, size);
+ #if defined(OS_ANDROID)

@@ -29,14 +29,3 @@
    struct mallinfo minfo = mallinfo();
  #if defined(USE_TCMALLOC)
    return minfo.uordblks;
---- qtwebengine/src/3rdparty/chromium/content/child/content_child_helpers.cc	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine/src/3rdparty/chromium/content/child/content_child_helpers.cc	2019-01-05 00:34:23.346513661 +0000
-@@ -25,7 +25,7 @@
- // though, this provides only a partial and misleading value.
- // Unfortunately some telemetry benchmark rely on it and these need to
- // be refactored before getting rid of this. See crbug.com/581365 .
--#if defined(OS_LINUX) || defined(OS_ANDROID)
-+#if defined(__GLIBC__) && ( defined(OS_LINUX) || defined(OS_ANDROID) )
- size_t GetMemoryUsageKB() {
-   struct mallinfo minfo = mallinfo();
-   uint64_t mem_usage =

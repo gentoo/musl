@@ -1,17 +1,17 @@
-# Copyright 1999-2018 Gentoo Authors
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 PYTHON_COMPAT=( python2_7 )
 inherit multiprocessing pax-utils python-any-r1 qt5-build
 
 DESCRIPTION="Library for rendering dynamic web content in Qt5 C++ and QML applications"
 
 if [[ ${QT5_BUILD_TYPE} == release ]]; then
-	KEYWORDS="~amd64 ~arm ~arm64 ~x86"
+	KEYWORDS="amd64 ~arm ~arm64 ~x86"
 fi
 
-IUSE="alsa bindist designer geolocation +jumbo-build pax_kernel pulseaudio
+IUSE="alsa bindist designer jumbo-build pax_kernel pulseaudio
 	+system-ffmpeg +system-icu widgets"
 REQUIRED_USE="designer? ( widgets )"
 
@@ -24,6 +24,7 @@ RDEPEND="
 	~dev-qt/qtdeclarative-${PV}
 	~dev-qt/qtgui-${PV}
 	~dev-qt/qtnetwork-${PV}
+	~dev-qt/qtpositioning-${PV}
 	~dev-qt/qtprintsupport-${PV}
 	~dev-qt/qtwebchannel-${PV}[qml]
 	dev-libs/expat
@@ -39,11 +40,10 @@ RDEPEND="
 	media-libs/libpng:0=
 	>=media-libs/libvpx-1.5:=[svc]
 	media-libs/libwebp:=
-	media-libs/mesa[egl]
+	media-libs/mesa[egl,X(+)]
 	media-libs/opus
 	sys-apps/dbus
 	sys-apps/pciutils
-	sys-libs/libcap
 	sys-libs/zlib[minizip]
 	virtual/libudev
 	x11-libs/libdrm
@@ -60,7 +60,6 @@ RDEPEND="
 	x11-libs/libXtst
 	alsa? ( media-libs/alsa-lib )
 	designer? ( ~dev-qt/designer-${PV} )
-	geolocation? ( ~dev-qt/qtpositioning-${PV} )
 	pulseaudio? ( media-sound/pulseaudio:= )
 	system-ffmpeg? ( media-video/ffmpeg:0= )
 	system-icu? ( >=dev-libs/icu-60.2:= )
@@ -80,30 +79,14 @@ DEPEND="${RDEPEND}
 "
 
 PATCHES+=(
-	"${FILESDIR}/${PN}-5.9.6-gcc8.patch" # bug 657124
-	"${FILESDIR}/${PN}-5.11.1-nouveau-disable-gpu.patch" # bug 609752
-	"${FILESDIR}/musl/arm-missing-files.patch"
-	"${FILESDIR}/musl/arm-void-is-not-android.patch"
-	"${FILESDIR}/musl/musl-sandbox.patch"
-	"${FILESDIR}/musl/qt-musl-dispatch_to_musl.patch"
-	"${FILESDIR}/musl/qt-musl-execinfo.patch"
-	"${FILESDIR}/musl/qt-musl-fpstate.patch"
-	"${FILESDIR}/musl/qt-musl-mallinfo.patch"
-	"${FILESDIR}/musl/qt-musl-off_t.patch"
-	"${FILESDIR}/musl/qt-musl-pread-pwrite.patch"
-	"${FILESDIR}/musl/qt-musl-pvalloc.patch"
-	"${FILESDIR}/musl/qt-musl-resolve.patch"
-	"${FILESDIR}/musl/qt-musl-serialio.patch"
-	"${FILESDIR}/musl/qt-musl-siginfo_t.patch"
-	"${FILESDIR}/musl/qt-musl-stackstart.patch"
-	"${FILESDIR}/musl/qt-musl-sysreg-for__WORDSIZE.patch"
-	"${FILESDIR}/musl/qt-musl-thread-stacksize.patch"
-	"${FILESDIR}/musl/qt-musl-remove-cdefs.patch"
-	"${FILESDIR}/musl/yasm-nls.patch"
+	"${FILESDIR}/${PN}-5.12.0-nouveau-disable-gpu.patch" # bug 609752
+	"${FILESDIR}/${P}-pulseaudio-13.patch" # bug 694960
 )
 
 src_prepare() {
 	use pax_kernel && PATCHES+=( "${FILESDIR}/${PN}-5.11.2-paxmark-mksnapshot.patch" )
+
+	eapply "${FILESDIR}/musl"
 
 	if ! use jumbo-build; then
 		sed -i -e 's|use_jumbo_build=true|use_jumbo_build=false|' \
@@ -117,11 +100,6 @@ src_prepare() {
 	qt_use_disable_config pulseaudio webengine-pulseaudio src/core/config/linux.pri
 
 	qt_use_disable_mod designer webenginewidgets src/plugins/plugins.pro
-
-	qt_use_disable_mod geolocation positioning \
-		mkspecs/features/configure.prf \
-		src/core/core_chromium.pri \
-		src/core/core_common.pri
 
 	qt_use_disable_mod widgets widgets src/src.pro
 
@@ -150,9 +128,9 @@ src_install() {
 	qt5-build_src_install
 
 	# bug 601472
-	if [[ ! -f ${D%/}${QT5_LIBDIR}/libQt5WebEngine.so ]]; then
+	if [[ ! -f ${D}${QT5_LIBDIR}/libQt5WebEngine.so ]]; then
 		die "${CATEGORY}/${PF} failed to build anything. Please report to https://bugs.gentoo.org/"
 	fi
 
-	pax-mark m "${D%/}${QT5_LIBEXECDIR}"/QtWebEngineProcess
+	pax-mark m "${D}${QT5_LIBEXECDIR}"/QtWebEngineProcess
 }

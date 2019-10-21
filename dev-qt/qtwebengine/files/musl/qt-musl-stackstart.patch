@@ -1,7 +1,8 @@
-diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/WebKit/Source/platform/wtf/StackUtil.cpp qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/WebKit/Source/platform/wtf/StackUtil.cpp
---- qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_party/WebKit/Source/platform/wtf/StackUtil.cpp	2018-11-19 18:55:45.000000000 +0000
-+++ qtwebengine-everywhere-src-5.11.3/src/3rdparty/chromium/third_party/WebKit/Source/platform/wtf/StackUtil.cpp	2019-01-05 00:28:12.437391690 +0000
-@@ -28,7 +28,7 @@
+diff --git a/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc b/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc
+index 10f1c0d..8e86a2e 100644
+--- a/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc
++++ b/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc
+@@ -28,7 +28,7 @@ size_t GetUnderestimatedStackSize() {
  // FIXME: On Mac OSX and Linux, this method cannot estimate stack size
  // correctly for the main thread.
  
@@ -10,7 +11,7 @@ diff -Naur qtwebengine-everywhere-src-5.11.3.orig/src/3rdparty/chromium/third_pa
      defined(OS_FUCHSIA)
    // pthread_getattr_np() can fail if the thread is not invoked by
    // pthread_create() (e.g., the main thread of webkit_unit_tests).
-@@ -96,7 +96,7 @@
+@@ -96,7 +96,7 @@ size_t GetUnderestimatedStackSize() {
  }
  
  void* GetStackStart() {
