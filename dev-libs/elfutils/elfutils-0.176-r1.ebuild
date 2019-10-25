@@ -17,15 +17,15 @@ IUSE="bzip2 lzma nls static-libs test +threads +utils"
 RDEPEND=">=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}]
 	bzip2? ( >=app-arch/bzip2-1.0.6-r4[${MULTILIB_USEDEP}] )
 	lzma? ( >=app-arch/xz-utils-5.0.5-r1[${MULTILIB_USEDEP}] )
-	!dev-libs/libelf"
-DEPEND="${RDEPEND}
-	nls? ( sys-devel/gettext )
-	>=sys-devel/flex-2.5.4a
+	!dev-libs/libelf
 	elibc_musl? (
 		sys-libs/argp-standalone
 		sys-libs/fts-standalone
 		sys-libs/obstack-standalone
 	)"
+DEPEND="${RDEPEND}
+	nls? ( sys-devel/gettext )
+	>=sys-devel/flex-2.5.4a"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.118-PaX-support.patch
