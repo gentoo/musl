@@ -1,0 +1,30 @@
+From ecfd3927df50b811ef1dff61abbdeed15daf7cd2 Mon Sep 17 00:00:00 2001
+From: Samuel Holland <samuel@sholland.org>
+Date: Sat, 6 Oct 2018 04:01:48 +0000
+Subject: [PATCH 09/14] test/use-extern-for-plugins: Don't assume multilib
+
+---
+ src/test/run-make-fulldeps/use-extern-for-plugins/Makefile | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
+
+diff --git a/src/test/run-make-fulldeps/use-extern-for-plugins/Makefile b/src/test/run-make-fulldeps/use-extern-for-plugins/Makefile
+index 3976da3113..567a8d3157 100644
+--- a/src/test/run-make-fulldeps/use-extern-for-plugins/Makefile
++++ b/src/test/run-make-fulldeps/use-extern-for-plugins/Makefile
+@@ -5,12 +5,7 @@
+ # ignore-bitrig
+ # ignore-sunos
+ 
+-HOST := $(shell $(RUSTC) -vV | grep 'host:' | sed 's/host: //')
+-ifeq ($(findstring i686,$(HOST)),i686)
+-TARGET := $(subst i686,x86_64,$(HOST))
+-else
+-TARGET := $(subst x86_64,i686,$(HOST))
+-endif
++TARGET := $(shell $(RUSTC) -vV | grep 'host:' | sed 's/host: //')
+ 
+ all:
+ 	$(RUSTC) foo.rs -C extra-filename=-host
+-- 
+2.21.0
+
