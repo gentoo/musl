@@ -15,7 +15,7 @@ SRC_URI="amd64? ( https://portage.smaeul.xyz/distfiles/${MY_P}-x86_64-gentoo-lin
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 SLOT="stable"
 KEYWORDS="~amd64"
-IUSE="doc extended"
+IUSE="doc"
 
 DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	sys-libs/zlib

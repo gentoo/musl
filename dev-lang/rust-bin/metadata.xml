@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+  <maintainer type="person">
+    <email>nielson2@yandex.com</email>
+    <name>Steffen Kuhn</name>
+  </maintainer>
+  <use>
+    <flag name="clippy">Install clippy component</flag>
+    <flag name="rustfmt">Install rustfmt component</flag>
+  </use>
+</pkgmetadata>
