@@ -30,8 +30,8 @@ DEPEND="${RDEPEND}
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.118-PaX-support.patch
 	"${FILESDIR}"/${PN}-0.175-disable-biarch-test-PR24158.patch
-   "${FILESDIR}"/${PN}-0.176-dwarf_fregs.patch
-   "${FILESDIR}"/${PN}-0.177-disable-large.patch
+	"${FILESDIR}"/${PN}-0.176-dwarf_fregs.patch
+	"${FILESDIR}"/${PN}-0.177-disable-large.patch
 	"${FILESDIR}"/${PN}-0.177-portability-fixes.patch
 )
 

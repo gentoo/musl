@@ -32,7 +32,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-0.175-disable-biarch-test-PR24158.patch
 	"${FILESDIR}"/${PN}-0.173-reorder.patch
 	"${FILESDIR}"/${PN}-0.176-portability-fixes.patch
-   "${FILESDIR}"/${PN}-0.176-dwarf_fregs.patch
+	"${FILESDIR}"/${PN}-0.176-dwarf_fregs.patch
 )
 
 src_prepare() {
