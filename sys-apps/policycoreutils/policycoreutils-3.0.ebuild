@@ -1,15 +1,15 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
-PYTHON_COMPAT=( python{2_7,3_4,3_5} )
+PYTHON_COMPAT=( python{3_5,3_6,3_7} )
 PYTHON_REQ_USE="xml"
 
 inherit multilib python-r1 toolchain-funcs bash-completion-r1
 
 MY_P="${P//_/-}"
 
-MY_RELEASEDATE="20170804"
+MY_RELEASEDATE="20191204"
 EXTRAS_VER="1.36"
 SEMNG_VER="${PV}"
 SELNX_VER="${PV}"
@@ -21,7 +21,7 @@ REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 DESCRIPTION="SELinux core utilities"
 HOMEPAGE="https://github.com/SELinuxProject/selinux/wiki"
 
-if [[ ${PV} == 9999 ]] ; then
+if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/SELinuxProject/selinux.git"
 	SRC_URI="https://dev.gentoo.org/~perfinion/distfiles/policycoreutils-extra-${EXTRAS_VER}.tar.bz2"
@@ -29,9 +29,9 @@ if [[ ${PV} == 9999 ]] ; then
 	S2="${WORKDIR}/policycoreutils-extra"
 	S="${S1}"
 else
-	SRC_URI="https://raw.githubusercontent.com/wiki/SELinuxProject/selinux/files/releases/${MY_RELEASEDATE}/${MY_P}.tar.gz
+	SRC_URI="https://github.com/SELinuxProject/selinux/releases/download/${MY_RELEASEDATE}/${MY_P}.tar.gz
 		https://dev.gentoo.org/~perfinion/distfiles/policycoreutils-extra-${EXTRAS_VER}.tar.bz2"
-	KEYWORDS="amd64 ~mips x86"
+	KEYWORDS="~amd64 ~arm64 ~mips ~x86"
 	S1="${WORKDIR}/${MY_P}"
 	S2="${WORKDIR}/policycoreutils-extra"
 	S="${S1}"
@@ -45,7 +45,7 @@ DEPEND=">=sys-libs/libselinux-${SELNX_VER}:=[python,${PYTHON_USEDEP}]
 	>=sys-libs/libsemanage-${SEMNG_VER}:=[python,${PYTHON_USEDEP}]
 	sys-libs/libcap-ng:=
 	>=sys-libs/libsepol-${SEPOL_VER}:=
-	>=app-admin/setools-4.1.1[${PYTHON_USEDEP}]
+	>=app-admin/setools-4.2.0[${PYTHON_USEDEP}]
 	sys-devel/gettext
 	dev-python/ipy[${PYTHON_USEDEP}]
 	dbus? (
@@ -54,9 +54,7 @@ DEPEND=">=sys-libs/libselinux-${SELNX_VER}:=[python,${PYTHON_USEDEP}]
 	)
 	audit? ( >=sys-process/audit-1.5.1[python,${PYTHON_USEDEP}] )
 	pam? ( sys-libs/pam:= )
-	${PYTHON_DEPS}
-	!<sec-policy/selinux-base-policy-2.20151208-r6"
-# 2.20151208-r6 and higher has support for new setfiles
+	${PYTHON_DEPS}"
 
 ### libcgroup -> seunshare
 ### dbus -> restorecond
@@ -83,7 +81,7 @@ src_prepare() {
 	if [[ ${PV} != 9999 ]] ; then
 		# If needed for live ebuilds please use /etc/portage/patches
 		eapply "${FILESDIR}/policycoreutils-2.7-0001-newrole-not-suid.patch"
-		eapply "${FILESDIR}/${P}-musl.patch"
+		eapply "${FILESDIR}/${PN}-2.7-musl.patch"
 	fi
 
 	# rlpkg is more useful than fixfiles
@@ -114,7 +112,6 @@ src_compile() {
 			INOTIFYH="$(usex dbus y n)" \
 			SESANDBOX="n" \
 			CC="$(tc-getCC)" \
-			PYLIBVER="${EPYTHON}" \
 			LIBDIR="\$(PREFIX)/$(get_libdir)"
 	}
 	S="${S1}" # Regular policycoreutils
@@ -128,11 +125,12 @@ src_install() {
 	installation-policycoreutils() {
 		einfo "Installing policycoreutils"
 		emake -C "${BUILD_DIR}" DESTDIR="${D}" \
+			AUDIT_LOG_PRIVS="y" \
 			AUDITH="$(usex audit y n)" \
 			PAMH="$(usex pam y n)" \
 			INOTIFYH="$(usex dbus y n)" \
 			SESANDBOX="n" \
-			AUDIT_LOG_PRIV="y" \
+			CC="$(tc-getCC)" \
 			LIBDIR="\$(PREFIX)/$(get_libdir)" \
 			install
 		python_optimize
@@ -142,8 +140,6 @@ src_install() {
 		einfo "Installing policycoreutils-extra"
 		emake -C "${BUILD_DIR}" \
 			DESTDIR="${D}" \
-			INOTIFYH="$(usex dbus)" \
-			SHLIBDIR="${D}$(get_libdir)/rc" \
 			install
 		python_optimize
 	}
