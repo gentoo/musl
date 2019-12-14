@@ -104,7 +104,6 @@ RDEPEND="
 				)
 		vaapi? (
 			>=x11-libs/libva-1.7.3:=[${MULTILIB_USEDEP}]
-			video_cards_nouveau? ( !<=x11-libs/libva-vdpau-driver-0.7.4-r3 )
 		)
 		vdpau? ( >=x11-libs/libvdpau-1.1:=[${MULTILIB_USEDEP}] )
 		xvmc? ( >=x11-libs/libXvMC-1.0.8:=[${MULTILIB_USEDEP}] )
@@ -151,7 +150,6 @@ LLVM_DEPSTR="
 	|| (
 		sys-devel/llvm:9[${MULTILIB_USEDEP}]
 		sys-devel/llvm:8[${MULTILIB_USEDEP}]
-		sys-devel/llvm:7[${MULTILIB_USEDEP}]
 	)
 	sys-devel/llvm:=[${MULTILIB_USEDEP}]
 "
