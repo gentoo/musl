@@ -1,7 +1,7 @@
 # Copyright 1999-2019 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="6"
+EAPI=6
 VALA_USE_DEPEND="vapigen"
 VALA_MIN_API_VERSION="0.32"
 
@@ -13,7 +13,7 @@ HOMEPAGE="https://wiki.gnome.org/Apps/Terminal/VTE"
 LICENSE="LGPL-2+"
 SLOT="2.91"
 IUSE="+crypt debug glade +introspection vala vanilla"
-KEYWORDS="amd64 arm ~arm64 ~mips ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc64 ~x86"
 REQUIRED_USE="vala? ( introspection )"
 
 SRC_URI="${SRC_URI} !vanilla? ( https://dev.gentoo.org/~leio/distfiles/${PN}-0.54.1-command-notify.patch.xz )"
