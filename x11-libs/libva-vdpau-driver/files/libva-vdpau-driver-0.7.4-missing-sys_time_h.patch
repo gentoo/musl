@@ -1,6 +1,5 @@
-diff -Naur libva-vdpau-driver-0.7.4.orig/src/utils.c libva-vdpau-driver-0.7.4/src/utils.c
---- libva-vdpau-driver-0.7.4.orig/src/utils.c	2016-05-27 19:07:51.001006381 +0000
-+++ libva-vdpau-driver-0.7.4/src/utils.c	2016-05-27 18:23:39.534238312 +0000
+--- a/src/utils.c
++++ b/src/utils.c
 @@ -21,6 +21,7 @@
  #include "sysdeps.h"
  #include "utils.h"

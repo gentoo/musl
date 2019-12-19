@@ -30,7 +30,8 @@ PATCHES=(
 	"${FILESDIR}"/${P}-libvdpau-0.8.patch
 	"${FILESDIR}"/${P}-sigfpe-crash.patch
 	"${FILESDIR}"/${P}-include-linux-videodev2.h.patch
-	"${FILESDIR}"/0001-fix-headers-musl.patch
+	"${FILESDIR}"/${P}-missing-sys_time_h.patch
+
 )
 
 src_prepare() {
