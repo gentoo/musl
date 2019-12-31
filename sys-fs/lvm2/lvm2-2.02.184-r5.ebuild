@@ -56,6 +56,7 @@ PATCHES=(
 	# Musl fixes
 	"${FILESDIR}"/${PN}-2.02.183-fix-stdio-usage.patch
 	"${FILESDIR}"/${PN}-2.02.183-portability.patch
+	"${FILESDIR}"/${PN}-2.02.183-implement-libc-specific-reopen_stream.patch
 
 	# For upstream -- review and forward:
 	"${FILESDIR}"/${PN}-2.02.63-always-make-static-libdm.patch
