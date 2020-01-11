@@ -1,0 +1,10 @@
+diff --git a/moz.build.old b/moz.build
+index 7e787bb..66c64b0 100644
+--- a/js/xpconnect/src/moz.build
++++ b/js/xpconnect/src/moz.build
+@@ -67,4 +67,4 @@ LOCAL_INCLUDES += [
+ ]
+
+ if CONFIG['GNU_CXX']:
+-    CXXFLAGS += ['-Wno-shadow', '-Werror=format']
++    CXXFLAGS += ['-Wno-shadow', '-Werror=format', '-Wno-error=format-overflow']
