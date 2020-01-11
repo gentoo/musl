@@ -1,0 +1,18 @@
+diff --git a/configure.old b/configure
+index 14cdc75..38ac09f 100755
+--- a/configure.old
++++ b/configure
+@@ -18728,11 +18728,11 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ #ifdef __cplusplus
+ extern "C"
+ #endif
+-char isinf ();
++#include <math.h>
+ int
+ main ()
+ {
+-return isinf ();
++return isinf (0.0);
+   ;
+   return 0;
+ }
