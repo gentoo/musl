@@ -1,0 +1,15 @@
+diff --git a/js/src/moz.build b/js/src/moz.build
+index d6c2a426b..c926a0c98 100644
+--- a/js/src/moz.build
++++ b/js/src/moz.build
+@@ -789,6 +789,10 @@ if CONFIG['GNU_CXX']:
+     # starting with version 7.1, see Mozilla bug 1363009.
+     CXXFLAGS += ['-Wno-shadow', '-Werror=format', '-fno-strict-aliasing']
+
++    # GCC 9.2.0 doesn't like this so don't error on it
++    if CONFIG['CC_VERSION'] == '9.2.0':
++        CXXFLAGS += ['-Wno-error=format-overflow']
++
+ # Suppress warnings in third-party code.
+ if CONFIG['CLANG_CXX'] or CONFIG['GNU_CXX']:
+     SOURCES['jsdtoa.cpp'].flags += ['-Wno-implicit-fallthrough']
