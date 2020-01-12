@@ -35,11 +35,13 @@ inherit check-reqs flag-o-matic toolchain-funcs eutils gnome2-utils mozconfig-v6
 DESCRIPTION="Firefox Web Browser"
 HOMEPAGE="https://www.mozilla.org/firefox"
 
-KEYWORDS="~alpha amd64 ~arm ~arm64 ~ia64 ~ppc ~ppc64 x86 ~amd64-linux ~x86-linux"
+KEYWORDS="~amd64 ~arm ~arm64 x86 ~amd64-linux ~x86-linux"
 
 SLOT="0"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
-IUSE="bindist eme-free +gmp-autoupdate hardened hwaccel jack pgo rust selinux test"
+IUSE="bindist eme-free +gmp-autoupdate hardened hwaccel jack pgo
+	rust selinux test +system-harfbuzz +system-icu +system-jpeg
+	+system-sqlite +system-libvpx"
 RESTRICT="!bindist? ( bindist ) !test? ( test )"
 
 PATCH_URIS=( https://dev.gentoo.org/~{anarchy,axs,polynomial-c}/mozilla/patchsets/${PATCH}.tar.xz )
@@ -58,6 +60,7 @@ RDEPEND="
 DEPEND="${RDEPEND}
 	pgo? ( >=sys-devel/gcc-4.5 )
 	rust? ( virtual/rust )
+	system-libvpx? ( >=media-libs/libvpx-1.5.0:0=[postproc] )
 	amd64? ( ${ASM_DEPEND} virtual/opengl )
 	x86? ( ${ASM_DEPEND} virtual/opengl )"
 
@@ -128,16 +131,9 @@ src_prepare() {
 	eapply "${WORKDIR}/firefox"
 
 	eapply "${FILESDIR}"/${P}-blessings-TERM.patch # 654316
-	#eapply "${FILESDIR}"/0002-Use-C99-math-isfinite.patch
-	#eapply "${FILESDIR}"/disable-hunspell_hooks.patch
 	eapply "${FILESDIR}"/disable-moz-stackwalk.patch
 	eapply "${FILESDIR}"/discard-x86-precision-musl.patch
-	#eapply "${FILESDIR}"/fix-fortify-inline.patch
-	#eapply "${FILESDIR}"/fix-fortify-system-wrappers.patch
-	#eapply "${FILESDIR}"/fix-seccomp-bpf.patch
-	#eapply "${FILESDIR}"/fix-stack-overflow.patch
 	eapply "${FILESDIR}"/fix-toolkit.patch
-	#eapply "${FILESDIR}"/fix-tools.patch
 	eapply "${FILESDIR}"/mallinfo.patch
 	eapply "${FILESDIR}"/missing-header-s390x.patch
 	eapply "${FILESDIR}"/musl-pthread-setname.patch
