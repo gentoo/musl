@@ -1,11 +1,19 @@
-Rename struct member to fix build failure with musl:
+From 9410c0a22d07b87e4ab38c35626cbe5c49ec471d Mon Sep 17 00:00:00 2001
+From: 
+Date: Thu, 16 Jan 2020 18:39:27 -0600
+Subject: [PATCH] Rename struct member to fix build failure with musl:
 
       modules/computer.c:240:27: error: expected identifier before '(' token
         if (detect_lang[i].stdout) {
-                           ^
---- hardinfo-0.5.2_pre20130823/modules/computer.c.orig	2018-05-22 13:02:50.873031729 -0700
-+++ hardinfo-0.5.2_pre20130823/modules/computer.c	2018-05-22 13:02:54.537055912 -0700
-@@ -194,7 +194,7 @@
+---
+ modules/computer.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/modules/computer.c b/modules/computer.c
+index cd015cf..13c8022 100644
+--- a/modules/computer.c
++++ b/modules/computer.c
+@@ -194,7 +194,7 @@ void scan_dev(gboolean reload)
         gchar *compiler_name;
         gchar *version_command;
         gchar *regex;
@@ -14,12 +22,15 @@ Rename struct member to fix build failure with musl:
      } detect_lang[] = {
         { "Scripting Languages", NULL, FALSE },
         { "CPython", "python -V", "\\d+\\.\\d+\\.\\d+", FALSE },
-@@ -237,7 +237,7 @@
+@@ -237,7 +237,7 @@ void scan_dev(gboolean reload)
              continue;
         }
-  
+        
 -       if (detect_lang[i].stdout) {
 +       if (detect_lang[i].out) {
              found = g_spawn_command_line_sync(detect_lang[i].version_command, &output, NULL, NULL, NULL);
         } else {
              found = g_spawn_command_line_sync(detect_lang[i].version_command, NULL, &output, NULL, NULL);
+-- 
+2.25.0
+
