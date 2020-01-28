@@ -12,6 +12,7 @@ LICENSE="GPL-3 LGPL-3"
 SLOT="0"
 KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="gtk static-libs test"
+RESTRICT="!test? ( test )"
 
 RDEPEND="virtual/jpeg:0
 	dev-libs/libxml2

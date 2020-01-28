@@ -63,6 +63,7 @@ if [[ ${PV} != 9999* ]] ; then
 	KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
 fi
 IUSE="+client lzma multitarget nls +python +server test vanilla xml"
+RESTRICT="!test? ( test )"
 REQUIRED_USE="
 	python? ( ${PYTHON_REQUIRED_USE} )
 	|| ( client server )

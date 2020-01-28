@@ -25,6 +25,7 @@ fi
 LICENSE="MIT"
 SLOT="0"
 IUSE="test +X"
+RESTRICT="!test? ( test )"
 
 DEPEND="${PYTHON_DEPS}
 	media-libs/mesa[egl,${MULTILIB_USEDEP}]

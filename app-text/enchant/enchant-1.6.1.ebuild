@@ -14,6 +14,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~arm ~arm64 ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
 
 IUSE="aspell +hunspell static-libs test"
+RESTRICT="!test? ( test )"
 REQUIRED_USE="|| ( hunspell aspell )"
 
 # FIXME: depends on unittest++ but through pkgconfig which is a Debian hack, bug #629742

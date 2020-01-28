@@ -13,6 +13,7 @@ LICENSE="LGPL-2"
 SLOT="0"
 KEYWORDS="amd64 arm arm64 ~mips ~ppc x86"
 IUSE="elogind examples gtk +introspection jit kde nls pam selinux systemd test"
+RESTRICT="!test? ( test )"
 
 REQUIRED_USE="?? ( elogind systemd )"
 

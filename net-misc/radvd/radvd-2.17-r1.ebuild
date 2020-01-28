@@ -13,6 +13,7 @@ LICENSE="BSD"
 SLOT="0"
 KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="selinux test"
+RESTRICT="!test? ( test )"
 
 CDEPEND="dev-libs/libdaemon"
 DEPEND="${CDEPEND}
