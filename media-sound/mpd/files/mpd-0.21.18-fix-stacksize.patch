@@ -1,0 +1,31 @@
+From 8671aa5b12fd6b857ee24cf8aa55275d283d9014 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Tue, 28 Jan 2020 12:55:14 -0600
+Subject: [PATCH] Fix stacksize on musl
+
+---
+ src/thread/Thread.cxx | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/src/thread/Thread.cxx b/src/thread/Thread.cxx
+index bb498fd..da65d52 100644
+--- a/src/thread/Thread.cxx
++++ b/src/thread/Thread.cxx
+@@ -34,8 +34,12 @@ Thread::Start()
+ 	if (handle == nullptr)
+ 		throw MakeLastError("Failed to create thread");
+ #else
+-	int e = pthread_create(&handle, nullptr, ThreadProc, this);
+-
++	pthread_attr_t attr, *attrptr = nullptr;
++	if ((pthread_attr_init(&attr) == 0)
++		&& (pthread_attr_setstacksize(&attr, 1024*1024) == 0)) {
++		attrptr = &attr;
++	}
++	int e = pthread_create(&handle, attrptr, ThreadProc, this);
+ 	if (e != 0)
+ 		throw MakeErrno(e, "Failed to create thread");
+ #endif
+-- 
+2.25.0
+

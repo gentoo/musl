@@ -1,5 +1,5 @@
 #!/sbin/openrc-run
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 : CFGFILE=${CFGFILE:=/etc/mpd.conf}
@@ -26,7 +26,7 @@ pidfile=$(get_config pid_file)
 description="Music Player Daemon"
 
 reload() {
-	ebegin "Reloading ${SVCNAME}"
-	kill -HUP `cat ${pidfile}`
-	eend $?
-}
+      ebegin "Reloading ${RC_SVCNAME}"
+      start-stop-daemon --pidfile ${pidfile} --signal HUP
+      eend $?
+  }
