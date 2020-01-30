@@ -11,7 +11,7 @@ SRC_URI="https://github.com/linux-pam/linux-pam/archive/v${PV}.tar.gz -> ${P}.ta
 
 LICENSE="|| ( BSD GPL-2 )"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 IUSE="audit berkdb +cracklib debug nis nls +pie selinux static-libs"
 
 BDEPEND="app-text/docbook-xml-dtd:4.1.2
