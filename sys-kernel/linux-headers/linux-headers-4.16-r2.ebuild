@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
@@ -15,7 +15,7 @@ SRC_URI="mirror://gentoo/gentoo-headers-base-${PV}-r1.tar.xz
 	${PATCH_VER:+https://dev.gentoo.org/~slyfox/distfiles/gentoo-headers-${PV}-${PATCH_VER}.tar.xz}
 "
 
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 ~x86"
 
 DEPEND="app-arch/xz-utils
 	dev-lang/perl"
