@@ -7,7 +7,7 @@ PATCH_VER="4"
 
 inherit toolchain
 
-KEYWORDS="amd64 arm arm64 ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
