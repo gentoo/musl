@@ -25,7 +25,7 @@ src_prepare() {
 		eapply "${FILESDIR}"/6.3.0/cpu_indicator.patch
 		eapply "${FILESDIR}"/7.1.0/posix_memalign.patch
 		case $(tc-arch) in
-			amd64|arm64) eapply "${FILESDIR}"/8.3.0/gcc-pure64.patch ;;
+			amd64|arm64|ppc64) eapply "${FILESDIR}"/8.3.0/gcc-pure64.patch ;;
 		esac
 	fi
 
