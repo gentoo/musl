@@ -10,7 +10,8 @@ MY_P="rust-${PV}"
 DESCRIPTION="Systems programming language from Mozilla"
 HOMEPAGE="https://www.rust-lang.org/"
 SRC_URI="amd64? ( https://portage.smaeul.xyz/distfiles/${MY_P}-x86_64-gentoo-linux-musl.tar.xz )
-	arm? ( https://portage.smaeul.xyz/distfiles/${MY_P}-armv7a-unknown-linux-musleabihf.tar.xz )"
+	arm? ( https://portage.smaeul.xyz/distfiles/${MY_P}-armv7a-unknown-linux-musleabihf.tar.xz )
+	x86? ( https://portage.smaeul.xyz/distfiles/${MY_P}-i686-gentoo-linux-musl.tar.xz ) "
 
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 SLOT="stable"
@@ -21,6 +22,7 @@ DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	sys-libs/zlib
 	net-libs/libssh2
 	net-misc/curl[ssl]
+	sys-libs/libssp_nonshared
 	!dev-lang/rust:0
 "
 RDEPEND="${DEPEND}"
@@ -39,6 +41,7 @@ src_unpack() {
 	local postfix
 	use amd64 && postfix=x86_64-gentoo-linux-musl
 	use arm && postfix=armv7a-unknown-linux-musleabihf
+	use x86 && postfix=i686-gentoo-linux-musl
 
 	mv "${WORKDIR}/${MY_P}-${postfix}" "${S}" || die
 }
