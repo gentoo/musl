@@ -12,7 +12,7 @@ SRC_URI="http://downloads.xiph.org/releases/${PN}/${MY_P}.src.tgz
 
 LICENSE="GPL-2 LGPL-2.1"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sparc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="static-libs"
 
 RDEPEND=""

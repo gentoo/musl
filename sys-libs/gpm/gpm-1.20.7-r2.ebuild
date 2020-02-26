@@ -14,7 +14,7 @@ SRC_URI="http://www.nico.schottelius.org/software/${PN}/archives/${P}.tar.lzma
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sh sparc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="selinux static-libs"
 
 RDEPEND=">=sys-libs/ncurses-5.9-r3:0=[${MULTILIB_USEDEP}]

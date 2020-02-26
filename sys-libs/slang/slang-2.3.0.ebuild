@@ -11,7 +11,7 @@ SRC_URI="http://www.jedsoft.org/releases/${PN}/${P}.tar.bz2
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ia64 ~mips ppc ~sh sparc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="cjk pcre png readline static-libs zlib"
 
 # ncurses for ncurses5-config to get terminfo directory
