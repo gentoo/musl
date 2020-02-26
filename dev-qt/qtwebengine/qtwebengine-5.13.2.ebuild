@@ -1,18 +1,18 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
+
 PYTHON_COMPAT=( python2_7 )
-inherit multiprocessing pax-utils python-any-r1 qt5-build
+inherit multiprocessing python-any-r1 qt5-build
 
 DESCRIPTION="Library for rendering dynamic web content in Qt5 C++ and QML applications"
 
 if [[ ${QT5_BUILD_TYPE} == release ]]; then
-	KEYWORDS="amd64 ~arm ~arm64 ~x86"
+	KEYWORDS="amd64 arm arm64 ~ppc64 ~x86"
 fi
 
-IUSE="alsa bindist designer jumbo-build pax_kernel pulseaudio
-	+system-ffmpeg +system-icu widgets"
+IUSE="alsa bindist designer jumbo-build pulseaudio +system-ffmpeg +system-icu widgets"
 REQUIRED_USE="designer? ( widgets )"
 
 RDEPEND="
@@ -75,22 +75,21 @@ DEPEND="${RDEPEND}
 	dev-util/ninja
 	dev-util/re2c
 	sys-devel/bison
-	pax_kernel? ( sys-apps/elfix )
 "
 
-PATCHES+=(
-	"${FILESDIR}/${PN}-5.12.0-nouveau-disable-gpu.patch" # bug 609752
-	"${FILESDIR}/${P}-pulseaudio-13.patch" # bug 694960
-)
+PATCHES+=( "${FILESDIR}/${PN}-5.12.5-icu-65.patch" )
 
 src_prepare() {
-	use pax_kernel && PATCHES+=( "${FILESDIR}/${PN}-5.11.2-paxmark-mksnapshot.patch" )
-
-	eapply "${FILESDIR}/musl"
-
 	if ! use jumbo-build; then
 		sed -i -e 's|use_jumbo_build=true|use_jumbo_build=false|' \
 			src/core/config/common.pri || die
+	fi
+
+	if use elibc_musl; then
+		eapply "${FILESDIR}/musl"
+		sed -i -e "s;\(use_allocator_shim\) = .*;\1 = false;" src/3rdparty/chromium/build/config/allocator.gni || die
+		# Compatibility functions res_ninit() and res_nclose() for musl libc
+		cp -v "${FILESDIR}"/musl/resolv_compat.h "${S}"/src/3rdparty/chromium/net/dns || die
 	fi
 
 	# bug 620444 - ensure local headers are used
@@ -131,6 +130,4 @@ src_install() {
 	if [[ ! -f ${D}${QT5_LIBDIR}/libQt5WebEngine.so ]]; then
 		die "${CATEGORY}/${PF} failed to build anything. Please report to https://bugs.gentoo.org/"
 	fi
-
-	pax-mark m "${D}${QT5_LIBEXECDIR}"/QtWebEngineProcess
 }

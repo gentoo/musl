@@ -1,8 +1,6 @@
-diff --git a/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc b/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc
-index 10f1c0d..8e86a2e 100644
---- a/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc
-+++ b/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc
-@@ -28,7 +28,7 @@ size_t GetUnderestimatedStackSize() {
+--- qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc	2018-01-27 23:08:43.586475349 +0100
++++ qtwebengine/src/3rdparty/chromium/third_party/blink/renderer/platform/wtf/stack_util.cc	2018-01-27 23:18:22.274505203 +0100
+@@ -28,7 +28,7 @@
  // FIXME: On Mac OSX and Linux, this method cannot estimate stack size
  // correctly for the main thread.
  
@@ -11,7 +9,7 @@ index 10f1c0d..8e86a2e 100644
      defined(OS_FUCHSIA)
    // pthread_getattr_np() can fail if the thread is not invoked by
    // pthread_create() (e.g., the main thread of webkit_unit_tests).
-@@ -96,7 +96,7 @@ size_t GetUnderestimatedStackSize() {
+@@ -96,7 +96,7 @@
  }
  
  void* GetStackStart() {

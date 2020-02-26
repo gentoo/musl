@@ -1,8 +1,6 @@
-diff --git a/src/3rdparty/chromium/third_party/lss/linux_syscall_support.h b/src/3rdparty/chromium/third_party/lss/linux_syscall_support.h
-index 5d9c2e8..e81e7b4 100644
---- a/src/3rdparty/chromium/third_party/lss/linux_syscall_support.h
-+++ b/src/3rdparty/chromium/third_party/lss/linux_syscall_support.h
-@@ -1794,6 +1794,15 @@ struct kernel_statfs {
+--- qtwebengine/src/3rdparty/chromium/third_party/lss/linux_syscall_support.h	2018-09-07 21:25:26.639964100 +0200
++++ qtwebengine/src/3rdparty/chromium/third_party/lss/linux_syscall_support.h	2018-09-07 21:25:11.611964995 +0200
+@@ -1794,6 +1794,15 @@
  /* End of s390/s390x definitions                                             */
  #endif
  
