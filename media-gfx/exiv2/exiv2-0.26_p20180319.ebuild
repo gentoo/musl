@@ -11,7 +11,7 @@ if [[ ${PV} = *9999 ]]; then
 else
 	COMMIT=876b1314ab892cbfa6672b6b94adbeb90db4211f
 	SRC_URI="https://github.com/Exiv2/${PN}/tarball/${COMMIT} -> ${P}.tar.gz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~ia64 ~mips ~ppc ~sh ~sparc ~x86"
+	KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~x86"
 fi
 inherit cmake-multilib python-any-r1
 

@@ -14,7 +14,7 @@ HOMEPAGE="https://github.com/storaged-project/libblockdev"
 SRC_URI="https://github.com/storaged-project/${PN}/archive/${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
 LICENSE="LGPL-2+"
 SLOT="0"
-KEYWORDS="alpha amd64 arm ~arm64 ia64 ppc ppc64 ~sparc x86"
+KEYWORDS="amd64 arm ~arm64 ppc ppc64 x86"
 IUSE="bcache +cryptsetup dmraid doc lvm kbd test"
 RESTRICT="!test? ( test )"
 

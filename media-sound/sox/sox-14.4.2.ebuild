@@ -11,7 +11,7 @@ SRC_URI="mirror://sourceforge/sox/${P}.tar.gz"
 
 LICENSE="LGPL-2.1"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ia64 ~mips ppc sparc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="alsa amr ao debug encode flac id3tag ladspa mad ogg openmp oss opus png pulseaudio sndfile static-libs twolame wavpack"
 
 RDEPEND="

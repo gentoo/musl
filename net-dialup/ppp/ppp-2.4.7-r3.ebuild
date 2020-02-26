@@ -14,7 +14,7 @@ SRC_URI="ftp://ftp.samba.org/pub/ppp/${P}.tar.gz
 
 LICENSE="BSD GPL-2"
 SLOT="0/${PV}"
-KEYWORDS="amd64 arm arm64 ia64 ~mips ppc ~sh sparc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="activefilter atm dhcp eap-tls gtk ipv6 libressl pam radius"
 
 DEPEND="activefilter? ( net-libs/libpcap )

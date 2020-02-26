@@ -12,7 +12,7 @@ SRC_URI="mirror://sourceforge/project/${PN}.berlios/${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~mips ppc sparc x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 IUSE="branding pam consolekit"
 REQUIRED_USE="consolekit? ( pam )"
 

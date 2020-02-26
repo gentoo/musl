@@ -10,7 +10,7 @@ HOMEPAGE="https://git.gnome.org/browse/gnome-session"
 
 LICENSE="GPL-2 LGPL-2 FDL-1.1"
 SLOT="0"
-KEYWORDS="amd64 ~arm ~arm64 ~ia64 ~ppc ~sparc x86"
+KEYWORDS="amd64 ~arm ~arm64 ~ppc x86"
 IUSE="doc ipv6 systemd"
 
 # x11-misc/xdg-user-dirs{,-gtk} are needed to create the various XDG_*_DIRs, and
