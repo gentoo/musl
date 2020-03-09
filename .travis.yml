@@ -1,6 +1,6 @@
 language: python
 python:
-    - pypy
+    - "3.7"
 notifications:
   irc:
     channels:
@@ -9,24 +9,24 @@ notifications:
     on_failure: always  # options: [always|never|change] default: always
     on_start: false     # default: false
 env:
-    - PORTAGE_VER="2.3.40"
+    - PORTAGE_VER="2.3.93"
 before_install:
     - sudo apt-get -qq update
     - pip install lxml pyyaml
 before_script:
-    - sudo chmod a+rwX /etc/passwd /etc/group /etc /usr
-    - mkdir -p travis-overlay /etc/portage/ /usr/portage/distfiles
+    - sudo chmod a+rwX /etc/passwd /etc/group /etc /var /var/cache
+    - mkdir -p travis-overlay /etc/portage /var/cache/distfiles /var/db/repos/gentoo
     - mv !(travis-overlay) travis-overlay/
     - mv .git travis-overlay/
     - wget "https://raw.githubusercontent.com/mrueg/repoman-travis/master/spinner.sh"
     - wget -qO - "https://github.com/gentoo/portage/archive/portage-${PORTAGE_VER}.tar.gz" | tar xz
-    - wget -qO - "https://github.com/gentoo-mirror/gentoo/archive/master.tar.gz" | tar xz -C /usr/portage --strip-components=1
+    - wget -qO - "https://github.com/gentoo-mirror/gentoo/archive/master.tar.gz" | tar xz -C /var/db/repos/gentoo --strip-components=1
     - chmod a+rwx spinner.sh
     - echo "portage:x:250:250:portage:/var/tmp/portage:/bin/false" >> /etc/passwd
     - echo "portage::250:portage,travis" >> /etc/group
-    - wget "https://www.gentoo.org/dtd/metadata.dtd" -O /usr/portage/distfiles/metadata.dtd
+    - wget "https://www.gentoo.org/dtd/metadata.dtd" -O /var/cache/distfiles/metadata.dtd
     - ln -s portage-portage-${PORTAGE_VER}/cnf/repos.conf /etc/portage/repos.conf
-    - ln -s /usr/portage/profiles/default/linux/amd64/17.0/musl /etc/portage/make.profile
+    - ln -s /var/db/repos/gentoo/profiles/default/linux/amd64/17.0/musl /etc/portage/make.profile
     - cd travis-overlay
 script:
     - ./../spinner.sh "python ../portage-portage-${PORTAGE_VER}/repoman/bin/repoman full -i -d"
