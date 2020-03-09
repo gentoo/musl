@@ -4,9 +4,11 @@
 EAPI=7
 
 PYTHON_COMPAT=( python2_7 )
+
 inherit multiprocessing python-any-r1 qt5-build
 
 DESCRIPTION="Library for rendering dynamic web content in Qt5 C++ and QML applications"
+SRC_URI+=" https://dev.gentoo.org/~anarchy/dist/${PN}-5.13.2-patches.tar.xz "
 
 if [[ ${QT5_BUILD_TYPE} == release ]]; then
 	KEYWORDS="amd64 arm arm64 ~ppc64 ~x86"
@@ -86,7 +88,7 @@ src_prepare() {
 	fi
 
 	if use elibc_musl; then
-		eapply "${FILESDIR}/musl"
+		eapply "${WORKDIR}/${PN}-5.13.2-patches"
 		sed -i -e "s;\(use_allocator_shim\) = .*;\1 = false;" src/3rdparty/chromium/build/config/allocator.gni || die
 		# Compatibility functions res_ninit() and res_nclose() for musl libc
 		cp -v "${FILESDIR}"/musl/resolv_compat.h "${S}"/src/3rdparty/chromium/net/dns || die
