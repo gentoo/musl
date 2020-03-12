@@ -21,6 +21,7 @@ DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	sys-libs/zlib
 	net-libs/libssh2
 	net-misc/curl[ssl]
+	sys-devel/llvm:8
 	!dev-lang/rust:0
 "
 RDEPEND="${DEPEND}"
