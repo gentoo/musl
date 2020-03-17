@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -29,6 +29,12 @@ PATCHES=(
 )
 
 S="${WORKDIR}/${P/_/}"
+
+src_prepare() {
+	has_version '>=sys-devel/autoconf-2.69-r5' && PATCHES+=( "${FILESDIR}/${PN}-3.1.3-runstatedir.patch" )
+
+	default
+}
 
 src_configure() {
 	use static && append-ldflags -static
