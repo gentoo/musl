@@ -23,6 +23,7 @@ DEPEND=">=app-eselect/eselect-rust-0.3_pre20150425
 	net-libs/libssh2
 	net-misc/curl[ssl]
 	sys-libs/libssp_nonshared
+	sys-devel/llvm:8
 	!dev-lang/rust:0
 "
 RDEPEND="${DEPEND}"
