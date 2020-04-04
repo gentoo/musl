@@ -153,7 +153,7 @@ LLVM_DEPSTR="
 		sys-devel/llvm:9[${MULTILIB_USEDEP}]
 		sys-devel/llvm:8[${MULTILIB_USEDEP}]
 	)
-	sys-devel/llvm:=[${MULTILIB_USEDEP}]
+	<sys-devel/llvm-$((LLVM_MAX_SLOT + 1)):=[${MULTILIB_USEDEP}]
 "
 LLVM_DEPSTR_AMDGPU=${LLVM_DEPSTR//]/,llvm_targets_AMDGPU(-)]}
 CLANG_DEPSTR=${LLVM_DEPSTR//llvm/clang}
@@ -330,7 +330,7 @@ pkg_setup() {
 		ewarn "detected! This can cause problems. For details, see bug 459306."
 	fi
 
-	if use llvm; then
+	if use gallium && use llvm; then
 		llvm_pkg_setup
 	fi
 	python-any-r1_pkg_setup
