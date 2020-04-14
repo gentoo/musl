@@ -98,7 +98,7 @@ RDEPEND="
 		)
 		lm-sensors? ( sys-apps/lm-sensors:=[${MULTILIB_USEDEP}] )
 		opencl? (
-					dev-libs/ocl-icd[khronos-headers,${MULTILIB_USEDEP}]
+					>=virtual/opencl-3[${MULTILIB_USEDEP}]
 					dev-libs/libclc
 					virtual/libelf:0=[${MULTILIB_USEDEP}]
 				)
@@ -248,6 +248,7 @@ x86? (
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-19.3.0-add-disable-tls-support.patch
+	"${FILESDIR}"/${P}-meson-Specify-the-maximum-required-libdrm-in-dri.pc.patch
 )
 
 llvm_check_deps() {
