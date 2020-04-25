@@ -1,8 +1,8 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
-inherit autotools linux-info multilib systemd toolchain-funcs udev flag-o-matic usr-ldscript
+EAPI=7
+inherit autotools linux-info multilib systemd toolchain-funcs udev flag-o-matic
 
 DESCRIPTION="User-land utilities for LVM2 (device-mapper) software"
 HOMEPAGE="https://sourceware.org/lvm2/"
@@ -11,7 +11,7 @@ SRC_URI="ftp://sourceware.org/pub/lvm2/${PN/lvm/LVM}.${PV}.tgz
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 ~arm ~arm64 ~mips ppc ppc64 x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 IUSE="readline static static-libs systemd lvm2create_initrd sanlock selinux +udev +thin device-mapper-only"
 REQUIRED_USE="device-mapper-only? ( !lvm2create_initrd !sanlock !thin )
 	systemd? ( udev )"
@@ -23,7 +23,7 @@ DEPEND_COMMON="
 	readline? ( sys-libs/readline:0= )
 	sanlock? ( sys-cluster/sanlock )
 	systemd? ( >=sys-apps/systemd-205:0= )
-	udev? ( >=virtual/libudev-208:=[static-libs?] )"
+	udev? ( >=virtual/libudev-208:=[static-libs(-)?] )"
 # /run is now required for locking during early boot. /var cannot be assumed to
 # be available -- thus, pull in recent enough baselayout for /run.
 # This version of LVM is incompatible with cryptsetup <1.1.2.
@@ -38,16 +38,18 @@ RDEPEND="${DEPEND_COMMON}
 # note: thin- 0.3.0 is required to avoid --disable-thin_check_needs_check
 # USE 'static' currently only works with eudev, bug 520450
 DEPEND="${DEPEND_COMMON}
-	virtual/pkgconfig
 	>=sys-devel/binutils-2.20.1-r1
-	sys-devel/autoconf-archive
 	static? (
 		selinux? ( sys-libs/libselinux[static-libs] )
 		udev? ( >=sys-fs/eudev-3.1.2[static-libs] )
 		>=sys-apps/util-linux-2.16[static-libs]
 	)"
+BDEPEND="
+	sys-devel/autoconf-archive
+	virtual/pkgconfig
+"
 
-S=${WORKDIR}/${PN/lvm/LVM}.${PV}
+S="${WORKDIR}/${PN/lvm/LVM}.${PV}"
 
 PATCHES=(
 	# Gentoo specific modification(s):
@@ -70,7 +72,9 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-2.02.166-HPPA-no-O_DIRECT.patch #657446
 	#"${FILESDIR}"/${PN}-2.02.145-mkdev.patch #580062 # Merged upstream
 	"${FILESDIR}"/${PN}-2.02.184-dmeventd-no-idle-exit.patch
-	"${FILESDIR}"/${PN}-2.02.184-allow-reading-metadata-with-invalid-creation_time.patch #682380
+	#"${FILESDIR}"/${PN}-2.02.184-allow-reading-metadata-with-invalid-creation_time.patch #682380 # merged upstream
+	"${FILESDIR}"/${PN}-2.02.184-mksh_build.patch #686652
+	"${FILESDIR}"/${PN}-2.02.186-udev_remove_unsupported_option.patch #700160
 )
 
 pkg_setup() {
@@ -80,7 +84,7 @@ pkg_setup() {
 		local WARNING_SYSVIPC="CONFIG_SYSVIPC:\tis not set (required for udev sync)\n"
 		if linux_config_exists; then
 			local uevent_helper_path=$(linux_chkconfig_string UEVENT_HELPER_PATH)
-			if [ -n "${uevent_helper_path}" ] && [ "${uevent_helper_path}" != '""' ]; then
+			if [[ -n "${uevent_helper_path}" ]] && [[ "${uevent_helper_path}" != '""' ]]; then
 				ewarn "It's recommended to set an empty value to the following kernel config option:"
 				ewarn "CONFIG_UEVENT_HELPER_PATH=${uevent_helper_path}"
 			fi
@@ -116,9 +120,9 @@ src_prepare() {
 
 	sed -i -e "s:/usr/bin/true:$(type -P true):" scripts/blk_availability_systemd_red_hat.service.in || die #517514
 
-	# Without thin-privision-tools, there is nothing to install for target install_man7:
+	# Don't install thin man page when not requested
 	if ! use thin ; then
-		sed -i -e '/^install_lvm2/s:install_man7::' man/Makefile.in || die
+		sed -i -e 's/^\(MAN7+=.*\) $(LVMTHINMAN) \(.*\)$/\1 \2/' man/Makefile.in || die
 	fi
 
 	eautoreconf
@@ -189,19 +193,22 @@ src_configure() {
 		--with-systemdsystemunitdir="$(systemd_get_systemunitdir)"
 		CLDFLAGS="${LDFLAGS}"
 	)
+	# Hard-wire this to bash as some shells (dash) don't know
+	# "-o pipefail" #682404
+	CONFIG_SHELL="/bin/bash" \
 	econf "${myeconfargs[@]}"
 }
 
 src_compile() {
 	pushd include >/dev/null
-	emake
+	emake V=1
 	popd >/dev/null
 
 	if use device-mapper-only ; then
-		emake device-mapper
+		emake V=1 device-mapper
 	else
-		emake
-		emake CC="$(tc-getCC)" -C scripts lvm2_activation_generator_systemd_red_hat
+		emake V=1
+		emake V=1 CC="$(tc-getCC)" -C scripts lvm2_activation_generator_systemd_red_hat
 	fi
 }
 
@@ -212,7 +219,7 @@ src_install() {
 	use systemd && INSTALL_TARGETS+=( install_systemd_units install_systemd_generators )
 	use device-mapper-only && INSTALL_TARGETS=( install_device-mapper )
 	for inst in ${INSTALL_TARGETS[@]}; do
-		emake DESTDIR="${D}" ${inst}
+		emake V=1 DESTDIR="${D}" ${inst}
 	done
 
 	newinitd "${FILESDIR}"/device-mapper.rc-2.02.105-r2 device-mapper
@@ -220,7 +227,7 @@ src_install() {
 
 	if use !device-mapper-only ; then
 		newinitd "${FILESDIR}"/dmeventd.initd-2.02.184-r2 dmeventd
-		newinitd "${FILESDIR}"/lvm.rc-2.02.184-r3 lvm
+		newinitd "${FILESDIR}"/lvm.rc-2.02.187 lvm
 		newconfd "${FILESDIR}"/lvm.confd-2.02.184-r3 lvm
 		if ! use udev ; then
 			# We keep the variable but remove udev from it.
@@ -240,12 +247,14 @@ src_install() {
 
 	if use static-libs; then
 		dolib.a libdm/ioctl/libdevmapper.a
-		dolib.a libdaemon/client/libdaemonclient.a #462908
-		#gen_usr_ldscript libdevmapper.so
-		dolib.a daemons/dmeventd/libdevmapper-event.a
-		#gen_usr_ldscript libdevmapper-event.so
+		if use !device-mapper-only; then
+			# depends on lvmetad
+			dolib.a libdaemon/client/libdaemonclient.a #462908
+			# depends on dmeventd
+			dolib.a daemons/dmeventd/libdevmapper-event.a
+		fi
 	else
-		rm -f "${ED%/}"/usr/$(get_libdir)/{libdevmapper-event,liblvm2cmd,liblvm2app,libdevmapper}.a
+		rm -f "${ED}"/usr/$(get_libdir)/{libdevmapper-event,liblvm2cmd,liblvm2app,libdevmapper}.a
 	fi
 
 	if use lvm2create_initrd; then
