@@ -1,14 +1,13 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 GNOME_ORG_MODULE="NetworkManager"
 GNOME2_LA_PUNT="yes"
 VALA_USE_DEPEND="vapigen"
-PYTHON_COMPAT=( python{2_7,3_4,3_5,3_6,3_7} )
+PYTHON_COMPAT=( python{3_6,3_7} )
 
-inherit bash-completion-r1 gnome2 linux-info multilib python-any-r1 systemd \
-	user readme.gentoo-r1 vala virtualx udev multilib-minimal flag-o-matic
+inherit bash-completion-r1 gnome2 linux-info multilib python-any-r1 systemd readme.gentoo-r1 vala virtualx udev multilib-minimal
 
 DESCRIPTION="A set of co-operative tools that make networking simple and straightforward"
 HOMEPAGE="https://wiki.gnome.org/Projects/NetworkManager"
@@ -17,17 +16,18 @@ LICENSE="GPL-2+"
 SLOT="0" # add subslot if libnm-util.so.2 or libnm-glib.so.4 bumps soname version
 
 IUSE="audit bluetooth connection-sharing consolekit +dhclient dhcpcd elogind gnutls +introspection iwd json kernel_linux +nss +modemmanager ncurses ofono ovs policykit +ppp resolvconf selinux systemd teamd test vala +wext +wifi"
+RESTRICT="!test? ( test )"
 
 REQUIRED_USE="
 	bluetooth? ( modemmanager )
 	iwd? ( wifi )
 	vala? ( introspection )
 	wext? ( wifi )
-	^^ ( nss gnutls )
+	|| ( nss gnutls )
 	?? ( consolekit elogind systemd )
 "
 
-KEYWORDS="~amd64 ~arm ~arm64 ~ppc ~ppc64 ~x86"
+KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
 
 # gobject-introspection-0.10.3 is needed due to gnome bug 642300
 # wpa_supplicant-0.7.3-r3 is needed due to bug 359271
@@ -40,7 +40,7 @@ COMMON_DEPEND="
 	>=net-misc/curl-7.24
 	net-misc/iputils
 	sys-apps/util-linux[${MULTILIB_USEDEP}]
-	sys-libs/readline:0=[${MULTILIB_USEDEP}]
+	sys-libs/readline:0=
 	>=virtual/libudev-175:=[${MULTILIB_USEDEP}]
 	audit? ( sys-process/audit )
 	bluetooth? ( >=net-wireless/bluez-5 )
@@ -51,14 +51,14 @@ COMMON_DEPEND="
 	dhclient? ( >=net-misc/dhcp-4[client] )
 	dhcpcd? ( net-misc/dhcpcd )
 	elogind? ( >=sys-auth/elogind-219 )
-	gnutls? (
-		dev-libs/libgcrypt:0=[${MULTILIB_USEDEP}]
-		>=net-libs/gnutls-2.12:=[${MULTILIB_USEDEP}] )
 	introspection? ( >=dev-libs/gobject-introspection-0.10.3:= )
 	json? ( >=dev-libs/jansson-2.5[${MULTILIB_USEDEP}] )
 	modemmanager? ( >=net-misc/modemmanager-0.7.991:0= )
 	ncurses? ( >=dev-libs/newt-0.52.15 )
 	nss? ( >=dev-libs/nss-3.11:=[${MULTILIB_USEDEP}] )
+	!nss? ( gnutls? (
+		dev-libs/libgcrypt:0=[${MULTILIB_USEDEP}]
+		>=net-libs/gnutls-2.12:=[${MULTILIB_USEDEP}] ) )
 	ofono? ( net-misc/ofono )
 	ovs? ( dev-libs/jansson )
 	ppp? ( >=net-dialup/ppp-2.4.5:=[ipv6] )
@@ -71,6 +71,7 @@ COMMON_DEPEND="
 	)
 "
 RDEPEND="${COMMON_DEPEND}
+	acct-group/plugdev
 	|| (
 		net-misc/iputils[arping(+)]
 		net-analyzer/arping
@@ -102,11 +103,13 @@ DEPEND="${COMMON_DEPEND}
 "
 
 PATCHES=(
-	"${FILESDIR}"/fix-busted-configure.patch
+	"${FILESDIR}"/${PN}-data-fix-the-ID_NET_DRIVER-udev-rule.patch
+	"${FILESDIR}"/${PV}-iwd1-compat.patch # included in 1.21.3+
+
+	# Required to build on musl
 	"${FILESDIR}"/musl-basic.patch
-	"${FILESDIR}"/musl-fix-includes.patch
-	"${FILESDIR}"/musl-has-not-secure-gentenv.patch
 	"${FILESDIR}"/musl-network-support.patch
+	"${FILESDIR}"/musl-fix-includes.patch
 	"${FILESDIR}"/musl-process-util.patch
 )
 
@@ -148,10 +151,13 @@ pkg_pretend() {
 
 pkg_setup() {
 	if use connection-sharing; then
-		CONFIG_CHECK="~NF_NAT_IPV4 ~NF_NAT_MASQUERADE_IPV4"
+		if kernel_is lt 5 1; then
+			CONFIG_CHECK="~NF_NAT_IPV4 ~NF_NAT_MASQUERADE_IPV4"
+		else
+			CONFIG_CHECK="~NF_NAT ~NF_NAT_MASQUERADE"
+		fi
 		linux-info_pkg_setup
 	fi
-	enewgroup plugdev
 	if use introspection || use test; then
 		python-any-r1_pkg_setup
 	fi
@@ -178,7 +184,7 @@ multilib_src_configure() {
 		# We need --with-libnm-glib (and dbus-glib dep) as reverse deps are
 		# still not ready for removing that lib, bug #665338
 		--with-libnm-glib
-		--with-nmcli=yes
+		$(multilib_native_with nmcli)
 		--with-udev-dir="$(get_udevdir)"
 		--with-config-plugins-default=keyfile
 		--with-iptables=/sbin/iptables
@@ -201,6 +207,8 @@ multilib_src_configure() {
 		$(multilib_native_use_with ncurses nmtui)
 		$(multilib_native_use_with ofono)
 		$(multilib_native_use_enable ovs)
+		$(multilib_native_use_enable policykit polkit)
+		$(multilib_native_use_enable policykit polkit-agent)
 		$(multilib_native_use_with resolvconf)
 		$(multilib_native_use_with selinux)
 		$(multilib_native_use_with systemd systemd-journal)
@@ -212,12 +220,6 @@ multilib_src_configure() {
 		$(multilib_native_use_with wext)
 		$(multilib_native_use_enable wifi)
 	)
-
-	if multilib_is_native_abi && use policykit; then
-		myconf+=( --enable-polkit=yes )
-	else
-		myconf+=( --enable-polkit=disabled )
-	fi
 
 	# Same hack as net-dialup/pptpd to get proper plugin dir for ppp, bug #519986
 	if use ppp; then
@@ -236,8 +238,6 @@ multilib_src_configure() {
 		ln -s "${S}/docs" docs || die
 		ln -s "${S}/man" man || die
 	fi
-
-	append-cflags -DRTLD_DEEPBIND=0
 
 	ECONF_SOURCE=${S} runstatedir="/run" gnome2_src_configure "${myconf[@]}"
 }
@@ -267,6 +267,8 @@ multilib_src_install() {
 	if multilib_is_native_abi; then
 		# Install completions at proper place, bug #465100
 		gnome2_src_install completiondir="$(get_bashcompdir)"
+		insinto /usr/lib/NetworkManager/conf.d #702476
+		doins "${S}"/examples/nm-conf.d/31-mac-addr-change.conf
 	else
 		local targets=(
 			install-libLTLIBRARIES

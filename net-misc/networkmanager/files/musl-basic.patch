@@ -1,15 +1,32 @@
-From 8d5abcd3f0ef99cb7551d2db400c0645812a54ab Mon Sep 17 00:00:00 2001
-From: 
-Date: Thu, 28 Mar 2019 11:48:38 -0500
-Subject: [PATCH 1/5] Basic musl fixes
+From d12f0c518b10a3be0357c9242a2491c0904b51d6 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Mon, 29 Jul 2019 23:24:11 -0500
+Subject: [PATCH 1/5] Usual musl fixes
 
 ---
+ shared/systemd/src/basic/sort-util.h  | 6 ++++++
  shared/systemd/src/basic/stdio-util.h | 2 ++
- shared/systemd/src/basic/util.h       | 6 ++++++
  2 files changed, 8 insertions(+)
 
+diff --git a/shared/systemd/src/basic/sort-util.h b/shared/systemd/src/basic/sort-util.h
+index e029f86..e876241 100644
+--- a/shared/systemd/src/basic/sort-util.h
++++ b/shared/systemd/src/basic/sort-util.h
+@@ -5,6 +5,12 @@
+ 
+ #include "macro.h"
+ 
++#if !defined(__GLIBC__)
++typedef int (*__compar_fn_t) (const void*, const void*);
++typedef __compar_fn_t comparison_fn_t;
++typedef int (*__compar_d_fn_t) (const void *, const void *, void *);
++#endif
++
+ void *xbsearch_r(const void *key, const void *base, size_t nmemb, size_t size,
+                  __compar_d_fn_t compar, void *arg);
+ 
 diff --git a/shared/systemd/src/basic/stdio-util.h b/shared/systemd/src/basic/stdio-util.h
-index dc67b6e..6336243 100644
+index c3b9448..e80a938 100644
 --- a/shared/systemd/src/basic/stdio-util.h
 +++ b/shared/systemd/src/basic/stdio-util.h
 @@ -1,7 +1,9 @@
@@ -22,23 +39,6 @@ index dc67b6e..6336243 100644
  #include <stdarg.h>
  #include <stdio.h>
  #include <sys/types.h>
-diff --git a/shared/systemd/src/basic/util.h b/shared/systemd/src/basic/util.h
-index dc33d66..fbdf291 100644
---- a/shared/systemd/src/basic/util.h
-+++ b/shared/systemd/src/basic/util.h
-@@ -27,6 +27,12 @@
- #include "macro.h"
- #include "time-util.h"
- 
-+#if !defined(__GLIBC__)
-+typedef int (*__compar_fn_t) (const void*, const void*);
-+typedef __compar_fn_t comparison_fn_t;
-+typedef int (*__compar_d_fn_t) (const void *, const void *, void *);
-+#endif
-+
- size_t page_size(void) _pure_;
- #define PAGE_ALIGN(l) ALIGN_TO((l), page_size())
- 
 -- 
-2.21.0
+2.22.0
 

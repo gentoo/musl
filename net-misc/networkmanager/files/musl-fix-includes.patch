@@ -1,7 +1,7 @@
-From 757c618b86fec884d9f9cb0abdbe31ba680ff863 Mon Sep 17 00:00:00 2001
-From: 
-Date: Thu, 28 Mar 2019 11:49:20 -0500
-Subject: [PATCH 2/5] Fix includes for musl users
+From f0d90910d8a8bde7608221b4e34ff12096a4d951 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Mon, 29 Jul 2019 23:25:11 -0500
+Subject: [PATCH 2/5] fix includes for musl
 
 ---
  src/devices/nm-device.c          | 4 ++++
@@ -10,7 +10,7 @@ Subject: [PATCH 2/5] Fix includes for musl users
  3 files changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/src/devices/nm-device.c b/src/devices/nm-device.c
-index 7514fa7..f041382 100644
+index 42e4688..3b9da98 100644
 --- a/src/devices/nm-device.c
 +++ b/src/devices/nm-device.c
 @@ -32,7 +32,11 @@
@@ -26,7 +26,7 @@ index 7514fa7..f041382 100644
  #include <linux/pkt_sched.h>
  
 diff --git a/src/nm-manager.c b/src/nm-manager.c
-index 0bf6a75..e392507 100644
+index 7d77144..dc143ba 100644
 --- a/src/nm-manager.c
 +++ b/src/nm-manager.c
 @@ -26,6 +26,7 @@
@@ -35,10 +35,10 @@ index 0bf6a75..e392507 100644
  #include <unistd.h>
 +#include <asm/types.h>
  
- #include "nm-utils/nm-c-list.h"
+ #include "nm-glib-aux/nm-c-list.h"
  
 diff --git a/src/platform/nm-linux-platform.c b/src/platform/nm-linux-platform.c
-index 2f5c75b..f086245 100644
+index 7d66a88..b9a7b30 100644
 --- a/src/platform/nm-linux-platform.c
 +++ b/src/platform/nm-linux-platform.c
 @@ -20,6 +20,7 @@
@@ -49,26 +49,26 @@ index 2f5c75b..f086245 100644
  
  #include <arpa/inet.h>
  #include <dlfcn.h>
-@@ -27,7 +28,11 @@
- #include <fcntl.h>
+@@ -28,7 +29,11 @@
  #include <libudev.h>
+ #include <linux/fib_rules.h>
  #include <linux/ip.h>
 +#if defined(__GLIBC__)
  #include <linux/if_arp.h>
 +#else
 +#include <linux/if.h>
 +#endif
+ #include <linux/if_bridge.h>
  #include <linux/if_link.h>
  #include <linux/if_tun.h>
- #include <linux/if_tunnel.h>
-@@ -53,7 +58,6 @@
+@@ -58,7 +63,6 @@
  #include "nm-platform-private.h"
  #include "wifi/nm-wifi-utils.h"
  #include "wifi/nm-wifi-utils-wext.h"
 -#include "wpan/nm-wpan-utils.h"
- #include "nm-utils/unaligned.h"
- #include "nm-utils/nm-io-utils.h"
- #include "nm-utils/nm-udev-utils.h"
+ #include "nm-glib-aux/nm-io-utils.h"
+ #include "nm-udev-aux/nm-udev-utils.h"
+ 
 -- 
-2.21.0
+2.22.0
 

@@ -1,6 +1,6 @@
-From 0777360a2d8baa5c297bfa017bfaa1caf111d720 Mon Sep 17 00:00:00 2001
-From: 
-Date: Thu, 28 Mar 2019 11:50:23 -0500
+From 23613c07ff805744aaee22c352b24731ec4b2c69 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Mon, 29 Jul 2019 23:27:58 -0500
 Subject: [PATCH 5/5] musl process util
 
 ---
@@ -8,7 +8,7 @@ Subject: [PATCH 5/5] musl process util
  1 file changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/shared/systemd/src/basic/process-util.c b/shared/systemd/src/basic/process-util.c
-index b0afb5c..f72e346 100644
+index 7431be3..f9e6d49 100644
 --- a/shared/systemd/src/basic/process-util.c
 +++ b/shared/systemd/src/basic/process-util.c
 @@ -21,6 +21,9 @@
@@ -21,7 +21,7 @@ index b0afb5c..f72e346 100644
  #if 0 /* NM_IGNORED */
  #if HAVE_VALGRIND_VALGRIND_H
  #include <valgrind/valgrind.h>
-@@ -1168,11 +1171,13 @@ void reset_cached_pid(void) {
+@@ -1183,11 +1186,13 @@ void reset_cached_pid(void) {
          cached_pid = CACHED_PID_UNSET;
  }
  
@@ -35,7 +35,7 @@ index b0afb5c..f72e346 100644
  
  pid_t getpid_cached(void) {
          static bool installed = false;
-@@ -1201,7 +1206,12 @@ pid_t getpid_cached(void) {
+@@ -1216,7 +1221,12 @@ pid_t getpid_cached(void) {
                           * only half-documented (glibc doesn't document it but LSB does — though only superficially)
                           * we'll check for errors only in the most generic fashion possible. */
  
@@ -50,5 +50,5 @@ index b0afb5c..f72e346 100644
                                  cached_pid = CACHED_PID_UNSET;
                                  return new_pid;
 -- 
-2.21.0
+2.22.0
 

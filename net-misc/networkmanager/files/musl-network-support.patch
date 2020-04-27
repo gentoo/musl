@@ -1,7 +1,7 @@
-From 530814cb0d4f3369c18a88a31b5f14f2ed6544bc Mon Sep 17 00:00:00 2001
-From: 
-Date: Thu, 28 Mar 2019 11:50:06 -0500
-Subject: [PATCH 4/5] musl network support
+From e5e2e822a6daab4af1710fb8044072dc2327d002 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Mon, 29 Jul 2019 23:26:46 -0500
+Subject: [PATCH 4/5] add network support for musl libc
 
 ---
  libnm-core/nm-utils.h                  | 4 ++++
@@ -26,7 +26,7 @@ index 2b5baba..976850c 100644
  
  #include "nm-core-enum-types.h"
 diff --git a/shared/systemd/src/basic/socket-util.h b/shared/systemd/src/basic/socket-util.h
-index d2246a8..4cb0807 100644
+index 15443f1..b9c3291 100644
 --- a/shared/systemd/src/basic/socket-util.h
 +++ b/shared/systemd/src/basic/socket-util.h
 @@ -12,6 +12,11 @@
@@ -58,5 +58,5 @@ index 36148b5..d282eb2 100644
  #include "nm-dbus-interface.h"
  #include "nm-setting-wireless.h"
 -- 
-2.21.0
+2.22.0
 
