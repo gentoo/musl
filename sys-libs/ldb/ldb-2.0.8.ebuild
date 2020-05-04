@@ -47,6 +47,7 @@ MULTILIB_WRAPPED_HEADERS=( /usr/include/pyldb.h )
 PATCHES=(
 	"${FILESDIR}"/${PN}-1.5.2-optional_packages.patch
 	"${FILESDIR}"/${PN}-1.1.31-fix_PKGCONFIGDIR-when-python-disabled.patch
+	"${FILESDIR}"/${P}-include-fcntl.h-for-pid_t.patch
 )
 
 pkg_setup() {
