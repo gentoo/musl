@@ -3,11 +3,11 @@
 
 EAPI="7"
 
-PATCH_VER="1"
+PATCH_VER="2"
 
 inherit toolchain
 
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 ~x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 
 RDEPEND=""
 DEPEND="${RDEPEND}
