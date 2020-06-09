@@ -28,7 +28,7 @@ REQUIRED_USE="
 	?? ( consolekit elogind systemd )
 "
 
-KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
+KEYWORDS="~alpha amd64 arm arm64 ~ia64 ppc ~ppc64 ~sparc x86"
 
 # gobject-introspection-0.10.3 is needed due to gnome bug 642300
 # wpa_supplicant-0.7.3-r3 is needed due to bug 359271
@@ -105,7 +105,7 @@ DEPEND="${COMMON_DEPEND}
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-data-fix-the-ID_NET_DRIVER-udev-rule.patch
-	"${FILESDIR}"/${PV}-iwd1-compat.patch # included in 1.21.3+
+	"${FILESDIR}"/1.18.4-iwd1-compat.patch # included in 1.21.3+
  	"${FILESDIR}"/${PV}-fix-bashisms.patch
 
 	# Required to build on musl
@@ -293,7 +293,7 @@ multilib_src_install_all() {
 	einstalldocs
 	! use systemd && readme.gentoo_create_doc
 
-	newinitd "${FILESDIR}/init.d.NetworkManager-r1" NetworkManager
+	newinitd "${FILESDIR}/init.d.NetworkManager-r2" NetworkManager
 	newconfd "${FILESDIR}/conf.d.NetworkManager" NetworkManager
 
 	# Need to keep the /etc/NetworkManager/dispatched.d for dispatcher scripts

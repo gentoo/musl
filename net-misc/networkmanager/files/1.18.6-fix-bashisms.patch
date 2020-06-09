@@ -1,15 +1,16 @@
-From 03072c0039261e9980ab5e88b283e1f07b4002bb Mon Sep 17 00:00:00 2001
+From 0adfc0f511e1389ca166fb233b9d3feb12da91d2 Mon Sep 17 00:00:00 2001
 From: Gilles Dartiguelongue <eva@gentoo.org>
-Date: Sun, 19 Apr 2020 00:59:33 +0200
+Date: Mon, 8 Jun 2020 20:42:40 -0500
 Subject: [PATCH] Remove subshells and fix invalid test syntax
 
+Signed-off-by: Gilles Dartiguelongue <eva@gentoo.org>
 ---
  configure.ac        | 28 ++++++++++++++--------------
  m4/introspection.m4 |  4 ++--
  2 files changed, 16 insertions(+), 16 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 33badfac0..fe43f844a 100644
+index 9dc0625..49cbba3 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -261,7 +261,7 @@ AC_ARG_WITH(libnm-glib,
@@ -104,7 +105,7 @@ index 33badfac0..fe43f844a 100644
  	fi
  
 diff --git a/m4/introspection.m4 b/m4/introspection.m4
-index f3bda0e7c..8c64bd04c 100644
+index f3bda0e..8c64bd0 100644
 --- a/m4/introspection.m4
 +++ b/m4/introspection.m4
 @@ -31,7 +31,7 @@ m4_define([_GOBJECT_INTROSPECTION_CHECK_INTERNAL],
@@ -126,5 +127,5 @@ index f3bda0e7c..8c64bd04c 100644
                AC_MSG_ERROR([introspection enabled but can't be used])
            fi
 -- 
-2.26.0
+2.26.2
 
