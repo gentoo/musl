@@ -106,7 +106,7 @@ DEPEND="${COMMON_DEPEND}
 PATCHES=(
 	"${FILESDIR}"/${PN}-data-fix-the-ID_NET_DRIVER-udev-rule.patch
 	"${FILESDIR}"/1.18.4-iwd1-compat.patch # included in 1.21.3+
- 	"${FILESDIR}"/${PV}-fix-bashisms.patch
+	"${FILESDIR}"/${PV}-fix-bashisms.patch
 
 	# Required to build on musl
 	"${FILESDIR}"/musl-basic.patch
