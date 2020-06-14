@@ -5,7 +5,7 @@ EAPI=7
 
 PYTHON_COMPAT=( python3_{6,7,8} )
 
-inherit llvm meson multilib-minimal pax-utils python-any-r1
+inherit llvm meson multilib-minimal python-any-r1 linux-info
 
 OPENGL_DIR="xorg-x11"
 
@@ -19,7 +19,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://mesa.freedesktop.org/archive/${MY_P}.tar.xz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 ~x86"
+	KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 fi
 
 LICENSE="MIT"
@@ -44,7 +44,6 @@ REQUIRED_USE="
 	gles1?  ( egl )
 	gles2?  ( egl )
 	vulkan? ( dri3
-			  || ( video_cards_i965 video_cards_iris video_cards_radeonsi )
 			  video_cards_radeonsi? ( llvm ) )
 	vulkan-overlay? ( vulkan )
 	wayland? ( egl gbm )
@@ -147,9 +146,10 @@ RDEPEND="${RDEPEND}
 # 1. List all the working slots (with min versions) in ||, newest first.
 # 2. Update the := to specify *max* version, e.g. < 10.
 # 3. Specify LLVM_MAX_SLOT, e.g. 9.
-LLVM_MAX_SLOT="9"
+LLVM_MAX_SLOT="10"
 LLVM_DEPSTR="
 	|| (
+		sys-devel/llvm:10[${MULTILIB_USEDEP}]
 		sys-devel/llvm:9[${MULTILIB_USEDEP}]
 		sys-devel/llvm:8[${MULTILIB_USEDEP}]
 	)
@@ -248,7 +248,6 @@ x86? (
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-19.3.0-add-disable-tls-support.patch
-	"${FILESDIR}"/${P}-meson-Specify-the-maximum-required-libdrm-in-dri.pc.patch
 )
 
 llvm_check_deps() {
@@ -265,6 +264,14 @@ llvm_check_deps() {
 }
 
 pkg_pretend() {
+	if use vulkan; then
+		if ! use video_cards_i965 &&
+		   ! use video_cards_iris &&
+		   ! use video_cards_radeonsi; then
+			ewarn "Ignoring USE=vulkan     since VIDEO_CARDS does not contain i965, iris, or radeonsi"
+		fi
+	fi
+
 	if use opencl; then
 		if ! use video_cards_r600 &&
 		   ! use video_cards_radeonsi; then
@@ -329,6 +336,15 @@ pkg_setup() {
 	if use llvm && has_version sys-devel/llvm[!debug=]; then
 		ewarn "Mismatch between debug USE flags in media-libs/mesa and sys-devel/llvm"
 		ewarn "detected! This can cause problems. For details, see bug 459306."
+	fi
+
+	# os_same_file_description requires the kcmp syscall,
+	# which is only available with CONFIG_CHECKPOINT_RESTORE=y.
+	# Currently only AMDGPU utilizes this function, so only AMDGPU users would
+	# get a spooky warning message if the syscall fails.
+	if use gallium && use video_cards_radeonsi; then
+		CONFIG_CHECK="~CHECKPOINT_RESTORE"
+		linux-info_pkg_setup
 	fi
 
 	if use gallium && use llvm; then
@@ -510,8 +526,6 @@ multilib_src_compile() {
 
 multilib_src_install() {
 	meson_src_install
-
-	use libglvnd && rm -f "${D}"/usr/$(get_libdir)/pkgconfig/{egl,gl}.pc
 }
 
 multilib_src_install_all() {
