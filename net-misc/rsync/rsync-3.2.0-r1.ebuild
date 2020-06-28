@@ -16,7 +16,7 @@ else
 		SRC_DIR="src-previews"
 	else
 		SRC_DIR="src"
-		KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 ~x86"
+		KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 	fi
 	SRC_URI="https://rsync.samba.org/ftp/rsync/${SRC_DIR}/${P/_/}.tar.gz"
 	S="${WORKDIR}/${P/_/}"
