@@ -85,12 +85,7 @@ src_configure() {
 		$(use_enable zstd)
 	)
 
-	if [[ "${ARCH}" == "amd64" ]] ; then
-		# SIMD is only available for x86_64 right now (#728868)
-		myeconfargs+=( $(use_enable cpu_flags_x86_sse2 simd) )
-	else
-		myeconfargs+=( --disable-simd )
-	fi
+	myeconfargs+=( --disable-simd )
 
 	econf "${myeconfargs[@]}"
 	[[ "${PV}" == *9999 ]] || touch proto.h-tstamp #421625
