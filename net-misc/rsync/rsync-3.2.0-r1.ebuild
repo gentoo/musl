@@ -59,7 +59,6 @@ python_check_deps() {
 PATCHES=(
 	"${FILESDIR}/${P}-simd_check.patch"
 	"${FILESDIR}/${P}-noexecstack.patch" #728882
-	"${FILESDIR}"/${PN}-fix-musl-ipv6.patch
 )
 
 src_prepare() {
@@ -77,7 +76,7 @@ src_configure() {
 		--without-included-popt
 		$(use_enable acl acl-support)
 		$(use_enable iconv)
-		$(use_enable ipv6)
+		--disable-ipv6
 		$(use_enable lz4)
 		$(use_enable ssl openssl)
 		$(use_with !system-zlib included-zlib)
