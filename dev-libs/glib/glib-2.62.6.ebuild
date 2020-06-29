@@ -51,7 +51,7 @@ BDEPEND="
 	systemtap? ( >=dev-util/systemtap-1.3 )
 	${PYTHON_DEPS}
 	test? ( >=sys-apps/dbus-1.2.14 )
-	virtual/pkgconfig[${MULTILIB_USEDEP}]
+	virtual/pkgconfig
 "
 # TODO: >=dev-util/gdbus-codegen-${PV} test dep once we modify gio/tests/meson.build to use external gdbus-codegen
 
@@ -79,8 +79,6 @@ pkg_setup() {
 }
 
 src_prepare() {
-	eapply "${FILESDIR}"/${PV}-gdbus-fixes.patch #700538, included in 2.62.3+
-	eapply "${FILESDIR}"/CVE-2020-6750.patch
 	# Musl fix
 	eapply "${FILESDIR}/2.56.2-quark_init_on_demand.patch"
 	eapply "${FILESDIR}/2.56.2-gobject_init_on_demand.patch"
@@ -124,10 +122,6 @@ src_prepare() {
 	sed -i -e '/subdir.*fuzzing/d' meson.build || die
 
 	# gdbus-codegen is a separate package
-	sed -i -e 's/install.*true/install : false/g' gio/gdbus-2.0/codegen/meson.build || die
-	# Older than meson-0.50 doesn't know about install kwarg for configure_file; for that we need to remove the install_dir kwarg.
-	# Upstream will remove the install kwarg in a future version to require only meson-0.49.2 or newer, at which point the
-	# install_dir removal only should be kept.
 	sed -i -e '/install_dir/d' gio/gdbus-2.0/codegen/meson.build || die
 
 	# Same kind of meson-0.50 issue with some installed-tests files; will likely be fixed upstream soon
@@ -175,6 +169,7 @@ multilib_src_configure() {
 		$(meson_use fam)
 		-Dinstalled_tests=false
 		-Dnls=enabled
+		-Doss_fuzz=disabled
 	)
 	meson_src_configure
 }
