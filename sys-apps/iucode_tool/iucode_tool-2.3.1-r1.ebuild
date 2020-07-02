@@ -20,6 +20,8 @@ RDEPEND=${DEPEND}
 S="${WORKDIR}/${PN/_/-}-${PV}"
 
 src_prepare() {
+	default
+
 	eapply "${FILESDIR}/${PN}-2.2-limits.patch"
 	use elibc_musl && eapply "${FILESDIR}/${PN}-2.2-argp.patch"
 
