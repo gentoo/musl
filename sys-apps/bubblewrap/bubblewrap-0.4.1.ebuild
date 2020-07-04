@@ -1,4 +1,4 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -6,12 +6,12 @@ EAPI=7
 inherit bash-completion-r1 linux-info
 
 DESCRIPTION="Unprivileged sandboxing tool, namespaces-powered chroot-like solution"
-HOMEPAGE="https://github.com/projectatomic/bubblewrap"
-SRC_URI="https://github.com/projectatomic/${PN}/releases/download/v${PV}/${P}.tar.xz"
+HOMEPAGE="https://github.com/containers/bubblewrap/"
+SRC_URI="https://github.com/containers/${PN}/releases/download/v${PV}/${P}.tar.xz"
 
 LICENSE="LGPL-2+"
 SLOT="0"
-KEYWORDS="amd64 ~arm ~arm64 ~ppc ~ppc64 x86"
+KEYWORDS="amd64 ~arm arm64 ~ppc ~ppc64 x86"
 IUSE="selinux +suid"
 
 RDEPEND="
@@ -28,8 +28,10 @@ DEPEND="${RDEPEND}
 
 # tests require root priviledge
 RESTRICT="test"
-
-PATCHES=( "${FILESDIR}"/${P}-missing-TEMP_FAILURE_RETRY.patch )
+PATCHES=(
+	"${FILESDIR}/${PN}-0.3.1-selinux-configure.patch" # bug 674312
+	"${FILESDIR}/${PN}-0.3.1-missing-TEMP_FAILURE_RETRY.patch"
+)
 
 pkg_setup() {
 	if [[ ${MERGE_TYPE} != buildonly ]]; then
