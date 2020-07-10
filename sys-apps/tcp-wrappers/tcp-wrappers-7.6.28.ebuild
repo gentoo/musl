@@ -15,7 +15,7 @@ SRC_URI="http://ftp.porcupine.org/pub/security/${MY_P}.tar.gz
 
 LICENSE="tcp_wrappers_license"
 SLOT="0"
-KEYWORDS="amd64 arm ~arm64 ~mips ppc ppc64 x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 IUSE="ipv6 netgroups static-libs"
 
 RDEPEND=""
