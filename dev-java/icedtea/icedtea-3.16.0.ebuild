@@ -1,28 +1,32 @@
-# Copyright 1999-2018 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # Build written by Andrew John Hughes (gnu_andrew@member.fsf.org)
 
+# *********************************************************
+# * IF YOU CHANGE THIS EBUILD, CHANGE ICEDTEA-6.* AS WELL *
+# *********************************************************
+
 EAPI="6"
 SLOT="8"
 
-inherit check-reqs flag-o-matic gnome2-utils java-pkg-2 java-vm-2 multiprocessing pax-utils prefix versionator
+inherit check-reqs flag-o-matic java-pkg-2 java-vm-2 multiprocessing pax-utils prefix toolchain-funcs versionator xdg-utils
 
 ICEDTEA_VER=$(get_version_component_range 1-3)
 ICEDTEA_BRANCH=$(get_version_component_range 1-2)
 ICEDTEA_PKG=icedtea-${ICEDTEA_VER}
 ICEDTEA_PRE=$(get_version_component_range _)
 
-CORBA_TARBALL="c120c4fb7b31.tar.xz"
-JAXP_TARBALL="55420c5cc9f3.tar.xz"
-JAXWS_TARBALL="f824de94c42e.tar.xz"
-JDK_TARBALL="7b289a33ab97.tar.xz"
-LANGTOOLS_TARBALL="8496472630c5.tar.xz"
-OPENJDK_TARBALL="3b2d372838b9.tar.xz"
-NASHORN_TARBALL="79a2c8e2babc.tar.xz"
-HOTSPOT_TARBALL="d78088224b98.tar.xz"
-SHENANDOAH_TARBALL="b8b742251e42.tar.xz"
-AARCH32_TARBALL="891d70e93fb0.tar.xz"
+CORBA_TARBALL="ea3169880d70.tar.xz"
+JAXP_TARBALL="883803235596.tar.xz"
+JAXWS_TARBALL="e5d96dc9988a.tar.xz"
+JDK_TARBALL="bb9b9a0ad162.tar.xz"
+LANGTOOLS_TARBALL="e47d37e5fe0b.tar.xz"
+OPENJDK_TARBALL="bca1f7228ce8.tar.xz"
+NASHORN_TARBALL="1d70dcb4ab53.tar.xz"
+HOTSPOT_TARBALL="eeb08cfebded.tar.xz"
+SHENANDOAH_TARBALL="e4e81ae21643.tar.xz"
+AARCH32_TARBALL="ecc1eb1dc760.tar.xz"
 
 CACAO_TARBALL="cacao-c182f119eaad.tar.xz"
 JAMVM_TARBALL="jamvm-ec18fb9e49e62dce16c5094ef1527eed619463aa.tar.gz"
@@ -41,14 +45,14 @@ AARCH32_GENTOO_TARBALL="icedtea-${ICEDTEA_BRANCH}-aarch32-${AARCH32_TARBALL}"
 CACAO_GENTOO_TARBALL="icedtea-${CACAO_TARBALL}"
 JAMVM_GENTOO_TARBALL="icedtea-${JAMVM_TARBALL}"
 
-DROP_URL="http://icedtea.classpath.org/download/drops"
+DROP_URL="https://icedtea.classpath.org/download/drops"
 ICEDTEA_URL="${DROP_URL}/icedtea${SLOT}/${ICEDTEA_VER}"
 
 DESCRIPTION="A harness to build OpenJDK using Free Software build tools and dependencies"
-HOMEPAGE="http://icedtea.classpath.org"
+HOMEPAGE="https://icedtea.classpath.org"
 SRC_PKG="${ICEDTEA_PKG}.tar.xz"
 SRC_URI="
-	http://icedtea.classpath.org/download/source/${SRC_PKG}
+	https://icedtea.classpath.org/download/source/${SRC_PKG}
 	${ICEDTEA_URL}/openjdk.tar.xz -> ${OPENJDK_GENTOO_TARBALL}
 	${ICEDTEA_URL}/corba.tar.xz -> ${CORBA_GENTOO_TARBALL}
 	${ICEDTEA_URL}/jaxp.tar.xz -> ${JAXP_GENTOO_TARBALL}
@@ -67,8 +71,9 @@ KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~x86"
 
 IUSE="+alsa cacao +cups doc examples +gtk headless-awt
 	jamvm +jbootstrap kerberos libressl nsplugin pax_kernel +pch
-	pulseaudio sctp selinux shenandoah smartcard +source +sunec +system-lcms test +webstart zero"
+	pulseaudio sctp selinux shenandoah smartcard +source +system-lcms test webstart zero"
 
+RESTRICT="!test? ( test )"
 REQUIRED_USE="gtk? ( !headless-awt )"
 
 # Ideally the following were optional at build time.
@@ -102,7 +107,6 @@ COMMON_DEP="
 	kerberos? ( virtual/krb5 )
 	sctp? ( net-misc/lksctp-tools )
 	smartcard? ( sys-apps/pcsc-lite )
-	sunec? ( >=dev-libs/nss-3.16.1-r1 )
 	system-lcms? ( >=media-libs/lcms-2.9:2= )"
 
 # Gtk+ will move to COMMON_DEP in time; PR1982
@@ -111,6 +115,7 @@ RDEPEND="${COMMON_DEP}
 	!dev-java/icedtea:0
 	!dev-java/icedtea-web:7
 	>=gnome-base/gsettings-desktop-schemas-3.12.2
+	>=sys-apps/baselayout-java-0.1.0-r1
 	virtual/ttf-fonts
 	alsa? ( ${ALSA_COMMON_DEP} )
 	cups? ( ${CUPS_COMMON_DEP} )
@@ -134,6 +139,8 @@ DEPEND="${COMMON_DEP} ${ALSA_COMMON_DEP} ${CUPS_COMMON_DEP} ${X_COMMON_DEP} ${X_
 	|| (
 		dev-java/icedtea-bin:8
 		dev-java/icedtea:8
+		dev-java/openjdk:8
+		dev-java/openjdk-bin:8
 	)
 	app-arch/cpio
 	app-arch/unzip
@@ -175,7 +182,7 @@ pkg_setup() {
 
 	JAVA_PKG_WANT_BUILD_VM="
 		icedtea-8 icedtea-bin-8
-		icedtea-7 icedtea-bin-7"
+		openjdk-8 openjdk-bin-8"
 	JAVA_PKG_WANT_SOURCE="1.5"
 	JAVA_PKG_WANT_TARGET="1.5"
 
@@ -189,20 +196,27 @@ src_unpack() {
 
 src_configure() {
 	# Link MUSL patches into icedtea build tree
-	ln -s "${FILESDIR}/${PN}8-autoconf-config.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-gcc-triple.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-hotspot-musl-ppc.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-hotspot-musl.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-hotspot-noagent-musl.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-hotspot-uclibc-fixes.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-jdk-execinfo.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-jdk-fix-ipv6-init.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-jdk-fix-libjvm-load.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-jdk-getmntent-buffer.patch" patches || die
-	ln -s "${FILESDIR}/${PN}8-jdk-musl.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.8.0-autoconf-config.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.16.0-gcc-name-pattern.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.2.0-hotspot-noagent-musl.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.12.0-hotspot-musl-ppc.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.16.0-hotspot-musl.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.2.0-jdk-execinfo.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.2.0-jdk-fix-libjvm-load.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.4.0-jdk-globals.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.8.0-jdk-musl.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.12.0-jdk-fix-awt-inputmethod-mbstr-null.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.12.0-jdk-fix-ipv6-init.patch" patches || die
+	ln -s "${FILESDIR}/${PN}-3.16.0-jdk-includes.patch" patches || die
+
+	# GCC10/-fno-common handling, #723102
+	if [[ $(gcc-major-version) -ge 10 ]]; then
+		append-flags -fcommon
+		append-flags -fno-delete-null-pointer-checks -fno-lifetime-dse
+	fi
 
 	# For bootstrap builds as the sandbox control file might not yet exist.
-	addpredict /proc/self/coredump_filter
+	addpredict /proc/self/coredump_filter #nowarn
 
 	# icedtea doesn't like some locales. #330433 #389717
 	export LANG="C" LC_ALL="C"
@@ -213,17 +227,18 @@ src_configure() {
 	# Export MUSL patches for configure
 	DISTRIBUTION_PATCHES=""
 
-	DISTRIBUTION_PATCHES+="patches/${PN}8-hotspot-musl-ppc.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-hotspot-musl.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-hotspot-noagent-musl.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-hotspot-uclibc-fixes.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-jdk-execinfo.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-jdk-fix-ipv6-init.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-jdk-fix-libjvm-load.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-jdk-getmntent-buffer.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-jdk-musl.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-autoconf-config.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}8-gcc-triple.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.8.0-autoconf-config.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.16.0-gcc-name-pattern.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.2.0-hotspot-noagent-musl.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.12.0-hotspot-musl-ppc.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.16.0-hotspot-musl.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.2.0-jdk-execinfo.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.2.0-jdk-fix-libjvm-load.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.4.0-jdk-globals.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.8.0-jdk-musl.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.12.0-jdk-fix-awt-inputmethod-mbstr-null.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.12.0-jdk-fix-ipv6-init.patch "
+	DISTRIBUTION_PATCHES+="patches/${PN}-3.16.0-jdk-includes.patch "
 
 	export DISTRIBUTION_PATCHES
 
@@ -254,7 +269,6 @@ src_configure() {
 	# In-tree JIT ports are available for amd64, arm, arm64, ppc64 (be&le), SPARC and x86.
 	if { use amd64 || use arm || use arm64 || use ppc64 || use sparc || use x86; }; then
 		hotspot_port="yes"
-
 		# Work around stack alignment issue, bug #647954.
 		use x86 && append-flags -mincoming-stack-boundary=2
 	fi
@@ -332,8 +346,6 @@ src_configure() {
 		--with-jdk-home="$(java-config -O)" \
 		--prefix="${EPREFIX}/usr/$(get_libdir)/icedtea${SLOT}" \
 		--mandir="${EPREFIX}/usr/$(get_libdir)/icedtea${SLOT}/man" \
-		--docdir="${EPREFIX}/usr/share/doc/${PF}" \
-		--htmldir="${EPREFIX}/usr/share/doc/${PF}/html" \
 		--with-pkgversion="Gentoo ${PF}" \
 		--disable-ccache \
 		--disable-downloading --disable-Werror --disable-tests \
@@ -348,7 +360,6 @@ src_configure() {
 		$(use_with pax_kernel pax "${EPREFIX}/usr/sbin/paxmark.sh") \
 		$(use_enable sctp system-sctp) \
 		$(use_enable smartcard system-pcsc) \
-		$(use_enable sunec) \
 		${zero_config} ${cacao_config} ${jamvm_config} ${hs_config}
 }
 
@@ -378,47 +389,23 @@ src_install() {
 		rm -v "${ddest}"/src.zip || die
 	fi
 
-	dosym /usr/share/doc/${PF} /usr/share/doc/${PN}${SLOT}
+	dosym ../../../usr/share/doc/"${PF}" usr/share/doc/"${PN}${SLOT}"
 
 	# Fix the permissions.
 	find "${ddest}" \! -type l \( -perm /111 -exec chmod 755 {} \; -o -exec chmod 644 {} \; \) || die
 
-	# We need to generate keystore - bug #273306
-	einfo "Generating cacerts file from certificates in ${EPREFIX}/usr/share/ca-certificates/"
-	mkdir "${T}/certgen" && cd "${T}/certgen" || die
-	cp "${FILESDIR}/generate-cacerts.pl" . && chmod +x generate-cacerts.pl || die
-	for c in "${EPREFIX}"/usr/share/ca-certificates/*/*.crt; do
-		openssl x509 -text -in "${c}" >> all.crt || die
-	done
-	./generate-cacerts.pl "${ddest}/bin/keytool" all.crt || die
-	cp -vRP cacerts "${ddest}/jre/lib/security/" || die
-	chmod 644 "${ddest}/jre/lib/security/cacerts" || die
+	dosym ../../../../../../etc/ssl/certs/java/cacerts "${dest}"/jre/lib/security/cacerts
 
 	java-vm_install-env "${FILESDIR}/icedtea.env.sh"
 	java-vm_sandbox-predict /proc/self/coredump_filter
 }
 
-pkg_preinst() {
-	# From 3.4.0 onwards, the arm directory is a symlink to the aarch32
-	# directory. We need to clear the old directory for a clean upgrade.
-	if use arm; then
-		local dir
-		for dir in "${EROOT}usr/$(get_libdir)/icedtea${SLOT}"/{lib,jre/lib}/arm; do
-			if [[ -d ${dir} && ! -L ${dir} ]]; then
-				rm -r "${dir}" || die
-			fi
-		done
-	fi
-
-	gnome2_icon_savelist
-}
-
 pkg_postinst() {
-	gnome2_icon_cache_update
+	xdg_icon_cache_update
 	java-vm-2_pkg_postinst
 }
 
 pkg_postrm() {
-	gnome2_icon_cache_update
+	xdg_icon_cache_update
 	java-vm-2_pkg_postrm
 }
