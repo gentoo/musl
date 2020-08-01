@@ -35,7 +35,7 @@ RDEPEND="
 DEPEND="${RDEPEND}
 	valgrind? ( dev-util/valgrind )"
 
-PATCHES=( "${FILESDIR}"/fix-ioctl-102.patch )
+PATCHES=( "${FILESDIR}"/${PN}-2.4.102-disable-noveau-tests.patch )
 
 multilib_src_configure() {
 	local emesonargs=(
