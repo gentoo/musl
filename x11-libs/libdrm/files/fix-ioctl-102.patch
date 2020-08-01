@@ -1,0 +1,28 @@
+From 6e24b7d1693f78ae83dc47f0ef7c0da3dfb2d590 Mon Sep 17 00:00:00 2001
+From: 
+Date: Sat, 1 Aug 2020 11:50:44 -0500
+Subject: [PATCH] Fix ioctl.h being redefined on musl
+
+---
+ tests/nouveau/threaded.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/tests/nouveau/threaded.c b/tests/nouveau/threaded.c
+index ddbac74..d30ebaa 100644
+--- a/tests/nouveau/threaded.c
++++ b/tests/nouveau/threaded.c
+@@ -20,7 +20,10 @@
+  * OTHER DEALINGS IN THE SOFTWARE.
+  */
+ 
+-#include <sys/ioctl.h>
++// Use glibc's function prototype for ioctl()
++#include <bits/ioctl.h>
++int ioctl (int, unsigned long, ...);
++
+ #include <dlfcn.h>
+ #include <fcntl.h>
+ #include <stdio.h>
+-- 
+2.26.2
+
