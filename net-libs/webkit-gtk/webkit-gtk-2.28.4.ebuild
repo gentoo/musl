@@ -16,9 +16,9 @@ SRC_URI="https://www.webkitgtk.org/releases/${MY_P}.tar.xz"
 
 LICENSE="LGPL-2+ BSD"
 SLOT="4/37" # soname version of libwebkit2gtk-4.0
-KEYWORDS="amd64 arm64 ~ppc64 ~sparc x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~sparc ~x86"
 
-IUSE="aqua coverage +egl +geolocation gles2-only gnome-keyring +gstreamer gtk-doc +introspection +jpeg2k +jumbo-build libnotify +opengl seccomp spell wayland +X"
+IUSE="aqua +egl +geolocation gles2-only gnome-keyring +gstreamer gtk-doc +introspection +jpeg2k +jumbo-build libnotify +opengl seccomp spell wayland +X"
 
 # gstreamer with opengl/gles2 needs egl
 REQUIRED_USE="
@@ -41,6 +41,7 @@ wpe_depend="
 	>=gui-libs/libwpe-1.3.0:1.0
 	>=gui-libs/wpebackend-fdo-1.3.1:1.0
 "
+# TODO: gst-plugins-base[X] is only needed when build configuration ends up with GLX set, but that's a bit automagic too to fix
 RDEPEND="
 	>=x11-libs/cairo-1.16.0:=[X?]
 	>=media-libs/fontconfig-2.13.0:1.0
@@ -67,7 +68,7 @@ RDEPEND="
 	spell? ( >=app-text/enchant-0.22:2 )
 	gstreamer? (
 		>=media-libs/gstreamer-1.14:1.0
-		>=media-libs/gst-plugins-base-1.14:1.0[egl?,opengl?]
+		>=media-libs/gst-plugins-base-1.14:1.0[egl?,opengl?,X?]
 		gles2-only? ( media-libs/gst-plugins-base:1.0[gles2] )
 		>=media-plugins/gst-plugins-opus-1.14.4-r1:1.0
 		>=media-libs/gst-plugins-bad-1.14:1.0 )
@@ -87,6 +88,8 @@ RDEPEND="
 	gles2-only? ( media-libs/mesa[gles2] )
 	opengl? ( virtual/opengl )
 	wayland? (
+		dev-libs/wayland
+		>=dev-libs/wayland-protocols-1.12
 		opengl? ( ${wpe_depend} )
 		gles2-only? ( ${wpe_depend} )
 	)
@@ -116,7 +119,7 @@ DEPEND="${RDEPEND}
 	virtual/perl-Carp
 	virtual/perl-JSON-PP
 
-	gtk-doc? ( >=dev-util/gtk-doc-1.10 )
+	gtk-doc? ( >=dev-util/gtk-doc-1.32 )
 	geolocation? ( dev-util/gdbus-codegen )
 "
 #	test? (
@@ -145,7 +148,7 @@ pkg_pretend() {
 
 	if ! use opengl && ! use gles2-only; then
 		ewarn
-		ewarn "You are disabling OpenGL usage (USE=opengl or USE=gles-only) completely."
+		ewarn "You are disabling OpenGL usage (USE=opengl or USE=gles2-only) completely."
 		ewarn "This is an unsupported configuration meant for very specific embedded"
 		ewarn "use cases, where there truly is no GL possible (and even that use case"
 		ewarn "is very unlikely to come by). If you have GL (even software-only), you"
@@ -164,11 +167,13 @@ pkg_setup() {
 
 src_prepare() {
 	eapply "${FILESDIR}/${PN}-2.24.4-eglmesaext-include.patch" # bug 699054 # https://bugs.webkit.org/show_bug.cgi?id=204108
-	eapply "${FILESDIR}"/2.26.2-fix-arm-non-unified-build.patch # bug 704194
-	eapply "${FILESDIR}"/2.26.3-fix-gtk-doc.patch # bug 704550 - retest without it once we can depend on >=gtk-doc-1.32
+	eapply "${FILESDIR}"/2.28.2-opengl-without-X-fixes.patch
+	eapply "${FILESDIR}"/2.28.2-non-jumbo-fix.patch
+	eapply "${FILESDIR}"/2.28.4-non-jumbo-fix2.patch
 	if use elibc_musl ; then
-		# Taken from https://git.alpinelinux.org/aports/tree/community/webkit2gtk/musl-fixes.patch?id=9c8441ce582f411dbec289ab698e6d0a962f62cc
-		eapply "${FILESDIR}/${PN}-2.26.2-musl.patch"
+		# Taken from https://git.alpinelinux.org/aports/tree/community/webkit2gtk/musl-fixes.patch?id=be463923b10a7268117c27c7e5515fc32457918c
+		eapply "${FILESDIR}/${PN}-2.28.1-musl.patch"
+		eapply "${FILESDIR}/${PN}-2.28.4-lower-stack-usage.patch"
 	fi
 	cmake-utils_src_prepare
 	gnome2_src_prepare
@@ -258,6 +263,10 @@ src_configure() {
 		${ruby_interpreter}
 	)
 
+	if use elibc_musl ; then
+		mycmakeargs+=( -DENABLE_SAMPLING_PROFILER=OFF )
+	fi
+
 	# Allow it to use GOLD when possible as it has all the magic to
 	# detect when to use it and using gold for this concrete package has
 	# multiple advantages and is also the upstream default, bug #585788
@@ -267,7 +276,7 @@ src_configure() {
 #		mycmakeargs+=( -DUSE_LD_GOLD=OFF )
 #	fi
 
-	cmake-utils_src_configure
+	WK_USE_CCACHE=NO cmake-utils_src_configure
 }
 
 src_compile() {
