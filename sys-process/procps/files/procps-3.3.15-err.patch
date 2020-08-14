@@ -1,0 +1,53 @@
+diff --git a/ps/display.c b/ps/display.c
+index 28e1a6e..084eb8a 100644
+--- a/ps/display.c
++++ b/ps/display.c
+@@ -25,6 +25,9 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#ifndef HAVE_ERROR_H
++#  include <err.h>
++#endif
+ 
+ #include <sys/sysmacros.h>
+ #include <sys/types.h>
+@@ -63,7 +66,12 @@ static void signal_handler(int signo){
+     case SIGUSR2:
+       exit(EXIT_FAILURE);
+     default:
++#ifdef HAVE_ERROR_H
+       error_at_line(0, 0, __FILE__, __LINE__, "%s", _("please report this bug"));
++#else
++      warn ("%s:%u: please report this bug", __FILE__, __LINE__);
++      fflush (stdout);
++#endif
+       signal(signo, SIG_DFL);  /* allow core file creation */
+       kill(getpid(), signo);
+       _exit(EXIT_FAILURE);
+diff --git a/ps/global.c b/ps/global.c
+index 7ab7774..52e6f91 100644
+--- a/ps/global.c
++++ b/ps/global.c
+@@ -25,6 +25,9 @@
+ #include <string.h>
+ #include <termios.h>
+ #include <unistd.h>
++#ifndef HAVE_ERROR_H
++#  include <err.h>
++#endif
+ 
+ #include <sys/ioctl.h>
+ #include <sys/stat.h>
+@@ -511,6 +514,11 @@ catastrophic_failure(const char *filename,
+ 		     unsigned int linenum,
+ 		     const char *message)
+ {
++#ifdef HAVE_ERROR_H
+   error_at_line(0, 0, filename, linenum, "%s", message);
++#else
++  warn ("%s:%u: %s", filename, linenum, message);
++  fflush(stdout);
++#endif
+   exit(EXIT_FAILURE);
+ }
