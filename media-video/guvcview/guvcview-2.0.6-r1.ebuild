@@ -1,11 +1,10 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
-
-inherit autotools flag-o-matic qmake-utils toolchain-funcs
+EAPI=7
 
 MY_P=${PN}-src-${PV}
+inherit autotools flag-o-matic qmake-utils toolchain-funcs
 
 DESCRIPTION="Simple Qt5 or GTK+3 interface for capturing and viewing video from v4l2 devices"
 HOMEPAGE="http://guvcview.sourceforge.net/"
@@ -14,20 +13,24 @@ SRC_URI="mirror://sourceforge/${PN}/${MY_P}.tar.gz"
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="amd64 x86"
-IUSE="gsl libav pulseaudio qt5"
+IUSE="gsl pulseaudio qt5"
 
+BDEPEND="
+	dev-util/intltool
+	sys-devel/autoconf-archive
+	sys-devel/gettext
+	virtual/pkgconfig
+"
 RDEPEND="
 	>=dev-libs/glib-2.10
 	media-libs/libpng:0=
 	media-libs/libsdl2
 	media-libs/libv4l
 	>=media-libs/portaudio-19_pre
-	virtual/ffmpeg
+	>=media-video/ffmpeg-2.8:0=
 	virtual/libusb:1
 	virtual/udev
 	gsl? ( >=sci-libs/gsl-1.15 )
-	!libav? ( >=media-video/ffmpeg-2.8:0= )
-	libav? ( media-video/libav:= )
 	pulseaudio? ( >=media-sound/pulseaudio-0.9.15 )
 	qt5? (
 		dev-qt/qtcore:5
@@ -38,21 +41,18 @@ RDEPEND="
 "
 # linux-headers: bug 448260
 DEPEND="${RDEPEND}
-	dev-util/intltool
-	sys-devel/autoconf-archive
-	sys-devel/gettext
 	>=sys-kernel/linux-headers-3.4-r2
 	virtual/os-headers
-	virtual/pkgconfig
 "
+
+PATCHES=(
+	"${FILESDIR}/${PN}-2.0.4-musl.patch"
+)
 
 S="${WORKDIR}/${MY_P}"
 
 src_prepare() {
 	default
-	# Fix for MUSL
-	epatch "${FILESDIR}/${PN}-2.0.4-musl.patch"
-
 	sed -i '/^docdir/,/^$/d' Makefile.am || die
 	echo "guvcview/gui_qt5_audioctrls.cpp" >> po/POTFILES.skip || die # bug 630984
 	eautoreconf
@@ -77,5 +77,5 @@ src_configure() {
 
 src_install() {
 	default
-	find "${D}" -name '*.la' -delete || die
+	find "${D}" -name '*.la' -type f -delete || die
 }
