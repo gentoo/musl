@@ -5,7 +5,7 @@ EAPI=7
 
 PYTHON_COMPAT=( python3_{6,7,8} )
 
-inherit llvm meson multilib-minimal pax-utils python-any-r1
+inherit llvm meson multilib-minimal python-any-r1 linux-info
 
 OPENGL_DIR="xorg-x11"
 
@@ -19,7 +19,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://mesa.freedesktop.org/archive/${MY_P}.tar.xz"
-	KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
+	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86 ~amd64-linux ~x86-linux ~sparc-solaris ~x64-solaris ~x86-solaris"
 fi
 
 LICENSE="MIT"
@@ -36,15 +36,14 @@ done
 
 IUSE="${IUSE_VIDEO_CARDS}
 	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 +gles2 +libglvnd +llvm
-	lm-sensors opencl osmesa pax_kernel selinux test unwind vaapi valgrind
-	vdpau vulkan vulkan-overlay wayland +X xa xvmc"
+	lm-sensors opencl osmesa selinux test unwind vaapi valgrind vdpau vulkan
+	vulkan-overlay wayland +X xa xvmc +zstd"
 
 REQUIRED_USE="
 	d3d9?   ( dri3 || ( video_cards_iris video_cards_r300 video_cards_r600 video_cards_radeonsi video_cards_nouveau video_cards_vmware ) )
 	gles1?  ( egl )
 	gles2?  ( egl )
 	vulkan? ( dri3
-			  || ( video_cards_i965 video_cards_iris video_cards_radeonsi )
 			  video_cards_radeonsi? ( llvm ) )
 	vulkan-overlay? ( vulkan )
 	wayland? ( egl gbm )
@@ -98,7 +97,7 @@ RDEPEND="
 		)
 		lm-sensors? ( sys-apps/lm-sensors:=[${MULTILIB_USEDEP}] )
 		opencl? (
-					dev-libs/ocl-icd[khronos-headers,${MULTILIB_USEDEP}]
+					>=virtual/opencl-3[${MULTILIB_USEDEP}]
 					dev-libs/libclc
 					virtual/libelf:0=[${MULTILIB_USEDEP}]
 				)
@@ -128,6 +127,7 @@ RDEPEND="
 		>=x11-libs/libxcb-1.13:=[${MULTILIB_USEDEP}]
 		x11-libs/libXfixes:=[${MULTILIB_USEDEP}]
 	)
+	zstd? ( app-arch/zstd:=[${MULTILIB_USEDEP}] )
 "
 for card in ${RADEON_CARDS}; do
 	RDEPEND="${RDEPEND}
@@ -146,13 +146,13 @@ RDEPEND="${RDEPEND}
 # 1. List all the working slots (with min versions) in ||, newest first.
 # 2. Update the := to specify *max* version, e.g. < 10.
 # 3. Specify LLVM_MAX_SLOT, e.g. 9.
-LLVM_MAX_SLOT="9"
+LLVM_MAX_SLOT="10"
 LLVM_DEPSTR="
 	|| (
+		sys-devel/llvm:10[${MULTILIB_USEDEP}]
 		sys-devel/llvm:9[${MULTILIB_USEDEP}]
-		sys-devel/llvm:8[${MULTILIB_USEDEP}]
 	)
-	sys-devel/llvm:=[${MULTILIB_USEDEP}]
+	<sys-devel/llvm-$((LLVM_MAX_SLOT + 1)):=[${MULTILIB_USEDEP}]
 "
 LLVM_DEPSTR_AMDGPU=${LLVM_DEPSTR//]/,llvm_targets_AMDGPU(-)]}
 CLANG_DEPSTR=${LLVM_DEPSTR//llvm/clang}
@@ -246,7 +246,7 @@ x86? (
 )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-19.3.0-add-disable-tls-support.patch
+	"${FILESDIR}"/${PN}-20.1.0-add-disable-tls-support.patch
 )
 
 llvm_check_deps() {
@@ -263,6 +263,14 @@ llvm_check_deps() {
 }
 
 pkg_pretend() {
+	if use vulkan; then
+		if ! use video_cards_i965 &&
+		   ! use video_cards_iris &&
+		   ! use video_cards_radeonsi; then
+			ewarn "Ignoring USE=vulkan     since VIDEO_CARDS does not contain i965, iris, or radeonsi"
+		fi
+	fi
+
 	if use opencl; then
 		if ! use video_cards_r600 &&
 		   ! use video_cards_radeonsi; then
@@ -329,7 +337,14 @@ pkg_setup() {
 		ewarn "detected! This can cause problems. For details, see bug 459306."
 	fi
 
-	if use llvm; then
+	if use video_cards_i965 ||
+	   use video_cards_iris ||
+	   use video_cards_radeonsi; then
+		CONFIG_CHECK="~CHECKPOINT_RESTORE"
+		linux-info_pkg_setup
+	fi
+
+	if use gallium && use llvm; then
 		llvm_pkg_setup
 	fi
 	python-any-r1_pkg_setup
@@ -461,11 +476,6 @@ multilib_src_configure() {
 		vulkan_enable video_cards_radeonsi amd
 	fi
 
-	# x86 hardened pax_kernel needs glx-rts, bug 240956
-	if [[ ${ABI} == x86 ]]; then
-		emesonargs+=( $(meson_use pax_kernel glx-read-only-text) )
-	fi
-
 	# Disable glx tls support on musl
 	if use elibc_musl; then
 		emesonargs+=( -Delf-tls=false )
@@ -495,10 +505,12 @@ multilib_src_configure() {
 		$(meson_use gles2)
 		$(meson_use libglvnd glvnd)
 		$(meson_use selinux)
+		$(meson_use zstd)
 		-Dvalgrind=$(usex valgrind auto false)
 		-Ddri-drivers=$(driver_list "${DRI_DRIVERS[*]}")
 		-Dgallium-drivers=$(driver_list "${GALLIUM_DRIVERS[*]}")
 		-Dvulkan-drivers=$(driver_list "${VULKAN_DRIVERS[*]}")
+		$(meson_use vulkan vulkan-device-select-layer)
 		$(meson_use vulkan-overlay vulkan-overlay-layer)
 		--buildtype $(usex debug debug plain)
 		-Db_ndebug=$(usex debug false true)
@@ -512,8 +524,6 @@ multilib_src_compile() {
 
 multilib_src_install() {
 	meson_src_install
-
-	use libglvnd && rm -f "${D}"/usr/$(get_libdir)/pkgconfig/{egl,gl}.pc
 }
 
 multilib_src_install_all() {
@@ -554,3 +564,4 @@ vulkan_enable() {
 		VULKAN_DRIVERS+=("$@")
 	fi
 }
+
