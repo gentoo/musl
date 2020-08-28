@@ -247,6 +247,10 @@ x86? (
 	libglvnd? ( usr/lib/libGLX_mesa.so.0.0.0 )
 )"
 
+PATCHES=(
+	"${FILESDIR}"/${PN}-20.1.0-add-disable-tls-support.patch
+)
+
 llvm_check_deps() {
 	local flags=${MULTILIB_USEDEP}
 	if use video_cards_r600 || use video_cards_radeon || use video_cards_radeonsi
@@ -478,6 +482,11 @@ multilib_src_configure() {
 		vulkan_enable video_cards_i965 intel
 		vulkan_enable video_cards_iris intel
 		vulkan_enable video_cards_radeonsi amd
+	fi
+
+	# Disable glx tls support on musl
+	if use elibc_musl; then
+		emesonargs+=( -Delf-tls=false )
 	fi
 
 	if use gallium; then
