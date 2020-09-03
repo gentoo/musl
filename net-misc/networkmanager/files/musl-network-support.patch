@@ -1,16 +1,3 @@
-From e5e2e822a6daab4af1710fb8044072dc2327d002 Mon Sep 17 00:00:00 2001
-From: Jory Pratt <anarchy@gentoo.org>
-Date: Mon, 29 Jul 2019 23:26:46 -0500
-Subject: [PATCH 4/5] add network support for musl libc
-
----
- libnm-core/nm-utils.h                  | 4 ++++
- shared/systemd/src/basic/socket-util.h | 5 +++++
- src/platform/wifi/nm-wifi-utils.h      | 4 ++++
- 3 files changed, 13 insertions(+)
-
-diff --git a/libnm-core/nm-utils.h b/libnm-core/nm-utils.h
-index 2b5baba..976850c 100644
 --- a/libnm-core/nm-utils.h
 +++ b/libnm-core/nm-utils.h
 @@ -30,7 +30,11 @@
@@ -25,24 +12,6 @@ index 2b5baba..976850c 100644
  #include <linux/if_infiniband.h>
  
  #include "nm-core-enum-types.h"
-diff --git a/shared/systemd/src/basic/socket-util.h b/shared/systemd/src/basic/socket-util.h
-index 15443f1..b9c3291 100644
---- a/shared/systemd/src/basic/socket-util.h
-+++ b/shared/systemd/src/basic/socket-util.h
-@@ -12,6 +12,11 @@
- #include <sys/socket.h>
- #include <sys/types.h>
- #include <sys/un.h>
-+#if !defined(__GLIBC__)
-+/* SIOCGSTAMPNS from linux/asm-generic.h 
-+ * for src/systemd/src/libsystemd-network/sd-lldp.c */
-+#include <linux/sockios.h>
-+#endif
- 
- #include "macro.h"
- #include "missing_socket.h"
-diff --git a/src/platform/wifi/nm-wifi-utils.h b/src/platform/wifi/nm-wifi-utils.h
-index 36148b5..d282eb2 100644
 --- a/src/platform/wifi/nm-wifi-utils.h
 +++ b/src/platform/wifi/nm-wifi-utils.h
 @@ -22,7 +22,11 @@
@@ -56,7 +25,18 @@ index 36148b5..d282eb2 100644
 +#endif
  
  #include "nm-dbus-interface.h"
- #include "nm-setting-wireless.h"
--- 
-2.22.0
-
+ 
+--- a/shared/systemd/src/basic/socket-util.h	2019-03-16 15:41:33.287235649 +0100
++++ b/shared/systemd/src/basic/socket-util.h	2019-03-16 15:42:24.273912106 +0100
+@@ -12,6 +12,11 @@
+ #include <sys/socket.h>
+ #include <sys/types.h>
+ #include <sys/un.h>
++#if !defined(__GLIBC__)
++/* SIOCGSTAMPNS from linux/asm-generic.h 
++ * for src/systemd/src/libsystemd-network/sd-lldp.c */
++#include <linux/sockios.h>
++#endif
+ 
+ #include "macro.h"
+ #include "missing_socket.h"
