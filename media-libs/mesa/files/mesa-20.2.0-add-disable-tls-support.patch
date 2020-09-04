@@ -1,0 +1,44 @@
+From 97365c36582ad77db40e957931f29f958074edec Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Tue, 1 Sep 2020 18:04:56 -0500
+Subject: [PATCH] Allow to disable glx_tls for musl users
+
+Signed-off-by: Jory Pratt <anarchy@gentoo.org>
+---
+ meson.build       | 2 +-
+ meson_options.txt | 6 ++++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 4f9c589..2c388e7 100644
+--- a/meson.build
++++ b/meson.build
+@@ -424,7 +424,7 @@ endif
+ 
+ # Android uses emutls for versions <= P/28. For USE_ELF_TLS we need ELF TLS.
+ use_elf_tls = false
+-if not ['windows', 'freebsd', 'openbsd'].contains(host_machine.system()) and (not with_platform_android or get_option('platform-sdk-version') >= 29)
++if get_option('elf-tls')
+   pre_args += '-DUSE_ELF_TLS'
+   use_elf_tls = true
+ endif
+diff --git a/meson_options.txt b/meson_options.txt
+index 2d39d13..a3d1de5 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -313,6 +313,12 @@ option(
+   value : false,
+   description : 'Build an SELinux-aware Mesa'
+ )
++option(
++  'elf-tls',
++  type : 'boolean',
++  value : true,
++  description : 'Enable thread-local storage in GLX and EGL'
++)
+ option(
+   'osmesa',
+   type : 'combo',
+-- 
+2.28.0
+
