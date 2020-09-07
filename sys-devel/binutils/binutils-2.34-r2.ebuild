@@ -19,8 +19,8 @@ REQUIRED_USE="default-gold? ( gold )"
 # PATCH_DEV          - Use download URI https://dev.gentoo.org/~{PATCH_DEV}/distfiles/...
 #                      for the patchsets
 
-PATCH_VER=1
-PATCH_DEV=slyfox
+PATCH_VER=6
+PATCH_DEV=dilfridge
 
 case ${PV} in
 	9999)
@@ -84,10 +84,6 @@ BDEPEND="
 
 RESTRICT="!test? ( test )"
 
-PATCHES=(
-	"${FILESDIR}"/${PN}-2.33-gcc-10.patch
-)
-
 MY_BUILDDIR=${WORKDIR}/build
 
 src_unpack() {
@@ -104,9 +100,6 @@ src_unpack() {
 
 src_prepare() {
 	if [[ ! -z ${PATCH_VER} ]] ; then
-		# Use upstream patch to enable development mode
-		rm -v "${WORKDIR}/patch"/0000-Gentoo-Git-is-development.patch || die
-
 		einfo "Applying binutils-${PATCH_BINUTILS_VER} patchset ${PATCH_VER}"
 		eapply "${WORKDIR}/patch"/*.patch
 	fi
