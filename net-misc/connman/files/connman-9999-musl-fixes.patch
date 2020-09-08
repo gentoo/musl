@@ -1,0 +1,81 @@
+--- ./configure.ac.orig
++++ ./configure.ac
+@@ -171,6 +171,8 @@
+ AM_CONDITIONAL(PPTP, test "${enable_pptp}" != "no")
+ AM_CONDITIONAL(PPTP_BUILTIN, test "${enable_pptp}" = "builtin")
+ 
++AC_CHECK_MEMBERS([struct in6_pktinfo.ipi6_addr], [], [], [[#include <netinet/in.h>]])
++AC_CHECK_HEADERS(execinfo.h)
+ AC_CHECK_HEADERS(resolv.h, dummy=yes,
+ 	AC_MSG_ERROR(resolver header files are required))
+ AC_CHECK_LIB(resolv, ns_initparse, dummy=yes, [
+diff --git a/gdhcp/common.c b/gdhcp/common.c
+index e111150..ee4dc43 100644
+--- a/gdhcp/common.c
++++ b/gdhcp/common.c
+@@ -22,6 +22,7 @@
+ #include <config.h>
+ #endif
+ 
++#define _GNU_SOURCE
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <errno.h>
+@@ -31,7 +32,6 @@
+ #include <string.h>
+ #include <endian.h>
+ #include <net/if_arp.h>
+-#include <linux/if.h>
+ #include <netpacket/packet.h>
+ #include <net/ethernet.h>
+ #include <arpa/inet.h>
+@@ -39,6 +39,8 @@
+ #include "gdhcp.h"
+ #include "common.h"
+ 
++#include <linux/if.h>
++
+ static const DHCPOption client_options[] = {
+ 	{ OPTION_IP,			0x01 }, /* subnet-mask */
+ 	{ OPTION_IP | OPTION_LIST,	0x03 }, /* routers */
+diff --git a/src/log.c b/src/log.c
+index a693bd0..9054462 100644
+--- a/src/log.c
++++ b/src/log.c
+ static void signal_handler(int signo)
+diff --exclude '*.*o' -ru connman-1.24.orig/src/tethering.c connman-1.24/src/tethering.c
+--- connman-1.24.orig/src/tethering.c	2014-04-04 15:12:07.000000000 -0300
++++ connman-1.24/src/tethering.c	2014-07-18 20:39:12.091344804 -0300
+@@ -31,8 +31,6 @@
+ #include <string.h>
+ #include <fcntl.h>
+ #include <netinet/in.h>
+-#include <linux/sockios.h>
+-#include <linux/if_tun.h>
+ #include <linux/if_bridge.h>
+
+ #include "connman.h"
+diff '--exclude=*.*o' -ru connman-1.24.orig/gweb/gresolv.c connman-1.24/gweb/gresolv.c
+--- connman-1.24.orig/gweb/gresolv.c	2014-07-18 20:43:40.000000000 -0300
++++ connman-1.24/gweb/gresolv.c	2014-07-18 20:44:43.284681413 -0300
+@@ -24,6 +24,8 @@
+ #endif
+ 
+ #include <errno.h>
++#include <stdio.h>
++#include <ctype.h>
+ #include <unistd.h>
+ #include <stdarg.h>
+ #include <string.h>
+--- ./gdhcp/common.h.orig
++++ ./gdhcp/common.h
+@@ -18,6 +18,9 @@
+  *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  *
+  */
++#ifdef HAVE_CONFIG_H
++#include <config.h>
++#endif
+ 
+ #include <netinet/udp.h>
+ #include <netinet/ip.h>
