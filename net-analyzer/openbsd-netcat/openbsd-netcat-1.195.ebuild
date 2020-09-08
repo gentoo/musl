@@ -32,7 +32,7 @@ src_prepare() {
 		# this undoes some of the Debian/Linux changes
 		eapply "${FILESDIR}"/${P}-darwin.patch
 	fi
-	use elibc_musl && epatch "${FILESDIR}"/${P}-b64_ntop.patch
+	use elibc_musl && eapply "${FILESDIR}"/${P}-b64_ntop.patch
 	default
 }
 
