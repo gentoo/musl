@@ -1,0 +1,104 @@
+From 3e1d61868fa8bfc586099302e931433270e5d17d Mon Sep 17 00:00:00 2001
+From: Jan Rybar <jrybar@redhat.com>
+Date: Tue, 25 Aug 2020 16:38:34 +0000
+Subject: [PATCH] Port polkit to mozjs78
+
+---
+ configure.ac                                   |  4 ++--
+ src/polkitbackend/polkitbackendjsauthority.cpp | 15 ++++++---------
+ 2 files changed, 8 insertions(+), 11 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index eea70fc7..c4569f10 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -34,7 +34,7 @@ AC_PROG_LN_S
+ AC_SYS_LARGEFILE
+ AM_PROG_CC_C_O
+ AC_PROG_CXX
+-AX_CXX_COMPILE_STDCXX([14], [], [mandatory])
++AX_CXX_COMPILE_STDCXX([17], [], [mandatory])
+ 
+ # Taken from dbus
+ AC_ARG_ENABLE(ansi,             [  --enable-ansi           enable -ansi -pedantic gcc flags],enable_ansi=$enableval,enable_ansi=no)
+@@ -80,7 +80,7 @@ PKG_CHECK_MODULES(GLIB, [gmodule-2.0 gio-unix-2.0 >= 2.30.0])
+ AC_SUBST(GLIB_CFLAGS)
+ AC_SUBST(GLIB_LIBS)
+ 
+-PKG_CHECK_MODULES(LIBJS, [mozjs-68])
++PKG_CHECK_MODULES(LIBJS, [mozjs-78])
+ 
+ AC_SUBST(LIBJS_CFLAGS)
+ AC_SUBST(LIBJS_CXXFLAGS)
+diff --git a/src/polkitbackend/polkitbackendjsauthority.cpp b/src/polkitbackend/polkitbackendjsauthority.cpp
+index 25bd1f93..ca171083 100644
+--- a/src/polkitbackend/polkitbackendjsauthority.cpp
++++ b/src/polkitbackend/polkitbackendjsauthority.cpp
+@@ -49,6 +49,7 @@
+ #include <js/Realm.h>
+ #include <js/SourceText.h>
+ #include <js/Warnings.h>
++#include <js/Array.h>
+ #include <jsapi.h>
+ 
+ #include "initjs.h" /* init.js */
+@@ -367,7 +368,7 @@ load_scripts (PolkitBackendJsAuthority  *authority)
+ static void
+ reload_scripts (PolkitBackendJsAuthority *authority)
+ {
+-  JS::AutoValueArray<1> args(authority->priv->cx);
++  JS::RootedValueArray<1> args(authority->priv->cx);
+   JS::RootedValue rval(authority->priv->cx);
+ 
+   JS::RootedObject js_polkit(authority->priv->cx, authority->priv->js_polkit->get ());
+@@ -482,10 +483,6 @@ polkit_backend_js_authority_constructed (GObject *object)
+   if (!JS::InitSelfHostedCode (authority->priv->cx))
+     goto fail;
+ 
+-  JS::ContextOptionsRef (authority->priv->cx)
+-      .setIon (TRUE)
+-      .setBaseline (TRUE)
+-      .setAsmJS (TRUE);
+   JS::SetWarningReporter(authority->priv->cx, report_error);
+   JS_SetContextPrivate (authority->priv->cx, authority);
+ 
+@@ -720,7 +717,7 @@ set_property_strv (PolkitBackendJsAuthority  *authority,
+         elems[n].setNull ();
+     }
+ 
+-  JS::RootedObject array_object(authority->priv->cx, JS_NewArrayObject (authority->priv->cx, elems));
++  JS::RootedObject array_object(authority->priv->cx, JS::NewArrayObject (authority->priv->cx, elems));
+ 
+   value_jsval = JS::ObjectValue (*array_object);
+   JS_SetProperty (authority->priv->cx, obj, name, value_jsval);
+@@ -1114,7 +1111,7 @@ polkit_backend_js_authority_get_admin_auth_identities (PolkitBackendInteractiveA
+ {
+   PolkitBackendJsAuthority *authority = POLKIT_BACKEND_JS_AUTHORITY (_authority);
+   GList *ret = NULL;
+-  JS::AutoValueArray<2> args(authority->priv->cx);
++  JS::RootedValueArray<2> args(authority->priv->cx);
+   JS::RootedValue rval(authority->priv->cx);
+   guint n;
+   GError *error = NULL;
+@@ -1218,7 +1215,7 @@ polkit_backend_js_authority_check_authorization_sync (PolkitBackendInteractiveAu
+ {
+   PolkitBackendJsAuthority *authority = POLKIT_BACKEND_JS_AUTHORITY (_authority);
+   PolkitImplicitAuthorization ret = implicit;
+-  JS::AutoValueArray<2> args(authority->priv->cx);
++  JS::RootedValueArray<2> args(authority->priv->cx);
+   JS::RootedValue rval(authority->priv->cx);
+   GError *error = NULL;
+   JS::RootedString ret_jsstr (authority->priv->cx);
+@@ -1409,7 +1406,7 @@ js_polkit_spawn (JSContext  *cx,
+   JS::CallArgs args = JS::CallArgsFromVp (js_argc, vp);
+   array_object = &args[0].toObject();
+ 
+-  if (!JS_GetArrayLength (cx, array_object, &array_len))
++  if (!JS::GetArrayLength (cx, array_object, &array_len))
+     {
+       JS_ReportErrorUTF8 (cx, "Failed to get array length");
+       goto out;
+-- 
+GitLab
+
+
