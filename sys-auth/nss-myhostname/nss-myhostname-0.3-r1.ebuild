@@ -1,17 +1,15 @@
-# Copyright 1999-2014 Gentoo Foundation
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="4"
-
-inherit eutils
+EAPI="7"
 
 DESCRIPTION="Name Service Switch module for resolving the local hostname"
-HOMEPAGE="http://0pointer.de/lennart/projects/nss-myhostname/"
-SRC_URI="http://0pointer.de/lennart/projects/${PN}/${P}.tar.gz"
+HOMEPAGE="https://0pointer.de/lennart/projects/nss-myhostname/"
+SRC_URI="https://0pointer.de/lennart/projects/${PN}/${P}.tar.gz"
 
 LICENSE="LGPL-2.1+"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ppc x86"
+KEYWORDS="amd64 arm ~arm64 ppc ppc64 x86"
 IUSE=""
 
 COMMON_DEPEND=""
@@ -19,11 +17,13 @@ RDEPEND="${COMMON_DEPEND}
 	!>=sys-apps/systemd-197"
 DEPEND="${COMMON_DEPEND}"
 
+PATCHES=( "${FILESDIR}"/0001-nss-myhostname-Check-for-nss.h-presense-before-use.patch )
+
 src_prepare() {
 	# The documentation in doc/ is just the README file in other formats
 	sed -e 's:SUBDIRS *= *doc:SUBDIRS =:' -i Makefile.{am,in} ||
 		die "sed failed"
-	epatch "${FILESDIR}"/0001-nss-myhostname-Check-for-nss.h-presense-before-use.patch
+	default
 }
 
 src_configure() {
