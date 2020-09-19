@@ -18,7 +18,7 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_REPO_URI="https://gitlab.freedesktop.org/mesa/mesa.git"
 	inherit git-r3
 else
-	SRC_URI="https://mesa.freedesktop.org/archive/${MY_P}.tar.xz"
+	SRC_URI="https://archive.mesa3d.org/${MY_P}.tar.xz"
 	KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 fi
 
@@ -151,7 +151,6 @@ LLVM_DEPSTR="
 	|| (
 		sys-devel/llvm:10[${MULTILIB_USEDEP}]
 		sys-devel/llvm:9[${MULTILIB_USEDEP}]
-		sys-devel/llvm:8[${MULTILIB_USEDEP}]
 	)
 	<sys-devel/llvm-$((LLVM_MAX_SLOT + 1)):=[${MULTILIB_USEDEP}]
 "
@@ -247,7 +246,7 @@ x86? (
 )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-19.3.0-add-disable-tls-support.patch
+	"${FILESDIR}"/${PN}-20.1.7-add-disable-tls-support.patch
 )
 
 llvm_check_deps() {
@@ -338,11 +337,9 @@ pkg_setup() {
 		ewarn "detected! This can cause problems. For details, see bug 459306."
 	fi
 
-	# os_same_file_description requires the kcmp syscall,
-	# which is only available with CONFIG_CHECKPOINT_RESTORE=y.
-	# Currently only AMDGPU utilizes this function, so only AMDGPU users would
-	# get a spooky warning message if the syscall fails.
-	if use gallium && use video_cards_radeonsi; then
+	if use video_cards_i965 ||
+	   use video_cards_iris ||
+	   use video_cards_radeonsi; then
 		CONFIG_CHECK="~CHECKPOINT_RESTORE"
 		linux-info_pkg_setup
 	fi
@@ -513,6 +510,7 @@ multilib_src_configure() {
 		-Ddri-drivers=$(driver_list "${DRI_DRIVERS[*]}")
 		-Dgallium-drivers=$(driver_list "${GALLIUM_DRIVERS[*]}")
 		-Dvulkan-drivers=$(driver_list "${VULKAN_DRIVERS[*]}")
+		$(meson_use vulkan vulkan-device-select-layer)
 		$(meson_use vulkan-overlay vulkan-overlay-layer)
 		--buildtype $(usex debug debug plain)
 		-Db_ndebug=$(usex debug false true)
