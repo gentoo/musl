@@ -42,7 +42,7 @@ case ${PV} in
 	*)
 		SRC_URI="mirror://gnu/binutils/binutils-${PV}.tar.xz"
 		SLOT=$(ver_cut 1-2)
-		KEYWORDS="amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 x86"
+		KEYWORDS="amd64 ~arm arm64 ~mips ~ppc ~ppc64 x86"
 		;;
 esac
 
