@@ -1,19 +1,17 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
-PYTHON_COMPAT=( python2_7 )
 
-inherit gnome2 python-r1
+inherit gnome2
 
 DESCRIPTION="GNOME terminal widget"
 HOMEPAGE="https://wiki.gnome.org/Apps/Terminal/VTE"
 
 LICENSE="LGPL-2+"
 SLOT="0"
-KEYWORDS="amd64 arm ~arm64 ~mips x86"
-IUSE="debug +introspection python"
-REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
+KEYWORDS="amd64 arm ~arm64 ~mips ppc64 x86"
+IUSE="debug +introspection"
 
 RDEPEND="
 	>=dev-libs/glib-2.26:2
@@ -25,10 +23,6 @@ RDEPEND="
 	x11-libs/libXft
 
 	introspection? ( >=dev-libs/gobject-introspection-0.9.0:= )
-	python? (
-		${PYTHON_DEPS}
-		dev-python/pygtk:2[${PYTHON_USEDEP}]
-	)
 "
 DEPEND="${RDEPEND}
 	dev-util/gtk-doc-am
@@ -59,26 +53,7 @@ PATCHES=(
 
 DOCS="AUTHORS ChangeLog HACKING NEWS README"
 
-src_prepare() {
-	prepare_python() {
-		mkdir -p "${BUILD_DIR}" || die
-	}
-	if use python; then
-		python_foreach_impl prepare_python
-	fi
-
-	gnome2_src_prepare
-}
-
 src_configure() {
-	configure_python() {
-		ECONF_SOURCE="${S}" gnome2_src_configure --enable-python
-	}
-
-	if use python; then
-		python_foreach_impl run_in_build_dir configure_python
-	fi
-
 	local myconf=""
 
 	if [[ ${CHOST} == *-interix* ]]; then
@@ -99,33 +74,8 @@ src_configure() {
 		${myconf}
 }
 
-src_compile() {
-	gnome2_src_compile
-
-	compile_python() {
-		cd "${BUILD_DIR}"/python || die
-		ln -s "${S}"/src/libvte.la "${BUILD_DIR}"/src/ || die
-		mkdir -p "${BUILD_DIR}"/src/.libs || die
-		ln -s "${S}"/src/.libs/libvte.so "${BUILD_DIR}"/src/.libs/ || die
-		emake CPPFLAGS="${CPPFLAGS} -I${S}/src"
-	}
-
-	if use python; then
-		python_foreach_impl run_in_build_dir compile_python
-	fi
-}
-
 src_install() {
 	gnome2_src_install
-
-	install_python() {
-		cd "${BUILD_DIR}"/python || die
-		emake install DESTDIR="${D}" \
-			CPPFLAGS="${CPPFLAGS} -I${S}/src"
-	}
-	if use python; then
-		python_foreach_impl run_in_build_dir install_python
-	fi
 
 	rm -v "${ED}usr/libexec/gnome-pty-helper" || die
 }
