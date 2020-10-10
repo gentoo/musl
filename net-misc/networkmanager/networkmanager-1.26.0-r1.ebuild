@@ -15,7 +15,7 @@ HOMEPAGE="https://wiki.gnome.org/Projects/NetworkManager"
 LICENSE="GPL-2+"
 SLOT="0"
 
-IUSE="audit bluetooth connection-sharing consolekit dhclient dhcpcd elogind gnutls +introspection iwd json kernel_linux +nss +modemmanager ncurses ofono ovs policykit +ppp resolvconf selinux systemd teamd test vala +wext +wifi"
+IUSE="audit bluetooth connection-sharing dhclient dhcpcd elogind gnutls +introspection iwd json kernel_linux +nss +modemmanager ncurses ofono ovs policykit +ppp resolvconf selinux systemd teamd test vala +wext +wifi"
 RESTRICT="!test? ( test )"
 
 REQUIRED_USE="
@@ -24,10 +24,10 @@ REQUIRED_USE="
 	vala? ( introspection )
 	wext? ( wifi )
 	|| ( nss gnutls )
-	?? ( consolekit elogind systemd )
+	?? ( elogind systemd )
 "
 
-KEYWORDS="amd64 arm arm64 ~ppc ~ppc64 x86"
+KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
 
 # gobject-introspection-0.10.3 is needed due to gnome bug 642300
 # wpa_supplicant-0.7.3-r3 is needed due to bug 359271
@@ -45,7 +45,6 @@ COMMON_DEPEND="
 	connection-sharing? (
 		net-dns/dnsmasq[dbus,dhcp]
 		net-firewall/iptables )
-	consolekit? ( >=sys-auth/consolekit-1.0.0 )
 	dhclient? ( >=net-misc/dhcp-4[client] )
 	dhcpcd? ( net-misc/dhcpcd )
 	elogind? ( >=sys-auth/elogind-219 )
@@ -187,9 +186,11 @@ multilib_src_configure() {
 		$(multilib_native_enable concheck)
 		--with-nm-cloud-setup=$(multilib_is_native_abi && echo yes || echo no)
 		--with-crypto=$(usex nss nss gnutls)
-		--with-session-tracking=$(multilib_native_usex systemd systemd $(multilib_native_usex elogind elogind $(multilib_native_usex consolekit consolekit no)))
-		# ConsoleKit has no build-time dependency, so use it as the default case.
-		# There is no off switch, and we do not support upower.
+		# elogind lacks multilib for now, and consolekit doesn't require linking against, so we use it as a fake option
+		# This SHOULD be removable once elogind has that. We abuse the fact that 'consolekit' does nothing at buildtime.
+		# (There is no off switch, and we do not support upower.)
+		# bug #747358
+		--with-session-tracking=$(multilib_native_usex systemd systemd $(multilib_native_usex elogind elogind consolekit))
 		--with-suspend-resume=$(multilib_native_usex systemd systemd $(multilib_native_usex elogind elogind consolekit))
 		$(multilib_native_use_with audit libaudit)
 		$(multilib_native_use_enable bluetooth bluez5-dun)
