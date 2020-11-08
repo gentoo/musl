@@ -1,0 +1,26 @@
+diff -r 21b063d75b3e make/Init.gmk
+--- jdk9/make/Init.gmk	Thu Mar 16 16:34:33 2017 +0000
++++ jdk9/make/Init.gmk	Tue Apr 04 13:49:37 2017 +0100
+@@ -303,7 +303,8 @@
+ 	    $(call PrepareSmartJavac)
+ 	    ( cd $(TOPDIR) && \
+ 	        $(NICE) $(MAKE) $(MAKE_ARGS) $(OUTPUT_SYNC_FLAG) \
+-	            -j $(JOBS) -f make/Main.gmk $(USER_MAKE_VARS) \
++	            $(if $(DISABLE_JOBS),, -j $(JOBS)) \
++	            -f make/Main.gmk $(USER_MAKE_VARS) \
+ 	            $(PARALLEL_TARGETS) $(COMPARE_BUILD_MAKE) $(BUILD_LOG_PIPE) || \
+ 	        ( exitcode=$$? && \
+ 	        $(PRINTF) "\nERROR: Build failed for $(TARGET_DESCRIPTION) (exit code $$exitcode) \n" \
+diff -r 21b063d75b3e make/Main.gmk
+--- jdk9/make/Main.gmk	Thu Mar 16 16:34:33 2017 +0000
++++ jdk9/make/Main.gmk	Tue Apr 04 13:49:37 2017 +0100
+@@ -320,7 +320,7 @@
+         ifneq ($(COMPILE_TYPE), cross)
+ 	  $(call LogWarn, Boot cycle build step 2: Building a new JDK image using previously built image)
+ 	  +$(MAKE) $(MAKE_ARGS) -f $(SRC_ROOT)/make/Init.gmk PARALLEL_TARGETS=$(BOOTCYCLE_TARGET) \
+-	      JOBS= SPEC=$(dir $(SPEC))bootcycle-spec.gmk main
++	      DISABLE_JOBS=true SPEC=$(dir $(SPEC))bootcycle-spec.gmk main
+         else
+ 	  $(call LogWarn, Boot cycle build disabled when cross compiling)
+         endif
+
