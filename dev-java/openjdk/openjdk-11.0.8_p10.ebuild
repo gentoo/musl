@@ -286,4 +286,3 @@ pkg_postinst() {
 		ewarn "absolute location under ${EPREFIX}/usr/$(get_libdir)/${PN}-${SLOT}."
 	fi
 }
-

@@ -265,4 +265,3 @@ pkg_postinst() {
 	java-vm-2_pkg_postinst
 	einfo "JavaWebStart functionality provided by icedtea-web package"
 }
-
