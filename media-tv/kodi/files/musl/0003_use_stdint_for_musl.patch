@@ -1,0 +1,34 @@
+From 6ba5baa56fcfadc66a6e36184dbab7f111737663 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Wed, 24 Apr 2019 11:20:27 -0500
+Subject: [PATCH] Use stdint.h defined types uint8_t, uint16_t, uint32_t and
+ uint64_t for compatibility with musl libc
+
+---
+ xbmc/platform/linux/storage/UDisks2Provider.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/xbmc/platform/linux/storage/UDisks2Provider.h b/xbmc/platform/linux/storage/UDisks2Provider.h
+index c0eb915..3697ef4 100644
+--- a/xbmc/platform/linux/storage/UDisks2Provider.h
++++ b/xbmc/platform/linux/storage/UDisks2Provider.h
+@@ -10,6 +10,7 @@
+ 
+ #include <string>
+ #include <vector>
++#include <stdint.h>
+ 
+ #include "storage/IStorageProvider.h"
+ #include "DBusUtil.h"
+@@ -40,7 +41,7 @@ class CUDisks2Provider : public IStorageProvider
+     std::string m_label;
+     std::string m_device;
+     bool m_isSystem = false;
+-    u_int64_t m_size = 0;
++    int64_t m_size = 0;
+ 
+     explicit Block(const char *object);
+     ~Block() = default;
+-- 
+2.21.0
+

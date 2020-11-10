@@ -1,0 +1,57 @@
+From 04e63b1f7a3ead576bcf504950af48b3d7383301 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Wed, 24 Apr 2019 10:14:17 -0500
+Subject: [PATCH 5/7] remove filewrap
+
+---
+ xbmc/platform/posix/utils/PosixInterfaceForCLog.cpp | 6 +-----
+ xbmc/platform/posix/utils/PosixInterfaceForCLog.h   | 4 +---
+ 2 files changed, 2 insertions(+), 8 deletions(-)
+
+diff --git a/xbmc/platform/posix/utils/PosixInterfaceForCLog.cpp b/xbmc/platform/posix/utils/PosixInterfaceForCLog.cpp
+index ce4c5aa..8c674eb 100644
+--- a/xbmc/platform/posix/utils/PosixInterfaceForCLog.cpp
++++ b/xbmc/platform/posix/utils/PosixInterfaceForCLog.cpp
+@@ -17,10 +17,6 @@
+ #include "platform/android/activity/XBMCApp.h"
+ #endif // TARGET_ANDROID
+ 
+-struct FILEWRAP : public FILE
+-{};
+-
+-
+ CPosixInterfaceForCLog::CPosixInterfaceForCLog() :
+   m_file(NULL)
+ { }
+@@ -40,7 +36,7 @@ bool CPosixInterfaceForCLog::OpenLogFile(const std::string &logFilename, const s
+   (void)remove(backupOldLogToFilename.c_str()); // if it's failed, try to continue
+   (void)rename(logFilename.c_str(), backupOldLogToFilename.c_str()); // if it's failed, try to continue
+ 
+-  m_file = (FILEWRAP*)fopen(logFilename.c_str(), "wb");
++  m_file = fopen(logFilename.c_str(), "wb");
+   if (!m_file)
+     return false; // error, can't open log file
+ 
+diff --git a/xbmc/platform/posix/utils/PosixInterfaceForCLog.h b/xbmc/platform/posix/utils/PosixInterfaceForCLog.h
+index 4e0f6c6..758debd 100644
+--- a/xbmc/platform/posix/utils/PosixInterfaceForCLog.h
++++ b/xbmc/platform/posix/utils/PosixInterfaceForCLog.h
+@@ -10,8 +10,6 @@
+ 
+ #include <string>
+ 
+-struct FILEWRAP; // forward declaration, wrapper for FILE
+-
+ class CPosixInterfaceForCLog
+ {
+ public:
+@@ -23,5 +21,5 @@ public:
+   void PrintDebugString(const std::string& debugString);
+   static void GetCurrentLocalTime(int& year, int& month, int& day, int& hour, int& minute, int& second, double& millisecond);
+ private:
+-  FILEWRAP* m_file;
++  FILE* m_file;
+ };
+-- 
+2.21.0
+

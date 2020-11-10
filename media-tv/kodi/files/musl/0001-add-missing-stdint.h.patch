@@ -1,0 +1,24 @@
+From 014f4b37a13366d1df37ab86db7fcb7c7cb6da7c Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Wed, 24 Apr 2019 10:09:26 -0500
+Subject: [PATCH 1/7] add missing stdint.h
+
+---
+ xbmc/filesystem/ZipManager.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/xbmc/filesystem/ZipManager.h b/xbmc/filesystem/ZipManager.h
+index f24d459..4cd899c 100644
+--- a/xbmc/filesystem/ZipManager.h
++++ b/xbmc/filesystem/ZipManager.h
+@@ -21,6 +21,7 @@
+ #include <string>
+ #include <vector>
+ #include <map>
++#include <stdint.h>
+ 
+ class CURL;
+ 
+-- 
+2.21.0
+

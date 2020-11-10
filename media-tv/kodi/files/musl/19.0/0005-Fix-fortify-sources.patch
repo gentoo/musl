@@ -1,0 +1,25 @@
+From c927c8330e9879acb9dbedb84a0788c97ffa4be8 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Tue, 10 Nov 2020 08:14:19 -0600
+Subject: [PATCH 5/5] Fix fortify sources
+
+---
+ xbmc/cores/DllLoader/exports/wrapper.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/xbmc/cores/DllLoader/exports/wrapper.c b/xbmc/cores/DllLoader/exports/wrapper.c
+index 23a1bcb..4d43044 100644
+--- a/xbmc/cores/DllLoader/exports/wrapper.c
++++ b/xbmc/cores/DllLoader/exports/wrapper.c
+@@ -449,7 +449,7 @@ struct mntent *__wrap_getmntent(FILE *fp)
+ // are actually #defines which are inlined when compiled with -O. Those defines
+ // actually call __*chk (for example, __fread_chk). We need to bypass this whole
+ // thing to actually call our wrapped functions.
+-#if _FORTIFY_SOURCE > 1
++#if defined(__GLIBC__) && _FORTIFY_SOURCE > 1
+ 
+ size_t __wrap___fread_chk(void * ptr, size_t ptrlen, size_t size, size_t n, FILE * stream)
+ {
+-- 
+2.26.2
+
