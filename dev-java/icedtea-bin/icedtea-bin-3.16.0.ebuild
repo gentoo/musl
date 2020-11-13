@@ -26,7 +26,7 @@ get_apk_names() {
 
 DESCRIPTION="Binary build of the IcedTea JDK from Alpine Linux"
 HOMEPAGE="http://icedtea.classpath.org"
-BASE_URI="http://dl-cdn.alpinelinux.org/alpine/edge/community/"
+BASE_URI="http://dl-cdn.alpinelinux.org/alpine/edge/community"
 SRC_URI="
 	$(get_apk_names amd64 x86_64)
 	$(get_apk_names arm armhf)
