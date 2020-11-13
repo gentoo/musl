@@ -12,19 +12,21 @@ HOMEPAGE="https://wiki.gnome.org/Apps/Terminal/VTE"
 
 LICENSE="LGPL-3+ GPL-3+"
 SLOT="2.91"
-IUSE="+crypt debug gtk-doc +introspection +vala vanilla"
-KEYWORDS="amd64 arm ~arm64 ~mips ppc64 x86"
+IUSE="+crypt debug gtk-doc +icu +introspection systemd +vala vanilla"
+KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 REQUIRED_USE="vala? ( introspection )"
 
-SRC_URI="${SRC_URI} !vanilla? ( https://dev.gentoo.org/~leio/distfiles/${PN}-0.58.3-command-notify.patch.xz )"
+SRC_URI="${SRC_URI} !vanilla? ( https://dev.gentoo.org/~leio/distfiles/${PN}-0.60.3-command-notify.patch.xz )"
 
 RDEPEND="
-	>=x11-libs/gtk+-3.16:3[introspection?]
+	>=x11-libs/gtk+-3.24.14:3[introspection?]
 	>=dev-libs/fribidi-1.0.0
-	>=dev-libs/glib-2.40:2
+	>=dev-libs/glib-2.52:2
 	crypt?  ( >=net-libs/gnutls-3.2.7:0= )
+	icu? ( dev-libs/icu:= )
 	>=x11-libs/pango-1.22.0
 	>=dev-libs/libpcre2-10.21
+	systemd? ( >=sys-apps/systemd-220:= )
 	sys-libs/zlib
 	introspection? ( >=dev-libs/gobject-introspection-1.56:= )
 	x11-libs/pango[introspection?]
@@ -45,10 +47,10 @@ src_prepare() {
 	if ! use vanilla; then
 		# Part of https://src.fedoraproject.org/rpms/vte291/raw/f31/f/vte291-cntnr-precmd-preexec-scroll.patch
 		# Adds OSC 777 support for desktop notifications in gnome-terminal or elsewhere
-		eapply "${WORKDIR}"/${PN}-0.58.3-command-notify.patch
+		eapply "${WORKDIR}"/${PN}-0.60.3-command-notify.patch
 	fi
 
-	eapply "${FILESDIR}/${PN}-0.54.2-musl-remove-W_EXITCODE.patch"
+	use elibc_musl &&  eapply "${FILESDIR}/${PN}-0.54.2-musl-remove-W_EXITCODE.patch"
 
 	# -Ddebugg option enables various debug support via VTE_DEBUG, but also ggdb3; strip the latter
 	sed -e '/ggdb3/d' -i meson.build || die
@@ -59,6 +61,7 @@ src_prepare() {
 
 src_configure() {
 	local emesonargs=(
+		-Da11y=true
 		$(meson_use debug debugg)
 		$(meson_use gtk-doc docs)
 		$(meson_use introspection gir)
@@ -66,7 +69,8 @@ src_configure() {
 		$(meson_use crypt gnutls)
 		-Dgtk3=true
 		-Dgtk4=false
-		-Diconv=true
+		$(meson_use icu)
+		$(meson_use systemd _systemd)
 		$(meson_use vala vapi)
 	)
 	meson_src_configure
