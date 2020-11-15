@@ -114,56 +114,59 @@
  
  #define THRESHOLD_PER_CONNECTOR	10
 
---- a/tools/aubdump.c
-+++ b/tools/aubdump.c
-@@ -226,10 +226,10 @@
- };
+--- a/tests/i915/gem_close_race.c
++++ b/tests/i915/gem_close_race.c
+@@ -42,6 +42,10 @@
+ #include <sys/syscall.h>
+ #include "drm.h"
  
- static int close_init_helper(int fd);
--static int ioctl_init_helper(int fd, unsigned long request, ...);
-+static int ioctl_init_helper(int fd, int request, ...);
++#ifndef __GLIBC__
++#include "signal_compat.h"
++#endif
++
+ #define OBJECT_SIZE (256 * 1024)
  
- static int (*libc_close)(int fd) = close_init_helper;
--static int (*libc_ioctl)(int fd, unsigned long request, ...) = ioctl_init_helper;
-+static int (*libc_ioctl)(int fd, int request, ...) = ioctl_init_helper;
+ #define COPY_BLT_CMD		(2<<29|0x53<<22|0x6)
+@@ -51,7 +55,7 @@
+ static uint32_t devid;
+ static bool has_64bit_relocations;
  
- static int drm_fd = -1;
- static char *filename = NULL;
-@@ -856,7 +856,7 @@
- }
+-#define sigev_notify_thread_id _sigev_un._tid
++#define sigev_notify_thread_id sigev_notify_function
  
- static int
--gem_ioctl(int fd, unsigned long request, void *argp)
-+gem_ioctl(int fd, int request, void *argp)
+ static void selfcopy(int fd, uint32_t handle, int loops)
  {
- 	int ret;
- 
-@@ -1150,7 +1150,7 @@
-     DRM_IOWR(DRM_COMMAND_BASE + DRM_I915_GEM_EXECBUFFER2, struct drm_i915_gem_execbuffer2)
- 
- int
--ioctl(int fd, unsigned long request, ...)
-+ioctl(int fd, int request, ...)
+
+--- a/tests/panfrost_submit.c
++++ b/tests/panfrost_submit.c
+@@ -68,7 +68,7 @@
+ static void check_fb(int fd, struct panfrost_bo *bo)
  {
- 	va_list args;
- 	void *argp;
-@@ -1290,7 +1290,7 @@
- }
+         int gpu_prod_id = igt_panfrost_get_param(fd, DRM_PANFROST_PARAM_GPU_PROD_ID);
+-        __uint32_t *fbo;
++	uint32_t *fbo;
+         int i;
  
- static int
--ioctl_init_helper(int fd, unsigned long request, ...)
-+ioctl_init_helper(int fd, int request, ...)
+         fbo = bo->map;
+
+--- a/tests/kms_atomic.c
++++ b/tests/kms_atomic.c
+@@ -683,7 +683,6 @@
  {
- 	va_list args;
- 	void *argp;
+ 	int timeline, fence_fd;
+ 	void *map;
+-	const ptrdiff_t PAGE_SIZE = sysconf(_SC_PAGE_SIZE);
+ 	uint64_t old_mode_id = pipe->values[IGT_CRTC_MODE_ID];
+ 
+ 	igt_require_sw_sync();
 
 --- a/lib/igt_eld.c
 +++ b/lib/igt_eld.c
-@@ -29,6 +29,7 @@
- #include <stdint.h>
- #include <stdio.h>
- #include <string.h>
-+#include <limits.h>
+@@ -26,6 +26,7 @@
+ #include "config.h"
  
- #include "igt_core.h"
- #include "igt_eld.h"
+ #include <dirent.h>
++#include <limits.h>
+ #include <errno.h>
+ #include <glob.h>
+ #include <stdint.h>
