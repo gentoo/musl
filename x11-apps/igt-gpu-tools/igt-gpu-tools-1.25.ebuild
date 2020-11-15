@@ -20,13 +20,14 @@ else
 fi
 LICENSE="MIT"
 SLOT="0"
-IUSE="chamelium doc man overlay runner unwind valgrind video_cards_amdgpu video_cards_intel video_cards_nouveau X xv"
+IUSE="chamelium doc man overlay runner tests unwind valgrind video_cards_amdgpu video_cards_intel video_cards_nouveau X xv"
 REQUIRED_USE="
 	|| ( video_cards_amdgpu video_cards_intel video_cards_nouveau )
 	overlay? (
 		video_cards_intel
 		|| ( X xv )
 	)
+	doc? ( tests )
 "
 RESTRICT="test"
 
@@ -71,8 +72,10 @@ DEPEND="${RDEPEND}
 		sys-devel/flex
 	)
 "
+
 PATCHES=(
-	"${FILESDIR}"/0001-${PN}-1.24-musl.patch
+	"${FILESDIR}/${PV}-python-3.9.patch"
+	"${FILESDIR}"/0001-${PN}-1.25-musl.patch
 )
 
 src_prepare() {
@@ -91,16 +94,16 @@ src_configure() {
 	use overlay && use X && overlay_backends+="x,"
 
 	local emesonargs=(
-		$(meson_feature chamelium build_chamelium)
-		$(meson_feature doc build_docs)
-		$(meson_feature man build_man)
-		$(meson_feature overlay build_overlay)
-		$(meson_feature runner build_runner)
-		$(meson_feature doc build_tests) # Test build is required for docs
-		$(meson_feature valgrind with_valgrind)
-		$(meson_feature unwind with_libunwind)
+		$(meson_feature chamelium)
+		$(meson_feature doc docs)
+		$(meson_feature man)
+		$(meson_feature overlay)
+		$(meson_feature runner)
+		$(meson_feature tests)
+		$(meson_feature valgrind)
+		$(meson_feature unwind libunwind)
 		-Doverlay_backends=${overlay_backends%?}
-		-Dwith_libdrm=${gpus%?}
+		-Dlibdrm_drivers=${gpus%?}
 	)
 	meson_src_configure
 }
