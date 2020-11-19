@@ -1,9 +1,10 @@
 --- syslinux-6.04-pre1/efi/wrapper.h.orig	2018-05-28 09:29:03.313673979 +0000
 +++ syslinux-6.04-pre1/efi/wrapper.h	2018-05-28 09:22:27.546908344 +0000
-@@ -26,6 +26,19 @@
+@@ -26,6 +26,20 @@
  #define __packed	__attribute__((packed))
  #define OFFSETOF(t,m)	((size_t)&((t *)0)->m)
  
++#include <stdint.h>
 +#ifndef __uint8_t
 +#define __uint8_t uint8_t
 +#endif
