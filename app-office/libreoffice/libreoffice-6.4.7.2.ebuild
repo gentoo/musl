@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{6,7,8} )
+PYTHON_COMPAT=( python3_{6,7,8,9} )
 PYTHON_REQ_USE="threads(+),xml"
 
 MY_PV="${PV/_alpha/.alpha}"
@@ -46,6 +46,20 @@ unset DEV_URI
 ADDONS_SRC=(
 	# QR code generating library for >=libreoffice-6.4
 	"${ADDONS_URI}/QR-Code-generator-1.4.0.tar.gz"
+	"base? (
+		${ADDONS_URI}/commons-logging-1.2-src.tar.gz
+		${ADDONS_URI}/ba2930200c9f019c2d93a8c88c651a0f-flow-engine-0.9.4.zip
+		${ADDONS_URI}/d8bd5eed178db6e2b18eeed243f85aa8-flute-1.1.6.zip
+		${ADDONS_URI}/eeb2c7ddf0d302fba4bfc6e97eac9624-libbase-1.1.6.zip
+		${ADDONS_URI}/3bdf40c0d199af31923e900d082ca2dd-libfonts-1.1.6.zip
+		${ADDONS_URI}/3404ab6b1792ae5f16bbd603bd1e1d03-libformula-1.1.7.zip
+		${ADDONS_URI}/db60e4fde8dd6d6807523deb71ee34dc-liblayout-0.2.10.zip
+		${ADDONS_URI}/97b2d4dba862397f446b217e2b623e71-libloader-1.1.6.zip
+		${ADDONS_URI}/8ce2fcd72becf06c41f7201d15373ed9-librepository-1.1.6.zip
+		${ADDONS_URI}/f94d9870737518e3b597f9265f4e9803-libserializer-1.1.6.zip
+		${ADDONS_URI}/ace6ab49184e329db254e454a010f56d-libxml-1.1.7.zip
+		${ADDONS_URI}/39bb3fcea1514f1369fcfc87542390fd-sacjava-1.3.zip
+	)"
 	"java? ( ${ADDONS_URI}/17410483b5b5f267aa18b7e00b65e6e0-hsqldb_1_8_0.zip )"
 	# no release for 8 years, should we package it?
 	"libreoffice_extensions_wiki-publisher? ( ${ADDONS_URI}/a7983f859eafb2677d7ff386a023bc40-xsltml_2.1.2.zip )"
@@ -64,12 +78,14 @@ unset ADDONS_SRC
 # Extensions that need extra work:
 LO_EXTS="nlpsolver scripting-beanshell scripting-javascript wiki-publisher"
 
-IUSE="accessibility bluetooth +branding coinmp +cups dbus debug eds firebird
+IUSE="accessibility base bluetooth +branding coinmp +cups +dbus debug eds firebird
 googledrive gstreamer +gtk kde ldap +mariadb odk pdfimport postgres test
 $(printf 'libreoffice_extensions_%s ' ${LO_EXTS})"
 
 REQUIRED_USE="${PYTHON_REQUIRED_USE}
+	base? ( firebird java )
 	bluetooth? ( dbus )
+	gtk? ( dbus )
 	libreoffice_extensions_nlpsolver? ( java )
 	libreoffice_extensions_scripting-beanshell? ( java )
 	libreoffice_extensions_scripting-javascript? ( java )
@@ -123,7 +139,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	dev-libs/icu:=
 	dev-libs/libassuan
 	dev-libs/libgpg-error
-	>=dev-libs/liborcus-0.15.0
+	dev-libs/liborcus:0/0.15
 	dev-libs/librevenge
 	dev-libs/libxml2
 	dev-libs/libxslt
@@ -164,7 +180,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	)
 	coinmp? ( sci-libs/coinor-mp )
 	cups? ( net-print/cups )
-	dbus? ( sys-apps/dbus )
+	dbus? ( sys-apps/dbus[X] )
 	eds? (
 		dev-libs/glib:2
 		gnome-base/dconf
@@ -249,15 +265,17 @@ PATCHES=(
 	# "${WORKDIR}"/${PATCHSET/.tar.xz/}
 
 	# not upstreamable stuff
-	"${FILESDIR}/${PN}-5.4-system-pyuno.patch"
 	"${FILESDIR}/${PN}-5.3.4.2-kioclient5.patch"
 	"${FILESDIR}/${PN}-6.1-nomancompress.patch"
+	"${FILESDIR}/${PN}-7.0.3.1-qt5detect.patch"
+
+	# 6.4 branch (fixed in 6.4.8)
+	"${FILESDIR}/${P}-fix-wrong-setting-for-doc-properties.patch"
 
 	# git master
-	"${FILESDIR}/${P}-boost-1.73.patch" # bug 721806
-
-	# TODO: upstream (for now taken from Arch Linux)
-	"${FILESDIR}/${PN}-6.4.2.2-poppler-0.86.patch" # bug 711102
+	"${FILESDIR}/${PN}-6.4.3.2-boost-1.73.patch" # bug 721806
+	"${FILESDIR}/${PN}-6.4.6.2-llvm-10.patch" # bug 713574
+	"${FILESDIR}"/${P}-icu-68-{1,2}.patch # bug 752021, +downstream backport
 
 	# musl compatibility by AlpineLinux
 	"${FILESDIR}/${PN}-6.4.4.2-linux-musl.patch"
@@ -279,11 +297,10 @@ _check_reqs() {
 }
 
 pkg_pretend() {
-	if ! use java && ! use firebird; then
-		ewarn "If you plan to use Base application you must enable either firebird or java."
-	fi
-
-	use java || ewarn "Without java, several wizards are not going to be available."
+	use base ||
+		ewarn "If you plan to use Base application you must enable USE base."
+	use java ||
+		ewarn "Without USE java, several wizards are not going to be available."
 
 	[[ ${MERGE_TYPE} != binary ]] && _check_reqs pkg_pretend
 }
@@ -326,12 +343,6 @@ src_prepare() {
 	# hack in the autogen.sh
 	touch autogen.lastrun
 
-	# system pyuno mess
-	sed -i \
-		-e "s:%eprefix%:${EPREFIX}:g" \
-		-e "s:%libdir%:$(get_libdir):g" \
-		pyuno/source/module/uno.py \
-		pyuno/source/officehelper.py || die
 	# sed in the tests
 	sed -i \
 		-e "s#all : build unitcheck#all : build#g" \
@@ -373,11 +384,7 @@ src_configure() {
 	export PYTHON_CFLAGS=$(python_get_CFLAGS)
 	export PYTHON_LIBS=$(python_get_LIBS)
 
-	if use kde; then
-		export QT_SELECT=5 # bug 639620 needs proper fix though
-		export QT5DIR="$(qt5_get_bindir)/../"
-		export MOC5="$(qt5_get_bindir)/moc"
-	fi
+	use kde && export QT5DIR="$(qt5_get_bindir)/.."
 
 	local gentoo_buildid="Gentoo official package"
 	if [[ -n ${LOCOREGIT_VERSION} ]]; then
@@ -414,14 +421,12 @@ src_configure() {
 		--disable-breakpad
 		--disable-bundle-mariadb
 		--disable-ccache
-		--disable-dependency-tracking
 		--disable-epm
 		--disable-fetch-external
 		--disable-gtk3-kde5
 		--disable-online-update
 		--disable-openssl
 		--disable-pdfium
-		--disable-report-builder
 		--disable-vlc
 		--with-build-version="${gentoo_buildid}"
 		--enable-extension-integration
@@ -440,8 +445,11 @@ src_configure() {
 		--with-help="html"
 		--without-helppack-integration
 		--with-system-gpgmepp
+		--without-system-jfreereport
+		--without-system_apache_commons
 		--without-system-sane
 		--without-system-qrcodegen
+		$(use_enable base report-builder)
 		$(use_enable bluetooth sdremote-bluetooth)
 		$(use_enable coinmp)
 		$(use_enable cups)
@@ -543,6 +551,37 @@ src_install() {
 		dodir /etc/env.d
 		echo "CONFIG_PROTECT=/usr/$(get_libdir)/${PN}/program/sofficerc" > "${ED}"/etc/env.d/99${PN} || die
 	fi
+
+	# bug 703474
+	insinto /usr/include
+	doins -r include/LibreOfficeKit
+
+	local lodir=/usr/$(get_libdir)/libreoffice
+	# patching this would break tests
+	cat <<-EOF > "${T}"/uno.py
+import sys, os
+sys.path.append('${EPREFIX}${lodir}/program')
+os.putenv('URE_BOOTSTRAP', 'vnd.sun.star.pathname:${EPREFIX}${lodir}/program/fundamentalrc')
+EOF
+	sed -e "/^import sys/d" -e "/^import os/d" \
+		-i "${D}"${lodir}/program/uno.py || die "cleanup dupl imports failed"
+	cat "${D}"${lodir}/program/uno.py >> "${T}"/uno.py || die
+	cp "${T}"/uno.py "${D}"${lodir}/program/uno.py || die
+
+	# more system pyuno mess
+	sed -e "/sOffice = \"\" # lets hope for the best/s:\"\":\"${EPREFIX}${lodir}/program\":" \
+		-i "${D}"${lodir}/program/officehelper.py || die
+
+	python_optimize "${D}"${lodir}/program
+	# link python bridge in site-packages, bug 667802
+	local py pyc loprogdir=$(get_libdir)/libreoffice/program
+	for py in uno.py unohelper.py officehelper.py; do
+		dosym ../../../${loprogdir}/${py} $(python_get_sitedir)/${py}
+		while IFS="" read -d $'\0' -r pyc; do
+			pyc=${pyc//*\/}
+			dosym ../../../../${loprogdir}/__pycache__/${pyc} $(python_get_sitedir)/__pycache__/${pyc}
+		done < <(find "${D}"${lodir}/program -type f -name ${py/.py/*.pyc} -print0)
+	done
 }
 
 pkg_postinst() {
