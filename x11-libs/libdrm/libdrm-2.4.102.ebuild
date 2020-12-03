@@ -17,7 +17,7 @@ if [[ ${PV} = 9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="https://dri.freedesktop.org/libdrm/${P}.tar.xz"
-	KEYWORDS="amd64 ~arm ~arm64 ~mips ~ppc ~x86"
+	KEYWORDS="amd64 arm arm64 ~mips ppc x86"
 fi
 
 VIDEO_CARDS="amdgpu exynos freedreno intel nouveau omap radeon tegra vc4 vivante vmware"
