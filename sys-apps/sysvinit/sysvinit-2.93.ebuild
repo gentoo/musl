@@ -50,7 +50,7 @@ src_prepare() {
 		-e '/^MAN8/s:\<pidof.8\>::g' \
 		src/Makefile || die
 
-	# stack protector is broken no x86 musl
+	# stack protector is broken on x86 musl
 	sed -i 's/-fstack-protector-strong//' src/Makefile || die
 
 	# Mung inittab for specific architectures
