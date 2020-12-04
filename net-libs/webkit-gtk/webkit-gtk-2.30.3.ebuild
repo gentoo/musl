@@ -304,4 +304,3 @@ src_install() {
 	pax-mark m "${ED}usr/libexec/webkit2gtk-4.0/jsc" "${ED}usr/libexec/webkit2gtk-4.0/WebKitWebProcess"
 	pax-mark m "${ED}usr/libexec/webkit2gtk-4.0/WebKitPluginProcess"
 }
-
