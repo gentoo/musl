@@ -1,7 +1,7 @@
 # Copyright 1999-2020 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
 inherit toolchain-funcs flag-o-matic
 
@@ -12,8 +12,8 @@ SRC_URI="mirror://nongnu/${PN}/${P/_/-}.tar.xz"
 LICENSE="GPL-2"
 SLOT="0"
 [[ "${PV}" == *beta* ]] || \
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 ~x86"
-IUSE="selinux ibm static"
+KEYWORDS="x86"
+IUSE="selinux ibm static kernel_FreeBSD"
 
 CDEPEND="
 	selinux? (
@@ -31,12 +31,16 @@ S="${WORKDIR}/${P/_*}"
 PATCHES=(
 	"${FILESDIR}/${PN}-2.86-kexec.patch" #80220
 	"${FILESDIR}/${PN}-2.94_beta-shutdown-single.patch" #158615
-	"${FILESDIR}/${PN}-2.92_beta-shutdown-h.patch" #449354
+	"${FILESDIR}/${PN}-2.95_beta-shutdown-h.patch" #449354
 )
 
 src_prepare() {
 	default
-	sed -i '/^CPPFLAGS =$/d' src/Makefile || die
+
+	sed -i \
+		-e '/^CPPFLAGS =$/d' \
+		-e '/^override CFLAGS +=/s/ -fstack-protector-strong//' \
+		src/Makefile || die
 
 	# last/lastb/mesg/mountpoint/sulogin/utmpdump/wall have moved to util-linux
 	sed -i -r \
@@ -49,9 +53,10 @@ src_prepare() {
 		-e '/\/bin\/pidof/d' \
 		-e '/^MAN8/s:\<pidof.8\>::g' \
 		src/Makefile || die
-
+		
 	# stack protector is broken on x86 musl
 	sed -i 's/-fstack-protector-strong//' src/Makefile || die
+
 
 	# logsave is already in e2fsprogs
 	sed -i -r \
@@ -61,7 +66,7 @@ src_prepare() {
 
 	# Mung inittab for specific architectures
 	cd "${WORKDIR}" || die
-	cp "${FILESDIR}"/inittab-2.91 inittab || die "cp inittab"
+	cp "${FILESDIR}"/inittab-2.95 inittab || die "cp inittab"
 	local insert=()
 	use ppc && insert=( '#psc0:12345:respawn:/sbin/agetty 115200 ttyPSC0 linux' )
 	use arm && insert=( '#f0:12345:respawn:/sbin/agetty 9600 ttyFB0 vt100' )
@@ -75,6 +80,13 @@ src_prepare() {
 		)
 	fi
 	(use arm || use mips || use sparc) && sed -i '/ttyS0/s:#::' inittab
+	if use kernel_FreeBSD ; then
+		sed -i \
+			-e 's/linux/cons25/g' \
+			-e 's/ttyS0/cuaa0/g' \
+			-e 's/ttyS1/cuaa1/g' \
+			inittab #121786
+	fi
 	if use x86 || use amd64 ; then
 		sed -i \
 			-e '/ttyS[01]/s:9600:115200:' \
@@ -102,18 +114,25 @@ src_install() {
 	doins "${WORKDIR}"/inittab
 
 	# dead symlink
-	rm "${ED%/}"/usr/bin/lastb || die
+	rm "${ED}"/usr/bin/lastb || die
 
 	newinitd "${FILESDIR}"/bootlogd.initd bootlogd
+	into /
+	dosbin "${FILESDIR}"/halt.sh
+
+	keepdir /etc/inittab.d
+
+	find "${ED}" -type d -empty -delete || die
 }
 
 pkg_postinst() {
 	# Reload init to fix unmounting problems of / on next reboot.
 	# This is really needed, as without the new version of init cause init
 	# not to quit properly on reboot, and causes a fsck of / on next reboot.
-	if [[ ${ROOT} == / ]] ; then
-		if [[ -e /dev/initctl && ! -e /run/initctl ]]; then
-			ln -s /dev/initctl /run/initctl
+	if [[ -z ${ROOT} ]] ; then
+		if [[ -e /dev/initctl ]] && [[ ! -e /run/initctl ]] ; then
+			ln -s /dev/initctl /run/initctl \
+				|| ewarn "Failed to set /run/initctl symlink!"
 		fi
 		# Do not return an error if this fails
 		/sbin/telinit U &>/dev/null
@@ -123,7 +142,7 @@ pkg_postinst() {
 	elog "sys-apps/util-linux. The pidof tool has been moved to sys-process/procps."
 
 	# Required for new bootlogd service
-	if [[ ! -e "${EROOT%/}/var/log/boot" ]] ; then
-		touch "${EROOT%/}/var/log/boot"
+	if [[ ! -e "${EROOT}/var/log/boot" ]] ; then
+		touch "${EROOT}/var/log/boot"
 	fi
 }
