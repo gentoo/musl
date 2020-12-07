@@ -53,10 +53,9 @@ src_prepare() {
 		-e '/\/bin\/pidof/d' \
 		-e '/^MAN8/s:\<pidof.8\>::g' \
 		src/Makefile || die
-		
+
 	# stack protector is broken on x86 musl
 	sed -i 's/-fstack-protector-strong//' src/Makefile || die
-
 
 	# logsave is already in e2fsprogs
 	sed -i -r \
