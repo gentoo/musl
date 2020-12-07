@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{6,7,8} )
+PYTHON_COMPAT=( python3_{6,7,8,9} )
 
 inherit llvm meson multilib-minimal python-any-r1 linux-info
 
@@ -19,7 +19,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://archive.mesa3d.org/${MY_P}.tar.xz"
-	KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sparc ~x86 ~amd64-linux ~x86-linux ~sparc-solaris ~x64-solaris ~x86-solaris"
+	KEYWORDS="amd64 ~arm arm64 ~mips ~ppc ~ppc64 ~x86"
 fi
 
 LICENSE="MIT"
@@ -35,7 +35,7 @@ for card in ${VIDEO_CARDS}; do
 done
 
 IUSE="${IUSE_VIDEO_CARDS}
-	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 +gles2 +libglvnd +llvm
+	+classic d3d9 debug +dri3 +egl +gallium +gbm gles1 +gles2 +llvm
 	lm-sensors opencl osmesa selinux test unwind vaapi valgrind vdpau vulkan
 	vulkan-overlay wayland +X xa xvmc zink +zstd"
 
@@ -74,16 +74,9 @@ REQUIRED_USE="
 
 LIBDRM_DEPSTRING=">=x11-libs/libdrm-2.4.100"
 RDEPEND="
-	!app-eselect/eselect-mesa
 	>=dev-libs/expat-2.1.0-r3:=[${MULTILIB_USEDEP}]
+	>=media-libs/libglvnd-1.3.2[X?,${MULTILIB_USEDEP}]
 	>=sys-libs/zlib-1.2.8[${MULTILIB_USEDEP}]
-	libglvnd? (
-		>=media-libs/libglvnd-1.3.2[X?,${MULTILIB_USEDEP}]
-		!app-eselect/eselect-opengl
-	)
-	!libglvnd? (
-		>=app-eselect/eselect-opengl-1.3.0
-	)
 	gallium? (
 		unwind? ( sys-libs/libunwind[${MULTILIB_USEDEP}] )
 		llvm? (
@@ -149,9 +142,10 @@ RDEPEND="${RDEPEND}
 # 1. List all the working slots (with min versions) in ||, newest first.
 # 2. Update the := to specify *max* version, e.g. < 10.
 # 3. Specify LLVM_MAX_SLOT, e.g. 9.
-LLVM_MAX_SLOT="10"
+LLVM_MAX_SLOT="11"
 LLVM_DEPSTR="
 	|| (
+		sys-devel/llvm:11[${MULTILIB_USEDEP}]
 		sys-devel/llvm:10[${MULTILIB_USEDEP}]
 		sys-devel/llvm:9[${MULTILIB_USEDEP}]
 	)
@@ -244,7 +238,7 @@ x86? (
 	usr/lib*/libGLESv2.so.2.0.0
 	usr/lib*/libGL.so.1.2.0
 	usr/lib*/libOSMesa.so.8.0.0
-	libglvnd? ( usr/lib/libGLX_mesa.so.0.0.0 )
+	usr/lib/libGLX_mesa.so.0.0.0
 )"
 
 PATCHES=(
@@ -381,6 +375,12 @@ multilib_src_configure() {
 	use wayland && platforms+=",wayland"
 	[[ -n $platforms ]] && emesonargs+=(-Dplatforms=${platforms#,})
 
+	if use X || use egl; then
+		emesonargs+=(-Dglvnd=true)
+	else
+		emesonargs+=(-Dglvnd=false)
+	fi
+
 	if use gallium; then
 		emesonargs+=(
 			$(meson_feature llvm)
@@ -511,7 +511,6 @@ multilib_src_configure() {
 		$(meson_feature gbm)
 		$(meson_feature gles1)
 		$(meson_feature gles2)
-		$(meson_use libglvnd glvnd)
 		$(meson_use selinux)
 		$(meson_feature zstd)
 		-Dvalgrind=$(usex valgrind auto false)
@@ -539,15 +538,7 @@ multilib_src_install_all() {
 }
 
 multilib_src_test() {
-	meson test -v -C "${BUILD_DIR}" -t 100
-}
-
-pkg_postinst() {
-	if ! use libglvnd; then
-		# Switch to the xorg implementation.
-		echo
-		eselect opengl set --use-old ${OPENGL_DIR}
-	fi
+	meson_src_test -t 100
 }
 
 # $1 - VIDEO_CARDS flag (check skipped for "--")
