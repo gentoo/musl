@@ -27,7 +27,7 @@ REQUIRED_USE="
 	?? ( elogind systemd )
 "
 
-KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
+KEYWORDS="amd64 arm arm64 ~ppc ~ppc64 x86"
 
 # gobject-introspection-0.10.3 is needed due to gnome bug 642300
 # wpa_supplicant-0.7.3-r3 is needed due to bug 359271
@@ -100,7 +100,7 @@ DEPEND="${COMMON_DEPEND}
 	)
 "
 
-PATCHES=(
+PATCHES=( "${FILESDIR}"/${PN}-1.26.4-iwd-fixes-pr640.patch
 	# Required to build on musl
 	"${FILESDIR}"/musl-basic.patch
 	"${FILESDIR}"/musl-network-support.patch
@@ -166,6 +166,11 @@ src_prepare() {
 
 	use vala && vala_src_prepare
 	gnome2_src_prepare
+
+	sed -i \
+		-e 's#/usr/bin/sed#/bin/sed#' \
+		data/84-nm-drivers.rules \
+		|| die
 }
 
 multilib_src_configure() {
