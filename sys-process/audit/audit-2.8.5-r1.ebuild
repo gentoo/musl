@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
@@ -45,7 +45,7 @@ pkg_setup() {
 
 src_prepare() {
 	eapply "${FILESDIR}/${PN}-2.8.5-auparse-remove-use-of-rawmemchr.patch"
-	eapply "${FILESDIR}/${PN}-all-get-rid-of-strndupa.patch"
+	eapply "${FILESDIR}/${PN}-2.8.5-all-get-rid-of-strndupa.patch"
 
 	# Do not build GUI tools
 	sed -i \
