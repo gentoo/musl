@@ -1,21 +1,21 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="6"
-PYTHON_COMPAT=( python{3_5,3_6,3_7} )
+EAPI="7"
+PYTHON_COMPAT=( python{3_6,3_7,3_8} )
 PYTHON_REQ_USE="xml"
 
 inherit multilib python-r1 toolchain-funcs bash-completion-r1
 
 MY_P="${P//_/-}"
 
-MY_RELEASEDATE="20191204"
-EXTRAS_VER="1.36"
+MY_RELEASEDATE="20200710"
+EXTRAS_VER="1.37"
 SEMNG_VER="${PV}"
 SELNX_VER="${PV}"
 SEPOL_VER="${PV}"
 
-IUSE="audit pam dbus"
+IUSE="audit dbus pam split-usr"
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
 DESCRIPTION="SELinux core utilities"
@@ -31,7 +31,7 @@ if [[ ${PV} == 9999 ]]; then
 else
 	SRC_URI="https://github.com/SELinuxProject/selinux/releases/download/${MY_RELEASEDATE}/${MY_P}.tar.gz
 		https://dev.gentoo.org/~perfinion/distfiles/policycoreutils-extra-${EXTRAS_VER}.tar.bz2"
-	KEYWORDS="~amd64 ~arm64 ~mips ~x86"
+	KEYWORDS="amd64 ~arm64 ~mips x86"
 	S1="${WORKDIR}/${MY_P}"
 	S2="${WORKDIR}/policycoreutils-extra"
 	S="${S1}"
@@ -42,11 +42,10 @@ SLOT="0"
 
 DEPEND=">=sys-libs/libselinux-${SELNX_VER}:=[python,${PYTHON_USEDEP}]
 	>=sys-libs/libcap-1.10-r10:=
-	>=sys-libs/libsemanage-${SEMNG_VER}:=[python,${PYTHON_USEDEP}]
+	>=sys-libs/libsemanage-${SEMNG_VER}:=[python(+),${PYTHON_USEDEP}]
 	sys-libs/libcap-ng:=
 	>=sys-libs/libsepol-${SEPOL_VER}:=
 	>=app-admin/setools-4.2.0[${PYTHON_USEDEP}]
-	sys-devel/gettext
 	dev-python/ipy[${PYTHON_USEDEP}]
 	dbus? (
 		sys-apps/dbus
@@ -56,13 +55,16 @@ DEPEND=">=sys-libs/libselinux-${SELNX_VER}:=[python,${PYTHON_USEDEP}]
 	pam? ( sys-libs/pam:= )
 	${PYTHON_DEPS}"
 
+# Avoid dependency loop in the cross-compile case, bug #755173
+# (Still exists in native)
+BDEPEND="sys-devel/gettext"
+
 ### libcgroup -> seunshare
 ### dbus -> restorecond
 
 # pax-utils for scanelf used by rlpkg
 RDEPEND="${DEPEND}
-	app-misc/pax-utils
-	!<sys-apps/openrc-0.14"
+	app-misc/pax-utils"
 
 PDEPEND="sys-apps/semodule-utils
 	sys-apps/selinux-python"
@@ -80,7 +82,7 @@ src_prepare() {
 	cd "${S}" || die "Failed to switch to ${S}"
 	if [[ ${PV} != 9999 ]] ; then
 		# If needed for live ebuilds please use /etc/portage/patches
-		eapply "${FILESDIR}/policycoreutils-2.7-0001-newrole-not-suid.patch"
+		eapply "${FILESDIR}/policycoreutils-3.1-0001-newrole-not-suid.patch"
 		eapply "${FILESDIR}/${PN}-2.7-musl.patch"
 	fi
 
@@ -154,7 +156,8 @@ src_install() {
 	rm -fR "${D}/etc/rc.d" || die
 
 	# compatibility symlinks
-	dosym /sbin/setfiles /usr/sbin/setfiles
+	use split-usr && dosym ../../sbin/setfiles /usr/sbin/setfiles
+
 	bashcomp_alias setsebool getsebool
 
 	# location for policy definitions
