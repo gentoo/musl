@@ -1,9 +1,9 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{6,7,8,9} )
+PYTHON_COMPAT=( python3_{7,8,9} )
 
 inherit llvm meson multilib-minimal python-any-r1 linux-info
 
@@ -19,7 +19,7 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 else
 	SRC_URI="https://archive.mesa3d.org/${MY_P}.tar.xz"
-	KEYWORDS="amd64 ~arm arm64 ~mips ~ppc ~ppc64 ~x86"
+	KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 fi
 
 LICENSE="MIT"
@@ -373,12 +373,17 @@ multilib_src_configure() {
 	local platforms
 	use X && platforms+="x11"
 	use wayland && platforms+=",wayland"
-	[[ -n $platforms ]] && emesonargs+=(-Dplatforms=${platforms#,})
+	emesonargs+=(-Dplatforms=${platforms#,})
 
 	if use X || use egl; then
 		emesonargs+=(-Dglvnd=true)
 	else
 		emesonargs+=(-Dglvnd=false)
+	fi
+
+	# Disable glx tls support on musl
+	if use elibc_musl; then
+		emesonargs+=( -Delf-tls=false )
 	fi
 
 	if use gallium; then
@@ -482,11 +487,6 @@ multilib_src_configure() {
 		vulkan_enable video_cards_i965 intel
 		vulkan_enable video_cards_iris intel
 		vulkan_enable video_cards_radeonsi amd
-	fi
-
-	# Disable glx tls support on musl
-	if use elibc_musl; then
-		emesonargs+=( -Delf-tls=false )
 	fi
 
 	if use gallium; then
