@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -108,6 +108,7 @@ PATCHES=( "${FILESDIR}"/${PN}-1.26.4-iwd-fixes-pr640.patch
 	"${FILESDIR}"/musl-process-util.patch
 	"${FILESDIR}"/musl-compar.patch
 	"${FILESDIR}"/musl-no-drand.patch
+	"${FILESDIR}"/reallocarray.patch
 )
 
 python_check_deps() {
