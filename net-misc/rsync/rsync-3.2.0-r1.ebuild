@@ -8,7 +8,7 @@ inherit autotools flag-o-matic prefix systemd
 DESCRIPTION="File transfer program to keep remote files into sync"
 HOMEPAGE="https://rsync.samba.org/"
 if [[ "${PV}" == *9999 ]] ; then
-	PYTHON_COMPAT=( python3_{6,7,8} )
+	PYTHON_COMPAT=( python3_{7,8} )
 	inherit git-r3 python-any-r1
 	EGIT_REPO_URI="https://github.com/WayneD/rsync.git"
 else

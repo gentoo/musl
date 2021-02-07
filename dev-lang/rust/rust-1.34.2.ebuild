@@ -3,7 +3,7 @@
 
 EAPI=6
 
-PYTHON_COMPAT=( python{2_7,3_{5,6,7}} )
+PYTHON_COMPAT=( python{2_7,3_7} )
 
 inherit check-reqs eapi7-ver flag-o-matic llvm multiprocessing python-any-r1 toolchain-funcs
 
