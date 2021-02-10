@@ -1,13 +1,12 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="5"
+EAPI="6"
 
-PYTHON_COMPAT=( python2_7 )
 GNOME_ORG_MODULE="gamin"
 GNOME_TARBALL_SUFFIX="bz2"
 
-inherit autotools eutils flag-o-matic libtool python-r1 gnome.org multilib-minimal
+inherit autotools epatch flag-o-matic libtool ltprune gnome.org multilib-minimal
 
 DESCRIPTION="Library providing the FAM File Alteration Monitor API"
 HOMEPAGE="https://www.gnome.org/~veillard/gamin/"
@@ -18,19 +17,18 @@ SRC_URI="${SRC_URI}
 
 LICENSE="LGPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~mips ppc x86"
-IUSE="debug kernel_linux python static-libs"
-REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
+KEYWORDS="~alpha amd64 arm arm64 ~hppa ~ia64 ~m68k ~mips ppc ppc64 ~s390 sparc x86 ~amd64-linux ~x86-linux ~x86-solaris"
+IUSE="debug kernel_linux static-libs"
 
 RESTRICT="test" # needs gam-server
 
 RDEPEND="
-	python? ( ${PYTHON_DEPS} )
 	!app-admin/fam
 	!<app-admin/gamin-0.1.10"
 DEPEND="${RDEPEND}"
 
 src_prepare() {
+	default
 	mv "${WORKDIR}"/pkg-config-*/pkg.m4 "${WORKDIR}"/ || die
 
 	# Fix QA warnings, bug #257281, upstream #466791
@@ -61,20 +59,18 @@ src_prepare() {
 	# Fix possible server deadlock in ih_sub_cancel, upstream bug #667230
 	epatch "${FILESDIR}/${PN}-0.1.10-deadlock.patch"
 
+        # Fix build on musl
+        epatch "${FILESDIR}"/${PN}-0.1.10-fix-pthread-mutex.patch
+
 	# Drop DEPRECATED flags
 	sed -i -e 's:-DG_DISABLE_DEPRECATED:$(NULL):g' server/Makefile.am || die
-
-	# Build only shared version of Python module.
-	epatch "${FILESDIR}"/${PN}-0.1.10-disable_python_static_library.patch
-
-	# Fix build on musl
-	epatch "${FILESDIR}"/${PN}-0.1.10-fix-pthread-mutex.patch
 
 	sed -i \
 		-e 's:AM_CONFIG_HEADER:AC_CONFIG_HEADERS:' \
 		-e 's:AM_PROG_CC_STDC:AC_PROG_CC:' \
 		configure.in || die #466962
 
+	mv configure.in configure.ac || die
 	# autoconf is required as the user-cflags patch modifies configure.in
 	# however, elibtoolize is also required, so when the above patch is
 	# removed, replace the following call with a call to elibtoolize
@@ -93,52 +89,12 @@ multilib_src_configure() {
 	local ECONF_SOURCE=${S}
 
 	econf "${myconf[@]}"
-	if multilib_is_native_abi && use python; then
-		python_configure() {
-			mkdir -p "${BUILD_DIR}" || die
-			cd "${BUILD_DIR}" || die
-			econf "${myconf[@]}" --with-python
-		}
-
-		python_foreach_impl python_configure
-	fi
-}
-
-multilib_src_compile() {
-	default
-
-	if multilib_is_native_abi && use python; then
-		local native_builddir=${BUILD_DIR}
-
-		python_compile() {
-			emake -C "${BUILD_DIR}"/python \
-				VPATH="${native_builddir}/python:${S}/python" \
-				_gamin_la_LIBADD="${native_builddir}/libgamin/libgamin-1.la"
-		}
-
-		python_foreach_impl python_compile
-	fi
-}
-
-multilib_src_install() {
-	emake DESTDIR="${D}" install
-
-	if multilib_is_native_abi && use python; then
-		local native_builddir=${BUILD_DIR}
-
-		python_install() {
-			emake -C "${BUILD_DIR}"/python \
-				DESTDIR="${D}" install \
-				VPATH="${native_builddir}/python:${S}/python"
-		}
-
-		python_foreach_impl python_install
-	fi
 }
 
 multilib_src_install_all() {
-	dodoc AUTHORS ChangeLog README TODO NEWS doc/*txt
-	dohtml doc/*
+	DOCS=( AUTHORS ChangeLog README TODO NEWS doc/*txt )
+	HTML_DOCS=( doc/*.{html,gif} )
+	einstalldocs
 
 	prune_libtool_files --all
 }
