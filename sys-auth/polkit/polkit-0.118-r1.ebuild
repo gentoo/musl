@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -7,12 +7,13 @@ inherit autotools pam pax-utils systemd xdg-utils
 
 DESCRIPTION="Policy framework for controlling privileges for system-wide services"
 HOMEPAGE="https://www.freedesktop.org/wiki/Software/polkit https://gitlab.freedesktop.org/polkit/polkit"
-SRC_URI="https://www.freedesktop.org/software/${PN}/releases/${P}.tar.gz"
+SRC_URI="https://www.freedesktop.org/software/${PN}/releases/${P}.tar.gz
+	https://dev.gentoo.org/~anarchy/dist/polkit-0.118-duktape.patch"
 
 LICENSE="LGPL-2"
 SLOT="0"
-KEYWORDS="amd64 x86"
-IUSE="+elogind examples gtk +introspection kde nls pam selinux systemd test"
+KEYWORDS="amd64 ~arm ~arm64 ~ppc64 x86"
+IUSE="duktape +elogind examples gtk +introspection kde nls pam selinux systemd test"
 RESTRICT="!test? ( test )"
 
 REQUIRED_USE="^^ ( elogind systemd )"
@@ -32,7 +33,8 @@ BDEPEND="
 	introspection? ( dev-libs/gobject-introspection )
 "
 DEPEND="
-	dev-lang/duktape
+	duktape? ( dev-lang/duktape )
+	!duktape? ( dev-lang/spidermonkey:78[-debug] )
 	dev-libs/glib:2
 	dev-libs/expat
 	elogind? ( sys-auth/elogind )
@@ -57,8 +59,8 @@ PDEPEND="
 DOCS=( docs/TODO HACKING NEWS README )
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-${PV}-duktape.patch
-	"${FILESDIR}"/${PN}-${PV}-elogind.patch
+	"${DISTDIR}"/${PN}-${PV}-duktape.patch
+	"${FILESDIR}"/${PN}-0.115-elogind.patch
 	"${FILESDIR}"/${PN}-${PV}-make-netgroup-support-optional.patch
 )
 
@@ -93,7 +95,7 @@ src_configure() {
 		--enable-man-pages
 		--disable-gtk-doc
 		--disable-examples
-		--with-duktape
+		$(use_with duktape)
 		$(use_enable elogind libelogind)
 		$(use_enable introspection)
 		$(use_enable nls)
