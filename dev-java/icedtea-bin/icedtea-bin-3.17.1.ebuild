@@ -1,4 +1,4 @@
-# Copyright 2020 Gentoo Authors
+# Copyright 2020-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -6,7 +6,7 @@ EAPI=6
 inherit java-vm-2 toolchain-funcs multilib-build
 
 ALPINE_PN="openjdk8"
-ALPINE_PV="8.252.09-r1"
+ALPINE_PV="8.275.01-r0"
 ALPINE_P="java-1.8-openjdk"
 ALPINE_PATH="usr/lib/jvm/${ALPINE_P}"
 S="${WORKDIR}"
@@ -14,19 +14,19 @@ S="${WORKDIR}"
 get_apk_names() {
 	ARCH="${2-${1}}"
 	echo "${1}? (
-		${BASE_URI}/${ARCH}/${ALPINE_PN}-${ALPINE_PV}.apk -> ${P}-${ARCH}.tar.gz
-		${BASE_URI}/${ARCH}/${ALPINE_PN}-jre-${ALPINE_PV}.apk -> ${P}-jre-${ARCH}.tar.gz
-		${BASE_URI}/${ARCH}/${ALPINE_PN}-jre-base-${ALPINE_PV}.apk -> ${P}-jre-base-${ARCH}.tar.gz
-		${BASE_URI}/${ARCH}/${ALPINE_PN}-jre-lib-${ALPINE_PV}.apk -> ${P}-jre-lib-${ARCH}.tar.gz
-		${BASE_URI}/${ARCH}/${ALPINE_PN}-doc-${ALPINE_PV}.apk -> ${P}-doc-${ARCH}.tar.gz
-		examples? ( ${BASE_URI}/${ARCH}/${ALPINE_PN}-demos-${ALPINE_PV}.apk -> ${P}-demos-${ARCH}.tar.gz )
-		debug? ( ${BASE_URI}/${ARCH}/${ALPINE_PN}-dbg-${ALPINE_PV}.apk -> ${P}-dbg-${ARCH}.tar.gz )
+		${BASE_URI}/${ARCH}/${ALPINE_PN}-${ALPINE_PV}.apk -> ${PF}-${ARCH}.tar.gz
+		${BASE_URI}/${ARCH}/${ALPINE_PN}-jre-${ALPINE_PV}.apk -> ${PF}-jre-${ARCH}.tar.gz
+		${BASE_URI}/${ARCH}/${ALPINE_PN}-jre-base-${ALPINE_PV}.apk -> ${PF}-jre-base-${ARCH}.tar.gz
+		${BASE_URI}/${ARCH}/${ALPINE_PN}-jre-lib-${ALPINE_PV}.apk -> ${PF}-jre-lib-${ARCH}.tar.gz
+		${BASE_URI}/${ARCH}/${ALPINE_PN}-doc-${ALPINE_PV}.apk -> ${PF}-doc-${ARCH}.tar.gz
+		examples? ( ${BASE_URI}/${ARCH}/${ALPINE_PN}-demos-${ALPINE_PV}.apk -> ${PF}-demos-${ARCH}.tar.gz )
+		debug? ( ${BASE_URI}/${ARCH}/${ALPINE_PN}-dbg-${ALPINE_PV}.apk -> ${PF}-dbg-${ARCH}.tar.gz )
 	)"
 }
 
 DESCRIPTION="Binary build of the IcedTea JDK from Alpine Linux"
 HOMEPAGE="http://icedtea.classpath.org"
-BASE_URI="http://dl-cdn.alpinelinux.org/alpine/edge/community"
+BASE_URI="http://dl-cdn.alpinelinux.org/alpine/edge/community/"
 SRC_URI="
 	$(get_apk_names amd64 x86_64)
 	$(get_apk_names arm armhf)
@@ -39,7 +39,7 @@ SRC_URI="
 
 LICENSE="GPL-2-with-classpath-exception"
 SLOT="8"
-KEYWORDS="-* amd64 ~arm arm64 ~ppc64 ~x86"
+KEYWORDS="-* amd64 arm arm64 ppc64 x86"
 IUSE="big-endian elibc_musl cups +gtk pulseaudio selinux debug examples alsa headless-awt"
 
 REQUIRED_USE="
