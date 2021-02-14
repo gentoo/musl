@@ -1,11 +1,11 @@
 # Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
 PYTHON_COMPAT=( python3_{7,8,9} )
 DISTUTILS_OPTIONAL=1
-inherit distutils-r1 eutils libtool multilib multilib-minimal
+inherit distutils-r1 libtool multilib-minimal
 
 LIBNL_P=${P/_/-}
 LIBNL_DIR=${PV/_/}
@@ -13,33 +13,25 @@ LIBNL_DIR=${LIBNL_DIR//./_}
 
 DESCRIPTION="Libraries providing APIs to netlink protocol based Linux kernel interfaces"
 HOMEPAGE="http://www.infradead.org/~tgr/libnl/ https://github.com/thom311/libnl"
-SRC_URI="
-	https://github.com/thom311/${PN}/releases/download/${PN}${LIBNL_DIR}/${P/_rc/-rc}.tar.gz
-"
+SRC_URI="https://github.com/thom311/${PN}/releases/download/${PN}${LIBNL_DIR}/${P/_rc/-rc}.tar.gz"
+S="${WORKDIR}/${LIBNL_P}"
+
 LICENSE="LGPL-2.1 utils? ( GPL-2 )"
 SLOT="3"
-KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86 ~amd64-linux ~x86-linux"
 IUSE="+debug static-libs python +threads utils"
 
-RDEPEND="
-	python? ( ${PYTHON_DEPS} )
-"
-DEPEND="
+RDEPEND="python? ( ${PYTHON_DEPS} )"
+DEPEND="${RDEPEND}"
+BDEPEND="
 	${RDEPEND}
 	python? ( dev-lang/swig )
 	sys-devel/bison
 	sys-devel/flex
 "
-REQUIRED_USE="
-	python? ( ${PYTHON_REQUIRED_USE} )
-"
-DOCS=(
-	ChangeLog
-)
+REQUIRED_USE="python? ( ${PYTHON_REQUIRED_USE} )"
 
-PATCHES=( "${FILESDIR}"/${PN}-3.3.0_rc1-musl.patch )
-
-S=${WORKDIR}/${LIBNL_P}
+DOCS=( ChangeLog )
 
 MULTILIB_WRAPPED_HEADERS=(
 	# we do not install CLI stuff for non-native
@@ -77,8 +69,7 @@ multilib_src_configure() {
 		$(multilib_native_use_enable utils cli) \
 		$(use_enable debug) \
 		$(use_enable static-libs static) \
-		$(use_enable threads) \
-		--disable-silent-rules
+		$(use_enable threads)
 }
 
 multilib_src_compile() {
@@ -103,5 +94,5 @@ multilib_src_install() {
 
 multilib_src_install_all() {
 	einstalldocs
-	prune_libtool_files --modules
+	find "${ED}" -name '*.la' -delete || die
 }
