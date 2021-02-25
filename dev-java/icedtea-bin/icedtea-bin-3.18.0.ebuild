@@ -3,7 +3,7 @@
 
 EAPI=6
 
-inherit java-vm-2 toolchain-funcs multilib-build
+inherit java-vm-2 toolchain-funcs multilib-build estack
 
 ALPINE_PN="openjdk8"
 ALPINE_PV="8.282.08-r0"
@@ -19,8 +19,8 @@ get_apk_names() {
 		${BASE_URI}/${ARCH}/${ALPINE_PN}-jre-base-${ALPINE_PV}.apk -> ${PF}-jre-base-${ARCH}.tar.gz
 		${BASE_URI}/${ARCH}/${ALPINE_PN}-jre-lib-${ALPINE_PV}.apk -> ${PF}-jre-lib-${ARCH}.tar.gz
 		${BASE_URI}/${ARCH}/${ALPINE_PN}-doc-${ALPINE_PV}.apk -> ${PF}-doc-${ARCH}.tar.gz
+		${BASE_URI}/${ARCH}/${ALPINE_PN}-dbg-${ALPINE_PV}.apk -> ${PF}-dbg-${ARCH}.tar.gz
 		examples? ( ${BASE_URI}/${ARCH}/${ALPINE_PN}-demos-${ALPINE_PV}.apk -> ${PF}-demos-${ARCH}.tar.gz )
-		debug? ( ${BASE_URI}/${ARCH}/${ALPINE_PN}-dbg-${ALPINE_PV}.apk -> ${PF}-dbg-${ARCH}.tar.gz )
 	)"
 }
 
@@ -40,18 +40,19 @@ SRC_URI="
 LICENSE="GPL-2-with-classpath-exception"
 SLOT="8"
 KEYWORDS="-* amd64 arm arm64 ppc64 x86"
-IUSE="big-endian elibc_musl cups +gtk pulseaudio selinux debug examples alsa headless-awt"
+IUSE="big-endian elibc_musl cups +gtk pulseaudio selinux examples alsa headless-awt"
 
 REQUIRED_USE="
 	gtk? ( !headless-awt )
 	ppc64? ( !big-endian )
 	elibc_musl
 "
-RESTRICT="preserve-libs strip mirror"
+RESTRICT="preserve-libs mirror"
 QA_PREBUILT="opt/.*"
 
 RDEPEND=""
 DEPEND="
+	dev-libs/elfutils[utils]
 	>=dev-libs/glib-2.60.7:2
 	>=media-libs/fontconfig-2.13:1.0
 	>=media-libs/freetype-2.9.1:2
@@ -102,17 +103,18 @@ src_unpack() {
 src_prepare() {
 	default
 
-	# Overwrite normal binaries with the ones with debug symbols
-	if use debug; then
-		# Remove .debug extension
-		shopt -s globstar
-		for file in usr/lib/debug/**/*.debug; do
-			mv "${file}" "${file%.debug}" || die
-		done
-		shopt -u globstar
-		cp -r usr/lib/debug/usr . || die
-		rm -rv usr/lib/debug || die
-	fi
+	# Unsplit debug symbols from the binaries
+	strip_dir="${S}"
+	debug_dir="${S}/debug"
+	mv -v usr/lib/debug "${debug_dir}" || die
+	cd "${debug_dir}" || die
+	eshopts_push -s globstar
+	for debug in **/*.debug; do
+		bin="${strip_dir}/${debug%.debug}"
+		eu-unstrip -o "${bin}" "${bin}" "${debug}" || die
+	done
+	eshopts_pop
+	cd - || die
 
 	if ! use alsa; then
 		rm -v "${ALPINE_PATH}"/jre/lib/*/libjsoundalsa.* || die
