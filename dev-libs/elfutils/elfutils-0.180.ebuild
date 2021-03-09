@@ -1,4 +1,4 @@
-# Copyright 2003-2020 Gentoo Authors
+# Copyright 2003-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -21,6 +21,7 @@ RDEPEND=">=sys-libs/zlib-1.2.8-r1[static-libs?,${MULTILIB_USEDEP}]
 		sys-libs/argp-standalone
 		sys-libs/fts-standalone
 		sys-libs/obstack-standalone
+		dev-libs/libbsd
 	)
 	!dev-libs/libelf"
 DEPEND="${RDEPEND}
