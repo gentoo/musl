@@ -243,6 +243,7 @@ x86? (
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-20.2.0-add-disable-tls-support.patch
+	"${FILESDIR}"/${PN}-20.3.4-intel-git_sha1.patch
 )
 
 llvm_check_deps() {

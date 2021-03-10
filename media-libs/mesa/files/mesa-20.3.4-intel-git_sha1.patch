@@ -1,0 +1,25 @@
+From 4ffaff669266dd5b633d2e44ca842c49f0a1d2fb Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Wed, 10 Mar 2021 08:48:37 -0600
+Subject: [PATCH] ensure git_sha1.h is generated for use
+
+---
+ src/intel/common/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/intel/common/meson.build b/src/intel/common/meson.build
+index 66e0967..422d22a 100644
+--- a/src/intel/common/meson.build
++++ b/src/intel/common/meson.build
+@@ -42,7 +42,7 @@ files_libintel_common = files(
+ )
+ 
+ libintel_common = static_library(
+-  ['intel_common', genX_xml_h],
++  ['intel_common', genX_xml_h, sha1_h],
+   files_libintel_common,
+   include_directories : [inc_include, inc_src, inc_mapi, inc_mesa, inc_gallium, inc_intel],
+   c_args : [no_override_init_args],
+-- 
+2.26.2
+
