@@ -1,0 +1,60 @@
+From 839343b02e59cb36e58f7e3def8bb39bf4ee3d5b Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Thu, 11 Mar 2021 07:59:56 -0600
+Subject: [PATCH] uncouple glibc functions and headers
+
+---
+ shared/nm-glib-aux/nm-json-aux.c      | 4 ++++
+ shared/systemd/src/basic/stdio-util.h | 2 ++
+ shared/systemd/src/basic/util.h       | 6 ++++++
+ 3 files changed, 12 insertions(+)
+
+diff --git a/shared/nm-glib-aux/nm-json-aux.c b/shared/nm-glib-aux/nm-json-aux.c
+index 4212e62..83114c7 100644
+--- a/shared/nm-glib-aux/nm-json-aux.c
++++ b/shared/nm-glib-aux/nm-json-aux.c
+@@ -9,6 +9,10 @@
+ 
+ #include <dlfcn.h>
+ 
++#ifndef RTLD_DEEPBIND
++#define RTLD_DEEPBIND 0
++#endif
++
+ /*****************************************************************************/
+ 
+ static void
+diff --git a/shared/systemd/src/basic/stdio-util.h b/shared/systemd/src/basic/stdio-util.h
+index c3b9448..e80a938 100644
+--- a/shared/systemd/src/basic/stdio-util.h
++++ b/shared/systemd/src/basic/stdio-util.h
+@@ -1,7 +1,9 @@
+ /* SPDX-License-Identifier: LGPL-2.1+ */
+ #pragma once
+ 
++#if defined(__GLIBC__)
+ #include <printf.h>
++#endif
+ #include <stdarg.h>
+ #include <stdio.h>
+ #include <sys/types.h>
+diff --git a/shared/systemd/src/basic/util.h b/shared/systemd/src/basic/util.h
+index 6fc7480..fab72e5 100644
+--- a/shared/systemd/src/basic/util.h
++++ b/shared/systemd/src/basic/util.h
+@@ -30,6 +30,12 @@ static inline unsigned u64log2(uint64_t n) {
+ #endif
+ }
+ 
++#if !defined(__GLIBC__)
++typedef int (*__compar_fn_t) (const void*, const void*);
++typedef __compar_fn_t comparison_fn_t;
++typedef int (*__compar_d_fn_t) (const void *, const void *, void *);
++#endif
++
+ static inline unsigned u32ctz(uint32_t n) {
+ #if __SIZEOF_INT__ == 4
+         return n != 0 ? __builtin_ctz(n) : 32;
+-- 
+2.26.2
+

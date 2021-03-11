@@ -1,0 +1,110 @@
+From a089fdec09fe8893ee8cff79ce2027d3ea2fa5bb Mon Sep 17 00:00:00 2001
+From:
+Date: Thu, 11 Mar 2021 07:42:59 -0600
+Subject: [PATCH 3/6] Fix includes to support musl
+
+---
+ src/NetworkManagerUtils.c                            | 1 +
+ src/devices/nm-device-bridge.c                       | 2 ++
+ src/devices/nm-device.c                              | 4 ++++
+ src/nm-manager.c                                     | 1 +
+ src/platform/nm-linux-platform.c                     | 5 +++++
+ src/systemd/src/libsystemd-network/sd-dhcp6-client.c | 4 ++++
+ 6 files changed, 17 insertions(+)
+
+diff --git a/src/NetworkManagerUtils.c b/src/NetworkManagerUtils.c
+index 4739e9d..ceadb50 100644
+--- a/src/NetworkManagerUtils.c
++++ b/src/NetworkManagerUtils.c
+@@ -4,6 +4,7 @@
+  * Copyright (C) 2005 - 2008 Novell, Inc.
+  */
+ 
++#include <netinet/if_ether.h>
+ #include "nm-default.h"
+ 
+ #include "NetworkManagerUtils.h"
+diff --git a/src/devices/nm-device-bridge.c b/src/devices/nm-device-bridge.c
+index 48dcec1..e78eab5 100644
+--- a/src/devices/nm-device-bridge.c
++++ b/src/devices/nm-device-bridge.c
+@@ -15,6 +15,8 @@
+ #include "nm-device-factory.h"
+ #include "nm-core-internal.h"
+ 
++#include <linux/if_ether.h>
++
+ #include "nm-device-logging.h"
+ _LOG_DECLARE_SELF(NMDeviceBridge);
+ 
+diff --git a/src/devices/nm-device.c b/src/devices/nm-device.c
+index 0be05f2..ebf233b 100644
+--- a/src/devices/nm-device.c
++++ b/src/devices/nm-device.c
+@@ -17,7 +17,11 @@
+ #include <arpa/inet.h>
+ #include <fcntl.h>
+ #include <linux/if_addr.h>
++#if defined(__GLIBC__)
+ #include <linux/if_arp.h>
++#else
++#include <linux/if.h>
++#endif
+ #include <linux/rtnetlink.h>
+ 
+ #include "nm-std-aux/unaligned.h"
+diff --git a/src/nm-manager.c b/src/nm-manager.c
+index 46f81c7..090916e 100644
+--- a/src/nm-manager.c
++++ b/src/nm-manager.c
+@@ -15,6 +15,7 @@
+ #include <sys/stat.h>
+ #include <sys/sendfile.h>
+ #include <limits.h>
++#include <asm/types.h>
+ 
+ #include "nm-glib-aux/nm-c-list.h"
+ 
+diff --git a/src/platform/nm-linux-platform.c b/src/platform/nm-linux-platform.c
+index b377c85..7e32eea 100644
+--- a/src/platform/nm-linux-platform.c
++++ b/src/platform/nm-linux-platform.c
+@@ -6,6 +6,7 @@
+ #include "nm-default.h"
+ 
+ #include "nm-linux-platform.h"
++#include "wpan/nm-wpan-utils.h"
+ 
+ #include <arpa/inet.h>
+ #include <dlfcn.h>
+@@ -14,7 +15,11 @@
+ #include <libudev.h>
+ #include <linux/fib_rules.h>
+ #include <linux/ip.h>
++#if defined(__GLIBC__)
+ #include <linux/if_arp.h>
++#else
++#include <linux/if.h>
++#endif
+ #include <linux/if_bridge.h>
+ #include <linux/if_link.h>
+ #include <linux/if_tun.h>
+diff --git a/src/systemd/src/libsystemd-network/sd-dhcp6-client.c b/src/systemd/src/libsystemd-network/sd-dhcp6-client.c
+index ec7f1be..ae63a86 100644
+--- a/src/systemd/src/libsystemd-network/sd-dhcp6-client.c
++++ b/src/systemd/src/libsystemd-network/sd-dhcp6-client.c
+@@ -7,7 +7,11 @@
+ 
+ #include <errno.h>
+ #include <sys/ioctl.h>
++#if defined(__GLIBC__)
+ #include <linux/if_arp.h>
++#else
++#include <linux/if.h>
++#endif
+ #include <linux/if_infiniband.h>
+ 
+ #include "sd-dhcp6-client.h"
+-- 
+2.26.2
+

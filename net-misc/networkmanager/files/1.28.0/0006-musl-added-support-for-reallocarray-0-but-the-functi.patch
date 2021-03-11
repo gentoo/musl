@@ -1,0 +1,43 @@
+From 94820f35e5559d610cd2a5bf967932d97df6fed9 Mon Sep 17 00:00:00 2001
+From: Jory Pratt <anarchy@gentoo.org>
+Date: Thu, 11 Mar 2021 07:46:00 -0600
+Subject: [PATCH 6/6] musl [added support for reallocarray](0), but the
+ function  prototype is declared in `stdlib.h` instead of `malloc.h`.
+
+Update the check for reallocarray to check both in `malloc.h` and
+`stdlib.h`.
+
+[0]:https://git.musl-libc.org/cgit/musl/commit/?id=821083ac7b54eaa040d5a8ddc67c6206a175e0ca
+---
+ configure    | 2 +-
+ configure.ac | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/configure b/configure
+index ec42b54..8e87c92 100755
+--- a/configure
++++ b/configure
+@@ -18250,7 +18250,7 @@ _ACEOF
+ 
+ ac_fn_c_check_decl "$LINENO" "reallocarray" "ac_cv_have_decl_reallocarray" "
+ #include <malloc.h>
+-
++#include <stdlib.h>
+ "
+ if test "x$ac_cv_have_decl_reallocarray" = xyes; then :
+   ac_have_decl=1
+diff --git a/configure.ac b/configure.ac
+index 8483dd7..d32bd46 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -83,6 +83,7 @@ AC_CHECK_DECLS([
+ 	reallocarray],
+ 	[], [], [[
+ #include <malloc.h>
++#include <stdlib.h>
+ ]])
+ 
+ AC_CHECK_DECLS([
+-- 
+2.26.2
+
