@@ -1,0 +1,34 @@
+From 1c1de9e9119cf1e0ef45a594ca9bbf306d2209cb Mon Sep 17 00:00:00 2001
+From:
+Date: Fri, 12 Mar 2021 08:41:13 -0600
+Subject: [PATCH] Expanded non-standard W_EXITCODE macro for Musl compatibility
+
+---
+ src/widget.cc | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/src/widget.cc b/src/widget.cc
+index 44a2271..109ff5f 100644
+--- a/src/widget.cc
++++ b/src/widget.cc
+@@ -20,8 +20,6 @@
+ 
+ #include "widget.hh"
+ 
+-#include <sys/wait.h> // for W_EXITCODE
+-
+ #include <exception>
+ #include <new>
+ #include <string>
+@@ -235,7 +233,7 @@ void
+ Widget::dispose() noexcept
+ {
+         if (m_terminal->terminate_child()) {
+-                int status = W_EXITCODE(0, SIGKILL);
++                int status = (0) << 8 | (SIGKILL); // W_EXITCODE(ret, sig)
+                 emit_child_exited(status);
+         }
+ }
+-- 
+2.26.2
+
