@@ -1,0 +1,36 @@
+From 7fd97298080acbe6f69e49a3d5df9eca423b5fe1 Mon Sep 17 00:00:00 2001
+From: Samuel Holland <samuel@sholland.org>
+Date: Mon, 7 Oct 2019 18:36:28 -0500
+Subject: [PATCH 09/15] test/failed-doctest-output: Fix normalization
+
+Otherwise we get:
+
+1
+2       running 2 tests
+-       test $DIR/failed-doctest-output.rs - OtherStruct (line 20) ... FAILED
+-       test $DIR/failed-doctest-output.rs - SomeStruct (line 10) ... FAILED
++       test src/rustc-1.38.0-src/$DIR/failed-doctest-output.rs - OtherStruct (line 20) ... FAILED
++       test src/rustc-1.38.0-src/$DIR/failed-doctest-output.rs - SomeStruct (line 10) ... FAILED
+5
+6       failures:
+7
+---
+ src/test/rustdoc-ui/failed-doctest-output.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/test/rustdoc-ui/failed-doctest-output.rs b/src/test/rustdoc-ui/failed-doctest-output.rs
+index fcbd7cabc69..7d19ace7487 100644
+--- a/src/test/rustdoc-ui/failed-doctest-output.rs
++++ b/src/test/rustdoc-ui/failed-doctest-output.rs
+@@ -4,7 +4,7 @@
+ 
+ // compile-flags:--test
+ // rustc-env:RUST_BACKTRACE=0
+-// normalize-stdout-test: "src/test/rustdoc-ui" -> "$$DIR"
++// normalize-stdout-test: "[[:graph:]]*src/test/rustdoc-ui" -> "$$DIR"
+ // failure-status: 101
+ 
+ // doctest fails at runtime
+-- 
+2.26.2
+
