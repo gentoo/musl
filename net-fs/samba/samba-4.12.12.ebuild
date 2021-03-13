@@ -1,11 +1,11 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
 
 PYTHON_COMPAT=( python3_{7,8} )
 PYTHON_REQ_USE='threads(+),xml(+)'
-inherit python-single-r1 waf-utils multilib-minimal linux-info systemd pam
+inherit python-single-r1 waf-utils multilib-minimal linux-info systemd pam tmpfiles
 
 MY_PV="${PV/_rc/rc}"
 MY_P="${PN}-${MY_PV}"
@@ -15,7 +15,7 @@ SRC_PATH="stable"
 
 SRC_URI="mirror://samba/${SRC_PATH}/${MY_P}.tar.gz"
 [[ ${PV} = *_rc* ]] || \
-KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~ppc ~ppc64 ~sparc ~x86"
 
 DESCRIPTION="Samba Suite Version 4"
 HOMEPAGE="https://www.samba.org/"
@@ -23,9 +23,10 @@ LICENSE="GPL-3"
 
 SLOT="0"
 
-IUSE="acl addc addns ads ceph client cluster cups debug dmapi fam gpg iprint
-json ldap pam profiling-data python quota selinux syslog system-heimdal
-+system-mitkrb5 systemd test winbind zeroconf"
+IUSE="acl addc addns ads ceph client cluster cups debug dmapi fam glusterfs
+gpg iprint json ldap ntvfs pam profiling-data python quota +regedit selinux
+snapper spotlight syslog system-heimdal +system-mitkrb5 systemd test winbind
+zeroconf"
 
 MULTILIB_WRAPPED_HEADERS=(
 	/usr/include/samba-4.0/policy.h
@@ -41,21 +42,23 @@ MULTILIB_WRAPPED_HEADERS=(
 CDEPEND="
 	>=app-arch/libarchive-3.1.2[${MULTILIB_USEDEP}]
 	dev-lang/perl:=
+	dev-libs/icu:=[${MULTILIB_USEDEP}]
 	dev-libs/libbsd[${MULTILIB_USEDEP}]
 	dev-libs/libtasn1[${MULTILIB_USEDEP}]
 	dev-libs/popt[${MULTILIB_USEDEP}]
-	>=net-libs/gnutls-3.2.0[${MULTILIB_USEDEP}]
+	dev-perl/Parse-Yapp
+	>=net-libs/gnutls-3.4.7[${MULTILIB_USEDEP}]
 	net-libs/libnsl:=[${MULTILIB_USEDEP}]
-	sys-apps/dbus[${MULTILIB_USEDEP}]
 	sys-libs/e2fsprogs-libs[${MULTILIB_USEDEP}]
-	>=sys-libs/ldb-2.0.10[ldap(+)?,python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
-	<sys-libs/ldb-2.1.0[ldap(+)?,python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
-	sys-libs/libcap
+	>=sys-libs/ldb-2.1.4[ldap(+)?,python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
+	<sys-libs/ldb-2.2.0[ldap(+)?,python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
+	sys-libs/libcap[${MULTILIB_USEDEP}]
+	sys-libs/liburing:=[${MULTILIB_USEDEP}]
 	sys-libs/ncurses:0=
 	sys-libs/readline:0=
-	>=sys-libs/talloc-2.2.0[python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
-	>=sys-libs/tdb-1.4.2[python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
-	>=sys-libs/tevent-0.10.0[python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
+	>=sys-libs/talloc-2.3.1[python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
+	>=sys-libs/tdb-1.4.3[python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
+	>=sys-libs/tevent-0.10.2[python?,${PYTHON_SINGLE_USEDEP},${MULTILIB_USEDEP}]
 	sys-libs/zlib[${MULTILIB_USEDEP}]
 	virtual/libiconv
 	pam? ( sys-libs/pam )
@@ -79,22 +82,22 @@ CDEPEND="
 	gpg? ( app-crypt/gpgme )
 	json? ( dev-libs/jansson )
 	ldap? ( net-nds/openldap[${MULTILIB_USEDEP}] )
+	snapper? ( sys-apps/dbus )
 	system-heimdal? ( >=app-crypt/heimdal-1.5[-ssl,${MULTILIB_USEDEP}] )
 	system-mitkrb5? ( >=app-crypt/mit-krb5-1.15.1[${MULTILIB_USEDEP}] )
 	systemd? ( sys-apps/systemd:0= )
-	zeroconf? ( net-dns/avahi )
+	zeroconf? ( net-dns/avahi[dbus] )
 "
 DEPEND="${CDEPEND}
 	${PYTHON_DEPS}
-	app-text/docbook-xsl-stylesheets
-	dev-libs/libxslt
-	>=dev-util/cmocka-1.1.1[${MULTILIB_USEDEP}]
+	>=dev-util/cmocka-1.1.3[${MULTILIB_USEDEP}]
 	net-libs/libtirpc[${MULTILIB_USEDEP}]
 	virtual/pkgconfig
 	|| (
 		net-libs/rpcsvc-proto
 		<sys-libs/glibc-2.26[rpc(+)]
 	)
+	spotlight? ( dev-libs/glib )
 	test? (
 		!system-mitkrb5? (
 			>=sys-libs/nss_wrapper-1.1.3
@@ -107,7 +110,11 @@ RDEPEND="${CDEPEND}
 	python? ( ${PYTHON_DEPS} )
 	client? ( net-fs/cifs-utils[ads?] )
 	selinux? ( sec-policy/selinux-samba )
-	!dev-perl/Parse-Yapp
+"
+
+BDEPEND="
+	app-text/docbook-xsl-stylesheets
+	dev-libs/libxslt
 "
 
 REQUIRED_USE="
@@ -116,6 +123,8 @@ REQUIRED_USE="
 	ads? ( acl ldap winbind )
 	cluster? ( ads )
 	gpg? ( addc )
+	ntvfs? ( addc )
+	spotlight? ( json )
 	test? ( python )
 	?? ( system-heimdal system-mitkrb5 )
 	${PYTHON_REQUIRED_USE}
@@ -132,6 +141,7 @@ S="${WORKDIR}/${MY_P}"
 PATCHES=(
 	"${FILESDIR}/${PN}-4.4.0-pam.patch"
 	"${FILESDIR}/${PN}-4.9.2-timespec.patch"
+	"${FILESDIR}/${PN}-4.13-vfs_snapper_configure_option.patch"
 )
 
 #CONFDIR="${FILESDIR}/$(get_version_component_range 1-2)"
@@ -142,6 +152,9 @@ WAF_BINARY="${S}/buildtools/bin/waf"
 SHAREDMODS=""
 
 pkg_setup() {
+	# Package fails to build with distcc
+	export DISTCC_DISABLE=1
+
 	python-single-r1_pkg_setup
 	if use cluster ; then
 		SHAREDMODS="idmap_rid,idmap_tdb2,idmap_ad"
@@ -152,11 +165,6 @@ pkg_setup() {
 
 src_prepare() {
 	default
-	if use elibc_musl; then
-		eapply "${FILESDIR}/musl-disable-netgroup.patch"
-		eapply "${FILESDIR}/netdb-defines.patch"
-		eapply "${FILESDIR}/${PN}-4.11.8-musl-fix-compar_fn_t.patch"
-	fi
 
 	# un-bundle dnspython
 	sed -i -e '/"dns.resolver":/d' "${S}"/third_party/wscript || die
@@ -172,6 +180,16 @@ src_prepare() {
 	sed -e 's:<gpgme\.h>:<gpgme/gpgme.h>:' \
 		-i source4/dsdb/samdb/ldb_modules/password_hash.c \
 		|| die
+
+        if use elibc_musl ; then
+                eapply "${FILESDIR}"/add_missing___compar_fn_t.patch
+                eapply "${FILESDIR}"/fix-musl-lib-without-innetgr.patch
+                eapply "${FILESDIR}"/getpwent_r.patch
+                eapply "${FILESDIR}"/missing-headers.patch
+                eapply "${FILESDIR}"/musl_rm_unistd_incl.patch
+                eapply "${FILESDIR}"/musl_uintptr.patch
+                eapply "${FILESDIR}"/netdb-defines.patch
+        fi
 
 	# Friggin' WAF shit
 	multilib_copy_sources
@@ -197,6 +215,7 @@ multilib_src_configure() {
 		--disable-rpath-install
 		--nopyc
 		--nopyo
+		--without-winexe
 		$(multilib_native_use_with acl acl-support)
 		$(multilib_native_usex addc '' '--without-ad-dc')
 		$(multilib_native_use_with addns dnsupdate)
@@ -206,12 +225,17 @@ multilib_src_configure() {
 		$(multilib_native_use_enable cups)
 		$(multilib_native_use_with dmapi)
 		$(multilib_native_use_with fam)
+		$(multilib_native_use_enable glusterfs)
 		$(multilib_native_use_with gpg gpgme)
 		$(multilib_native_use_with json)
 		$(multilib_native_use_enable iprint)
+		$(multilib_native_use_with ntvfs ntvfs-fileserver)
 		$(multilib_native_use_with pam)
 		$(multilib_native_usex pam "--with-pammodulesdir=${EPREFIX}/$(get_libdir)/security" '')
 		$(multilib_native_use_with quota quotas)
+		$(multilib_native_use_with regedit)
+		$(multilib_native_use_enable snapper)
+		$(multilib_native_use_enable spotlight)
 		$(multilib_native_use_with syslog)
 		$(multilib_native_use_with systemd)
 		--systemd-install-services
@@ -273,7 +297,7 @@ multilib_src_install() {
 		newinitd "${CONFDIR}/samba4.initd-r1" samba
 		newconfd "${CONFDIR}/samba4.confd" samba
 
-		systemd_dotmpfilesd "${FILESDIR}"/samba.conf
+		dotmpfiles "${FILESDIR}"/samba.conf
 		use addc || rm "${D}/$(systemd_get_systemunitdir)/samba.service" || die
 
 		# Preserve functionality for old gentoo-specific unit names
@@ -292,13 +316,8 @@ multilib_src_install() {
 	keepdir /var/cache/samba
 	keepdir /var/lib/ctdb
 	keepdir /var/lib/samba/{bind-dns,private}
+	keepdir /var/lock/samba
 	keepdir /var/log/samba
-}
-
-multilib_src_install_all() {
-	# Attempt to fix bug #673168
-	find "${ED}" -type d -name "Yapp" -print0 \
-		| xargs -0 --no-run-if-empty rm -r || die
 }
 
 multilib_src_test() {
