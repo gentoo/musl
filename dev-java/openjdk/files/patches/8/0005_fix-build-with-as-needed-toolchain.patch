@@ -1,0 +1,91 @@
+From 84bcdb9cdab0e0be9cdfededfb518d3cea9009e3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Andr=C3=A9=20Draszik?= <andre.draszik at jci.com>
+Date: Mon, 12 Mar 2018 15:40:58 +0000
+Subject: [PATCH] build: fix build on --as-needed toolchains (generic)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+If the (host) toolchain has been configured to
+unconditionally add --as-needed to the linker command line
+then linking fails when using the system zlib:
+  + ...gcc -lz -L<sysroot>/usr/lib -L<sysroot>/lib \
+               -Wl,-rpath-link,<sysroot>/usr/lib -Wl,-rpath-link,<sysroot>/lib \
+               -Wl,-rpath,<sysroot>/usr/lib -Wl,-rpath,<sysroot>/lib \
+           -Wl,-O1 -Xlinker --hash-style=both -Xlinker -z -Xlinker defs -Xlinker -O1 \
+           -Xlinker --allow-shlib-undefined -Xlinker -soname=libunpack.so \
+           -Xlinker -z -Xlinker origin -Xlinker -rpath -Xlinker '$ORIGIN' \
+           -lc \
+           -Xlinker -version-script=<src>/jdk/make/mapfiles/libunpack/mapfile-vers-unpack200 \
+           -o $build/jdk/objs/unpackexe/unpack200 \
+           $build/jdk/objs/unpackexe/bands.o $build/jdk/objs/unpackexe/bytes.o \
+           $build/jdk/objs/unpackexe/coding.o $build/jdk/objs/unpackexe/main.o \
+           $build/jdk/objs/unpackexe/unpack.o $build/jdk/objs/unpackexe/utils.o \
+           $build/jdk/objs/unpackexe/zip.o -lstdc++
+  $build/jdk/objs/unpackexe/zip.o: In function `jar::deflate_bytes(bytes&, bytes&)':
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:464: undefined reference to `deflateInit2_'
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:507: undefined reference to `deflate'
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:514: undefined reference to `deflateEnd'
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:502: undefined reference to `deflate'
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:518: undefined reference to `deflateEnd'
+  $build/jdk/objs/unpackexe/zip.o: In function `jar::get_crc32(unsigned int, unsigned char*, unsigned int)':
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:61: undefined reference to `crc32'
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:61: undefined reference to `crc32'
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:61: undefined reference to `crc32'
+  $build/jdk/objs/unpackexe/zip.o: In function `gunzip::free()':
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:645: undefined reference to `inflateEnd'
+  $build/jdk/objs/unpackexe/zip.o: In function `read_input_via_gzip(unpacker*, void*, long, long)':
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:548: undefined reference to `inflate'
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:548: undefined reference to `inflate'
+  $build/jdk/objs/unpackexe/zip.o: In function `gunzip::start(int)':
+  $src/jdk/src/share/native/com/sun/java/util/jar/pack/zip.cpp:637: undefined reference to `inflateInit2_'
+  collect2: error: ld returned 1 exit status
+
+(as happened on a Ubuntu 16.04 xenial host:
+  gcc --version
+  gcc (Ubuntu 5.4.0-6ubuntu1~16.04.9) 5.4.0 20160609
+  Copyright (C) 2015 Free Software Foundation, Inc.
+  This is free software; see the source for copying conditions.  There is NO
+  warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+)
+
+The reason is that the order of command line arguments
+becomes important with --as-needed and the JDK build system
+places -lz at the beginning of the command line where it
+would normally place the zlib object files from its own
+bundled compiled version.
+
+Having -lz early in the command line is not useful, as it
+is discarded by the linker at that point in time as it
+hasn't seen any reference to the symbols provided yet.
+
+As it seems a generic pattern in the makefiles here, just
+place the $EXPECTED_OBJS early in the command line, before
+any additional libraries, so as to fix this once and for
+all.
+
+Signed-off-by: André Draszik <andre.draszik at jci.com>
+---
+Upstream-Status: Pending
+ make/common/NativeCompilation.gmk | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/make/common/NativeCompilation.gmk b/make/common/NativeCompilation.gmk
+index e7ea22ce..79f081fd 100644
+--- a/make/common/NativeCompilation.gmk
++++ b/make/common/NativeCompilation.gmk
+@@ -477,9 +477,8 @@ define SetupNativeCompilation
+ 
+     $$($1_TARGET) : $$($1_EXPECTED_OBJS) $$($1_RES) $$($1_GEN_MANIFEST)
+ 	$$(call LINKING_EXE_MSG,$$($1_BASENAME))
+-	$$($1_LDEXE) $$($1_LDFLAGS) $$($1_EXTRA_LDFLAGS) $(EXE_OUT_OPTION)$$($1_TARGET) \
+-	$$($1_EXPECTED_OBJS) $$($1_RES) $$($1_LDFLAGS_SUFFIX) \
+-	$$($1_EXTRA_LDFLAGS_SUFFIX)
++	$$($1_LDEXE) $$($1_EXPECTED_OBJS) $$($1_LDFLAGS) $$($1_EXTRA_LDFLAGS) $(EXE_OUT_OPTION)$$($1_TARGET) \
++	$$($1_RES) $$($1_LDFLAGS_SUFFIX) $$($1_EXTRA_LDFLAGS_SUFFIX)
+         ifneq (,$$($1_GEN_MANIFEST))
+ 	  $(MT) -nologo -manifest $$($1_GEN_MANIFEST) -outputresource:$$@;#1
+         endif
+-- 
+2.16.2
+

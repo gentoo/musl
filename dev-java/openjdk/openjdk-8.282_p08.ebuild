@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -43,7 +43,7 @@ SRC_URI="
 
 LICENSE="GPL-2"
 SLOT="$(ver_cut 1)"
-KEYWORDS="amd64 ~arm64 ppc64 x86"
+KEYWORDS="amd64 arm64 ppc64 x86"
 IUSE="alsa debug cups doc examples headless-awt javafx +jbootstrap +pch selinux source"
 
 COMMON_DEPEND="
@@ -139,22 +139,28 @@ src_prepare() {
 	sed -i '/^WARNINGS_ARE_ERRORS/ s/-Werror/-Wno-error/' \
 		hotspot/make/linux/makefiles/gcc.make || die
 
+	# todo: patches
+	eapply "${FILESDIR}/patches/${SLOT}/0001_fix-jdk-ipv6-init.patch"
+	eapply "${FILESDIR}/patches/${SLOT}/0002_fix-jdk-close-fds.patch"
+	eapply "${FILESDIR}/patches/${SLOT}/0003_jdk-disable-vfork.patch"
+	eapply "${FILESDIR}/patches/${SLOT}/0004_hotspot-insantiate-arrayallocator.patch"
+	eapply "${FILESDIR}/patches/${SLOT}/0005_fix-build-with-as-needed-toolchain.patch"
+	eapply "${FILESDIR}/patches/${SLOT}/0006_fix-libjvm-load.patch"
+	eapply "${FILESDIR}/patches/${SLOT}/0007_jdk-includes.patch"
+	eapply "${FILESDIR}/patches/${SLOT}/0008_jdk-execinfo.patch"
+
 	# conditionally apply patches for musl compatibility
 	if use elibc_musl; then
-		eapply "${FILESDIR}/musl/${SLOT}/0001_musl_hotspot.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/0002_musl_hotspot_ppc.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/0004_musl_hotspot_noagent.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/0005_musl_fix_libjvm_load.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/0006_musl_jdk.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/0007_musl_jdk_includes.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/0008_musl_jdk_execinfo.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/0009_fix_jdk_ipv6_init.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/0010_fix_jdk_close_fds.patch"
-	fi
+		eapply "${FILESDIR}/patches/${SLOT}/1001_hotspot-musl.patch"
+		eapply "${FILESDIR}/patches/${SLOT}/1002_hotspot-ppc-musl.patch"
 
-	# apply this patch here as the sources are not available unless ARCH == arm64
-	if use elibc_musl && use arm64; then
-		eapply "${FILESDIR}/patches/${PN}-${SLOT}/0003_musl_hotspot_aarch64.patch"
+		# apply this patch here as the sources are not available unless ARCH == arm64
+		if use arm64; then
+			eapply "${FILESDIR}/patches/${SLOT}/1003_hotspot-aarch64-musl.patch"
+		fi
+
+		eapply "${FILESDIR}/patches/${SLOT}/1004_hotspot-noagent-musl.patch"
+		eapply "${FILESDIR}/patches/${SLOT}/1006_jdk-musl.patch"
 	fi
 
 	chmod +x configure || die
@@ -193,6 +199,7 @@ src_configure() {
 			--with-zlib=system
 			--with-native-debug-symbols=$(usex debug internal none)
 			$(usex headless-awt --disable-headful '')
+			$(tc-is-clang && echo "--with-toolchain-type=clang")
 		)
 
 	# PaX breaks pch, bug #601016
