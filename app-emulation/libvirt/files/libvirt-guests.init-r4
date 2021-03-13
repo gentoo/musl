@@ -206,6 +206,7 @@ start() {
 		name=$(do_virsh "${uri}" domname ${uuid})
 		einfo "  ${name}"
 		do_virsh "${uri}" start ${uuid} > /dev/null
+        do_virsh "${uri}" domtime --sync ${uuid} > /dev/null
 	done <"${gueststatefile}"
 	eend 0
 }
