@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -19,7 +19,7 @@ HOMEPAGE="https://github.com/elogind/elogind"
 
 LICENSE="CC0-1.0 LGPL-2.1+ public-domain"
 SLOT="0"
-IUSE="+acl debug doc +pam +policykit selinux"
+IUSE="+acl audit debug doc +pam +policykit selinux"
 
 BDEPEND="
 	app-text/docbook-xml-dtd:4.2
@@ -30,6 +30,7 @@ BDEPEND="
 	virtual/pkgconfig
 "
 DEPEND="
+	audit? ( sys-process/audit )
 	sys-apps/util-linux
 	sys-libs/libcap
 	virtual/libudev:=
@@ -48,9 +49,8 @@ PDEPEND="
 DOCS=( README.md src/libelogind/sd-bus/GVARIANT-SERIALIZATION )
 
 PATCHES=(
-	"${FILESDIR}/${P}-nodocs.patch"
+	"${FILESDIR}/${PN}-243.7-nodocs.patch"
 	"${FILESDIR}/${PN}-241.4-broken-test.patch" # bug 699116
-	"${FILESDIR}/${PN}-243.7-musl-mallinfo.patch"
 )
 
 pkg_setup() {
@@ -61,6 +61,11 @@ pkg_setup() {
 
 src_prepare() {
 	default
+
+	if use elibc_musl ; then
+		eapply "${FILESDIR}"/${PN}-246.9.2-musl-mallinfo.patch
+	fi
+
 	xdg_environment_reset
 }
 
@@ -90,6 +95,7 @@ src_configure() {
 		-Ddefault-hierarchy=${cgroupmode}
 		-Ddefault-kill-user-processes=false
 		-Dacl=$(usex acl true false)
+		-Daudit=$(usex audit true false)
 		--buildtype $(usex debug debug release)
 		-Dhtml=$(usex doc auto false)
 		-Dpam=$(usex pam true false)
@@ -105,13 +111,23 @@ src_install() {
 
 	meson_src_install
 
-	newinitd "${FILESDIR}"/${PN}.init ${PN}
+	newinitd "${FILESDIR}"/${PN}.init-r1 ${PN}
 
 	sed -e "s/@libdir@/$(get_libdir)/" "${FILESDIR}"/${PN}.conf.in > ${PN}.conf || die
 	newconfd ${PN}.conf ${PN}
 }
 
 pkg_postinst() {
+	if ! use pam; then
+		ewarn "${PN} will not be managing user logins/seats without USE=\"pam\"!"
+		ewarn "In other words, it will be useless for most applications."
+		ewarn
+	fi
+	if ! use policykit; then
+		ewarn "loginctl will not be able to perform privileged operations without"
+		ewarn "USE=\"policykit\"! That means e.g. no suspend or hibernate."
+		ewarn
+	fi
 	if [[ "$(rc-config list boot | grep elogind)" != "" ]]; then
 		elog "elogind is currently started from boot runlevel."
 	elif [[ "$(rc-config list default | grep elogind)" != "" ]]; then
