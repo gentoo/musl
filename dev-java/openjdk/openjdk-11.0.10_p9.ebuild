@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -132,19 +132,15 @@ pkg_setup() {
 src_prepare() {
 	default
 
-	# conditionally apply patches for musl compatibility
-	if use elibc_musl; then
-		eapply "${FILESDIR}/musl/${SLOT}/build.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/fix-bootjdk-check.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/ppc64le.patch"
-		eapply "${FILESDIR}/musl/${SLOT}/aarch64.patch"
-	fi
+	eapply "${FILESDIR}/patches/${SLOT}/0001_fix-bootjdk-check.patch"
 
-	# conditionally remove not compilable module (hotspot jdk.hotspot.agent)
-	# this needs libthread_db which is only provided by glibc
-	#
-	# haven't found any way to disable this module so just remove it.
-	if use elibc_musl; then
+	if use elibc_musl ; then
+		eapply "${FILESDIR}/patches/${SLOT}/1001_build.patch"
+		eapply "${FILESDIR}/patches/${SLOT}/1002_aarch64.patch"
+		eapply "${FILESDIR}/patches/${SLOT}/1003_ppc64le.patch"
+
+		# this needs libthread_db which is only provided by glibc
+		# haven't found any way to disable this module so just remove it.
 		rm -rf "${S}"/src/jdk.hotspot.agent || die "failed to remove HotSpot agent"
 	fi
 
@@ -185,6 +181,7 @@ src_configure() {
 		--with-zlib=system
 		--enable-dtrace=$(usex systemtap yes no)
 		--enable-headless-only=$(usex headless-awt yes no)
+		$(tc-is-clang && echo "--with-toolchain-type=clang")
 	)
 
 	if use javafx; then
