@@ -1,6 +1,6 @@
---- a/src/tools/rls/rls/src/cmd.rs
-+++ b/src/tools/rls/rls/src/cmd.rs
-@@ -17,7 +17,7 @@ use crate::config::Config;
+--- rustc-1.35.0-src/src/tools/rls/rls/src/cmd.rs
++++ rustc-1.35.0-src/src/tools/rls/rls/src/cmd.rs
+@@ -7,7 +7,7 @@ use crate::config::Config;
  use crate::server::{self, LsService, Notification, Request, RequestId};
  use rls_analysis::{AnalysisHost, Target};
  use rls_vfs::Vfs;
@@ -9,7 +9,7 @@
  
  use lsp_types::{
      ClientCapabilities, CodeActionContext, CodeActionParams, CompletionItem,
-@@ -323,8 +323,8 @@ fn url(file_name: &str) -> Url {
+@@ -313,8 +313,8 @@ fn url(file_name: &str) -> Url {
  }
  
  fn next_id() -> RequestId {
@@ -20,9 +20,9 @@
  }
  
  // Custom reader and output for the RLS server.
---- a/src/tools/rls/rls/src/server/io.rs
-+++ b/src/tools/rls/rls/src/server/io.rs
-@@ -17,7 +17,7 @@ use crate::lsp_data::{LSPNotification, LSPRequest};
+--- rustc-1.35.0-src/src/tools/rls/rls/src/server/io.rs
++++ rustc-1.35.0-src/src/tools/rls/rls/src/server/io.rs
+@@ -7,7 +7,7 @@ use crate::lsp_data::{LSPNotification, LSPRequest};
  
  use std::fmt;
  use std::io::{self, BufRead, Write};
@@ -31,7 +31,7 @@
  use std::sync::Arc;
  
  use jsonrpc_core::{self as jsonrpc, response, version, Id};
-@@ -182,13 +182,13 @@ pub trait Output: Sync + Send + Clone + 'static {
+@@ -171,13 +171,13 @@ pub trait Output: Sync + Send + Clone + 'static {
  /// An output that sends notifications and responses on `stdout`.
  #[derive(Clone)]
  pub(super) struct StdioOutput {
@@ -40,14 +40,14 @@
  }
  
  impl StdioOutput {
-     /// Construct a new `stdout` output.
+     /// Constructs a new `stdout` output.
      pub(crate) fn new() -> StdioOutput {
 -        StdioOutput { next_id: Arc::new(AtomicU64::new(1)) }
 +        StdioOutput { next_id: Arc::new(AtomicU32::new(1).into()) }
      }
  }
  
-@@ -205,7 +205,7 @@ impl Output for StdioOutput {
+@@ -194,7 +194,7 @@ impl Output for StdioOutput {
      }
  
      fn provide_id(&self) -> RequestId {
