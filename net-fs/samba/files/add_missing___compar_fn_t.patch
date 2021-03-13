@@ -1,5 +1,3 @@
-diff --git a/source4/dsdb/samdb/ldb_modules/count_attrs.c b/source4/dsdb/samdb/ldb_modules/count_attrs.c
-index b0d1b22..2d53b53 100644
 --- a/source4/dsdb/samdb/ldb_modules/count_attrs.c
 +++ b/source4/dsdb/samdb/ldb_modules/count_attrs.c
 @@ -38,6 +38,11 @@
