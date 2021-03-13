@@ -1,4 +1,4 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # emacs support disabled due to #99533 #335900
@@ -8,13 +8,13 @@ EAPI=5
 inherit eutils systemd toolchain-funcs autotools multilib-minimal usr-ldscript
 
 DESCRIPTION="Console-based mouse driver"
-HOMEPAGE="http://www.nico.schottelius.org/software/gpm/"
-SRC_URI="http://www.nico.schottelius.org/software/${PN}/archives/${P}.tar.lzma
+HOMEPAGE="https://www.nico.schottelius.org/software/gpm/"
+SRC_URI="https://www.nico.schottelius.org/software/${PN}/archives/${P}.tar.lzma
 	mirror://gentoo/${P}-docs.patch.xz"
 
 LICENSE="GPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~mips ppc x86"
+KEYWORDS="~alpha amd64 arm arm64 hppa ~ia64 ~m68k ~mips ppc ppc64 ~riscv s390 sparc x86"
 IUSE="selinux static-libs"
 
 RDEPEND=">=sys-libs/ncurses-5.9-r3:0=[${MULTILIB_USEDEP}]
@@ -32,6 +32,18 @@ src_prepare() {
 	epatch "${WORKDIR}"/${P}-docs.patch
 	touch -r . doc/* || die
 
+	# bug #629774
+	epatch "${FILESDIR}"/${P}-glibc-2.26.patch
+
+	# bug #705878
+	epatch "${FILESDIR}"/${P}-gcc-10.patch
+
+	# musl
+	epatch "${FILESDIR}"/${P}-musl-missing-headers.patch
+	epatch "${FILESDIR}"/${P}-musl-portable-sigaction.patch
+
+	epatch_user
+
 	# fix ABI values
 	sed -i \
 		-e '/^abi_lev=/s:=.*:=1:' \
@@ -41,10 +53,6 @@ src_prepare() {
 	# Should be fixed with the next release though.
 	# https://github.com/telmich/gpm/pull/15
 	sed -i -e '/ACLOCAL/,$d' autogen.sh || die
-
-	epatch "${FILESDIR}"/${P}-musl-missing-headers.patch
-	epatch "${FILESDIR}"/${P}-musl-portable-sigaction.patch
-
 	./autogen.sh
 	eautoreconf
 
