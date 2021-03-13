@@ -1,12 +1,12 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
+EAPI=7
 
 inherit eutils toolchain-funcs
 
 DESCRIPTION="SYSLINUX, PXELINUX, ISOLINUX, EXTLINUX and MEMDISK bootloaders"
-HOMEPAGE="http://www.syslinux.org/"
+HOMEPAGE="https://www.syslinux.org/"
 # Final releases in 6.xx/$PV.tar.* (literal "xx")
 # Testing releases in Testing/$PV/$PV.tar.*
 SRC_URI_DIR=${PV:0:1}.xx
@@ -15,7 +15,7 @@ SRC_URI_TESTING=Testing/${PV:0:4}
 [[ ${PV/_beta} != $PV ]] && SRC_URI_DIR=$SRC_URI_TESTING
 [[ ${PV/_pre} != $PV ]] && SRC_URI_DIR=$SRC_URI_TESTING
 [[ ${PV/_rc} != $PV ]] && SRC_URI_DIR=$SRC_URI_TESTING
-SRC_URI="mirror://kernel/linux/utils/boot/syslinux/${SRC_URI_DIR}/${P/_/-}.tar.xz"
+SRC_URI="https://www.kernel.org/pub/linux/utils/boot/syslinux/${SRC_URI_DIR}/${P/_/-}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -23,8 +23,8 @@ KEYWORDS="-* amd64 x86"
 IUSE="custom-cflags"
 
 RDEPEND="sys-fs/mtools
-		dev-perl/Crypt-PasswdMD5
-		dev-perl/Digest-SHA1"
+	dev-perl/Crypt-PasswdMD5
+	dev-perl/Digest-SHA1"
 DEPEND="${RDEPEND}
 	dev-lang/nasm
 	>=sys-boot/gnu-efi-3.0u
@@ -41,11 +41,17 @@ QA_PREBUILT="usr/share/${PN}/*.c32"
 
 # removed all the unpack/patching stuff since we aren't rebuilding the core stuff anymore
 
-src_prepare() {
-	rm -f gethostip #bug 137081
+PATCHES=(
+	"${FILESDIR}"/${PN}-6.03-sysmacros.patch #579928
+	"${FILESDIR}"/${P}-singleloadsegment.patch #662678
+	"${FILESDIR}"/${P}-fcommon.patch #705730
+	"${FILESDIR}"/${PN}-musl.patch
+)
 
-	epatch "${FILESDIR}"/${PN}-6.03-sysmacros.patch #579928
-	epatch "${FILESDIR}"/${PN}-musl.patch
+src_prepare() {
+	default
+
+	rm -f gethostip #bug 137081
 
 	# Don't prestrip or override user LDFLAGS, bug #305783
 	local SYSLINUX_MAKEFILES="extlinux/Makefile linux/Makefile mtools/Makefile \
@@ -83,31 +89,32 @@ src_prepare() {
 			ewarn "Continuing anyway as requested."
 		fi
 	fi
+
+	tc-export AR CC LD OBJCOPY RANLIB
+}
+
+_emake() {
+	emake \
+		AR="${AR}" \
+		CC="${CC}" \
+		LD="${LD}" \
+		OBJCOPY="${OBJCOPY}" \
+		RANLIB="${RANLIB}" \
+		"$@"
 }
 
 src_compile() {
 	# build system abuses the LDFLAGS variable to pass arguments to ld
 	unset LDFLAGS
 	if [[ ! -z ${loaderarch} ]]; then
-		emake CC="$(tc-getCC)" LD="$(tc-getLD)" ${loaderarch}
+		_emake ${loaderarch}
 	fi
-	emake CC="$(tc-getCC)" LD="$(tc-getLD)" ${loaderarch} installer
+	_emake ${loaderarch} installer
 }
 
 src_install() {
 	# parallel install fails sometimes
 	einfo "loaderarch=${loaderarch}"
-	emake -j1 LD="$(tc-getLD)" INSTALLROOT="${D}" MANDIR=/usr/share/man bios ${loaderarch} install
+	_emake -j1 INSTALLROOT="${D}" MANDIR=/usr/share/man bios ${loaderarch} install
 	dodoc README NEWS doc/*.txt
-}
-
-pkg_postinst() {
-	# print warning for users upgrading from the previous stable version
-	if has 4.07 ${REPLACING_VERSIONS}; then
-		ewarn "syslinux now uses dynamically linked ELF executables. Before you reboot,"
-		ewarn "ensure that needed dependencies are fulfilled. For example, run from your"
-		ewarn "syslinux directory:"
-		ewarn
-		ewarn "LD_LIBRARY_PATH=\".\" ldd menu.c32"
-	fi
 }
