@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -12,7 +12,7 @@ SRC_URI="https://fedorapeople.org/~steved/${PN}/${PV}/${P}.tar.bz2"
 
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 ~x86"
+KEYWORDS="~alpha amd64 arm arm64 ~hppa ~ia64 ~m68k ~mips ppc ppc64 s390 sparc x86"
 IUSE="ldap static-libs"
 
 DEPEND="ldap? ( net-nds/openldap )"
@@ -25,8 +25,6 @@ RDEPEND="
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.27-getgrouplist.patch #169909
 	"${FILESDIR}"/${PN}-0.21-headers.patch
-	"${FILESDIR}"/${PN}-0.27-configure-musl.patch
-	"${FILESDIR}"/0001-add_missing_header_musl.patch
 )
 
 src_prepare() {
@@ -35,6 +33,12 @@ src_prepare() {
 	sed -i \
 		-e "/PATH_PLUGINS/s:/usr/lib/libnfsidmap:${EPREFIX}/usr/$(get_libdir)/libnfsidmap:" \
 		libnfsidmap.c || die #504666
+
+	if use elibc_musl ; then
+		"${FILESDIR}"/${PN}-0.27-configure-musl.patch
+		"${FILESDIR}"/0001-add_missing_header_musl.patch
+	fi
+
 	eautoreconf
 }
 
