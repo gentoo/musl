@@ -1,8 +1,7 @@
-diff --git a/src/ui/theme.c.orig b/src/ui/theme.c
-index e45f98e..d049b16 100644
---- a/src/ui/theme.c
-+++ b/src/ui/theme.c
-@@ -60,6 +60,7 @@
+diff -Naur marco-1.24.1/src/ui/theme.c marco-1.24.1-r1/src/ui/theme.c
+--- marco-1.24.1/src/ui/theme.c	2020-08-04 14:35:42.000000000 -0400
++++ marco-1.24.1-r1/src/ui/theme.c	2021-03-12 20:50:03.128023279 -0500
+@@ -61,6 +61,7 @@
  #include <gtk/gtk.h>
  #include <string.h>
  #include <stdlib.h>
