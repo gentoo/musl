@@ -1,5 +1,7 @@
---- rustc-1.38.0-src/src/llvm-project/llvm/include/llvm/Analysis/TargetLibraryInfo.def
-+++ rustc-1.38.0-src/src/llvm-project/llvm/include/llvm/Analysis/TargetLibraryInfo.def
+diff --git a/src/llvm-project/llvm/include/llvm/Analysis/TargetLibraryInfo.def b/src/llvm-project/llvm/include/llvm/Analysis/TargetLibraryInfo.def
+index 579d23004d1..6cd9d2722fb 100644
+--- a/src/llvm-project/llvm/include/llvm/Analysis/TargetLibraryInfo.def
++++ b/src/llvm-project/llvm/include/llvm/Analysis/TargetLibraryInfo.def
 @@ -27,6 +27,15 @@
  #define TLI_DEFINE_STRING_INTERNAL(string_repr) string_repr,
  #endif

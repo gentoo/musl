@@ -1,18 +1,18 @@
-From 037c877646effd72dbf82f3eb8e5ed41e9f5e89d Mon Sep 17 00:00:00 2001
+From d4b28cd40d12ef2a801658176b31c6663c25d66f Mon Sep 17 00:00:00 2001
 From: Samuel Holland <samuel@sholland.org>
 Date: Mon, 17 Sep 2018 02:29:06 +0000
-Subject: [PATCH 15/15] Add gentoo target specs
+Subject: [PATCH 14/14] Add gentoo target specs
 
 ---
- src/librustc_target/spec/aarch64_gentoo_linux_musl.rs | 11 +++++++++++
- src/librustc_target/spec/arm_gentoo_linux_musleabi.rs | 11 +++++++++++
- .../spec/armv7a_gentoo_linux_musleabihf.rs            | 11 +++++++++++
- src/librustc_target/spec/i686_gentoo_linux_musl.rs    | 11 +++++++++++
- src/librustc_target/spec/mod.rs                       | 11 ++++++++++-
- .../spec/powerpc64_gentoo_linux_musl.rs               | 11 +++++++++++
- src/librustc_target/spec/powerpc_gentoo_linux_musl.rs | 11 +++++++++++
- src/librustc_target/spec/x86_64_gentoo_linux_musl.rs  | 11 +++++++++++
- 8 files changed, 87 insertions(+), 1 deletion(-)
+ .../spec/aarch64_gentoo_linux_musl.rs               | 11 +++++++++++
+ .../spec/arm_gentoo_linux_musleabi.rs               | 11 +++++++++++
+ .../spec/armv7a_gentoo_linux_musleabihf.rs          | 11 +++++++++++
+ src/librustc_target/spec/i686_gentoo_linux_musl.rs  | 13 +++++++++++++
+ src/librustc_target/spec/mod.rs                     | 11 ++++++++++-
+ .../spec/powerpc64_gentoo_linux_musl.rs             | 11 +++++++++++
+ .../spec/powerpc_gentoo_linux_musl.rs               | 13 +++++++++++++
+ .../spec/x86_64_gentoo_linux_musl.rs                | 11 +++++++++++
+ 8 files changed, 91 insertions(+), 1 deletion(-)
  create mode 100644 src/librustc_target/spec/aarch64_gentoo_linux_musl.rs
  create mode 100644 src/librustc_target/spec/arm_gentoo_linux_musleabi.rs
  create mode 100644 src/librustc_target/spec/armv7a_gentoo_linux_musleabihf.rs
@@ -23,7 +23,7 @@ Subject: [PATCH 15/15] Add gentoo target specs
 
 diff --git a/src/librustc_target/spec/aarch64_gentoo_linux_musl.rs b/src/librustc_target/spec/aarch64_gentoo_linux_musl.rs
 new file mode 100644
-index 00000000000..420fe7cde70
+index 0000000000..420fe7cde7
 --- /dev/null
 +++ b/src/librustc_target/spec/aarch64_gentoo_linux_musl.rs
 @@ -0,0 +1,11 @@
@@ -40,7 +40,7 @@ index 00000000000..420fe7cde70
 +}
 diff --git a/src/librustc_target/spec/arm_gentoo_linux_musleabi.rs b/src/librustc_target/spec/arm_gentoo_linux_musleabi.rs
 new file mode 100644
-index 00000000000..d47ca841647
+index 0000000000..d47ca84164
 --- /dev/null
 +++ b/src/librustc_target/spec/arm_gentoo_linux_musleabi.rs
 @@ -0,0 +1,11 @@
@@ -57,7 +57,7 @@ index 00000000000..d47ca841647
 +}
 diff --git a/src/librustc_target/spec/armv7a_gentoo_linux_musleabihf.rs b/src/librustc_target/spec/armv7a_gentoo_linux_musleabihf.rs
 new file mode 100644
-index 00000000000..f5c85855c18
+index 0000000000..f5c85855c1
 --- /dev/null
 +++ b/src/librustc_target/spec/armv7a_gentoo_linux_musleabihf.rs
 @@ -0,0 +1,11 @@
@@ -74,11 +74,11 @@ index 00000000000..f5c85855c18
 +}
 diff --git a/src/librustc_target/spec/i686_gentoo_linux_musl.rs b/src/librustc_target/spec/i686_gentoo_linux_musl.rs
 new file mode 100644
-index 00000000000..1cd39cd76af
+index 0000000000..be4d7b8523
 --- /dev/null
 +++ b/src/librustc_target/spec/i686_gentoo_linux_musl.rs
-@@ -0,0 +1,11 @@
-+use crate::spec::TargetResult;
+@@ -0,0 +1,13 @@
++use crate::spec::{LinkerFlavor, TargetResult};
 +
 +pub fn target() -> TargetResult {
 +    let mut base = super::i686_unknown_linux_musl::target()?;
@@ -86,15 +86,17 @@ index 00000000000..1cd39cd76af
 +    base.llvm_target = "i686-gentoo-linux-musl".to_string();
 +    base.target_vendor = "gentoo".to_string();
 +    base.options.crt_static_default = false;
++    base.options.post_link_args.insert(LinkerFlavor::Gcc,
++        vec!["-Wl,--as-needed".to_string(), "-lssp_nonshared".to_string()]);
 +
 +    Ok(base)
 +}
 diff --git a/src/librustc_target/spec/mod.rs b/src/librustc_target/spec/mod.rs
-index fa29ff3f8d8..a711417e7c1 100644
+index bef2afc7b6..42bd26ce0c 100644
 --- a/src/librustc_target/spec/mod.rs
 +++ b/src/librustc_target/spec/mod.rs
-@@ -489,7 +489,17 @@ macro_rules! supported_targets {
-     };
+@@ -327,7 +327,17 @@ macro_rules! supported_targets {
+     )
  }
  
 +mod arm_unknown_linux_musleabi;
@@ -111,7 +113,7 @@ index fa29ff3f8d8..a711417e7c1 100644
      ("x86_64-unknown-linux-gnu", x86_64_unknown_linux_gnu),
      ("x86_64-unknown-linux-gnux32", x86_64_unknown_linux_gnux32),
      ("i686-unknown-linux-gnu", i686_unknown_linux_gnu),
-@@ -514,7 +524,6 @@ supported_targets! {
+@@ -348,7 +358,6 @@ supported_targets! {
      ("sparc64-unknown-linux-gnu", sparc64_unknown_linux_gnu),
      ("arm-unknown-linux-gnueabi", arm_unknown_linux_gnueabi),
      ("arm-unknown-linux-gnueabihf", arm_unknown_linux_gnueabihf),
@@ -121,7 +123,7 @@ index fa29ff3f8d8..a711417e7c1 100644
      ("armv5te-unknown-linux-gnueabi", armv5te_unknown_linux_gnueabi),
 diff --git a/src/librustc_target/spec/powerpc64_gentoo_linux_musl.rs b/src/librustc_target/spec/powerpc64_gentoo_linux_musl.rs
 new file mode 100644
-index 00000000000..e840bb27bbf
+index 0000000000..e840bb27bb
 --- /dev/null
 +++ b/src/librustc_target/spec/powerpc64_gentoo_linux_musl.rs
 @@ -0,0 +1,11 @@
@@ -138,11 +140,11 @@ index 00000000000..e840bb27bbf
 +}
 diff --git a/src/librustc_target/spec/powerpc_gentoo_linux_musl.rs b/src/librustc_target/spec/powerpc_gentoo_linux_musl.rs
 new file mode 100644
-index 00000000000..a623ffed53a
+index 0000000000..905c5214d4
 --- /dev/null
 +++ b/src/librustc_target/spec/powerpc_gentoo_linux_musl.rs
-@@ -0,0 +1,11 @@
-+use crate::spec::TargetResult;
+@@ -0,0 +1,13 @@
++use crate::spec::{LinkerFlavor, TargetResult};
 +
 +pub fn target() -> TargetResult {
 +    let mut base = super::powerpc_unknown_linux_musl::target()?;
@@ -150,12 +152,14 @@ index 00000000000..a623ffed53a
 +    base.llvm_target = "powerpc-gentoo-linux-musl".to_string();
 +    base.target_vendor = "gentoo".to_string();
 +    base.options.crt_static_default = false;
++    base.options.post_link_args.insert(LinkerFlavor::Gcc,
++        vec!["-Wl,--as-needed".to_string(), "-lssp_nonshared".to_string()]);
 +
 +    Ok(base)
 +}
 diff --git a/src/librustc_target/spec/x86_64_gentoo_linux_musl.rs b/src/librustc_target/spec/x86_64_gentoo_linux_musl.rs
 new file mode 100644
-index 00000000000..f33047358b5
+index 0000000000..f33047358b
 --- /dev/null
 +++ b/src/librustc_target/spec/x86_64_gentoo_linux_musl.rs
 @@ -0,0 +1,11 @@
@@ -171,5 +175,5 @@ index 00000000000..f33047358b5
 +    Ok(base)
 +}
 -- 
-2.26.2
+2.21.0
 
