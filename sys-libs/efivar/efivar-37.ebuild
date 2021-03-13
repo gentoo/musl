@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=6
@@ -11,7 +11,7 @@ SRC_URI="https://github.com/rhinstaller/efivar/releases/download/${PV}/${P}.tar.
 
 LICENSE="GPL-2"
 SLOT="0/1"
-KEYWORDS="amd64 x86"
+KEYWORDS="amd64 ~arm arm64 ~ia64 x86"
 
 RDEPEND="dev-libs/popt"
 DEPEND="${RDEPEND}
@@ -20,35 +20,23 @@ DEPEND="${RDEPEND}
 "
 
 PATCHES=(
-	"${FILESDIR}/0.23-musl.patch"
-	"${FILESDIR}/27-strndupa.patch"
+	"${FILESDIR}"/${PN}-37-ia64-relro.patch
 )
 
 src_prepare() {
 	default
-	sed -i -e s/-Werror// gcc.specs || die
+	sed -i -e 's/-Werror //' gcc.specs || die
 }
 
 src_configure() {
 	tc-export CC
-
-	# https://github.com/rhinstaller/efivar/issues/64
-	append-cflags -flto
-
+	export CC_FOR_BUILD=$(tc-getBUILD_CC)
 	tc-ld-disable-gold
 	export libdir="/usr/$(get_libdir)"
 	unset LIBS # Bug 562004
-}
 
-src_compile() {
-	# Avoid building static binary/libs
-	opts=(
-		BINTARGETS=efivar
-		STATICLIBTARGETS=
-	)
-	emake "${opts[@]}"
-}
-
-src_install() {
-	emake "${opts[@]}" DESTDIR="${D}" install
+	if [[ -n ${GCC_SPECS} ]]; then
+		# The environment overrides the command line.
+		GCC_SPECS+=":${S}/gcc.specs"
+	fi
 }
