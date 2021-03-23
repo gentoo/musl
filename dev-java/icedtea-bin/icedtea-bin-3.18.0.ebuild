@@ -111,7 +111,9 @@ src_prepare() {
 	eshopts_push -s globstar
 	for debug in **/*.debug; do
 		bin="${strip_dir}/${debug%.debug}"
-		eu-unstrip -o "${bin}" "${bin}" "${debug}" || die
+		if [ -f "${bin}" ]; then
+			eu-unstrip -o "${bin}" "${bin}" "${debug}" || die
+		fi
 	done
 	eshopts_pop
 	cd - || die
