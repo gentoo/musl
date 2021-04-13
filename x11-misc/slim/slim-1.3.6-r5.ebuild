@@ -1,9 +1,8 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=5
 
-CMAKE_MIN_VERSION="2.8.8"
 inherit cmake-utils pam eutils systemd versionator
 
 DESCRIPTION="Simple Login Manager"
@@ -30,21 +29,25 @@ DEPEND="${RDEPEND}
 	x11-base/xorg-proto"
 PDEPEND="branding? ( >=x11-themes/slim-themes-1.2.3a-r3 )"
 
-src_prepare() {
+PATCHES=(
 	# Our Gentoo-specific config changes
-	epatch "${FILESDIR}"/${P}-config.diff \
-		"${FILESDIR}"/${PN}-1.3.5-arm.patch \
-		"${FILESDIR}"/${P}-honour-cflags.patch \
-		"${FILESDIR}"/${P}-libslim-cmake-fixes.patch \
-		"${FILESDIR}"/${PN}-1.3.5-disable-ck-for-systemd.patch \
-		"${FILESDIR}"/${P}-strip-systemd-unit-install.patch \
-		"${FILESDIR}"/${P}-systemd-session.patch \
-		"${FILESDIR}"/${P}-session-chooser.patch \
-		"${FILESDIR}"/${P}-fix-slimlock-nopam-v2.patch \
-		"${FILESDIR}"/${P}-drop-zlib.patch \
-		"${FILESDIR}"/${P}-freetype.patch \
-		"${FILESDIR}"/${P}-envcpy-bad-pointer-arithmetic.patch \
-		"${FILESDIR}"/${P}-add-missing-libgen_h.patch
+	"${FILESDIR}"/${P}-config.diff
+	"${FILESDIR}"/${PN}-1.3.5-arm.patch
+	"${FILESDIR}"/${P}-honour-cflags.patch
+	"${FILESDIR}"/${P}-libslim-cmake-fixes.patch
+	"${FILESDIR}"/${PN}-1.3.5-disable-ck-for-systemd.patch
+	"${FILESDIR}"/${P}-strip-systemd-unit-install.patch
+	"${FILESDIR}"/${P}-systemd-session.patch
+	"${FILESDIR}"/${P}-session-chooser.patch
+	"${FILESDIR}"/${P}-fix-slimlock-nopam-v2.patch
+	"${FILESDIR}"/${P}-drop-zlib.patch
+	"${FILESDIR}"/${P}-freetype.patch
+	"${FILESDIR}"/${P}-envcpy-bad-pointer-arithmetic.patch
+	"${FILESDIR}"/${P}-add-missing-libgen_h.patch
+)
+
+src_prepare() {
+	cmake-utils_src_prepare
 
 	if use elibc_FreeBSD; then
 		sed -i -e 's/"-DHAVE_SHADOW"/"-DNEEDS_BASENAME"/' CMakeLists.txt \
@@ -59,7 +62,7 @@ src_prepare() {
 }
 
 src_configure() {
-	mycmakeargs=(
+	local mycmakeargs=(
 		$(cmake-utils_use pam USE_PAM)
 		-DUSE_CONSOLEKIT=OFF
 	)
