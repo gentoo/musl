@@ -22,6 +22,11 @@ BDEPEND=">=sys-devel/libtool-2.2.6b
 
 DOCS=( AUTHORS ChangeLog NEWS README )
 
+PATCHES=(
+	# https://gitlab.com/psmisc/psmisc/-/issues/35
+	"${FILESDIR}/${PN}-23.4-fuser_regression_revert.patch"
+)
+
 src_prepare() {
 	default
 
