@@ -22,14 +22,11 @@ BDEPEND=">=sys-devel/libtool-2.2.6b
 
 DOCS=( AUTHORS ChangeLog NEWS README )
 
-PATCHES=(
-	"${FILESDIR}"/include_limits.patch
-)
-
 src_prepare() {
 	default
 
 	if use elibc_musl ; then
+		"${FILESDIR}"/include_limits.patch
 		"${FILESDIR}"/musl_ptregs.patch
 	fi
 
