@@ -6,9 +6,10 @@ EAPI=6
 inherit java-vm-2 toolchain-funcs multilib-build estack
 
 ALPINE_PN="openjdk8"
-ALPINE_PV="8.282.08-r0"
+ALPINE_PV="8.282.08-r1"
 ALPINE_P="java-1.8-openjdk"
 ALPINE_PATH="usr/lib/jvm/${ALPINE_P}"
+ALPINE_JPEG="libjpeg-turbo-2.0.6-r0"
 S="${WORKDIR}"
 
 get_apk_names() {
@@ -21,12 +22,14 @@ get_apk_names() {
 		${BASE_URI}/${ARCH}/${ALPINE_PN}-doc-${ALPINE_PV}.apk -> ${PF}-doc-${ARCH}.tar.gz
 		${BASE_URI}/${ARCH}/${ALPINE_PN}-dbg-${ALPINE_PV}.apk -> ${PF}-dbg-${ARCH}.tar.gz
 		examples? ( ${BASE_URI}/${ARCH}/${ALPINE_PN}-demos-${ALPINE_PV}.apk -> ${PF}-demos-${ARCH}.tar.gz )
+		jpeg? ( ${BASE_URI_JPEG}/${ARCH}/${ALPINE_JPEG}.apk -> ${PF}-libjpeg-${ARCH}.tar.gz )
 	)"
 }
 
 DESCRIPTION="Binary build of the IcedTea JDK from Alpine Linux"
 HOMEPAGE="http://icedtea.classpath.org"
 BASE_URI="http://dl-cdn.alpinelinux.org/alpine/edge/community/"
+BASE_URI_JPEG="http://dl-cdn.alpinelinux.org/alpine/edge/main/"
 SRC_URI="
 	$(get_apk_names amd64 x86_64)
 	$(get_apk_names arm armhf)
@@ -40,7 +43,7 @@ SRC_URI="
 LICENSE="GPL-2-with-classpath-exception"
 SLOT="8"
 KEYWORDS="-* amd64 arm arm64 ppc64 x86"
-IUSE="big-endian elibc_musl cups +gtk pulseaudio selinux examples alsa headless-awt"
+IUSE="alsa big-endian cups elibc_musl examples +gtk headless-awt jpeg kerberos pulseaudio sctp selinux smartcard"
 
 REQUIRED_USE="
 	gtk? ( !headless-awt )
@@ -59,7 +62,6 @@ DEPEND="
 	>=media-libs/lcms-2.9:2
 	>=sys-apps/baselayout-java-0.1.0-r1
 	>=sys-libs/zlib-1.2.11-r2
-	virtual/jpeg-compat:62
 	alsa? ( >=media-libs/alsa-lib-1.2 )
 	cups? ( >=net-print/cups-2.0 )
 	gtk? (
@@ -69,7 +71,10 @@ DEPEND="
 		>=x11-libs/gtk+-2.24:2
 		>=x11-libs/pango-1.42
 	)
+	kerberos? ( virtual/krb5 )
+	sctp? ( net-misc/lksctp-tools )
 	selinux? ( sec-policy/selinux-java )
+	smartcard? ( sys-apps/pcsc-lite )
 	virtual/ttf-fonts
 	!headless-awt? (
 		media-libs/giflib:0/7
@@ -137,6 +142,12 @@ src_install() {
 
 	# doins doesn't preserve executable bits
 	cp -pRP "${ALPINE_PATH}"/{bin,include,jre,lib,man} "${ddest}" || die
+
+	if use jpeg; then
+		# Install libjpeg.so.8 dependency
+		libdir="$(cd "${ALPINE_PATH}" && dirname -- jre/lib/*/libjavajpeg.so)"
+		cp -vpP usr/lib/libjpeg.so* "${ddest}/${libdir}" || die
+	fi
 
 	if use examples; then
 		cp -pRP "${ALPINE_PATH}"/{demo,sample} "${ddest}" || die
