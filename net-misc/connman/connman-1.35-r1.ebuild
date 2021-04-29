@@ -1,4 +1,4 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="6"
@@ -6,7 +6,7 @@ inherit autotools systemd
 
 DESCRIPTION="Provides a daemon for managing internet connections"
 HOMEPAGE="https://01.org/connman"
-SRC_URI="mirror://kernel/linux/network/${PN}/${P}.tar.xz"
+SRC_URI="https://www.kernel.org/pub/linux/network/${PN}/${P}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0"
