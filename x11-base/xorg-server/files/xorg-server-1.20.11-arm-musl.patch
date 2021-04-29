@@ -1,0 +1,12 @@
+diff -Naur a/hw/xfree86/common/compiler.h b/hw/xfree86/common/compiler.h
+--- a/hw/xfree86/common/compiler.h	2021-04-29 15:19:17.958218267 -0400
++++ b/hw/xfree86/common/compiler.h	2021-04-29 15:19:44.362218296 -0400
+@@ -518,7 +518,7 @@
+     barrier();
+ }
+ 
+-#elif defined(__mips__) || (defined(__arm32__) && !defined(__linux__))
++#elif defined(__mips__) || (defined(__arm32__) && !defined(__GLIBC__))
+ #if defined(__arm32__) || defined(__mips64)
+ #define PORT_SIZE long
+ #else

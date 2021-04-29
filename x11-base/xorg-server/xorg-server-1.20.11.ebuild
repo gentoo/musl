@@ -197,6 +197,7 @@ src_prepare() {
 
 	if use elibc_musl ; then
 		eapply "${FILESDIR}"/xorg-server-1.20.11-fix-musl-input_event.patch
+		eapply "${FILESDIR}"/xorg-server-1.20.11-arm-musl.patch
 	fi
 
 	eapply_user
