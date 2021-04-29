@@ -22,6 +22,7 @@ IUSE="alsa cups debug doc examples gentoo-vm headless-awt javafx +jbootstrap +pc
 COMMON_DEPEND="
 	media-libs/freetype:2=
 	media-libs/giflib:0/7
+	media-libs/harfbuzz:=
 	media-libs/libpng:0=
 	media-libs/lcms:2=
 	sys-libs/zlib
@@ -166,6 +167,7 @@ src_configure() {
 		--with-extra-cxxflags="${CXXFLAGS}"
 		--with-extra-ldflags="${LDFLAGS}"
 		--with-giflib=system
+		--with-harfbuzz=system
 		--with-lcms=system
 		--with-libjpeg=system
 		--with-libpng=system
@@ -185,7 +187,7 @@ src_configure() {
 	)
 
 	if use javafx; then
-		local zip="${EROOT%/}/usr/$(get_libdir)/openjfx-${SLOT}/javafx-exports.zip"
+		local zip="${EPREFIX%/}/usr/$(get_libdir)/openjfx-${SLOT}/javafx-exports.zip"
 		if [[ -r ${zip} ]]; then
 			myconf+=( --with-import-modules="${zip}" )
 		else
