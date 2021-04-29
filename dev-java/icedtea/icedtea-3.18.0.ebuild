@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 # Build written by Andrew John Hughes (gnu_andrew@member.fsf.org)
@@ -7,26 +7,25 @@
 # * IF YOU CHANGE THIS EBUILD, CHANGE ICEDTEA-6.* AS WELL *
 # *********************************************************
 
-EAPI="6"
+EAPI=6
 SLOT="8"
 
-inherit check-reqs flag-o-matic java-pkg-2 java-vm-2 multiprocessing pax-utils prefix toolchain-funcs versionator xdg-utils
+inherit check-reqs eapi7-ver flag-o-matic java-pkg-2 java-vm-2 multiprocessing pax-utils prefix toolchain-funcs xdg-utils
 
-ICEDTEA_VER=$(get_version_component_range 1-3)
-ICEDTEA_BRANCH=$(get_version_component_range 1-2)
+ICEDTEA_VER=$(ver_cut 1-3)
+ICEDTEA_BRANCH=$(ver_cut 1-2)
 ICEDTEA_PKG=icedtea-${ICEDTEA_VER}
-ICEDTEA_PRE=$(get_version_component_range _)
 
-CORBA_TARBALL="ea3169880d70.tar.xz"
-JAXP_TARBALL="883803235596.tar.xz"
-JAXWS_TARBALL="e5d96dc9988a.tar.xz"
-JDK_TARBALL="bb9b9a0ad162.tar.xz"
-LANGTOOLS_TARBALL="e47d37e5fe0b.tar.xz"
-OPENJDK_TARBALL="bca1f7228ce8.tar.xz"
-NASHORN_TARBALL="1d70dcb4ab53.tar.xz"
-HOTSPOT_TARBALL="eeb08cfebded.tar.xz"
-SHENANDOAH_TARBALL="e4e81ae21643.tar.xz"
-AARCH32_TARBALL="ecc1eb1dc760.tar.xz"
+CORBA_TARBALL="${PV}.tar.xz"
+JAXP_TARBALL="${PV}.tar.xz"
+JAXWS_TARBALL="${PV}.tar.xz"
+JDK_TARBALL="${PV}.tar.xz"
+LANGTOOLS_TARBALL="${PV}.tar.xz"
+OPENJDK_TARBALL="${PV}.tar.xz"
+NASHORN_TARBALL="${PV}.tar.xz"
+HOTSPOT_TARBALL="${PV}.tar.xz"
+SHENANDOAH_TARBALL="${PV}.tar.xz"
+AARCH32_TARBALL="${PV}.tar.xz"
 
 CACAO_TARBALL="cacao-c182f119eaad.tar.xz"
 JAMVM_TARBALL="jamvm-ec18fb9e49e62dce16c5094ef1527eed619463aa.tar.gz"
@@ -70,17 +69,16 @@ LICENSE="Apache-1.1 Apache-2.0 GPL-1 GPL-2 GPL-2-with-linking-exception LGPL-2 M
 KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~x86"
 
 IUSE="+alsa cacao +cups doc examples +gtk headless-awt
-	jamvm +jbootstrap kerberos libressl nsplugin pax_kernel +pch
-	pulseaudio sctp selinux shenandoah smartcard +source +system-lcms test webstart zero"
+	jamvm +jbootstrap kerberos libressl pax_kernel +pch
+	pulseaudio sctp selinux shenandoah smartcard +source +system-lcms test zero"
 
 RESTRICT="!test? ( test )"
 REQUIRED_USE="gtk? ( !headless-awt )"
 
 # Ideally the following were optional at build time.
-ALSA_COMMON_DEP="
-	>=media-libs/alsa-lib-1.0"
-CUPS_COMMON_DEP="
-	>=net-print/cups-1.2.12"
+ALSA_COMMON_DEP=">=media-libs/alsa-lib-1.0"
+CUPS_COMMON_DEP=">=net-print/cups-1.2.12"
+
 X_COMMON_DEP="
 	>=media-libs/giflib-4.1.6:0=
 	>=media-libs/libpng-1.2:0=
@@ -89,12 +87,15 @@ X_COMMON_DEP="
 	>=x11-libs/libXi-1.1.3
 	>=x11-libs/libXrender-0.9.4
 	>=x11-libs/libXtst-1.0.3
-	x11-libs/libXcomposite"
+	x11-libs/libXcomposite
+"
+
 X_DEPEND="
 	x11-base/xorg-proto
 	>=x11-libs/libXau-1.0.3
 	>=x11-libs/libXdmcp-1.0.2
-	>=x11-libs/libXinerama-1.0.2"
+	>=x11-libs/libXinerama-1.0.2
+"
 
 # The Javascript requirement is obsolete; OpenJDK 8+ has Nashorn
 COMMON_DEP="
@@ -104,13 +105,19 @@ COMMON_DEP="
 	>=media-libs/freetype-2.5.3:2=
 	>=sys-libs/zlib-1.2.3
 	virtual/jpeg:0=
+	gtk? (
+		>=dev-libs/atk-1.30.0
+		>=x11-libs/cairo-1.8.8
+		x11-libs/gdk-pixbuf:2
+		>=x11-libs/gtk+-2.8:2
+		>=x11-libs/pango-1.24.5
+	)
 	kerberos? ( virtual/krb5 )
 	sctp? ( net-misc/lksctp-tools )
 	smartcard? ( sys-apps/pcsc-lite )
-	system-lcms? ( >=media-libs/lcms-2.9:2= )"
+	system-lcms? ( >=media-libs/lcms-2.9:2= )
+"
 
-# Gtk+ will move to COMMON_DEP in time; PR1982
-# gsettings-desktop-schemas will be needed for native proxy support; PR1976
 RDEPEND="${COMMON_DEP}
 	!dev-java/icedtea:0
 	!dev-java/icedtea-web:7
@@ -119,17 +126,10 @@ RDEPEND="${COMMON_DEP}
 	virtual/ttf-fonts
 	alsa? ( ${ALSA_COMMON_DEP} )
 	cups? ( ${CUPS_COMMON_DEP} )
-	gtk? (
-		>=dev-libs/atk-1.30.0
-		>=x11-libs/cairo-1.8.8
-		x11-libs/gdk-pixbuf:2
-		>=x11-libs/gtk+-2.8:2
-		>=x11-libs/pango-1.24.5
-	)
 	!headless-awt? ( ${X_COMMON_DEP} )
-	selinux? ( sec-policy/selinux-java )"
+	selinux? ( sec-policy/selinux-java )
+"
 
-# ca-certificates, perl and openssl are used for the cacerts keystore generation
 # perl is needed for running the SystemTap tests and the bootstrap javac
 # lsb-release is used to obtain distro information for the version & crash dump output
 # attr is needed for xattr.h which defines the extended attribute syscalls used by NIO2
@@ -137,10 +137,10 @@ RDEPEND="${COMMON_DEP}
 # Ant is no longer needed under the new build system
 DEPEND="${COMMON_DEP} ${ALSA_COMMON_DEP} ${CUPS_COMMON_DEP} ${X_COMMON_DEP} ${X_DEPEND}
 	|| (
+		dev-java/openjdk-bin:8
+		dev-java/openjdk:8
 		dev-java/icedtea-bin:8
 		dev-java/icedtea:8
-		dev-java/openjdk:8
-		dev-java/openjdk-bin:8
 	)
 	app-arch/cpio
 	app-arch/unzip
@@ -155,9 +155,7 @@ DEPEND="${COMMON_DEP} ${ALSA_COMMON_DEP} ${CUPS_COMMON_DEP} ${X_COMMON_DEP} ${X_
 	virtual/pkgconfig
 	pax_kernel? ( sys-apps/elfix )"
 
-PDEPEND="webstart? ( >=dev-java/icedtea-web-1.6.1:0 )
-	nsplugin? ( >=dev-java/icedtea-web-1.6.1:0[nsplugin] )
-	pulseaudio? ( dev-java/icedtea-sound )"
+PDEPEND="pulseaudio? ( dev-java/icedtea-sound )"
 
 S="${WORKDIR}"/${ICEDTEA_PKG}
 
@@ -181,8 +179,8 @@ pkg_setup() {
 	icedtea_check_requirements
 
 	JAVA_PKG_WANT_BUILD_VM="
-		icedtea-8 icedtea-bin-8
-		openjdk-8 openjdk-bin-8"
+		openjdk-8 openjdk-bin-8
+		icedtea-8 icedtea-bin-8"
 	JAVA_PKG_WANT_SOURCE="1.5"
 	JAVA_PKG_WANT_TARGET="1.5"
 
@@ -194,26 +192,41 @@ src_unpack() {
 	unpack ${SRC_PKG}
 }
 
-src_configure() {
-	# Link MUSL patches into icedtea build tree
-	ln -s "${FILESDIR}/${PN}-3.8.0-autoconf-config.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.16.0-gcc-name-pattern.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.2.0-hotspot-noagent-musl.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.12.0-hotspot-musl-ppc.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.16.0-hotspot-musl.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.2.0-jdk-execinfo.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.2.0-jdk-fix-libjvm-load.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.4.0-jdk-globals.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.8.0-jdk-musl.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.12.0-jdk-fix-awt-inputmethod-mbstr-null.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.12.0-jdk-fix-ipv6-init.patch" patches || die
-	ln -s "${FILESDIR}/${PN}-3.16.0-jdk-includes.patch" patches || die
+src_prepare() {
 
+	default
+
+	if use elibc_musl ; then
+		eapply "${FILESDIR}/${PN}-3.8.0-autoconf-config.patch"
+		eapply "${FILESDIR}/${PN}-3.16.0-gcc-name-pattern.patch"
+		eapply "${FILESDIR}/${PN}-3.2.0-hotspot-noagent-musl.patch"
+		eapply "${FILESDIR}/${PN}-3.12.0-hotspot-musl-ppc.patch"
+		eapply "${FILESDIR}/${PN}-3.16.0-hotspot-musl.patch"
+		eapply "${FILESDIR}/${PN}-3.2.0-jdk-execinfo.patch"
+		eapply "${FILESDIR}/${PN}-3.2.0-jdk-fix-libjvm-load.patch"
+		eapply "${FILESDIR}/${PN}-3.4.0-jdk-globals.patch"
+		eapply "${FILESDIR}/${PN}-3.8.0-jdk-musl.patch"
+		eapply "${FILESDIR}/${PN}-3.12.0-jdk-fix-awt-inputmethod-mbstr-null.patch"
+		eapply "${FILESDIR}/${PN}-3.12.0-jdk-fix-ipv6-init.patch"
+		eapply "${FILESDIR}/${PN}-3.16.0-jdk-includes.patch"
+	fi
+
+	eapply_user
+}
+
+src_configure() {
 	# GCC10/-fno-common handling, #723102
 	if [[ $(gcc-major-version) -ge 10 ]]; then
 		append-flags -fcommon
 		append-flags -fno-delete-null-pointer-checks -fno-lifetime-dse
 	fi
+	# this patch helps with gcc10 as well
+	# since build system unpacks tarballs itself, this is a way to force makefile
+	# to apply our patch. it expects relative path inside source, so we can't specify
+	# ${FILESDIR} directly.
+	mkdir -v gentoo_patches || die
+	cp -v "${FILESDIR}/openjdk-8-hotspot-arrayallocator.patch" gentoo_patches || die
+	export DISTRIBUTION_PATCHES="gentoo_patches//openjdk-8-hotspot-arrayallocator.patch"
 
 	# For bootstrap builds as the sandbox control file might not yet exist.
 	addpredict /proc/self/coredump_filter #nowarn
@@ -223,24 +236,6 @@ src_configure() {
 
 	local cacao_config config hotspot_port hs_config jamvm_config use_cacao use_jamvm use_zero zero_config
 	local vm=$(java-pkg_get-current-vm)
-
-	# Export MUSL patches for configure
-	DISTRIBUTION_PATCHES=""
-
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.8.0-autoconf-config.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.16.0-gcc-name-pattern.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.2.0-hotspot-noagent-musl.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.12.0-hotspot-musl-ppc.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.16.0-hotspot-musl.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.2.0-jdk-execinfo.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.2.0-jdk-fix-libjvm-load.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.4.0-jdk-globals.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.8.0-jdk-musl.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.12.0-jdk-fix-awt-inputmethod-mbstr-null.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.12.0-jdk-fix-ipv6-init.patch "
-	DISTRIBUTION_PATCHES+="patches/${PN}-3.16.0-jdk-includes.patch "
-
-	export DISTRIBUTION_PATCHES
 
 	# gcj-jdk ensures ecj is present.
 	if use jbootstrap || has "${vm}" gcj-jdk; then
@@ -333,7 +328,8 @@ src_configure() {
 
 	unset JAVA_HOME JDK_HOME CLASSPATH JAVAC JAVACFLAGS
 
-	econf ${config} \
+	# force bash for now https://bugs.gentoo.org/722292
+	CONFIG_SHELL="${EPREFIX}/bin/bash" econf ${config} \
 		--with-openjdk-src-zip="${DISTDIR}/${OPENJDK_GENTOO_TARBALL}" \
 		--with-corba-src-zip="${DISTDIR}/${CORBA_GENTOO_TARBALL}" \
 		--with-jaxp-src-zip="${DISTDIR}/${JAXP_GENTOO_TARBALL}" \
@@ -403,6 +399,7 @@ src_install() {
 pkg_postinst() {
 	xdg_icon_cache_update
 	java-vm-2_pkg_postinst
+	einfo "JavaWebStart functionality provided by icedtea-web package"
 }
 
 pkg_postrm() {
