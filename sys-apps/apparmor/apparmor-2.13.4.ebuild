@@ -1,25 +1,28 @@
-# Copyright 1999-2018 Gentoo Foundation
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
-inherit systemd toolchain-funcs versionator flag-o-matic
+inherit systemd toolchain-funcs
 
-MY_PV="$(get_version_component_range 1-2)"
+MY_PV="$(ver_cut 1-2)"
 
 DESCRIPTION="Userspace utils and init scripts for the AppArmor application security system"
-HOMEPAGE="http://apparmor.net/"
-SRC_URI="https://launchpad.net/${PN}/${MY_PV}/${PV}/+download/${P}.tar.gz"
+HOMEPAGE="https://gitlab.com/apparmor/apparmor/wikis/home"
+SRC_URI="https://launchpad.net/${PN}/${MY_PV}/${PV}/+download/${PN}-${PV}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64"
 IUSE="doc"
 
+RESTRICT="test" # bug 675854
+
 RDEPEND="~sys-libs/libapparmor-${PV}"
 DEPEND="${RDEPEND}
 	dev-lang/perl
 	sys-devel/bison
+	sys-devel/gettext
 	sys-devel/flex
 	doc? ( dev-tex/latex2html )
 "
@@ -27,26 +30,23 @@ DEPEND="${RDEPEND}
 S=${WORKDIR}/apparmor-${PV}/parser
 
 PATCHES=(
-	"${FILESDIR}/${PN}-2.10-makefile.patch"
+	"${FILESDIR}/${PN}-2.13.1-makefile.patch"
 	"${FILESDIR}/${PN}-2.11.1-dynamic-link.patch"
-	"${FILESDIR}/${PN}-2.12-missingdefs.patch"
-	"${FILESDIR}/${PN}-2.12-musl-filebuf.patch"
 )
 
 src_prepare() {
 	default
 
+	if use elibc_musl ; then
+		eapply "${FILESDIR}/0001-Fix-linking-against-gettext-on-musl-libc.patch"
+	fi
+
 	# remove warning about missing file that controls features
 	# we don't currently support
 	sed -e "/installation problem/ctrue" -i rc.apparmor.functions || die
-
-	cp "${FILESDIR}/stdio_filebuf.h" libapparmor_re
 }
 
-src_compile()  {
-	# for some reason this isn't included?
-	append-libs -lunwind
-
+src_compile() {
 	emake CC="$(tc-getCC)" CXX="$(tc-getCXX)" USE_SYSTEM=1 arch manpages
 	use doc && emake pdf
 }

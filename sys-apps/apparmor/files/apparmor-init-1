@@ -63,12 +63,9 @@ start() {
 	eindent
 
 	if ! is_apparmor_loaded ; then
-		load_module
-		if [ $? -ne 0 ]; then
-			eerror "AppArmor kernel support is not present"
-			eend 1
-			return 1
-		fi
+		eerror "AppArmor kernel support is not present"
+		eend 1
+		return 1
 	fi
 
 	parse_profiles load
