@@ -1,23 +1,24 @@
-# Copyright 1999-2019 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
 XORG_DOC=doc
-XORG_EAUTORECONF="yes"
-inherit xorg-3 multilib flag-o-matic
+inherit xorg-3 multilib flag-o-matic toolchain-funcs
 EGIT_REPO_URI="https://gitlab.freedesktop.org/xorg/xserver.git"
 
 DESCRIPTION="X.Org X servers"
 SLOT="0/${PV}"
 if [[ ${PV} != 9999* ]]; then
-	KEYWORDS="arm"
+	KEYWORDS="~alpha amd64 arm arm64 ~hppa ~ia64 ~mips ppc ppc64 ~riscv ~s390 sparc x86 ~amd64-linux ~x86-linux"
 fi
 
 IUSE_SERVERS="dmx kdrive wayland xephyr xnest xorg xvfb"
-IUSE="${IUSE_SERVERS} debug elogind +glamor ipv6 libressl minimal selinux +suid systemd +udev unwind xcsecurity"
+IUSE="${IUSE_SERVERS} debug +elogind ipv6 libressl minimal selinux suid systemd test +udev unwind xcsecurity"
+RESTRICT="!test? ( test )"
 
-CDEPEND=">=app-eselect/eselect-opengl-1.3.0
+CDEPEND="
+	media-libs/libglvnd[X]
 	!libressl? ( dev-libs/openssl:0= )
 	libressl? ( dev-libs/libressl:0= )
 	>=x11-apps/iceauth-1.0.2
@@ -32,7 +33,6 @@ CDEPEND=">=app-eselect/eselect-opengl-1.3.0
 	>=x11-libs/libxkbfile-1.0.4
 	>=x11-libs/libxshmfence-1.1
 	>=x11-libs/pixman-0.27.2
-	>=x11-libs/xtrans-1.3.5
 	>=x11-misc/xbitmaps-1.0.1
 	>=x11-misc/xkeyboard-config-2.4.1-r3
 	dmx? (
@@ -47,11 +47,6 @@ CDEPEND=">=app-eselect/eselect-opengl-1.3.0
 		x11-libs/libXrender
 		>=x11-libs/libXres-1.0.3
 		>=x11-libs/libXtst-1.0.99.2
-	)
-	glamor? (
-		media-libs/libepoxy[X]
-		>=media-libs/mesa-18[egl,gbm]
-		!x11-libs/glamor
 	)
 	kdrive? (
 		>=x11-libs/libXext-1.0.5
@@ -68,14 +63,15 @@ CDEPEND=">=app-eselect/eselect-opengl-1.3.0
 	!minimal? (
 		>=x11-libs/libX11-1.1.5
 		>=x11-libs/libXext-1.0.5
-		>=media-libs/mesa-18
+		>=media-libs/mesa-18[X(+),egl,gbm]
+		>=media-libs/libepoxy-1.5.4[X,egl(+)]
 	)
 	udev? ( virtual/libudev:= )
 	unwind? ( sys-libs/libunwind )
 	wayland? (
 		>=dev-libs/wayland-1.3.0
-		media-libs/libepoxy
-		>=dev-libs/wayland-protocols-1.1
+		>=media-libs/libepoxy-1.5.4[egl(+)]
+		>=dev-libs/wayland-protocols-1.18
 	)
 	>=x11-apps/xinit-1.3.3-r1
 	systemd? (
@@ -84,14 +80,14 @@ CDEPEND=">=app-eselect/eselect-opengl-1.3.0
 	)
 	elogind? (
 		sys-apps/dbus
-		sys-auth/elogind
+		sys-auth/elogind[pam]
 		sys-auth/pambase[elogind]
 	)
-	"
-
+	!!x11-drivers/nvidia-drivers[-libglvnd(+)]
+"
 DEPEND="${CDEPEND}
-	sys-devel/flex
 	>=x11-base/xorg-proto-2018.4
+	>=x11-libs/xtrans-1.3.5
 	dmx? (
 		doc? (
 			|| (
@@ -100,13 +96,16 @@ DEPEND="${CDEPEND}
 				www-client/w3m
 			)
 		)
-	)"
-
-RDEPEND="${CDEPEND}
-	selinux? ( sec-policy/selinux-xserver )
-	!x11-drivers/xf86-video-modesetting
+	)
 "
-
+RDEPEND="${CDEPEND}
+	!systemd? ( gui-libs/display-manager-init )
+	selinux? ( sec-policy/selinux-xserver )
+"
+BDEPEND="
+	sys-devel/flex
+	wayland? ( dev-util/wayland-scanner )
+"
 PDEPEND="
 	xorg? ( >=x11-base/xorg-drivers-$(ver_cut 1-2) )"
 
@@ -115,13 +114,10 @@ REQUIRED_USE="!minimal? (
 	)
 	elogind? ( udev )
 	?? ( elogind systemd )
-	minimal? ( !glamor !wayland )
+	minimal? ( !wayland )
 	xephyr? ( kdrive )"
 
 UPSTREAMED_PATCHES=(
-	"${FILESDIR}"/${PN}-1.20.4-shm-reindent-shm_tmpfile-to-follow-our-standards.patch
-	"${FILESDIR}"/${PN}-1.20.4-shm-Pick-the-shm-dir-at-run-time-not-build-time.patch
-	"${FILESDIR}"/${PN}-1.20.4-shm-Use-memfd_create-when-possible.patch
 )
 
 PATCHES=(
@@ -129,13 +125,13 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-1.12-unloadsubmodule.patch
 	# needed for new eselect-opengl, bug #541232
 	"${FILESDIR}"/${PN}-1.18-support-multiple-Files-sections.patch
-	"${FILESDIR}"/${PN}-1.17.4-arm-musl.patch
 )
 
 pkg_setup() {
-	if use wayland && ! use glamor; then
+	if use wayland && use minimal; then
 		ewarn "glamor is necessary for acceleration under Xwayland."
 		ewarn "Performance may be unacceptable without it."
+		ewarn "Build with USE=-minimal to enable glamor."
 	fi
 
 	# localstatedir is used for the log location; we need to override the default
@@ -147,8 +143,8 @@ pkg_setup() {
 		$(use_enable ipv6)
 		$(use_enable debug)
 		$(use_enable dmx)
-		$(use_enable glamor)
 		$(use_enable kdrive)
+		$(use_enable test unit-tests)
 		$(use_enable unwind libunwind)
 		$(use_enable wayland xwayland)
 		$(use_enable !minimal record)
@@ -156,6 +152,7 @@ pkg_setup() {
 		$(use_enable !minimal dri)
 		$(use_enable !minimal dri2)
 		$(use_enable !minimal dri3)
+		$(use_enable !minimal glamor)
 		$(use_enable !minimal glx)
 		$(use_enable xcsecurity)
 		$(use_enable xephyr)
@@ -165,10 +162,7 @@ pkg_setup() {
 		$(use_enable udev config-udev)
 		$(use_with doc doxygen)
 		$(use_with doc xmlto)
-		$(usex !elogind $(use_enable systemd systemd-logind) '--enable-systemd-logind')
 		$(use_with systemd systemd-daemon)
-		$(usex suid $(use_enable systemd suid-wrapper) '--disable-suid-wrapper')
-		$(usex suid $(use_enable !systemd install-setuid) '--disable-install-setuid')
 		--enable-libdrm
 		--sysconfdir="${EPREFIX}"/etc/X11
 		--localstatedir="${EPREFIX}"/var
@@ -180,7 +174,32 @@ pkg_setup() {
 		--without-fop
 		--with-os-vendor=Gentoo
 		--with-sha1=libcrypto
+		CPP="$(tc-getPROG CPP cpp)"
 	)
+
+	if use systemd || use elogind; then
+		XORG_CONFIGURE_OPTIONS+=(
+			"--enable-systemd-logind"
+			"--disable-install-setuid"
+			"$(use_enable suid suid-wrapper)"
+		)
+	else
+		XORG_CONFIGURE_OPTIONS+=(
+			"--disable-systemd-logind"
+			"--disable-suid-wrapper"
+			"$(use_enable suid install-setuid)"
+		)
+	fi
+}
+
+src_prepare() {
+	default
+
+	if use elibc_musl ; then
+		eapply "${FILESDIR}"/xorg-server-1.20.11-fix-musl-input_event.patch
+	fi
+
+	eapply_user
 }
 
 src_install() {
@@ -193,22 +212,11 @@ src_install() {
 		dodoc "${S}"/hw/xfree86/xorg.conf.example
 	fi
 
-	newinitd "${FILESDIR}"/xdm-setup.initd-1 xdm-setup
-	newinitd "${FILESDIR}"/xdm.initd-11 xdm
-	newconfd "${FILESDIR}"/xdm.confd-4 xdm
-
 	# install the @x11-module-rebuild set for Portage
 	insinto /usr/share/portage/config/sets
 	newins "${FILESDIR}"/xorg-sets.conf xorg.conf
 
 	find "${ED}"/var -type d -empty -delete || die
-}
-
-pkg_postinst() {
-	if ! use minimal; then
-		# sets up libGL and DRI2 symlinks if needed (ie, on a fresh install)
-		eselect opengl set xorg-x11 --use-old
-	fi
 }
 
 pkg_postrm() {
