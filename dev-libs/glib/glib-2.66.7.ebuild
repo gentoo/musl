@@ -72,7 +72,6 @@ MULTILIB_CHOST_TOOLS=(
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-2.64.1-mark-gdbus-server-auth-test-flaky.patch
-	"${FILESDIR}"/0001-gquark-fix-initialization-with-c-constructors.patch
 )
 
 pkg_setup() {
@@ -88,6 +87,11 @@ pkg_setup() {
 }
 
 src_prepare() {
+
+	if use elibc_musl ; then
+		eapply "${FILESDIR}"/0001-gquark-fix-initialization-with-c-constructors.patch
+	fi
+
 	if use test; then
 		# TODO: Review the test exclusions, especially now with meson
 		# Disable tests requiring dev-util/desktop-file-utils when not installed, bug #286629, upstream bug #629163
