@@ -39,7 +39,7 @@ SRC_URI="
 
 LICENSE="GPL-2-with-classpath-exception"
 SLOT="8"
-KEYWORDS="-* amd64 arm arm64 ppc64 x86"
+KEYWORDS="-* amd64 ~arm arm64 ppc64 x86"
 IUSE="big-endian elibc_musl cups +gtk pulseaudio selinux examples alsa headless-awt"
 
 REQUIRED_USE="
