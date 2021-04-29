@@ -131,10 +131,10 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-6.8.0-fix-libvirt-lxc-dbus.patch
 	"${FILESDIR}"/${PN}-6.8.0-meson-properly-handle-libpcap-if-it-s-explicitly-dis.patch
 
-        # musl
-        "${FILESDIR}"/libvirt-fork-exec-deadlock.patch
-        "${FILESDIR}"/stderr-fix.patch
-        "${FILESDIR}"/musl-fix-includes.patch
+	# musl
+	"${FILESDIR}"/libvirt-fork-exec-deadlock.patch
+	"${FILESDIR}"/stderr-fix.patch
+	"${FILESDIR}"/musl-fix-includes.patch
 )
 
 pkg_setup() {
