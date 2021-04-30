@@ -29,6 +29,8 @@ SRC_URI="
 		ppc64? ( $(rust_arch_uri powerpc64-gentoo-linux-musl     rust-${RUST_STAGE0_VERSION} ) )
 		x86?   ( $(rust_arch_uri i686-gentoo-linux-musl          rust-${RUST_STAGE0_VERSION} ) )
 	)
+	http://dev.gentoo.org/~anarchy/dist/0006-Remove-musl_root-and-CRT-fallback-from-musl-targets.patch
+	http://dev.gentoo.org/~anarchy/dist/0030-libc-linkage.patch
 "
 
 # keep in sync with llvm ebuild of the same version as bundled one.
@@ -127,7 +129,7 @@ PATCHES=(
 	"${FILESDIR}"/0003-Fix-linking-to-zlib-when-cross-compiling.patch
 	"${FILESDIR}"/0004-Fix-rustdoc-when-cross-compiling-on-musl.patch
 	"${FILESDIR}"/0005-Use-static-native-libraries-when-linking-static-exec.patch
-	"${FILESDIR}"/0006-Remove-musl_root-and-CRT-fallback-from-musl-targets.patch
+	"${DISTDIR}"/0006-Remove-musl_root-and-CRT-fallback-from-musl-targets.patch
 	"${FILESDIR}"/0007-Prefer-libgcc_eh-over-libunwind-for-musl.patch
 	"${FILESDIR}"/0008-Link-libssp_nonshared.a-on-all-musl-targets.patch
 	"${FILESDIR}"/0009-test-failed-doctest-output-Fix-normalization.patch
@@ -137,7 +139,7 @@ PATCHES=(
 	"${FILESDIR}"/0013-Link-stage-2-tools-dynamically-to-libstd.patch
 	"${FILESDIR}"/0014-Move-debugger-scripts-to-usr-share-rust.patch
 	"${FILESDIR}"/0015-Add-gentoo-target-specs.patch
-	"${FILESDIR}"/0030-libc-linkage.patch
+	"${DISTDIR}"/0030-libc-linkage.patch
 	"${FILESDIR}"/0040-rls-atomics.patch
 	"${FILESDIR}"/0050-llvm.patch
 	"${FILESDIR}"/0051-llvm-powerpc-elfv2.patch
