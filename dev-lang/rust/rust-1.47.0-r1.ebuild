@@ -29,8 +29,8 @@ SRC_URI="
 		ppc64? ( $(rust_arch_uri powerpc64-gentoo-linux-musl     rust-${RUST_STAGE0_VERSION} ) )
 		x86?   ( $(rust_arch_uri i686-gentoo-linux-musl          rust-${RUST_STAGE0_VERSION} ) )
 	)
-	http://dev.gentoo.org/~anarchy/dist/0006-Remove-musl_root-and-CRT-fallback-from-musl-targets.patch
-	http://dev.gentoo.org/~anarchy/dist/0030-libc-linkage.patch
+	https://dev.gentoo.org/~anarchy/dist/0006-Remove-musl_root-and-CRT-fallback-from-musl-targets.patch
+	https://dev.gentoo.org/~anarchy/dist/0030-libc-linkage.patch
 "
 
 # keep in sync with llvm ebuild of the same version as bundled one.
