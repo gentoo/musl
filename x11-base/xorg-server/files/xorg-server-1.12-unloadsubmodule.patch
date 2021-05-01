@@ -1,29 +1,28 @@
-diff -u13 -r xorg-server-1.12.3-old/hw/xfree86/loader/loadmod.c xorg-server-1.12.3/hw/xfree86/loader/loadmod.c
---- xorg-server-1.12.3-old/hw/xfree86/loader/loadmod.c	2012-09-05 18:26:42.000000000 +0200
-+++ xorg-server-1.12.3/hw/xfree86/loader/loadmod.c	2012-09-05 18:28:54.000000000 +0200
-@@ -1109,39 +1109,38 @@
- static void
- RemoveChild(ModuleDescPtr child)
- {
-     ModuleDescPtr mdp;
-     ModuleDescPtr prevsib;
-     ModuleDescPtr parent;
- 
-     if (!child->parent)
-         return;
- 
+From 4d5c555b05cf09e186cab9411aea3155018dab59 Mon Sep 17 00:00:00 2001
+From: 
+Date: Fri, 30 Apr 2021 22:50:01 -0500
+Subject: [PATCH 1/4] 
+
+---
+ hw/xfree86/loader/loadmod.c | 19 +++++++++----------
+ 1 file changed, 9 insertions(+), 10 deletions(-)
+
+diff --git a/hw/xfree86/loader/loadmod.c b/hw/xfree86/loader/loadmod.c
+index a6356bd..a2130a0 100644
+--- a/hw/xfree86/loader/loadmod.c
++++ b/hw/xfree86/loader/loadmod.c
+@@ -892,19 +892,18 @@ RemoveChild(ModuleDescPtr child)
      parent = child->parent;
      if (parent->child == child) {
          parent->child = child->sib;
 -        return;
--    }
+     }
 -
 -    prevsib = parent->child;
 -    mdp = prevsib->sib;
 -    while (mdp && mdp != child) {
 -        prevsib = mdp;
 -        mdp = mdp->sib;
-+    }
 +    else {
 +        prevsib = parent->child;
 +        mdp = prevsib->sib;
@@ -41,13 +40,6 @@ diff -u13 -r xorg-server-1.12.3-old/hw/xfree86/loader/loadmod.c xorg-server-1.12
  }
  
  void
- LoaderErrorMsg(const char *name, const char *modname, int errmaj, int errmin)
- {
-     const char *msg;
-     MessageType type = X_ERROR;
- 
-     switch (errmaj) {
-     case LDR_NOERROR:
-         msg = "no error";
-         break;
-     case LDR_NOMEM:
+-- 
+2.26.3
+

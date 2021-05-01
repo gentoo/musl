@@ -1,7 +1,18 @@
-diff -Naur a/hw/xfree86/common/compiler.h b/hw/xfree86/common/compiler.h
---- a/hw/xfree86/common/compiler.h	2021-04-29 15:19:17.958218267 -0400
-+++ b/hw/xfree86/common/compiler.h	2021-04-29 15:19:44.362218296 -0400
-@@ -518,7 +518,7 @@
+From 6a4a8b4fc167541bb2ed7911d1b22fc726ca3bf1 Mon Sep 17 00:00:00 2001
+From: 
+Date: Fri, 30 Apr 2021 22:55:18 -0500
+Subject: [PATCH 4/4] convert to checking GLIBC instead of linux for arm musl
+ users
+
+---
+ hw/xfree86/common/compiler.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/hw/xfree86/common/compiler.h b/hw/xfree86/common/compiler.h
+index 2b2008b..ddda5bf 100644
+--- a/hw/xfree86/common/compiler.h
++++ b/hw/xfree86/common/compiler.h
+@@ -518,7 +518,7 @@ xf86WriteMmio32Le(__volatile__ void *base, const unsigned long offset,
      barrier();
  }
  
@@ -10,3 +21,6 @@ diff -Naur a/hw/xfree86/common/compiler.h b/hw/xfree86/common/compiler.h
  #if defined(__arm32__) || defined(__mips64)
  #define PORT_SIZE long
  #else
+-- 
+2.26.3
+

@@ -1,10 +1,25 @@
-See http://lists.x.org/archives/xorg-devel/2015-February/045755.html
+From 8fd90ff40ab7c59c7f0a6430737fbb31d0214e44 Mon Sep 17 00:00:00 2001
+From: Michał Górny <mgorny at gentoo.org>
+Date: Fri, 30 Apr 2021 22:51:14 -0500
+Subject: [PATCH 2/4] Support reading multiple 'Files' sections in
+ configuration, concatenating the resulting paths. This makes it possible to
+ add ModulePaths and FontPaths within xorg.conf.d/ files without interfering
+ with user-provided xorg.conf. Gentoo needs this to support using replacement
+ xorg modules provided by proprietary video drivers.
+
+Fixes: https://bugs.freedesktop.org/show_bug.cgi?id=88003
+Signed-off-by: Michał Górny <mgorny at gentoo.org>
+---
+ hw/xfree86/parser/Files.c       | 8 ++++++--
+ hw/xfree86/parser/configProcs.h | 2 +-
+ hw/xfree86/parser/read.c        | 2 +-
+ 3 files changed, 8 insertions(+), 4 deletions(-)
 
 diff --git a/hw/xfree86/parser/Files.c b/hw/xfree86/parser/Files.c
-index 849bf92..5cc3ec7 100644
+index c86ac7a..cad11cc 100644
 --- a/hw/xfree86/parser/Files.c
 +++ b/hw/xfree86/parser/Files.c
-@@ -76,14 +76,18 @@ static xf86ConfigSymTabRec FilesTab[] = {
+@@ -76,14 +76,18 @@ static const xf86ConfigSymTabRec FilesTab[] = {
  #define CLEANUP xf86freeFiles
  
  XF86ConfFilesPtr
@@ -26,7 +41,7 @@ index 849bf92..5cc3ec7 100644
          while ((token = xf86getToken(FilesTab)) != ENDSECTION) {
          switch (token) {
 diff --git a/hw/xfree86/parser/configProcs.h b/hw/xfree86/parser/configProcs.h
-index 171f8e8..e8199fe 100644
+index 7a46e01..0eccd14 100644
 --- a/hw/xfree86/parser/configProcs.h
 +++ b/hw/xfree86/parser/configProcs.h
 @@ -36,7 +36,7 @@ void xf86freeDeviceList(XF86ConfDevicePtr ptr);
@@ -39,10 +54,10 @@ index 171f8e8..e8199fe 100644
  void xf86freeFiles(XF86ConfFilesPtr p);
  
 diff --git a/hw/xfree86/parser/read.c b/hw/xfree86/parser/read.c
-index 327c02a..e0d6139 100644
+index d7e7312..f8f5ed5 100644
 --- a/hw/xfree86/parser/read.c
 +++ b/hw/xfree86/parser/read.c
-@@ -110,7 +110,7 @@ xf86readConfigFile(void)
+@@ -111,7 +111,7 @@ xf86readConfigFile(void)
              if (xf86nameCompare(xf86_lex_val.str, "files") == 0) {
                  free(xf86_lex_val.str);
                  xf86_lex_val.str = NULL;
@@ -51,3 +66,6 @@ index 327c02a..e0d6139 100644
              }
              else if (xf86nameCompare(xf86_lex_val.str, "serverflags") == 0) {
                  free(xf86_lex_val.str);
+-- 
+2.26.3
+
