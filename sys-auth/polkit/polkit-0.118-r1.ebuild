@@ -95,7 +95,6 @@ src_configure() {
 		--enable-man-pages
 		--disable-gtk-doc
 		--disable-examples
-		$(use_with duktape)
 		$(use_enable elogind libelogind)
 		$(use_enable introspection)
 		$(use_enable nls)
@@ -106,6 +105,11 @@ src_configure() {
 		$(use_enable test)
 		--with-os-type=gentoo
 	)
+
+	if use duktape; then
+		 myeconfargs+=( --with-duktape )
+	fi
+
 	econf "${myeconfargs[@]}"
 }
 
