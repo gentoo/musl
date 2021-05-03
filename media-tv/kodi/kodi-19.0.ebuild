@@ -108,7 +108,7 @@ COMMON_TARGET_DEPEND="${PYTHON_DEPS}
 	>=media-libs/taglib-1.11.1
 	system-ffmpeg? (
 		>=media-video/ffmpeg-${FFMPEG_VERSION}:=[dav1d?,encode,postproc]
-		media-video/ffmpeg[-libressl,openssl]
+		media-video/ffmpeg[openssl]
 	)
 	!system-ffmpeg? (
 		app-arch/bzip2
