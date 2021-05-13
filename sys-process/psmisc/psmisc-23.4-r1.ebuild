@@ -31,8 +31,8 @@ src_prepare() {
 	default
 
 	if use elibc_musl ; then
-		"${FILESDIR}"/include_limits.patch
-		"${FILESDIR}"/musl_ptregs.patch
+		eapply "${FILESDIR}"/include_limits.patch
+		eapply "${FILESDIR}"/musl_ptregs.patch
 	fi
 
 	eapply_user
