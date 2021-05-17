@@ -6,10 +6,11 @@ EAPI="7"
 PYTHON_COMPAT=( python3_{7,8,9} )
 PYTHON_REQ_USE="ncurses,readline"
 
-FIRMWARE_ABI_VERSION="4.0.0-r50"
+FIRMWARE_ABI_VERSION="5.2.0-r50"
 
-inherit eutils linux-info toolchain-funcs multilib python-r1 \
-	udev fcaps readme.gentoo-r1 pax-utils l10n xdg-utils
+inherit eutils linux-info toolchain-funcs multilib python-r1
+inherit udev fcaps readme.gentoo-r1 pax-utils l10n xdg-utils
+inherit flag-o-matic
 
 if [[ ${PV} = *9999* ]]; then
 	EGIT_REPO_URI="https://git.qemu.org/git/qemu.git"
@@ -23,7 +24,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="https://download.qemu.org/${P}.tar.xz"
-	KEYWORDS="amd64 arm64 ~ppc ~ppc64 x86"
+	KEYWORDS="amd64 arm64 ~ppc ppc64 x86"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -32,7 +33,7 @@ HOMEPAGE="http://www.qemu.org http://www.linux-kvm.org"
 LICENSE="GPL-2 LGPL-2 BSD-2"
 SLOT="0"
 
-IUSE="accessibility +aio alsa bzip2 capstone +caps +curl debug doc
+IUSE="accessibility +aio alsa bzip2 capstone +caps +curl debug +doc
 	+fdt glusterfs gnutls gtk infiniband iscsi io-uring
 	jack jemalloc +jpeg kernel_linux
 	kernel_FreeBSD lzo multipath
@@ -169,25 +170,27 @@ SOFTMMU_TOOLS_DEPEND="
 	zstd? ( >=app-arch/zstd-1.4.0[static-libs(+)] )
 "
 
+SEABIOS_VERSION="1.14.0"
+
 X86_FIRMWARE_DEPEND="
 	pin-upstream-blobs? (
-		~sys-firmware/edk2-ovmf-201905[binary]
-		~sys-firmware/ipxe-1.0.0_p20190728[binary,qemu]
-		~sys-firmware/seabios-1.12.0[binary,seavgabios]
-		~sys-firmware/sgabios-0.1_pre8[binary]
+		~sys-firmware/edk2-ovmf-202008[binary]
+		~sys-firmware/ipxe-1.21.1[binary,qemu]
+		~sys-firmware/seabios-${SEABIOS_VERSION}[binary,seavgabios]
+		~sys-firmware/sgabios-0.1_pre10[binary]
 	)
 	!pin-upstream-blobs? (
 		sys-firmware/edk2-ovmf
 		sys-firmware/ipxe[qemu]
-		>=sys-firmware/seabios-1.10.2[seavgabios]
+		>=sys-firmware/seabios-${SEABIOS_VERSION}[seavgabios]
 		sys-firmware/sgabios
 	)"
 PPC_FIRMWARE_DEPEND="
 	pin-upstream-blobs? (
-		~sys-firmware/seabios-1.12.0[binary,seavgabios]
+		~sys-firmware/seabios-${SEABIOS_VERSION}[binary,seavgabios]
 	)
 	!pin-upstream-blobs? (
-		>=sys-firmware/seabios-1.10.2[seavgabios]
+		>=sys-firmware/seabios-${SEABIOS_VERSION}[seavgabios]
 	)
 "
 
@@ -231,6 +234,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-5.2.0-strings.patch
 	"${FILESDIR}"/${PN}-5.2.0-fix-firmware-path.patch
 	"${FILESDIR}"/${PN}-5.2.0-no-pie-ld.patch
+	"${FILESDIR}"/${PN}-5.2.0-dce-locks.patch
 )
 
 QA_PREBUILT="
@@ -359,6 +363,10 @@ check_targets() {
 }
 
 src_prepare() {
+	# workaround -fcommon breakage: bug #726560
+	[[ ${PV} == 5.2.0 ]] || die "Check if -fcommon hack is needed"
+	filter-flags -fcommon
+
 	check_targets IUSE_SOFTMMU_TARGETS softmmu
 	check_targets IUSE_USER_TARGETS linux-user
 
@@ -591,6 +599,9 @@ qemu_src_configure() {
 		tc-enables-pie && conf_opts+=( --enable-pie )
 	fi
 
+	# Meson will not use a cross-file unless cross_prefix is set.
+	tc-is-cross-compiler && conf_opts+=( --cross-prefix="${CHOST}-" )
+
 	# Plumb through equivalent of EXTRA_ECONF to allow experiments
 	# like bug #747928.
 	conf_opts+=( ${EXTRA_CONF_QEMU} )
@@ -741,7 +752,7 @@ src_install() {
 		[[ -e check-report.html ]] && dodoc check-report.html
 
 		if use kernel_linux; then
-			udev_newrules "${FILESDIR}"/65-kvm.rules-r1 65-kvm.rules
+			udev_newrules "${FILESDIR}"/65-kvm.rules-r2 65-kvm.rules
 		fi
 
 		if use python; then
@@ -819,7 +830,7 @@ src_install() {
 firmware_abi_change() {
 	local pv
 	for pv in ${REPLACING_VERSIONS}; do
-		if ver_test $pv -lt ${FIRMWARE_ABI_VERSION}; then
+		if ver_test ${pv} -lt ${FIRMWARE_ABI_VERSION}; then
 			return 0
 		fi
 	done
