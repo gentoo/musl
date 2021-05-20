@@ -30,7 +30,7 @@ else
 	S=${WORKDIR}/xbmc-${MY_PV}
 fi
 
-inherit autotools cmake desktop linux-info pax-utils python-single-r1 xdg
+inherit autotools cmake desktop flag-o-matic linux-info pax-utils python-single-r1 xdg
 
 DESCRIPTION="A free and open source media-player and entertainment hub"
 HOMEPAGE="https://kodi.tv/ https://kodi.wiki/"
@@ -238,6 +238,9 @@ src_prepare() {
 		"${S}"/tools/depends/native/TexturePacker/src/autogen.sh \
 		"${S}"/tools/depends/native/JsonSchemaBuilder/src/autogen.sh \
 		|| die
+
+	# Required to prevent addons from crashing
+	use elibc_musl && append-ldflags -Wl,-z,stack-size=1048576
 }
 
 src_configure() {
