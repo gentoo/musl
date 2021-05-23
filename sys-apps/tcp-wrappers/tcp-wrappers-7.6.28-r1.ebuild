@@ -1,9 +1,9 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI="7"
 
-inherit toolchain-funcs flag-o-matic multilib-minimal usr-ldscript
+inherit toolchain-funcs multilib-minimal usr-ldscript
 
 MY_PV=$(ver_cut 1-2)
 DEB_PV=$(ver_cut 3)
@@ -18,7 +18,8 @@ SLOT="0"
 KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 IUSE="ipv6 netgroups static-libs"
 
-RDEPEND=""
+RDEPEND="netgroups? ( net-libs/libnsl:= )"
+DEPEND="${RDEPEND}"
 
 S=${WORKDIR}/${MY_P}
 
@@ -52,7 +53,7 @@ temake() {
 		RANLIB="$(tc-getRANLIB)" \
 		COPTS="${CFLAGS} ${CPPFLAGS} ${mycppflags}" \
 		LDFLAGS="${LDFLAGS}" \
-		"$@" || die
+		"$@"
 }
 
 multilib_src_configure() {
@@ -61,6 +62,8 @@ multilib_src_configure() {
 }
 
 multilib_src_compile() {
+	# https://bugs.gentoo.org/728348
+	unset STRINGS
 	temake all
 }
 
