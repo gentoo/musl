@@ -7,7 +7,7 @@ PATCH_VER="6"
 
 inherit toolchain
 
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 ~x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 
 RDEPEND=""
 BDEPEND="${CATEGORY}/binutils"
