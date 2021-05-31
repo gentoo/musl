@@ -9,6 +9,7 @@ http://www.musl-libc.org/
 * Jory A. Pratt <anarchy@gentoo.org>
 * Aric Belsito <lluixhi@gmail.com>
 * Felix Janda <felix.janda@posteo.de>
+* Georgy Yakovlev <gyakovlev@gentoo.org>
 
 ## pkgcheck status
 ![pkgcheck](https://github.com/gentoo/musl/actions/workflows/main.yml/badge.svg)
