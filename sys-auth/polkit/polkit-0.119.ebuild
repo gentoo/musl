@@ -1,4 +1,4 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -7,12 +7,13 @@ inherit autotools pam pax-utils systemd xdg-utils
 
 DESCRIPTION="Policy framework for controlling privileges for system-wide services"
 HOMEPAGE="https://www.freedesktop.org/wiki/Software/polkit https://gitlab.freedesktop.org/polkit/polkit"
-SRC_URI="https://www.freedesktop.org/software/${PN}/releases/${P}.tar.gz"
+SRC_URI="https://www.freedesktop.org/software/${PN}/releases/${P}.tar.gz
+	https://dev.gentoo.org/~anarchy/dist/polkit-0.118-duktape.patch"
 
 LICENSE="LGPL-2"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~arm64 ~mips ~ppc ~ppc64 x86"
-IUSE="elogind examples gtk +introspection jit kde nls pam selinux systemd test"
+KEYWORDS="amd64 ~arm ~arm64 ~mips ~ppc64 x86"
+IUSE="duktape elogind examples gtk +introspection kde nls pam selinux systemd test"
 RESTRICT="!test? ( test )"
 
 REQUIRED_USE="^^ ( elogind systemd )"
@@ -21,6 +22,7 @@ BDEPEND="
 	acct-user/polkitd
 	app-text/docbook-xml-dtd:4.1.2
 	app-text/docbook-xsl-stylesheets
+	dev-libs/glib
 	dev-libs/gobject-introspection-common
 	dev-libs/libxslt
 	dev-util/glib-utils
@@ -31,7 +33,8 @@ BDEPEND="
 	introspection? ( dev-libs/gobject-introspection )
 "
 DEPEND="
-	dev-lang/spidermonkey:68[-debug]
+	duktape? ( dev-lang/duktape )
+	!duktape? ( dev-lang/spidermonkey:78[-debug] )
 	dev-libs/glib:2
 	dev-libs/expat
 	elogind? ( sys-auth/elogind )
@@ -56,11 +59,9 @@ PDEPEND="
 DOCS=( docs/TODO HACKING NEWS README )
 
 PATCHES=(
-	# bug 660880
-	"${FILESDIR}"/polkit-0.115-elogind.patch
-
-	# locally rebased patch	
-	"${FILESDIR}"/polkit-0.116-make-netgroup-support-optional-2.patch
+	"${DISTDIR}"/${PN}-0.118-duktape.patch
+	"${FILESDIR}"/${PN}-0.115-elogind.patch # bug 660880
+	"${FILESDIR}"/${PN}-0.118-make-netgroup-support-optional.patch
 )
 
 QA_MULTILIB_PATHS="
@@ -104,6 +105,11 @@ src_configure() {
 		$(use_enable test)
 		--with-os-type=gentoo
 	)
+
+	if use duktape; then
+		 myeconfargs+=( --with-duktape )
+	fi
+
 	econf "${myeconfargs[@]}"
 }
 
@@ -118,8 +124,8 @@ src_install() {
 	default
 
 	if use examples; then
-		insinto /usr/share/doc/${PF}/examples
-		doins src/examples/{*.c,*.policy*}
+		docinto examples
+		dodoc src/examples/{*.c,*.policy*}
 	fi
 
 	diropts -m 0700 -o polkitd
