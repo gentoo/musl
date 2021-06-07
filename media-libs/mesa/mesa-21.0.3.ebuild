@@ -43,6 +43,7 @@ REQUIRED_USE="
 	d3d9?   ( dri3 || ( video_cards_iris video_cards_r300 video_cards_r600 video_cards_radeonsi video_cards_nouveau video_cards_vmware ) )
 	gles1?  ( egl )
 	gles2?  ( egl )
+	osmesa? ( gallium )
 	vulkan? ( dri3
 			  video_cards_radeonsi? ( llvm ) )
 	vulkan-overlay? ( vulkan )
@@ -104,7 +105,7 @@ RDEPEND="
 	)
 	selinux? ( sys-libs/libselinux[${MULTILIB_USEDEP}] )
 	wayland? (
-		>=dev-libs/wayland-1.15.0:=[${MULTILIB_USEDEP}]
+		>=dev-libs/wayland-1.18.0:=[${MULTILIB_USEDEP}]
 		>=dev-libs/wayland-protocols-1.8
 	)
 	${LIBDRM_DEPSTRING}[video_cards_freedreno?,video_cards_nouveau?,video_cards_vc4?,video_cards_vivante?,video_cards_vmware?,${MULTILIB_USEDEP}]
@@ -116,7 +117,6 @@ RDEPEND="
 	X? (
 		>=x11-libs/libX11-1.6.2:=[${MULTILIB_USEDEP}]
 		>=x11-libs/libxshmfence-1.1:=[${MULTILIB_USEDEP}]
-		>=x11-libs/libXdamage-1.1.4-r1:=[${MULTILIB_USEDEP}]
 		>=x11-libs/libXext-1.3.2:=[${MULTILIB_USEDEP}]
 		>=x11-libs/libXxf86vm-1.1.3:=[${MULTILIB_USEDEP}]
 		>=x11-libs/libxcb-1.13:=[${MULTILIB_USEDEP}]
@@ -225,6 +225,7 @@ BDEPEND="
 	sys-devel/flex
 	virtual/pkgconfig
 	$(python_gen_any_dep ">=dev-python/mako-0.8.0[\${PYTHON_USEDEP}]")
+	wayland? ( dev-util/wayland-scanner[${MULTILIB_USEDEP}] )
 "
 
 S="${WORKDIR}/${MY_P}"
@@ -241,8 +242,7 @@ x86? (
 )"
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-20.2.0-add-disable-tls-support.patch
-	"${FILESDIR}"/${PN}-20.3.4-missing-git_sha1.patch
+	"${FILESDIR}"/${PN}-21.0.3-add-disable-tls-support.patch
 )
 
 llvm_check_deps() {
@@ -320,6 +320,10 @@ pkg_pretend() {
 
 	if ! use llvm; then
 		use opencl     && ewarn "Ignoring USE=opencl     since USE does not contain llvm"
+	fi
+
+	if use osmesa && ! use llvm; then
+		ewarn "OSMesa will be slow without enabling USE=llvm"
 	fi
 }
 
@@ -455,6 +459,7 @@ multilib_src_configure() {
 			gallium_enable -- kmsro
 		fi
 
+		gallium_enable -- swrast
 		gallium_enable video_cards_lima lima
 		gallium_enable video_cards_panfrost panfrost
 		gallium_enable video_cards_v3d v3d
@@ -499,14 +504,6 @@ multilib_src_configure() {
 		vulkan_enable video_cards_v3d broadcom
 	fi
 
-	if use gallium; then
-		gallium_enable -- swrast
-		emesonargs+=( -Dosmesa=$(usex osmesa gallium none) )
-	else
-		dri_driver_enable -- swrast
-		emesonargs+=( -Dosmesa=$(usex osmesa classic none) )
-	fi
-
 	driver_list() {
 		local drivers="$(sort -u <<< "${1// /$'\n'}")"
 		echo "${drivers//$'\n'/,}"
@@ -521,6 +518,7 @@ multilib_src_configure() {
 		$(meson_feature gbm)
 		$(meson_feature gles1)
 		$(meson_feature gles2)
+		$(meson_use osmesa)
 		$(meson_use selinux)
 		$(meson_feature zstd)
 		-Dvalgrind=$(usex valgrind auto false)
