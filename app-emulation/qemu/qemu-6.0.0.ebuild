@@ -3,14 +3,13 @@
 
 EAPI="7"
 
-PYTHON_COMPAT=( python3_{7,8,9} )
+PYTHON_COMPAT=( python3_{7,8,9,10} )
 PYTHON_REQ_USE="ncurses,readline"
 
 FIRMWARE_ABI_VERSION="5.2.0-r50"
 
 inherit eutils linux-info toolchain-funcs multilib python-r1
 inherit udev fcaps readme.gentoo-r1 pax-utils l10n xdg-utils
-inherit flag-o-matic
 
 if [[ ${PV} = *9999* ]]; then
 	EGIT_REPO_URI="https://git.qemu.org/git/qemu.git"
@@ -24,7 +23,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="https://download.qemu.org/${P}.tar.xz"
-	KEYWORDS="amd64 arm64 ~ppc ppc64 x86"
+	KEYWORDS="amd64 arm64 ~ppc ppc64 ~x86"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -44,14 +43,55 @@ IUSE="accessibility +aio alsa bzip2 capstone +caps +curl debug +doc
 	usbredir vde +vhost-net vhost-user-fs virgl virtfs +vnc vte xattr xen
 	xfs zstd"
 
-COMMON_TARGETS="aarch64 alpha arm cris hppa i386 m68k microblaze microblazeel
-	mips mips64 mips64el mipsel nios2 or1k ppc ppc64 riscv32 riscv64 s390x
-	sh4 sh4eb sparc sparc64 x86_64 xtensa xtensaeb"
-IUSE_SOFTMMU_TARGETS="${COMMON_TARGETS}
-	avr lm32 moxie rx tricore unicore32"
-IUSE_USER_TARGETS="${COMMON_TARGETS}
-	aarch64_be armeb mipsn32 mipsn32el ppc64abi32 ppc64le sparc32plus
-	tilegx"
+COMMON_TARGETS="
+	aarch64
+	alpha
+	arm
+	cris
+	hppa
+	i386
+	m68k
+	microblaze
+	microblazeel
+	mips
+	mips64
+	mips64el
+	mipsel
+	nios2
+	or1k
+	ppc
+	ppc64
+	riscv32
+	riscv64
+	s390x
+	sh4
+	sh4eb
+	sparc
+	sparc64
+	x86_64
+	xtensa
+	xtensaeb
+"
+IUSE_SOFTMMU_TARGETS="
+	${COMMON_TARGETS}
+	avr
+	lm32
+	moxie
+	rx
+	tricore
+	unicore32
+"
+IUSE_USER_TARGETS="
+	${COMMON_TARGETS}
+	aarch64_be
+	armeb
+	hexagon
+	mipsn32
+	mipsn32el
+	ppc64abi32
+	ppc64le
+	sparc32plus
+"
 
 use_softmmu_targets=$(printf ' qemu_softmmu_targets_%s' ${IUSE_SOFTMMU_TARGETS})
 use_user_targets=$(printf ' qemu_user_targets_%s' ${IUSE_USER_TARGETS})
@@ -71,6 +111,7 @@ REQUIRED_USE="${PYTHON_REQUIRED_USE}
 	static? ( static-user !alsa !gtk !jack !opengl !pulseaudio !plugins !rbd !snappy )
 	static-user? ( !plugins )
 	vhost-user-fs? ( caps seccomp )
+	virgl? ( opengl )
 	virtfs? ( caps xattr )
 	vte? ( gtk )
 	multipath? ( udev )
@@ -229,11 +270,9 @@ RDEPEND="${CDEPEND}
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-2.11.1-capstone_include_path.patch
+	"${FILESDIR}"/${PN}-5.2.0-strings.patch
 	"${FILESDIR}"/${PN}-5.2.0-cleaner-werror.patch
 	"${FILESDIR}"/${PN}-5.2.0-disable-keymap.patch
-	"${FILESDIR}"/${PN}-5.2.0-strings.patch
-	"${FILESDIR}"/${PN}-5.2.0-fix-firmware-path.patch
-	"${FILESDIR}"/${PN}-5.2.0-no-pie-ld.patch
 	"${FILESDIR}"/${PN}-5.2.0-dce-locks.patch
 )
 
@@ -363,10 +402,6 @@ check_targets() {
 }
 
 src_prepare() {
-	# workaround -fcommon breakage: bug #726560
-	[[ ${PV} == 5.2.0 ]] || die "Check if -fcommon hack is needed"
-	filter-flags -fcommon
-
 	check_targets IUSE_SOFTMMU_TARGETS softmmu
 	check_targets IUSE_USER_TARGETS linux-user
 
@@ -393,7 +428,6 @@ src_prepare() {
 		eapply "${FILESDIR}"/musl-patches/fix-segevent-and-sigval_t.patch
 		eapply "${FILESDIR}"/musl-patches/fix-sendmsg.patch
 		eapply "${FILESDIR}"/musl-patches/fix-sockios-header.patch
-		eapply "${FILESDIR}"/musl-patches/guest-agent-shutdown.patch
 		eapply "${FILESDIR}"/musl-patches/ignore-signals-33-and-64-to-allow-golang-emulation.patch
 		eapply "${FILESDIR}"/musl-patches/mips-softfloat.patch
 		eapply "${FILESDIR}"/musl-patches/musl-F_SHLCK-and-F_EXLCK.patch
@@ -522,7 +556,7 @@ qemu_src_configure() {
 		$(conf_notuser vhost-user-fs)
 		$(conf_tools vhost-user-fs virtiofsd)
 		$(conf_notuser virgl virglrenderer)
-		$(conf_notuser virtfs)
+		$(conf_softmmu virtfs)
 		$(conf_notuser vnc)
 		$(conf_notuser vte)
 		$(conf_notuser xen)
