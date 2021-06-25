@@ -12,7 +12,7 @@ SRC_URI="https://www.freedesktop.org/software/${PN}/releases/${P}.tar.gz
 
 LICENSE="LGPL-2"
 SLOT="0"
-KEYWORDS="amd64 ~arm ~arm64 ~mips ~ppc64 x86"
+KEYWORDS="amd64 arm arm64 ~mips ppc64 x86"
 IUSE="duktape elogind examples gtk +introspection kde nls pam selinux systemd test"
 RESTRICT="!test? ( test )"
 
@@ -37,6 +37,7 @@ DEPEND="
 	!duktape? ( dev-lang/spidermonkey:78[-debug] )
 	dev-libs/glib:2
 	dev-libs/expat
+	virtual/libcrypt:=
 	elogind? ( sys-auth/elogind )
 	pam? (
 		sys-auth/pambase
