@@ -37,12 +37,12 @@ DEPEND="
 	!duktape? ( dev-lang/spidermonkey:78[-debug] )
 	dev-libs/glib:2
 	dev-libs/expat
-	virtual/libcrypt:=
 	elogind? ( sys-auth/elogind )
 	pam? (
 		sys-auth/pambase
 		sys-libs/pam
 	)
+	!pam? ( virtual/libcrypt:= )
 	systemd? ( sys-apps/systemd:0=[policykit] )
 "
 RDEPEND="${DEPEND}
