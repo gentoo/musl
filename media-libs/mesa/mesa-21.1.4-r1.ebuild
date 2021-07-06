@@ -242,7 +242,6 @@ x86? (
 	usr/lib/libGLX_mesa.so.0.0.0
 )"
 
-
 PATCHES=(
 	"${FILESDIR}"/${PN}-21.1.4-add-disable-tls-support.patch
 )
