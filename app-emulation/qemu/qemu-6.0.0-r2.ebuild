@@ -9,7 +9,7 @@ PYTHON_REQ_USE="ncurses,readline"
 FIRMWARE_ABI_VERSION="5.2.0-r50"
 
 inherit eutils linux-info toolchain-funcs multilib python-r1
-inherit udev fcaps readme.gentoo-r1 pax-utils l10n xdg-utils
+inherit udev fcaps readme.gentoo-r1 pax-utils xdg-utils
 
 if [[ ${PV} = *9999* ]]; then
 	EGIT_REPO_URI="https://git.qemu.org/git/qemu.git"
@@ -23,7 +23,7 @@ if [[ ${PV} = *9999* ]]; then
 	SRC_URI=""
 else
 	SRC_URI="https://download.qemu.org/${P}.tar.xz"
-	KEYWORDS="amd64 arm64 ~ppc ppc64 ~x86"
+	KEYWORDS="amd64 arm64 ~ppc ppc64 x86"
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
@@ -33,7 +33,7 @@ LICENSE="GPL-2 LGPL-2 BSD-2"
 SLOT="0"
 
 IUSE="accessibility +aio alsa bzip2 capstone +caps +curl debug +doc
-	+fdt glusterfs gnutls gtk infiniband iscsi io-uring
+	+fdt fuse glusterfs gnutls gtk infiniband iscsi io-uring
 	jack jemalloc +jpeg kernel_linux
 	kernel_FreeBSD lzo multipath
 	ncurses nfs nls numa opengl +oss +pin-upstream-blobs
@@ -108,6 +108,7 @@ REQUIRED_USE="${PYTHON_REQUIRED_USE}
 	qemu_softmmu_targets_ppc? ( fdt )
 	qemu_softmmu_targets_riscv32? ( fdt )
 	qemu_softmmu_targets_riscv64? ( fdt )
+	sdl-image? ( sdl )
 	static? ( static-user !alsa !gtk !jack !opengl !pulseaudio !plugins !rbd !snappy )
 	static-user? ( !plugins )
 	vhost-user-fs? ( caps seccomp )
@@ -149,6 +150,7 @@ SOFTMMU_TOOLS_DEPEND="
 	caps? ( sys-libs/libcap-ng[static-libs(+)] )
 	curl? ( >=net-misc/curl-7.15.4[static-libs(+)] )
 	fdt? ( >=sys-apps/dtc-1.5.0[static-libs(+)] )
+	fuse? ( >=sys-fs/fuse-3.1:3[static-libs(+)] )
 	glusterfs? ( >=sys-cluster/glusterfs-3.4.0[static-libs(+)] )
 	gnutls? (
 		dev-libs/nettle:=[static-libs(+)]
@@ -171,8 +173,8 @@ SOFTMMU_TOOLS_DEPEND="
 	lzo? ( dev-libs/lzo:2[static-libs(+)] )
 	multipath? ( sys-fs/multipath-tools )
 	ncurses? (
-		sys-libs/ncurses:0=[unicode]
-		sys-libs/ncurses:0=[static-libs(+)]
+		sys-libs/ncurses:=[unicode(+)]
+		sys-libs/ncurses:=[static-libs(+)]
 	)
 	nfs? ( >=net-fs/libnfs-1.9.3:=[static-libs(+)] )
 	numa? ( sys-process/numactl[static-libs(+)] )
@@ -274,6 +276,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-5.2.0-cleaner-werror.patch
 	"${FILESDIR}"/${PN}-5.2.0-disable-keymap.patch
 	"${FILESDIR}"/${PN}-5.2.0-dce-locks.patch
+	"${FILESDIR}"/${PN}-6.0.0-make.patch
 )
 
 QA_PREBUILT="
@@ -521,6 +524,7 @@ qemu_src_configure() {
 		$(conf_notuser caps cap-ng)
 		$(conf_notuser curl)
 		$(conf_notuser fdt)
+		$(conf_notuser fuse)
 		$(conf_notuser glusterfs)
 		$(conf_notuser gnutls)
 		$(conf_notuser gnutls nettle)
