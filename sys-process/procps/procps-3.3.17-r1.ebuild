@@ -3,21 +3,21 @@
 
 EAPI=7
 
-inherit flag-o-matic multilib-minimal toolchain-funcs usr-ldscript
+inherit flag-o-matic multilib-minimal usr-ldscript
 
-DESCRIPTION="standard informational utilities and process-handling tools"
+DESCRIPTION="Standard informational utilities and process-handling tools"
 HOMEPAGE="http://procps-ng.sourceforge.net/ https://gitlab.com/procps-ng/procps"
 SRC_URI="mirror://sourceforge/${PN}-ng/${PN}-ng-${PV}.tar.xz"
 
 LICENSE="GPL-2"
 SLOT="0/8" # libprocps.so
-KEYWORDS="~alpha amd64 arm arm64 hppa ~ia64 ~m68k ~mips ppc ppc64 ~riscv ~s390 sparc x86 ~amd64-linux ~x86-linux"
+KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 IUSE="elogind +kill modern-top +ncurses nls selinux static-libs systemd test unicode"
 RESTRICT="!test? ( test )"
 
 DEPEND="
 	elogind? ( sys-auth/elogind )
-	ncurses? ( >=sys-libs/ncurses-5.7-r7:=[unicode?] )
+	ncurses? ( >=sys-libs/ncurses-5.7-r7:=[unicode(+)?] )
 	selinux? ( sys-libs/libselinux[${MULTILIB_USEDEP}] )
 	systemd? ( sys-apps/systemd[${MULTILIB_USEDEP}] )
 "
