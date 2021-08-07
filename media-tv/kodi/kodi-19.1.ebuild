@@ -10,7 +10,7 @@ LIBDVDNAV_VERSION="6.0.0-Leia-Alpha-3"
 FFMPEG_VERSION="4.3.2"
 CODENAME="Matrix"
 FFMPEG_KODI_VERSION="19.1"
-PYTHON_COMPAT=( python3_{6,7,8,9} )
+PYTHON_COMPAT=( python3_{8,9} )
 SRC_URI="https://github.com/xbmc/libdvdcss/archive/${LIBDVDCSS_VERSION}.tar.gz -> libdvdcss-${LIBDVDCSS_VERSION}.tar.gz
 	https://github.com/xbmc/libdvdread/archive/${LIBDVDREAD_VERSION}.tar.gz -> libdvdread-${LIBDVDREAD_VERSION}.tar.gz
 	https://github.com/xbmc/libdvdnav/archive/${LIBDVDNAV_VERSION}.tar.gz -> libdvdnav-${LIBDVDNAV_VERSION}.tar.gz
@@ -30,7 +30,16 @@ else
 	S=${WORKDIR}/xbmc-${MY_PV}
 fi
 
-inherit autotools cmake desktop flag-o-matic linux-info pax-utils python-single-r1 xdg
+PATCHES=(
+	"${FILESDIR}/${P}-fmt-8.patch"
+	"${FILESDIR}/musl/19.0/0001-add-missing-stdint.h.patch"
+	"${FILESDIR}/musl/19.0/0002-fix-fileemu.patch"
+	"${FILESDIR}/musl/19.0/0003-Use-stdint.h-defined-types-uint8_t-uint16_t-uint32_t.patch"
+	"${FILESDIR}/musl/19.0/0004-Fix-ldt-for-musl.patch"
+	"${FILESDIR}/musl/19.0/0005-Fix-fortify-sources.patch"
+)
+
+inherit autotools cmake desktop linux-info pax-utils python-single-r1 xdg
 
 DESCRIPTION="A free and open source media-player and entertainment hub"
 HOMEPAGE="https://kodi.tv/ https://kodi.wiki/"
@@ -84,8 +93,8 @@ COMMON_TARGET_DEPEND="${PYTHON_DEPS}
 	>=dev-libs/spdlog-1.5.0:=
 	dev-libs/tinyxml[stl]
 	$(python_gen_cond_dep '
-		dev-python/pillow[${PYTHON_MULTI_USEDEP}]
-		dev-python/pycryptodome[${PYTHON_MULTI_USEDEP}]
+		dev-python/pillow[${PYTHON_USEDEP}]
+		dev-python/pycryptodome[${PYTHON_USEDEP}]
 	')
 	>=dev-libs/libcdio-2.1.0[cxx]
 	>=dev-libs/libfmt-6.1.2
@@ -190,14 +199,6 @@ In some cases Kodi needs to access multicast addresses.
 Please consider enabling IP_MULTICAST under Networking options.
 "
 
-PATCHES=(
-	"${FILESDIR}/musl/19.0/0001-add-missing-stdint.h.patch"
-	"${FILESDIR}/musl/19.0/0002-fix-fileemu.patch"
-	"${FILESDIR}/musl/19.0/0003-Use-stdint.h-defined-types-uint8_t-uint16_t-uint32_t.patch"
-	"${FILESDIR}/musl/19.0/0004-Fix-ldt-for-musl.patch"
-	"${FILESDIR}/musl/19.0/0005-Fix-fortify-sources.patch"
-)
-
 pkg_setup() {
 	check_extra_config
 	python-single-r1_pkg_setup
@@ -240,7 +241,7 @@ src_prepare() {
 		|| die
 
 	# Required to prevent addons from crashing
-	use elibc_musl && append-ldflags -Wl,-z,stack-size=1048576
+	use elibc_musl && append-ldflags -Wl,-z,stack-size=2097152
 }
 
 src_configure() {
