@@ -19,6 +19,12 @@ RDEPEND=">=sys-libs/zlib-1.2.8-r1[static-libs?,${MULTILIB_USEDEP}]
 	lzma? ( >=app-arch/xz-utils-5.0.5-r1[static-libs?,${MULTILIB_USEDEP}] )
 	zstd? ( app-arch/zstd:=[static-libs?,${MULTILIB_USEDEP}] )
 	!dev-libs/libelf
+	elibc_musl? (
+		sys-libs/argp-standalone
+		sys-libs/fts-standalone
+		sys-libs/obstack-standalone
+		dev-libs/libbsd
+	)
 "
 DEPEND="${RDEPEND}
 	valgrind? ( dev-util/valgrind )
