@@ -14,7 +14,8 @@ SLOT="0"
 KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
 IUSE="readline static static-libs systemd lvm2create_initrd sanlock selinux +udev +thin device-mapper-only"
 REQUIRED_USE="device-mapper-only? ( !lvm2create_initrd !sanlock !thin )
-	static? ( !systemd )
+	static? ( !systemd !udev )
+	static-libs? ( !udev )
 	systemd? ( udev )"
 
 DEPEND_COMMON="
@@ -24,7 +25,7 @@ DEPEND_COMMON="
 	readline? ( sys-libs/readline:0= )
 	sanlock? ( sys-cluster/sanlock )
 	systemd? ( >=sys-apps/systemd-205:0= )
-	udev? ( >=virtual/libudev-208:=[static-libs(-)?] )"
+	udev? ( >=virtual/libudev-208:= )"
 # /run is now required for locking during early boot. /var cannot be assumed to
 # be available -- thus, pull in recent enough baselayout for /run.
 # This version of LVM is incompatible with cryptsetup <1.1.2.
