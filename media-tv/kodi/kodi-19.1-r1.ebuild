@@ -26,7 +26,7 @@ else
 	MY_PV=${MY_PV/_rc/RC}
 	MY_P="${PN}-${MY_PV}"
 	SRC_URI+=" https://github.com/xbmc/xbmc/archive/v${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~x86"
+	KEYWORDS="~amd64 ~arm arm64 ~x86"
 	S=${WORKDIR}/xbmc-${MY_PV}
 fi
 
@@ -71,7 +71,7 @@ RESTRICT="!test? ( test )"
 
 COMMON_DEPEND="
 	>=dev-libs/lzo-2.04
-	>=dev-libs/flatbuffers-1.12.0
+	>=dev-libs/flatbuffers-1.12.0:=
 	>=media-libs/libjpeg-turbo-2.0.4:=
 	>=media-libs/libpng-1.6.26:0=
 "
@@ -239,9 +239,6 @@ src_prepare() {
 		"${S}"/tools/depends/native/TexturePacker/src/autogen.sh \
 		"${S}"/tools/depends/native/JsonSchemaBuilder/src/autogen.sh \
 		|| die
-
-	# Required to prevent addons from crashing
-	use elibc_musl && append-ldflags -Wl,-z,stack-size=2097152
 }
 
 src_configure() {
