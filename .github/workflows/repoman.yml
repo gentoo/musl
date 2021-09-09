@@ -19,7 +19,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install lxml pyyaml
-        wget -qO - "https://github.com/gentoo/portage/archive/portage-3.0.16.tar.gz" | tar xz
+        wget -qO - "https://github.com/gentoo/portage/archive/portage-3.0.22.tar.gz" | tar xz
         sudo groupadd -g 250 portage
         sudo useradd -g portage -d /var/tmp/portage -s /bin/false -u 250 portage
     - name: Setup master gentoo repository
