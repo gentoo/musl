@@ -23,5 +23,9 @@ src_prepare() {
 		esac
 	fi
 
+	if [[ ${CATEGORY} != cross-* ]] ; then
+		eapply "${FILESDIR}"/gcc-6.1-musl-libssp.patch
+	fi
+
 	eapply_user
 }
