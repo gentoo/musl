@@ -3,7 +3,7 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{7,8,9} )
+PYTHON_COMPAT=( python3_{8..10} )
 PYTHON_REQ_USE="threads(+),xml"
 
 MY_PV="${PV/_alpha/.alpha}"
@@ -177,7 +177,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	x11-libs/libXrandr
 	x11-libs/libXrender
 	accessibility? (
-		$(python_gen_cond_dep 'dev-python/lxml[${PYTHON_MULTI_USEDEP}]')
+		$(python_gen_cond_dep 'dev-python/lxml[${PYTHON_USEDEP}]')
 	)
 	bluetooth? (
 		dev-libs/glib:2
@@ -213,7 +213,7 @@ COMMON_DEPEND="${PYTHON_DEPS}
 		dev-libs/glib:2
 		dev-libs/gobject-introspection
 		gnome-base/dconf
-		media-libs/mesa[egl]
+		media-libs/mesa[egl(+)]
 		x11-libs/gtk+:3[X]
 		x11-libs/pango
 	)
@@ -294,7 +294,8 @@ PATCHES=(
 	"${FILESDIR}/${PN}-7.0.3.1-qt5detect.patch"
 
 	# master branch
-	"${FILESDIR}/${P}-bashism.patch" # bug 780432
+	"${FILESDIR}/${PN}-7.1.3.2-bashism.patch" # bug 780432
+	"${FILESDIR}/${P}-bison-3.8.patch" # bug 812923
 
 	# musl compatibility by AlpineLinux
 	"${FILESDIR}/${PN}-6.4.4.2-linux-musl.patch"
