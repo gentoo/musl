@@ -50,7 +50,8 @@ REQUIRED_USE="
 RESTRICT="preserve-libs mirror"
 QA_PREBUILT="opt/.*"
 
-RDEPEND=""
+RDEPEND="${DEPEND}
+	dev-libs/nss"
 DEPEND="
 	dev-libs/elfutils[utils]
 	>=dev-libs/glib-2.60.7:2
