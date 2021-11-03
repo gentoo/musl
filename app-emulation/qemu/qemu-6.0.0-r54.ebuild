@@ -6,7 +6,7 @@ EAPI="7"
 PYTHON_COMPAT=( python3_{7,8,9,10} )
 PYTHON_REQ_USE="ncurses,readline"
 
-FIRMWARE_ABI_VERSION="5.2.0-r50"
+FIRMWARE_ABI_VERSION="6.0.0-r50"
 
 inherit eutils linux-info toolchain-funcs multilib python-r1
 inherit udev fcaps readme.gentoo-r1 pax-utils xdg-utils
@@ -27,7 +27,7 @@ else
 fi
 
 DESCRIPTION="QEMU + Kernel-based Virtual Machine userland tools"
-HOMEPAGE="http://www.qemu.org http://www.linux-kvm.org"
+HOMEPAGE="https://www.qemu.org https://www.linux-kvm.org"
 
 LICENSE="GPL-2 LGPL-2 BSD-2"
 SLOT="0"
@@ -182,7 +182,7 @@ SOFTMMU_TOOLS_DEPEND="
 		virtual/opengl
 		media-libs/libepoxy[static-libs(+)]
 		media-libs/mesa[static-libs(+)]
-		media-libs/mesa[egl,gbm]
+		media-libs/mesa[egl(+),gbm(+)]
 	)
 	png? ( media-libs/libpng:0=[static-libs(+)] )
 	pulseaudio? ( media-sound/pulseaudio )
@@ -213,17 +213,18 @@ SOFTMMU_TOOLS_DEPEND="
 	zstd? ( >=app-arch/zstd-1.4.0[static-libs(+)] )
 "
 
+EDK2_OVMF_VERSION="202105"
 SEABIOS_VERSION="1.14.0"
 
 X86_FIRMWARE_DEPEND="
 	pin-upstream-blobs? (
-		~sys-firmware/edk2-ovmf-202008[binary]
+		~sys-firmware/edk2-ovmf-${EDK2_OVMF_VERSION}[binary]
 		~sys-firmware/ipxe-1.21.1[binary,qemu]
 		~sys-firmware/seabios-${SEABIOS_VERSION}[binary,seavgabios]
 		~sys-firmware/sgabios-0.1_pre10[binary]
 	)
 	!pin-upstream-blobs? (
-		sys-firmware/edk2-ovmf
+		>=sys-firmware/edk2-ovmf-${EDK2_OVMF_VERSION}
 		sys-firmware/ipxe[qemu]
 		>=sys-firmware/seabios-${SEABIOS_VERSION}[seavgabios]
 		sys-firmware/sgabios
@@ -242,7 +243,7 @@ BDEPEND="
 	dev-lang/perl
 	sys-apps/texinfo
 	virtual/pkgconfig
-	doc? ( dev-python/sphinx )
+	doc? ( dev-python/sphinx[${PYTHON_USEDEP}] )
 	gtk? ( nls? ( sys-devel/gettext ) )
 	test? (
 		dev-libs/glib[utils]
