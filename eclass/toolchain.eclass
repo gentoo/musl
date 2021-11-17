@@ -556,7 +556,7 @@ do_gcc_gentoo_patches() {
 			tc_apply_patches "Applying uClibc patches ..." "${WORKDIR}"/uclibc/*.patch
 		fi
 
-		if [[ -n ${MUSL_VER} ]] ; then #&& [[ ${CTARGET} == *musl* ]] ; then
+		if [[ -n ${MUSL_VER} ]] && [[ ${CTARGET} == *musl* ]] ; then
 			if [[ ${CATEGORY} == cross-* ]] ; then
 				# We don't want to apply some patches when cross-compiling.
 				if [[ -d "${WORKDIR}"/musl/nocross ]] ; then
