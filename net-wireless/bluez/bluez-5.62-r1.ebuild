@@ -1,7 +1,7 @@
 # Copyright 1999-2021 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 PYTHON_COMPAT=( python3_{8..10} )
 
 inherit autotools linux-info python-single-r1 readme.gentoo-r1 systemd udev multilib-minimal
@@ -68,9 +68,6 @@ PATCHES=(
 	# Fedora patches
 	# http://www.spinics.net/lists/linux-bluetooth/msg40136.html
 	"${FILESDIR}"/0001-obex-Use-GLib-helper-function-to-manipulate-paths.patch
-
-	# https://marc.info/?l=linux-bluetooth&m=161498090629584&w=2
-	"${FILESDIR}"/${PN}-5.60-glibc-2.34.patch
 
 	# Required for musl support
 	"${FILESDIR}"/0001-include-limits.h-for-PATH_MAX-for-musl-support.patch
