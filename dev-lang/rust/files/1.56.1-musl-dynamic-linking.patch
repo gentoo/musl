@@ -1,0 +1,69 @@
+From f11729adb9990528a38df7c703bf589d58998c4f Mon Sep 17 00:00:00 2001
+From: Jakub Jirutka <jakub@jirutka.cz>
+Date: Wed, 24 Nov 2021 21:32:50 -0600
+Subject: [PATCH] [PATCH] Fix linux_musl_base for native musl host
+
+See https://github.com/rust-lang/rust/pull/40113
+---
+ compiler/rustc_target/src/spec/crt_objects.rs | 22 -------------------
+ .../rustc_target/src/spec/linux_musl_base.rs  |  6 +----
+ 2 files changed, 1 insertion(+), 27 deletions(-)
+
+diff --git a/compiler/rustc_target/src/spec/crt_objects.rs b/compiler/rustc_target/src/spec/crt_objects.rs
+index 2fc9ab29f..276736159 100644
+--- a/compiler/rustc_target/src/spec/crt_objects.rs
++++ b/compiler/rustc_target/src/spec/crt_objects.rs
+@@ -62,28 +62,6 @@ pub(super) fn all(obj: &str) -> CrtObjects {
+     ])
+ }
+ 
+-pub(super) fn pre_musl_fallback() -> CrtObjects {
+-    new(&[
+-        (LinkOutputKind::DynamicNoPicExe, &["crt1.o", "crti.o", "crtbegin.o"]),
+-        (LinkOutputKind::DynamicPicExe, &["Scrt1.o", "crti.o", "crtbeginS.o"]),
+-        (LinkOutputKind::StaticNoPicExe, &["crt1.o", "crti.o", "crtbegin.o"]),
+-        (LinkOutputKind::StaticPicExe, &["rcrt1.o", "crti.o", "crtbeginS.o"]),
+-        (LinkOutputKind::DynamicDylib, &["crti.o", "crtbeginS.o"]),
+-        (LinkOutputKind::StaticDylib, &["crti.o", "crtbeginS.o"]),
+-    ])
+-}
+-
+-pub(super) fn post_musl_fallback() -> CrtObjects {
+-    new(&[
+-        (LinkOutputKind::DynamicNoPicExe, &["crtend.o", "crtn.o"]),
+-        (LinkOutputKind::DynamicPicExe, &["crtendS.o", "crtn.o"]),
+-        (LinkOutputKind::StaticNoPicExe, &["crtend.o", "crtn.o"]),
+-        (LinkOutputKind::StaticPicExe, &["crtendS.o", "crtn.o"]),
+-        (LinkOutputKind::DynamicDylib, &["crtendS.o", "crtn.o"]),
+-        (LinkOutputKind::StaticDylib, &["crtendS.o", "crtn.o"]),
+-    ])
+-}
+-
+ pub(super) fn pre_mingw_fallback() -> CrtObjects {
+     new(&[
+         (LinkOutputKind::DynamicNoPicExe, &["crt2.o", "rsbegin.o"]),
+diff --git a/compiler/rustc_target/src/spec/linux_musl_base.rs b/compiler/rustc_target/src/spec/linux_musl_base.rs
+index 5038a967d..25d634a1e 100644
+--- a/compiler/rustc_target/src/spec/linux_musl_base.rs
++++ b/compiler/rustc_target/src/spec/linux_musl_base.rs
+@@ -1,16 +1,12 @@
+-use crate::spec::crt_objects::{self, CrtObjectsFallback};
+ use crate::spec::TargetOptions;
+ 
+ pub fn opts() -> TargetOptions {
+     let mut base = super::linux_base::opts();
+ 
+     base.env = "musl".to_string();
+-    base.pre_link_objects_fallback = crt_objects::pre_musl_fallback();
+-    base.post_link_objects_fallback = crt_objects::post_musl_fallback();
+-    base.crt_objects_fallback = Some(CrtObjectsFallback::Musl);
+ 
+     // These targets statically link libc by default
+-    base.crt_static_default = true;
++    base.crt_static_default = false;
+ 
+     base
+ }
+-- 
+2.32.0
+
