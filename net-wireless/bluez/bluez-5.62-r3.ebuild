@@ -70,6 +70,15 @@ PATCHES=(
 
 	# Required for musl support
 	"${FILESDIR}"/0001-include-limits.h-for-PATH_MAX-for-musl-support.patch
+
+	# This reverts commit ac2c2e10b3adb432a572b618c6f53cabb6b3c80b. It
+	# causes problems with Logitech MX wireless input devices (see
+	# https://github.com/bluez/bluez/issues/220 )
+	"${FILESDIR}"/0001-Revert-attrib-Make-use-of-bt_att_resend.patch
+
+	# gatt-client: Fix disconnecting due to GattCharacteristic1.MTU
+	# (from 'master')
+	"${FILESDIR}"/${P}-fix-disconnecting.patch
 )
 
 pkg_setup() {
