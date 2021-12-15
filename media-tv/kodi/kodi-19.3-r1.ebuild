@@ -141,7 +141,7 @@ COMMON_TARGET_DEPEND="${PYTHON_DEPS}
 		x11-libs/libva:=
 		!gles? ( x11-libs/libva[opengl] )
 		system-ffmpeg? ( media-video/ffmpeg[vaapi] )
-		vdpau? ( x11-libs/libva[vdpau] )
+		vdpau? ( x11-libs/libva-vdpau-driver )
 		wayland? ( x11-libs/libva[wayland] )
 		X? ( x11-libs/libva[X] )
 	)
@@ -340,6 +340,12 @@ src_compile() {
 }
 
 src_test() {
+	local myctestargs=(
+		# Known failing, unreliable test
+		# bug #743938
+		-E "(TestCPUInfo.GetCPUFrequency)"
+	)
+
 	# see https://github.com/xbmc/xbmc/issues/17860#issuecomment-630120213
 	KODI_HOME="${BUILD_DIR}" cmake_build check
 }
