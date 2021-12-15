@@ -16,7 +16,7 @@ if [[ ${PV} = *_rc* ]]; then
 	SRC_URI="mirror://samba/rc/${MY_P}.tar.gz"
 else
 	SRC_URI="mirror://samba/stable/${MY_P}.tar.gz"
-	KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
+		KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
 fi
 S="${WORKDIR}/${MY_P}"
 
@@ -188,15 +188,15 @@ src_prepare() {
 		-i source4/dsdb/samdb/ldb_modules/password_hash.c \
 		|| die
 
-        if use elibc_musl ; then
-                eapply "${FILESDIR}"/add_missing___compar_fn_t.patch
-                eapply "${FILESDIR}"/fix-musl-lib-without-innetgr.patch
-                eapply "${FILESDIR}"/getpwent_r.patch
-                eapply "${FILESDIR}"/missing-headers.patch
-                eapply "${FILESDIR}"/musl_rm_unistd_incl.patch
-                eapply "${FILESDIR}"/musl_uintptr.patch
-                eapply "${FILESDIR}"/netdb-defines.patch
-        fi
+	if use elibc_musl ; then
+		eapply "${FILESDIR}"/add_missing___compar_fn_t.patch
+		eapply "${FILESDIR}"/fix-musl-lib-without-innetgr.patch
+		eapply "${FILESDIR}"/getpwent_r.patch
+		eapply "${FILESDIR}"/missing-headers.patch
+		eapply "${FILESDIR}"/musl_rm_unistd_incl.patch
+		eapply "${FILESDIR}"/musl_uintptr.patch
+		eapply "${FILESDIR}"/netdb-defines.patch
+	fi
 
 	# Friggin' WAF shit
 	multilib_copy_sources
