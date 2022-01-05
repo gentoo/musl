@@ -1,4 +1,4 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -396,7 +396,7 @@ multilib_src_configure() {
 
 	# Disable glx tls support on musl
 	if use elibc_musl; then
-		emesonargs+=( -Delf-tls=false )
+		emesonargs+=( -Duse-elf-tls=false )
 	fi
 
 	if use gallium; then
