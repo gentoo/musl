@@ -1,17 +1,18 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
-inherit eutils libtool multilib-minimal
+EAPI=8
+
+inherit libtool multilib-minimal
 
 DESCRIPTION="VBI Decoding Library for Zapping"
-SRC_URI="mirror://sourceforge/zapping/${P}.tar.bz2"
 HOMEPAGE="http://zapping.sourceforge.net"
+SRC_URI="mirror://sourceforge/project/zapping/${PN}/${PV}/${P}.tar.bz2"
 
 LICENSE="GPL-2 LGPL-2"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ppc x86"
-IUSE="doc dvb nls static-libs v4l X"
+KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
+IUSE="doc dvb nls v4l X"
 
 RDEPEND=">=media-libs/libpng-1.5.18:0=[${MULTILIB_USEDEP}]
 	>=sys-libs/zlib-1.2.8-r1[${MULTILIB_USEDEP}]
@@ -19,18 +20,22 @@ RDEPEND=">=media-libs/libpng-1.5.18:0=[${MULTILIB_USEDEP}]
 	X? ( >=x11-libs/libX11-1.6.2[${MULTILIB_USEDEP}] )"
 DEPEND="${RDEPEND}
 	virtual/os-headers
-	doc? ( app-doc/doxygen )
-	nls? ( sys-devel/gettext )
 	X? ( x11-libs/libXt )"
+BDEPEND="doc? ( app-doc/doxygen )
+	nls? ( sys-devel/gettext )"
+
+PATCHES=(
+	"${FILESDIR}"/tests-gcc7.patch
+	"${FILESDIR}"/${PN}-va_copy.patch
+)
 
 src_prepare() {
-	epatch "${FILESDIR}/${PN}-va_copy.patch"
+	default
 	elibtoolize
 }
 
 multilib_src_configure() {
 	ECONF_SOURCE="${S}" econf \
-		$(use_enable static-libs static) \
 		$(use_enable v4l) \
 		$(use_enable dvb) \
 		$(use_enable nls) \
@@ -41,11 +46,18 @@ multilib_src_configure() {
 multilib_src_install() {
 	emake DESTDIR="${D}" install
 
-	multilib_is_native_abi && use doc && dohtml -a png,gif,html,css doc/html/*
+	if multilib_is_native_abi; then
+		if use doc; then
+			docinto html
+			dodoc doc/html/*.{png,gif,html,css}
+		fi
+	fi
 }
 
 multilib_src_install_all() {
+	# This may have been left pointing to "html"
+	docinto
 	dodoc AUTHORS BUGS ChangeLog NEWS README TODO
 
-	find "${D}" -name '*.la' -delete
+	find "${ED}" -name '*.la' -delete
 }
