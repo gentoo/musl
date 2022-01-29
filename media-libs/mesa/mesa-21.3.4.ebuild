@@ -240,6 +240,7 @@ x86? (
 PATCHES=(
 	"${FILESDIR}"/mesa-tls.patch
 	"${FILESDIR}"/mesa-tls-2.patch
+	"${FILESDIR}"/mesa-tls-3-fix-non-initial-exec.patch
 )
 
 llvm_check_deps() {
