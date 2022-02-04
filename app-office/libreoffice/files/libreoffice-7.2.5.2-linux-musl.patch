@@ -1,24 +1,35 @@
+From 9e10d040b12bd0aa5c4c95848763426cd9aaf089 Mon Sep 17 00:00:00 2001
+From: 
+Date: Thu, 3 Feb 2022 18:27:20 -0600
+Subject: [PATCH] check for musl
+
+---
+ configure.ac | 23 ++++-------------------
+ 1 file changed, 4 insertions(+), 19 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 092fb04cc..ce4e408a6 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -612,7 +612,7 @@
+@@ -879,7 +879,7 @@ solaris*)
      fi
      ;;
  
 -linux-gnu*|k*bsd*-gnu*)
 +linux-gnu*|linux-musl*|k*bsd*-gnu*)
-     build_gstreamer_1_0=yes
-     test_kf5=yes
-     test_gtk3_kde5=yes
-@@ -4353,7 +4353,7 @@
+     using_freetype_fontconfig=yes
+     using_x11=yes
+     build_skia=yes
+@@ -4933,7 +4933,7 @@ kfreebsd*)
      esac
      ;;
  
 -linux-gnu*)
 +linux-gnu*|linux-musl*)
      COM=GCC
-     USING_X11=TRUE
      OS=LINUX
-@@ -7672,7 +7672,7 @@
+     RTL_OS=Linux
+@@ -8593,7 +8593,7 @@ if test -n "$ENABLE_JAVA" -a -z "$JAVAINC"; then
          test -d "$JAVA_HOME/include/native_thread" && JAVAINC="$JAVAINC -I$JAVA_HOME/include/native_thread"
          ;;
  
@@ -27,8 +38,8 @@
          JAVAINC="-I$JAVA_HOME/include"
          JAVAINC="$JAVAINC -I$JAVA_HOME/include/linux"
          test -d "$JAVA_HOME/include/native_thread" && JAVAINC="$JAVAINC -I$JAVA_HOME/include/native_thread"
-@@ -10260,21 +10260,6 @@
- AC_SUBST(ENABLE_LIBNUMBERTEXT)
+@@ -11235,21 +11235,6 @@ AC_SUBST(SYSTEM_LIBNUMBERTEXT)
+ AC_SUBST(SYSTEM_LIBNUMBERTEXT_DATA)
  AC_SUBST(LIBNUMBERTEXT_CFLAGS)
  
 -dnl ***************************************
@@ -49,7 +60,7 @@
  dnl =========================================
  dnl Check for uuidgen
  dnl =========================================
-@@ -12812,7 +12812,7 @@
+@@ -14221,7 +14206,7 @@ else
  
      case "$host_os" in
  
@@ -58,3 +69,6 @@
          if test "$ENABLE_JAVA" != ""; then
              pathmunge "$JAVA_HOME/bin" "after"
          fi
+-- 
+2.34.1
+

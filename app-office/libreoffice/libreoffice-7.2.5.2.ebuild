@@ -1,4 +1,4 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
@@ -50,9 +50,7 @@ ADDONS_SRC=(
 	# not packaged in Gentoo, https://www.netlib.org/fp/dtoa.c
 	"${ADDONS_URI}/dtoa-20180411.tgz"
 	# not packaged in Gentoo, https://skia.org/
-	"${ADDONS_URI}/skia-m88-59bafeeaa7de9eb753e3778c414e01dcf013dcd8.tar.xz"
-	# QR code generating library for >=libreoffice-6.4, bug #691740
-	"${ADDONS_URI}/QR-Code-generator-1.4.0.tar.gz"
+	"${ADDONS_URI}/skia-m90-45c57e116ee0ce214bdf78405a4762722e4507d9.tar.xz"
 	"base? (
 		${ADDONS_URI}/commons-logging-1.2-src.tar.gz
 		${ADDONS_URI}/ba2930200c9f019c2d93a8c88c651a0f-flow-engine-0.9.4.zip
@@ -105,30 +103,8 @@ LICENSE="|| ( LGPL-3 MPL-1.1 )"
 SLOT="0"
 
 [[ ${MY_PV} == *9999* ]] || \
-KEYWORDS="amd64 ~arm ~arm64 ~ppc64 ~x86"
+KEYWORDS="amd64 ~arm ~arm64 ~ppc64 x86"
 
-BDEPEND="
-	dev-util/intltool
-	sys-devel/bison
-	sys-devel/flex
-	sys-devel/gettext
-	virtual/pkgconfig
-	clang? ( || (
-		(	sys-devel/clang:13
-			sys-devel/llvm:13
-			=sys-devel/lld-13*	)
-		(	sys-devel/clang:12
-			sys-devel/llvm:12
-			=sys-devel/lld-12*	)
-		(	sys-devel/clang:11
-			sys-devel/llvm:11
-			=sys-devel/lld-11*	)
-		(	sys-devel/clang:10
-			sys-devel/llvm:10
-			=sys-devel/lld-10*	)
-	) )
-	odk? ( >=app-doc/doxygen-1.8.4 )
-"
 COMMON_DEPEND="${PYTHON_DEPS}
 	app-arch/unzip
 	app-arch/zip
@@ -153,7 +129,6 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	>=dev-cpp/clucene-2.3.3.4-r2
 	>=dev-cpp/libcmis-0.5.2
 	dev-db/unixODBC
-	>=games-engines/box2d-2.4.1:0
 	dev-lang/perl
 	>=dev-libs/boost-1.72.0:=[nls]
 	dev-libs/expat
@@ -169,10 +144,11 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	dev-libs/nss
 	>=dev-libs/redland-1.0.16
 	>=dev-libs/xmlsec-1.2.28[nss]
+	>=games-engines/box2d-2.4.1:0
 	media-gfx/fontforge
 	media-gfx/graphite2
 	media-libs/fontconfig
-	media-libs/freetype:2
+	>=media-libs/freetype-2.11.0-r1:2
 	>=media-libs/harfbuzz-0.9.42:=[graphite,icu]
 	media-libs/lcms:2
 	>=media-libs/libcdr-0.1.0
@@ -182,11 +158,11 @@ COMMON_DEPEND="${PYTHON_DEPS}
 	>=media-libs/libpng-1.4:0=
 	>=media-libs/libvisio-0.1.0
 	media-libs/libzmf
+	media-libs/zxing-cpp
 	>=net-libs/neon-0.31.1:=
 	net-misc/curl
 	sci-mathematics/lpsolve
 	sys-libs/zlib
-	virtual/glu
 	virtual/jpeg:0
 	virtual/opengl
 	x11-libs/cairo[X]
@@ -281,6 +257,27 @@ RDEPEND="${COMMON_DEPEND}
 	) )
 	kde? ( kde-frameworks/breeze-icons:* )
 "
+BDEPEND="
+	dev-util/intltool
+	sys-devel/bison
+	sys-devel/flex
+	sys-devel/gettext
+	virtual/pkgconfig
+	clang? (
+		|| (
+			(	sys-devel/clang:13
+				sys-devel/llvm:13
+				=sys-devel/lld-13*	)
+			(	sys-devel/clang:12
+				sys-devel/llvm:12
+				=sys-devel/lld-12*	)
+			(	sys-devel/clang:11
+				sys-devel/llvm:11
+				=sys-devel/lld-11*	)
+		)
+	)
+	odk? ( >=app-doc/doxygen-1.8.4 )
+"
 if [[ ${MY_PV} != *9999* ]] && [[ ${PV} != *_* ]]; then
 	PDEPEND="=app-office/libreoffice-l10n-$(ver_cut 1-2)*"
 else
@@ -295,14 +292,14 @@ PATCHES=(
 	# not upstreamable stuff
 	"${FILESDIR}/${PN}-5.3.4.2-kioclient5.patch"
 	"${FILESDIR}/${PN}-6.1-nomancompress.patch"
-	"${FILESDIR}/${PN}-7.0.3.1-qt5detect.patch"
+	"${FILESDIR}/${PN}-7.2.0.4-qt5detect.patch"
 
-	# master branch
-	"${FILESDIR}/${PN}-7.1.3.2-bashism.patch" # bug 780432
+	# 7.3 branch
+	"${FILESDIR}/${PN}-7.2.2.2-makefile-gengal.patch"
 
 	# musl compatibility by AlpineLinux
-	"${FILESDIR}/${PN}-6.4.4.2-linux-musl.patch"
-	"${FILESDIR}/${PN}-6.1.4.2-musl-fix-execinfo.patch"
+	"${FILESDIR}/${PN}-7.2.5.2-linux-musl.patch"
+	"${FILESDIR}/${PN}-7.2.5.2-musl-fix-execinfo.patch"
 	"${FILESDIR}/${PN}-6.1.4.2-disable-liborcus-unittest.patch"
 	"${FILESDIR}/${PN}-6.1.4.2-musl-stacksize.patch"
 )
@@ -476,7 +473,6 @@ src_configure() {
 	# --without-system-sane: just sane.h header that is used for scan in writer,
 	#   not linked or anything else, worthless to depend on
 	# --disable-pdfium: not yet packaged
-	# --without-system-qrcodegen: has no real build system and LO is the only user
 	local myeconfargs=(
 		--with-system-dicts
 		--with-system-epoxy
@@ -487,7 +483,6 @@ src_configure() {
 		--enable-cairo-canvas
 		--enable-largefile
 		--enable-mergelibs
-		--enable-neon
 		--enable-python=system
 		--enable-randr
 		--enable-release-build
@@ -500,7 +495,6 @@ src_configure() {
 		--disable-online-update
 		--disable-openssl
 		--disable-pdfium
-		--disable-vlc
 		--with-extra-buildid="${gentoo_buildid}"
 		--enable-extension-integration
 		--with-external-dict-dir="${EPREFIX}/usr/share/myspell"
@@ -512,6 +506,7 @@ src_configure() {
 		--with-system-ucpp
 		--with-tls=nss
 		--with-vendor="Gentoo Foundation"
+		--with-webdav
 		--with-x
 		--without-fonts
 		--without-myspell-dicts
@@ -519,10 +514,8 @@ src_configure() {
 		--without-helppack-integration
 		--with-system-gpgmepp
 		--without-system-jfreereport
-		--without-system_apache_commons
 		--without-system-libcmis
 		--without-system-sane
-		--without-system-qrcodegen
 		$(use_enable base report-builder)
 		$(use_enable bluetooth sdremote-bluetooth)
 		$(use_enable coinmp)
