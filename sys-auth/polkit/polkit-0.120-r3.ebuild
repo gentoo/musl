@@ -12,7 +12,7 @@ SRC_URI="https://www.freedesktop.org/software/${PN}/releases/${P}.tar.gz
 
 LICENSE="LGPL-2"
 SLOT="0"
-KEYWORDS="amd64 ~arm ~arm64 ~mips ~ppc64 ~x86"
+KEYWORDS="amd64 ~arm arm64 ~mips ppc64 x86"
 IUSE="duktape examples gtk +introspection kde pam selinux systemd test"
 #RESTRICT="!test? ( test )"
 # Tests currently don't work with meson. See
