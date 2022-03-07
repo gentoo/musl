@@ -19,6 +19,7 @@ REQUIRED_USE="^^ ( elogind systemd )"
 CDEPEND="
 	>=dev-libs/glib-2.44:2
 	sys-auth/polkit
+	virtual/libcrypt:=
 	elogind? ( >=sys-auth/elogind-229.4 )
 	introspection? ( >=dev-libs/gobject-introspection-0.9.12:= )
 	systemd? ( >=sys-apps/systemd-186:0= )
@@ -42,6 +43,7 @@ RDEPEND="${CDEPEND}
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.6.35-gentoo-system-users.patch
+	"${FILESDIR}"/${PN}-0.6.55-meson-0.61-build.patch
 )
 
 src_prepare() {
