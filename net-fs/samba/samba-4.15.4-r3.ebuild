@@ -1,9 +1,9 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_{8..9} )
+PYTHON_COMPAT=( python3_{8..10} )
 PYTHON_REQ_USE="threads(+),xml(+)"
 inherit python-single-r1 waf-utils multilib-minimal linux-info systemd pam tmpfiles
 
@@ -16,24 +16,22 @@ if [[ ${PV} = *_rc* ]]; then
 	SRC_URI="mirror://samba/rc/${MY_P}.tar.gz"
 else
 	SRC_URI="mirror://samba/stable/${MY_P}.tar.gz"
-		KEYWORDS="amd64 arm arm64 ppc ppc64 x86"
+	KEYWORDS="~alpha amd64 arm arm64 ~hppa ~ia64 ppc ppc64 ~riscv sparc x86"
 fi
 S="${WORKDIR}/${MY_P}"
 
 LICENSE="GPL-3"
 SLOT="0"
-IUSE="acl addc addns ads ceph client cluster cups debug dmapi fam glusterfs
-gpg iprint json ldap ntvfs pam profiling-data python quota +regedit selinux
+IUSE="acl addc ads ceph client cluster cpu_flags_x86_aes cups debug fam
+glusterfs gpg iprint json ldap pam profiling-data python quota +regedit selinux
 snapper spotlight syslog system-heimdal +system-mitkrb5 systemd test winbind
 zeroconf"
 
 REQUIRED_USE="${PYTHON_REQUIRED_USE}
 	addc? ( python json winbind )
-	addns? ( python )
-	ads? ( acl ldap winbind )
+	ads? ( acl ldap python winbind )
 	cluster? ( ads )
 	gpg? ( addc )
-	ntvfs? ( addc )
 	spotlight? ( json )
 	test? ( python )
 	!ads? ( !addc )
@@ -66,17 +64,16 @@ COMMON_DEPEND="
 	dev-libs/popt[${MULTILIB_USEDEP}]
 	dev-perl/Parse-Yapp
 	>=net-libs/gnutls-3.4.7[${MULTILIB_USEDEP}]
-	net-libs/libnsl:=[${MULTILIB_USEDEP}]
-	sys-libs/e2fsprogs-libs[${MULTILIB_USEDEP}]
-	>=sys-libs/ldb-2.3.2[ldap(+)?,${MULTILIB_USEDEP}]
-	<sys-libs/ldb-2.4.0[ldap(+)?,${MULTILIB_USEDEP}]
+	>=sys-fs/e2fsprogs-1.46.4-r51[${MULTILIB_USEDEP}]
+	>=sys-libs/ldb-2.4.1[ldap(+)?,${MULTILIB_USEDEP}]
+	<sys-libs/ldb-2.5.0[ldap(+)?,${MULTILIB_USEDEP}]
 	sys-libs/libcap[${MULTILIB_USEDEP}]
 	sys-libs/liburing:=[${MULTILIB_USEDEP}]
 	sys-libs/ncurses:0=
 	sys-libs/readline:0=
-	>=sys-libs/talloc-2.3.2[${MULTILIB_USEDEP}]
-	>=sys-libs/tdb-1.4.3[${MULTILIB_USEDEP}]
-	>=sys-libs/tevent-0.10.2[${MULTILIB_USEDEP}]
+	>=sys-libs/talloc-2.3.3[${MULTILIB_USEDEP}]
+	>=sys-libs/tdb-1.4.4[${MULTILIB_USEDEP}]
+	>=sys-libs/tevent-0.11.0[${MULTILIB_USEDEP}]
 	sys-libs/zlib[${MULTILIB_USEDEP}]
 	virtual/libcrypt:=[${MULTILIB_USEDEP}]
 	virtual/libiconv
@@ -85,7 +82,7 @@ COMMON_DEPEND="
 			dev-python/dnspython:=[\${PYTHON_USEDEP}]
 			dev-python/markdown[\${PYTHON_USEDEP}]
 		)
-		addns? (
+		ads? (
 			dev-python/dnspython:=[\${PYTHON_USEDEP}]
 			net-dns/bind-tools[gssapi]
 		)
@@ -96,11 +93,10 @@ COMMON_DEPEND="
 	cluster? ( net-libs/rpcsvc-proto )
 	cups? ( net-print/cups )
 	debug? ( dev-util/lttng-ust )
-	dmapi? ( sys-apps/dmapi )
 	fam? ( virtual/fam )
-	gpg? ( app-crypt/gpgme )
+	gpg? ( app-crypt/gpgme:= )
 	json? ( dev-libs/jansson:= )
-	ldap? ( net-nds/openldap[${MULTILIB_USEDEP}] )
+	ldap? ( net-nds/openldap:=[${MULTILIB_USEDEP}] )
 	pam? ( sys-libs/pam )
 	python? (
 		sys-libs/ldb[python,${PYTHON_SINGLE_USEDEP}]
@@ -110,7 +106,7 @@ COMMON_DEPEND="
 	)
 	snapper? ( sys-apps/dbus )
 	system-heimdal? ( >=app-crypt/heimdal-1.5[-ssl,${MULTILIB_USEDEP}] )
-	system-mitkrb5? ( >=app-crypt/mit-krb5-1.15.1[${MULTILIB_USEDEP}] )
+	system-mitkrb5? ( >=app-crypt/mit-krb5-1.19[${MULTILIB_USEDEP}] )
 	systemd? ( sys-apps/systemd:0= )
 	zeroconf? ( net-dns/avahi[dbus] )
 "
@@ -144,9 +140,6 @@ BDEPEND="${PYTHON_DEPS}
 
 PATCHES=(
 	"${FILESDIR}/${PN}-4.4.0-pam.patch"
-
-	# https://bugs.gentoo.org/828063
-	"${FILESDIR}/${P}-winbindd_regression_fix.patch"
 )
 
 #CONFDIR="${FILESDIR}/$(get_version_component_range 1-2)"
@@ -187,10 +180,9 @@ src_prepare() {
 	sed -e 's:<gpgme\.h>:<gpgme/gpgme.h>:' \
 		-i source4/dsdb/samdb/ldb_modules/password_hash.c \
 		|| die
-
 	if use elibc_musl ; then
 		eapply "${FILESDIR}"/add_missing___compar_fn_t.patch
-		eapply "${FILESDIR}"/fix-musl-lib-without-innetgr.patch
+		eapply "${FILESDIR}"/add-signal_h.patch
 		eapply "${FILESDIR}"/getpwent_r.patch
 		eapply "${FILESDIR}"/missing-headers.patch
 		eapply "${FILESDIR}"/musl_rm_unistd_incl.patch
@@ -223,20 +215,19 @@ multilib_src_configure() {
 		--nopyc
 		--nopyo
 		--without-winexe
+		--accel-aes=$(usex cpu_flags_x86_aes intelaesni none)
 		$(multilib_native_use_with acl acl-support)
 		$(multilib_native_usex addc '' '--without-ad-dc')
-		$(multilib_native_use_with addns dnsupdate)
 		$(multilib_native_use_with ads)
 		$(multilib_native_use_enable ceph cephfs)
 		$(multilib_native_use_with cluster cluster-support)
 		$(multilib_native_use_enable cups)
-		$(multilib_native_use_with dmapi)
+		--without-dmapi
 		$(multilib_native_use_with fam)
 		$(multilib_native_use_enable glusterfs)
 		$(multilib_native_use_with gpg gpgme)
 		$(multilib_native_use_with json)
 		$(multilib_native_use_enable iprint)
-		$(multilib_native_use_with ntvfs ntvfs-fileserver)
 		$(multilib_native_use_with pam)
 		$(multilib_native_usex pam "--with-pammodulesdir=${EPREFIX}/$(get_libdir)/security" '')
 		$(multilib_native_use_with quota quotas)
@@ -264,7 +255,7 @@ multilib_src_configure() {
 		myconf+=( --with-shared-modules=DEFAULT,!vfs_snapper )
 	fi
 
-	CPPFLAGS="-I${SYSROOT}${EPREFIX}/usr/include/et ${CPPFLAGS}" \
+	CPPFLAGS="-I${ESYSROOT}/usr/include/et ${CPPFLAGS}" \
 		waf-utils_src_configure ${myconf[@]}
 }
 
@@ -350,7 +341,9 @@ pkg_postinst() {
 		elog "controller work previously known as 'samba4'."
 		elog
 	fi
-	elog "For further information and migration steps make sure to read "
-	elog "https://samba.org/samba/history/${P}.html "
-	elog "https://wiki.samba.org/index.php/Samba4/HOWTO "
+	if [[ "${PV}" != *_rc* ]] ; then
+		elog "For further information and migration steps make sure to read "
+		elog "https://samba.org/samba/history/${P}.html "
+		elog "https://wiki.samba.org/index.php/Samba4/HOWTO "
+	fi
 }
