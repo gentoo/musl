@@ -1,8 +1,9 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
-inherit autotools linux-info multilib systemd toolchain-funcs tmpfiles udev flag-o-matic
+TMPFILES_OPTIONAL=1
+inherit autotools linux-info systemd toolchain-funcs tmpfiles udev flag-o-matic
 
 DESCRIPTION="User-land utilities for LVM2 (device-mapper) software"
 HOMEPAGE="https://sourceware.org/lvm2/"
@@ -12,8 +13,8 @@ SRC_URI="ftp://sourceware.org/pub/lvm2/${PN/lvm/LVM}.${PV}.tgz
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="amd64 arm arm64 ~mips ppc ppc64 x86"
-IUSE="readline static static-libs systemd lvm2create_initrd sanlock selinux +udev +thin device-mapper-only"
-REQUIRED_USE="device-mapper-only? ( !lvm2create_initrd !sanlock !thin )
+IUSE="readline static static-libs systemd lvm2create-initrd sanlock selinux +udev +thin device-mapper-only"
+REQUIRED_USE="device-mapper-only? ( !lvm2create-initrd !sanlock !thin )
 	static? ( !systemd !udev )
 	static-libs? ( !udev )
 	systemd? ( udev )"
@@ -31,11 +32,9 @@ DEPEND_COMMON="
 # This version of LVM is incompatible with cryptsetup <1.1.2.
 RDEPEND="${DEPEND_COMMON}
 	>=sys-apps/baselayout-2.2
-	!<sys-apps/openrc-0.11
-	!<sys-fs/cryptsetup-1.1.2
-	!!sys-fs/lvm-user
 	>=sys-apps/util-linux-2.16
-	lvm2create_initrd? ( sys-apps/makedev )
+	lvm2create-initrd? ( sys-apps/makedev )
+	!device-mapper-only? ( virtual/tmpfiles )
 	thin? ( >=sys-block/thin-provisioning-tools-0.3.0 )"
 # note: thin- 0.3.0 is required to avoid --disable-thin_check_needs_check
 DEPEND="${DEPEND_COMMON}
@@ -54,11 +53,6 @@ PATCHES=(
 	# Gentoo specific modification(s):
 	"${FILESDIR}"/${PN}-2.02.178-example.conf.in.patch
 
-	# Musl fixes
-	"${FILESDIR}"/${PN}-2.02.183-fix-stdio-usage.patch
-	"${FILESDIR}"/${PN}-2.02.183-portability.patch
-	"${FILESDIR}"/${PN}-2.02.183-implement-libc-specific-reopen_stream.patch
-
 	# For upstream -- review and forward:
 	"${FILESDIR}"/${PN}-2.02.63-always-make-static-libdm.patch
 	"${FILESDIR}"/${PN}-2.02.56-lvm2create_initrd.patch
@@ -75,6 +69,11 @@ PATCHES=(
 	#"${FILESDIR}"/${PN}-2.02.184-allow-reading-metadata-with-invalid-creation_time.patch #682380 # merged upstream
 	"${FILESDIR}"/${PN}-2.02.184-mksh_build.patch #686652
 	"${FILESDIR}"/${PN}-2.02.186-udev_remove_unsupported_option.patch #700160
+
+	# Musl fixes
+	"${FILESDIR}"/${PN}-2.02.183-fix-stdio-usage.patch
+	"${FILESDIR}"/${PN}-2.02.183-portability.patch
+	"${FILESDIR}"/${PN}-2.02.183-implement-libc-specific-reopen_stream.patch
 )
 
 pkg_setup() {
@@ -213,14 +212,12 @@ src_compile() {
 }
 
 src_install() {
-	local inst INSTALL_TARGETS
-	INSTALL_TARGETS=( install install_tmpfiles_configuration )
+	local inst
+	local INSTALL_TARGETS=( install install_tmpfiles_configuration )
 	# install systemd related files only when requested, bug #522430
-	use systemd && INSTALL_TARGETS+=( install_systemd_units install_systemd_generators )
+	use systemd && INSTALL_TARGETS+=( SYSTEMD_GENERATOR_DIR="$(systemd_get_systemgeneratordir)" install_systemd_units install_systemd_generators )
 	use device-mapper-only && INSTALL_TARGETS=( install_device-mapper )
-	for inst in ${INSTALL_TARGETS[@]}; do
-		emake V=1 DESTDIR="${D}" ${inst}
-	done
+	emake V=1 DESTDIR="${D}" "${INSTALL_TARGETS[@]}"
 
 	newinitd "${FILESDIR}"/device-mapper.rc-2.02.105-r2 device-mapper
 	newconfd "${FILESDIR}"/device-mapper.conf-1.02.22-r3 device-mapper
@@ -257,7 +254,7 @@ src_install() {
 		rm -f "${ED}"/usr/$(get_libdir)/{libdevmapper-event,liblvm2cmd,liblvm2app,libdevmapper}.a
 	fi
 
-	if use lvm2create_initrd; then
+	if use lvm2create-initrd; then
 		dosbin scripts/lvm2create_initrd/lvm2create_initrd
 		doman scripts/lvm2create_initrd/lvm2create_initrd.8
 		newdoc scripts/lvm2create_initrd/README README.lvm2create_initrd
@@ -270,7 +267,9 @@ src_install() {
 }
 
 pkg_postinst() {
-	tmpfiles_process lvm2.conf
+	if ! use device-mapper-only; then
+		tmpfiles_process lvm2.conf
+	fi
 
 	if [[ -z "${REPLACING_VERSIONS}" ]]; then
 		# This is a new installation
