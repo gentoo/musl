@@ -191,6 +191,7 @@ Please consider enabling IP_MULTICAST under Networking options.
 "
 
 PATCHES=(
+	"${FILESDIR}/${P}-fmt-9.patch"
 	"${FILESDIR}/musl/19.0/0001-add-missing-stdint.h.patch"
 	"${FILESDIR}/musl/19.0/0002-fix-fileemu.patch"
 	"${FILESDIR}/musl/19.0/0003-Use-stdint.h-defined-types-uint8_t-uint16_t-uint32_t.patch"
