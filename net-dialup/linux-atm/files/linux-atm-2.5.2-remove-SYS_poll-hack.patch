@@ -1,6 +1,5 @@
-diff -Naur linux-atm-2.5.2.orig/src/mpoad/io.c linux-atm-2.5.2/src/mpoad/io.c
---- linux-atm-2.5.2.orig/src/mpoad/io.c	2007-12-31 19:14:51.000000000 -0500
-+++ linux-atm-2.5.2/src/mpoad/io.c	2015-07-15 13:25:41.500014905 -0400
+--- a/src/mpoad/io.c	2007-12-31 19:14:51.000000000 -0500
++++ b/src/mpoad/io.c	2015-07-15 13:25:41.500014905 -0400
 @@ -10,14 +10,7 @@
  #include <errno.h>
  #include <sys/ioctl.h>
