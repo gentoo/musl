@@ -183,7 +183,7 @@ src_prepare() {
 
 	if use elibc_musl ; then
 		eapply "${FILESDIR}"/add_missing___compar_fn_t.patch
-		eapply "${FILESDIR}"/fix-musl-lib-without-innetgr.patch
+		eapply "${FILESDIR}"/add-missing_signal_h.patch
 		eapply "${FILESDIR}"/getpwent_r.patch
 		eapply "${FILESDIR}"/missing-headers.patch
 		eapply "${FILESDIR}"/musl_rm_unistd_incl.patch
