@@ -1,0 +1,24 @@
+https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/musl-hacks.patch
+
+
+
+---
+ src/3rdparty/chromium/net/socket/udp_socket_posix.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/3rdparty/chromium/net/socket/udp_socket_posix.cc b/src/3rdparty/chromium/net/socket/udp_socket_posix.cc
+index 71265568b..b9043f4d1 100644
+--- a/src/3rdparty/chromium/net/socket/udp_socket_posix.cc
++++ b/src/3rdparty/chromium/net/socket/udp_socket_posix.cc
+@@ -1152,7 +1152,7 @@ SendResult UDPSocketPosixSender::InternalSendmmsgBuffers(
+     msg_iov->push_back({const_cast<char*>(buffer->data()), buffer->length()});
+   msgvec->reserve(buffers.size());
+   for (size_t j = 0; j < buffers.size(); j++)
+-    msgvec->push_back({{nullptr, 0, &msg_iov[j], 1, nullptr, 0, 0}, 0});
++    msgvec->push_back({{nullptr, 0, &msg_iov[j], 1, 0, 0, 0}, 0});
+   int result = HANDLE_EINTR(Sendmmsg(fd, &msgvec[0], buffers.size(), 0));
+   SendResult send_result(0, 0, std::move(buffers));
+   if (result < 0) {
+-- 
+2.35.1
+
