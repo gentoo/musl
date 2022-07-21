@@ -1,7 +1,7 @@
-From a381e9d12fb3bb489f12e119c3ae6e2318f429e9 Mon Sep 17 00:00:00 2001
-From: Your Name <you@example.com>
-Date: Wed, 20 Jul 2022 18:47:15 +0200
-Subject: [PATCH 2/2] musl sandbox
+This should be fine for all non-Android platforms.
+TODO: not okay for upstreaming.
+
+https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/musl-sandbox.patch
 
 ---
  .../syscall_parameters_restrictions.cc        | 22 +++++--------------
