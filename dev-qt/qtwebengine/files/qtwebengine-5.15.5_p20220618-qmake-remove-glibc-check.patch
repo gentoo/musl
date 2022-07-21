@@ -1,8 +1,9 @@
 Qt checks if glibc is available and if not disables large part of Qt5WebEngine and thus cripples functionality.
-However these parts work fine with Musl so there is no need to disable them.
-Just remove the check so it builds again. Since 5.15.1 is the last version of Qt to be released with this build system it'll be obsolete with Qt6 and there is no real point in fixing this upstream.
+However these parts work fine with Musl so there is no need to disable them. - Alpine
 
+Just remove the check so it builds again. Since 5.15 is the last version of Qt to be released with this build system it'll be obsolete with Qt6 so there is no real point in fixing this upstream except adding to Qt5PatchCollection.
 
+https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/remove-glibc-check.patch
 diff --git a/src/buildtools/config/support.pri b/src/buildtools/config/support.pri
 index e7f869a1..de18523d 100644
 --- a/src/buildtools/config/support.pri
