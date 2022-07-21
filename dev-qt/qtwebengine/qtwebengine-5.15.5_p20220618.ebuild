@@ -40,7 +40,6 @@ RDEPEND="
 	dev-libs/nspr
 	dev-libs/nss
 	dev-libs/expat
-	dev-libs/libbsd
 	dev-libs/libevent:=
 	dev-libs/libxml2[icu]
 	dev-libs/libxslt
@@ -126,7 +125,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-backtrace-execinfo.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-pvalloc-patch.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-linux-stack_util-stackstart.patch
-	"${FILESDIR}"/${PN}-5.15.5_p20220618-bsd-cdefs.h.patch
+	"${FILESDIR}"/${PN}-5.15.5_p20220618-remove-decls-usage.patch
 	## runtime
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-sandbox.patch
 )
