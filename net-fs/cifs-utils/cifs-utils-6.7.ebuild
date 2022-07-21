@@ -11,7 +11,7 @@ SRC_URI="https://ftp.samba.org/pub/linux-cifs/${PN}/${P}.tar.bz2"
 
 LICENSE="GPL-3"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~mips ppc x86"
+KEYWORDS="amd64 arm arm64 ~mips ~ppc x86"
 IUSE="+acl +ads +caps +caps-ng creds pam"
 
 RDEPEND="
