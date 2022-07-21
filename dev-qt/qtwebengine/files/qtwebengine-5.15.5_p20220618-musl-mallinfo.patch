@@ -1,7 +1,7 @@
-From 95c68a3b5f3bfe018bc38b7e138d47d21cd7e288 Mon Sep 17 00:00:00 2001
-From: Your Name <you@example.com>
-Date: Mon, 18 Jul 2022 22:56:44 +0200
-Subject: [PATCH 1/4] mallinfo
+musl does not support mallinfo, this patch changes OS_LINUX check to include
+checking for glibc too.
+
+Could probably be done in build system but not done because of Qt6 moving to CMake.
 
 ---
  src/3rdparty/chromium/base/process/process_metrics_posix.cc   | 4 ++--
