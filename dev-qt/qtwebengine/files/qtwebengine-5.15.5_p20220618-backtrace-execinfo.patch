@@ -1,3 +1,5 @@
+https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/qt-musl-execinfo.patch
+
 The backtrace api is not available in musl libc. This can be added with
 libexecinfo but that needs changes in the build system. As qmake is being swapped
 for CMake in Qt6 it makes sense to just check for glibc

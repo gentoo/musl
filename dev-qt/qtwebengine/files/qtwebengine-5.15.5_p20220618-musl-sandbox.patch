@@ -1,3 +1,5 @@
+https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/musl-sandbox.patch
+
 This should be fine for all non-Android platforms.
 TODO: not okay for upstreaming.
 

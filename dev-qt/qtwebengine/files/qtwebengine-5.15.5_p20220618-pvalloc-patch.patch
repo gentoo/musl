@@ -1,3 +1,5 @@
+https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/qt-musl-pvalloc.patch
+
 The obsolete function pvalloc() is similar to valloc(), but rounds the size of the allocation up to the next multiple of the system page size. (https://linux.die.net/man/3/pvalloc)
 
 See: https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/qt-musl-pvalloc.patch?id=65f58742e6e669c7d0f5b23c0764f4f73661980b
