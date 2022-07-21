@@ -129,8 +129,6 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-bsd-cdefs.h.patch
 	## runtime
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-sandbox.patch
-	"${FILESDIR}"/${PN}-5.15.5_p20220618-sandbox-syscall-x86_64.patch
-	# "${FILESDIR}"/nasm.patch
 )
 
 qtwebengine_check-reqs() {
