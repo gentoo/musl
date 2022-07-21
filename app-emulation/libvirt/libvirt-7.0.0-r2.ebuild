@@ -106,7 +106,7 @@ RDEPEND="
 	virt-network? (
 		net-dns/dnsmasq[dhcp,ipv6,script]
 		net-firewall/ebtables
-		>=net-firewall/iptables-1.4.10[ipv6]
+		>=net-firewall/iptables-1.4.10[ipv6(+)]
 		net-misc/radvd
 		sys-apps/iproute2[-minimal]
 	)
