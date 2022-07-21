@@ -46,7 +46,7 @@ DEPEND=">=sys-libs/libselinux-${SELNX_VER}:=[python,${PYTHON_USEDEP}]
 	sys-libs/libcap-ng:=
 	>=sys-libs/libsepol-${SEPOL_VER}:=
 	>=app-admin/setools-4.2.0[${PYTHON_USEDEP}]
-	dev-python/ipy[${PYTHON_USEDEP}]
+	dev-python/IPy[${PYTHON_USEDEP}]
 	dbus? (
 		sys-apps/dbus
 		dev-libs/dbus-glib:=
