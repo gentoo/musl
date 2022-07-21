@@ -1,0 +1,116 @@
+https://wiki.musl-libc.org/faq.html#Q:-When-compiling-something-against-musl,-I-get-error-messages-about-%3Ccode%3Esys/cdefs.h%3C/code%3E
+"The bug is in the application that uses this internal glibc header. This header is not intended to be used by any program"
+
+sys/cdefs.h does not exist in musl libc, this breaks bundled Chromium.
+
+---
+ src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h    | 8 ++++++--
+ .../chromium/third_party/libsync/src/include/sync/sync.h  | 8 ++++++--
+ src/3rdparty/chromium/third_party/libsync/src/sw_sync.h   | 8 ++++++--
+ .../usrsctp/usrsctplib/usrsctplib/netinet/sctp_uio.h      | 8 ++++++--
+ 4 files changed, 24 insertions(+), 8 deletions(-)
+
+diff --git a/src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h b/src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h
+index db2ad9027..4840f0ae9 100644
+--- a/src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h
++++ b/src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h
+@@ -91,7 +91,9 @@ typedef struct {
+ #pragma pack()
+ 
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*
+  * DNS configuration access APIs
+@@ -109,6 +111,8 @@ void
+ _dns_configuration_ack		(dns_config_t	*config,
+ 				 const char	*bundle_id);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif	/* __DNSINFO_H__ */
+diff --git a/src/3rdparty/chromium/third_party/libsync/src/include/sync/sync.h b/src/3rdparty/chromium/third_party/libsync/src/include/sync/sync.h
+index 50ed0ac57..91dfd5d69 100644
+--- a/src/3rdparty/chromium/third_party/libsync/src/include/sync/sync.h
++++ b/src/3rdparty/chromium/third_party/libsync/src/include/sync/sync.h
+@@ -24,7 +24,9 @@
+ 
+ #include <linux/types.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ struct sync_legacy_merge_data {
+  int32_t fd2;
+@@ -158,6 +160,8 @@ struct sync_pt_info *sync_pt_info(struct sync_fence_info_data *info,
+                                   struct sync_pt_info *itr);
+ void sync_fence_info_free(struct sync_fence_info_data *info);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* __SYS_CORE_SYNC_H */
+diff --git a/src/3rdparty/chromium/third_party/libsync/src/sw_sync.h b/src/3rdparty/chromium/third_party/libsync/src/sw_sync.h
+index fda1c4c57..395c38072 100644
+--- a/src/3rdparty/chromium/third_party/libsync/src/sw_sync.h
++++ b/src/3rdparty/chromium/third_party/libsync/src/sw_sync.h
+@@ -19,7 +19,9 @@
+ #ifndef __SYS_CORE_SW_SYNC_H
+ #define __SYS_CORE_SW_SYNC_H
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*
+  * sw_sync is mainly intended for testing and should not be compiled into
+@@ -30,6 +32,8 @@ int sw_sync_timeline_create(void);
+ int sw_sync_timeline_inc(int fd, unsigned count);
+ int sw_sync_fence_create(int fd, const char *name, unsigned value);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* __SYS_CORE_SW_SYNC_H */
+diff --git a/src/3rdparty/chromium/third_party/usrsctp/usrsctplib/usrsctplib/netinet/sctp_uio.h b/src/3rdparty/chromium/third_party/usrsctp/usrsctplib/usrsctplib/netinet/sctp_uio.h
+index 6298f9334..d688d9d75 100755
+--- a/src/3rdparty/chromium/third_party/usrsctp/usrsctplib/usrsctplib/netinet/sctp_uio.h
++++ b/src/3rdparty/chromium/third_party/usrsctp/usrsctplib/usrsctplib/netinet/sctp_uio.h
+@@ -1317,7 +1317,9 @@ sctp_sorecvmsg(struct socket *so,
+  */
+ #if !(defined(_KERNEL)) && !(defined(__Userspace__))
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ int	sctp_peeloff(int, sctp_assoc_t);
+ int	sctp_bindx(int, struct sockaddr *, int, int);
+ int	sctp_connectx(int, const struct sockaddr *, int, sctp_assoc_t *);
+@@ -1355,7 +1357,9 @@ ssize_t	sctp_sendv(int, const struct iovec *, int, struct sockaddr *,
+ 
+ ssize_t	sctp_recvv(int, const struct iovec *, int, struct sockaddr *,
+ 	    socklen_t *, void *, socklen_t *, unsigned int *, int *);
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif				/* !_KERNEL */
+ #endif				/* !__sctp_uio_h__ */
+-- 
+2.35.1
+
