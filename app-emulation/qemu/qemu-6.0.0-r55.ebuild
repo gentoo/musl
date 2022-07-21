@@ -160,11 +160,7 @@ SOFTMMU_TOOLS_DEPEND="
 		x11-libs/gtk+:3
 		vte? ( x11-libs/vte:2.91 )
 	)
-	infiniband? (
-		sys-fabric/libibumad:=[static-libs(+)]
-		sys-fabric/libibverbs:=[static-libs(+)]
-		sys-fabric/librdmacm:=[static-libs(+)]
-	)
+	infiniband? ( sys-cluster/rdma-core[static-libs(+)] )
 	iscsi? ( net-libs/libiscsi )
 	io-uring? ( sys-libs/liburing:=[static-libs(+)] )
 	jack? ( virtual/jack )
