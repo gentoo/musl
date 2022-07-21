@@ -1,3 +1,5 @@
+https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/qt-musl-mallinfo.patch
+
 musl does not support mallinfo, this patch changes OS_LINUX check to include
 checking for glibc too.
 

@@ -1,3 +1,5 @@
+https://git.alpinelinux.org/aports/tree/community/qt5-qtwebengine/nasm.patch
+
 diff --git a/src/3rdparty/chromium/third_party/nasm/config/config-linux.h b/src/3rdparty/chromium/third_party/nasm/config/config-linux.h
 index 7eb7c20ff..3bdc2eb39 100644
 --- a/src/3rdparty/chromium/third_party/nasm/config/config-linux.h
