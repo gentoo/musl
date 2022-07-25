@@ -128,7 +128,6 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-hacks-ii.patch
 	## runtime
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-sandbox.patch
-	"${FILESDIR}"/${PN}-5.15.5_p20220618-remove-cdefs-includes.patch
 )
 
 qtwebengine_check-reqs() {
