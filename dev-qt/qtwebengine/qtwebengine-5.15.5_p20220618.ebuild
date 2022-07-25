@@ -117,7 +117,6 @@ PATCHES=(
 	# for musl libc
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-qmake-remove-glibc-check.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-fix-sys-queue.h.patch
-	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-canonicalize-filename.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-mallinfo.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-mojo-strncpy.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-resolv-compat.patch
@@ -182,6 +181,10 @@ src_unpack() {
 }
 
 src_prepare() {
+	# Using a conditional patch here since QMake is deprecated
+	# by CMake in Qt6. A build system change would be prettier but
+	# this works just as well right now.
+	use elibc_musl && PATCHES+=( "${FILESDIR}"/${PN}-5.15.5_p20220618-musl-canonicalize-filename.patch )
 	if [[ ${PV} == ${QT5_PV}_p* ]]; then
 		# This is made from git, and for some reason will fail w/o .git directories.
 		mkdir -p .git src/3rdparty/chromium/.git || die
