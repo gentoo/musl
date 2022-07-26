@@ -124,7 +124,7 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-pvalloc-patch.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-linux-stack_util-stackstart.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-remove-decls-usage.patch
-	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-hacks-ii.patch
+	"${FILESDIR}"/${PN}-5.15.5_p20220618-msghdr-padding-initlist.patch
 	## runtime
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-sandbox.patch
 )
