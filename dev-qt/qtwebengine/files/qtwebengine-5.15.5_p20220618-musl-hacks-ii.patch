@@ -1,35 +1,38 @@
-From 48104199ceb938ad21b4573958c16c224dfeff60 Mon Sep 17 00:00:00 2001
-From: Your Name <you@example.com>
-Date: Fri, 22 Jul 2022 18:13:11 +0200
-Subject: [PATCH] musl hacks ii
+From 91fcf20ad6923db94a228faa1cf3bcdcaa5f8cbc Mon Sep 17 00:00:00 2001
+From: Alfred Persson Forsberg <cat@catcream.org>
+Date: Tue, 26 Jul 2022 20:53:11 +0200
+Subject: [PATCH] Don't use initializer list for msghdr
 
+msghdr is defined with padding in musl libc. Using an initializer list
+will set an int padding (5th element) to nullptr and break the build
+because of implicit conversion error from ptr to int.
+
+Signed-off-by: Alfred Persson Forsberg <cat@catcream.org>
 ---
- .../chromium/net/socket/udp_socket_posix.cc      | 16 ++++++++++++++--
- 1 file changed, 14 insertions(+), 2 deletions(-)
+ .../chromium/net/socket/udp_socket_posix.cc        | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
 
 diff --git a/src/3rdparty/chromium/net/socket/udp_socket_posix.cc b/src/3rdparty/chromium/net/socket/udp_socket_posix.cc
-index 71265568b..7d82331f9 100644
+index 71265568b..58b2b1cbf 100644
 --- a/src/3rdparty/chromium/net/socket/udp_socket_posix.cc
 +++ b/src/3rdparty/chromium/net/socket/udp_socket_posix.cc
-@@ -1151,8 +1151,20 @@ SendResult UDPSocketPosixSender::InternalSendmmsgBuffers(
+@@ -1151,8 +1151,18 @@ SendResult UDPSocketPosixSender::InternalSendmmsgBuffers(
    for (auto& buffer : buffers)
      msg_iov->push_back({const_cast<char*>(buffer->data()), buffer->length()});
    msgvec->reserve(buffers.size());
 -  for (size_t j = 0; j < buffers.size(); j++)
 -    msgvec->push_back({{nullptr, 0, &msg_iov[j], 1, nullptr, 0, 0}, 0});
 +  for (size_t j = 0; j < buffers.size(); j++) {
-+    auto hdr = new msghdr;
-+    hdr->msg_name = nullptr;
-+    hdr->msg_namelen = 0;
-+    hdr->msg_iov = &msg_iov[j];
-+    hdr->msg_iovlen = 1;
-+    hdr->__pad1 = 0;
-+    hdr->msg_control = 0;
-+    hdr->msg_controllen = 0;
-+    hdr->__pad2 = 0;
-+    hdr->msg_flags = 0;
-+    msgvec->push_back({hdr, 0});
-+    // msgvec->push_back({{nullptr, 0, &msg_iov[j], 1, nullptr, 0, 0}, 0});
++    struct msghdr msg;
++    msg.msg_name = nullptr;
++    msg.msg_namelen = 0;
++    msg.msg_iov = &msg_iov[j];
++    msg.msg_iovlen = 1;
++    msg.msg_control = 0;
++    msg.msg_controllen = 0;
++    msg.msg_flags = 0;
++
++    msgvec->push_back({msg, 0});
 +  }
    int result = HANDLE_EINTR(Sendmmsg(fd, &msgvec[0], buffers.size(), 0));
    SendResult send_result(0, 0, std::move(buffers));
