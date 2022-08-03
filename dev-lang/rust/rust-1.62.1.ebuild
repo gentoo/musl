@@ -1,9 +1,9 @@
 # Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
+EAPI=8
 
-PYTHON_COMPAT=( python3_{7..10} )
+PYTHON_COMPAT=( python3_{8..11} )
 
 inherit bash-completion-r1 check-reqs estack flag-o-matic llvm multiprocessing \
 	multilib multilib-build python-any-r1 rust-toolchain toolchain-funcs verify-sig
@@ -19,10 +19,10 @@ else
 	SLOT="stable/${ABI_VER}"
 	MY_P="rustc-${PV}"
 	SRC="${MY_P}-src.tar.xz"
-	KEYWORDS="amd64 ~arm arm64 ppc64 x86"
+	KEYWORDS="amd64 arm arm64 ppc64 ~x86"
 fi
 
-RUST_STAGE0_VERSION="1.$(($(ver_cut 2) - 1)).1"
+RUST_STAGE0_VERSION="1.$(($(ver_cut 2) - 1)).0"
 
 DESCRIPTION="Systems programming language from Mozilla"
 HOMEPAGE="https://www.rust-lang.org/"
@@ -41,7 +41,7 @@ LLVM_TARGET_USEDEPS=${ALL_LLVM_TARGETS[@]/%/(-)?}
 
 LICENSE="|| ( MIT Apache-2.0 ) BSD-1 BSD-2 BSD-4 UoI-NCSA"
 
-IUSE="clippy cpu_flags_x86_sse2 debug dist doc miri nightly parallel-compiler rls rustfmt rust-src system-bootstrap system-llvm test wasm ${ALL_LLVM_TARGETS[*]}"
+IUSE="clippy cpu_flags_x86_sse2 debug dist doc miri nightly parallel-compiler profiler rls rustfmt rust-src system-bootstrap system-llvm test wasm ${ALL_LLVM_TARGETS[*]}"
 
 # Please keep the LLVM dependency block separate. Since LLVM is slotted,
 # we need to *really* make sure we're not pulling more than one slot
@@ -49,7 +49,7 @@ IUSE="clippy cpu_flags_x86_sse2 debug dist doc miri nightly parallel-compiler rl
 
 # How to use it:
 # List all the working slots in LLVM_VALID_SLOTS, newest first.
-LLVM_VALID_SLOTS=( 13 )
+LLVM_VALID_SLOTS=( 14 )
 LLVM_MAX_SLOT="${LLVM_VALID_SLOTS[0]}"
 
 # splitting usedeps needed to avoid CI/pkgcheck's UncheckableDep limitation
@@ -109,11 +109,9 @@ DEPEND="
 	system-llvm? ( ${LLVM_DEPEND} )
 "
 
-# we need to block older versions due to layout changes.
 RDEPEND="${DEPEND}
 	app-eselect/eselect-rust
-	!<dev-lang/rust-1.47.0-r1
-	!<dev-lang/rust-bin-1.47.0-r1
+	sys-apps/lsb-release
 "
 
 REQUIRED_USE="|| ( ${ALL_LLVM_TARGETS[*]} )
@@ -157,7 +155,7 @@ VERIFY_SIG_OPENPGP_KEY_PATH=${BROOT}/usr/share/openpgp-keys/rust.asc
 
 PATCHES=(
 	"${FILESDIR}"/1.55.0-ignore-broken-and-non-applicable-tests.patch
-	"${FILESDIR}"/1.56.1-musl-dynamic-linking.patch
+	"${FILESDIR}"/1.62.1-musl-dynamic-linking.patch
 )
 
 S="${WORKDIR}/${MY_P}-src"
@@ -191,10 +189,10 @@ bootstrap_rust_version_check() {
 }
 
 pre_build_checks() {
-	local M=4096
-	# multiply requirements by 1.5 if we are doing x86-multilib
+	local M=8192
+	# multiply requirements by 1.3 if we are doing x86-multilib
 	if use amd64; then
-		M=$(( $(usex abi_x86_32 15 10) * ${M} / 10 ))
+		M=$(( $(usex abi_x86_32 13 10) * ${M} / 10 ))
 	fi
 	M=$(( $(usex clippy 128 0) + ${M} ))
 	M=$(( $(usex miri 128 0) + ${M} ))
@@ -258,7 +256,9 @@ src_prepare() {
 }
 
 src_configure() {
-	local rust_target="" rust_targets="" arch_cflags
+	use system-llvm && filter-flags '-flto*' # https://bugs.gentoo.org/862109
+
+	local rust_target="" rust_targets="" arch_cflags use_libcxx="false"
 
 	# Collect rust target names to compile standard libs for all ABIs.
 	for v in $(multilib_get_enabled_abi_pairs); do
@@ -280,6 +280,9 @@ src_configure() {
 	fi
 	if use miri; then
 		tools="\"miri\",$tools"
+	fi
+	if use profiler; then
+		tools="\"rust-demangler\",$tools"
 	fi
 	if use rls; then
 		tools="\"rls\",\"analysis\",$tools"
@@ -304,6 +307,15 @@ src_configure() {
 
 	rust_target="$(rust_abi)"
 
+	# https://bugs.gentoo.org/732632
+	if tc-is-clang; then
+		local clang_slot="$(clang-major-version)"
+		if { has_version "sys-devel/clang:${clang_slot}[default-libcxx]" || is-flagq -stdlib=libc++; }; then
+			use_libcxx="true"
+		fi
+	fi
+
+	local cm_btype="$(usex debug DEBUG RELEASE)"
 	cat <<- _EOF_ > "${S}"/config.toml
 		changelog-seen = 2
 		[llvm]
@@ -315,6 +327,10 @@ src_configure() {
 		targets = "${LLVM_TARGETS// /;}"
 		experimental-targets = ""
 		link-shared = $(toml_usex system-llvm)
+		$(if [[ ${use_libcxx} == true ]]; then
+			echo "use-libcxx = true"
+			echo "static-libstdcpp = false"
+		fi)
 		$(case "${rust_target}" in
 			i586-*-linux-*)
 				# https://github.com/rust-lang/rust/issues/93059
@@ -322,7 +338,17 @@ src_configure() {
 				echo 'cxxflags = "-fcf-protection=none"'
 				echo 'ldflags = "-fcf-protection=none"'
 				;;
+			*)
+				;;
 		esac)
+		[llvm.build-config]
+		CMAKE_VERBOSE_MAKEFILE = "ON"
+		CMAKE_C_FLAGS_${cm_btype} = "${CFLAGS}"
+		CMAKE_CXX_FLAGS_${cm_btype} = "${CXXFLAGS}"
+		CMAKE_EXE_LINKER_FLAGS_${cm_btype} = "${LDFLAGS}"
+		CMAKE_MODULE_LINKER_FLAGS_${cm_btype} = "${LDFLAGS}"
+		CMAKE_SHARED_LINKER_FLAGS_${cm_btype} = "${LDFLAGS}"
+		CMAKE_STATIC_LINKER_FLAGS_${cm_btype} = "${ARFLAGS}"
 		[build]
 		build-stage = 2
 		test-stage = 2
@@ -343,7 +369,7 @@ src_configure() {
 		tools = [${tools}]
 		verbose = 2
 		sanitizers = false
-		profiler = false
+		profiler = $(toml_usex profiler)
 		cargo-native-static = false
 		[install]
 		prefix = "${EPREFIX}/usr/lib/${PN}/${PV}"
@@ -420,6 +446,8 @@ src_configure() {
 		cat <<- _EOF_ >> "${S}"/config.toml
 			[target.wasm32-unknown-unknown]
 			linker = "$(usex system-llvm lld rust-lld)"
+			# wasm target does not have profiler_builtins https://bugs.gentoo.org/848483
+			profiler = false
 		_EOF_
 	fi
 
@@ -607,6 +635,7 @@ src_install() {
 
 	use clippy && symlinks+=( clippy-driver cargo-clippy )
 	use miri && symlinks+=( miri cargo-miri )
+	use profiler && symlinks+=( rust-demangler )
 	use rls && symlinks+=( rls )
 	use rustfmt && symlinks+=( rustfmt cargo-fmt )
 
@@ -665,6 +694,9 @@ src_install() {
 	if use miri; then
 		echo /usr/bin/miri >> "${T}/provider-${P}"
 		echo /usr/bin/cargo-miri >> "${T}/provider-${P}"
+	fi
+	if use profiler; then
+		echo /usr/bin/rust-demangler >> "${T}/provider-${P}"
 	fi
 	if use rls; then
 		echo /usr/bin/rls >> "${T}/provider-${P}"
