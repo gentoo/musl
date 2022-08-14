@@ -1,9 +1,22 @@
---- a/src/user-classify.c.old	2013-12-04 20:29:48.944454769 +0100
-+++ b/src/user-classify.c	2013-12-04 20:32:59.728283477 +0100
-@@ -55,6 +55,48 @@
+From 0db673b94a6031640ae5faa3b79c4a1fea078350 Mon Sep 17 00:00:00 2001
+From: Matt Turner <mattst88@gmail.com>
+Date: Sun, 30 Jan 2022 12:00:09 -0800
+Subject: [PATCH] Add more users
+
+---
+ src/user-classify.c | 35 ++++++++++++++++++++++++++++++++++-
+ 1 file changed, 34 insertions(+), 1 deletion(-)
+
+diff --git a/src/user-classify.c b/src/user-classify.c
+index 9224905..70f1877 100644
+--- a/src/user-classify.c
++++ b/src/user-classify.c
+@@ -52,7 +52,40 @@ static const char *default_excludes[] = {
          "at",
          "gdm",
-         "gnome-initial-setup"
+         "gnome-initial-setup",
+-        "git"
++        "git",
 +        /* Additional Gentoo system users with non-trivial login shell */
 +        "amanda",
 +        "backuppc",
@@ -12,15 +25,6 @@
 +        "flexlm",
 +        "foldingathome",
 +        "geneweb",
-+        "git",
-+        "gnump3d",
-+        "hacluster",
-+        "hg",
-+        "hsqldb",
-+        "infinote",
-+        "foldingathome",
-+        "geneweb",
-+        "git",
 +        "gnump3d",
 +        "hacluster",
 +        "hg",
@@ -48,4 +52,7 @@
 +        "vdradmin",
  };
  
- #define PATH_NOLOGIN "/sbin/nologin"
+ static gboolean
+-- 
+2.34.1
+
