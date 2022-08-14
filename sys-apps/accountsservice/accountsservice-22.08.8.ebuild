@@ -1,9 +1,9 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 2011-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
-
-inherit meson systemd
+PYTHON_COMPAT=( python3_{8..10} )
+inherit meson python-any-r1 systemd
 
 DESCRIPTION="D-Bus interfaces for querying and manipulating user account information"
 HOMEPAGE="https://www.freedesktop.org/wiki/Software/AccountsService/"
@@ -11,13 +11,14 @@ SRC_URI="https://www.freedesktop.org/software/${PN}/${P}.tar.xz"
 
 LICENSE="GPL-3+"
 SLOT="0"
-KEYWORDS="~alpha amd64 arm arm64 ~ia64 ppc ppc64 ~sparc x86"
+KEYWORDS="~alpha amd64 arm arm64 ~ia64 ~loong ppc ppc64 ~riscv ~sparc x86"
 
-IUSE="doc elogind gtk-doc +introspection selinux systemd"
+IUSE="doc elogind gtk-doc +introspection selinux systemd test"
+RESTRICT="!test? ( test )"
 REQUIRED_USE="^^ ( elogind systemd )"
 
 CDEPEND="
-	>=dev-libs/glib-2.44:2
+	>=dev-libs/glib-2.63.5:2
 	sys-auth/polkit
 	virtual/libcrypt:=
 	elogind? ( >=sys-auth/elogind-229.4 )
@@ -32,29 +33,32 @@ BDEPEND="
 	virtual/pkgconfig
 	doc? (
 		app-text/docbook-xml-dtd:4.1.2
-		app-text/xmlto )
+		app-text/xmlto
+	)
 	gtk-doc? (
 		dev-util/gtk-doc
-		app-text/docbook-xml-dtd:4.3 )
+		app-text/docbook-xml-dtd:4.3
+	)
+	test? (
+		$(python_gen_any_dep '
+			dev-python/python-dbusmock[${PYTHON_USEDEP}]
+		')
+	)
 "
 RDEPEND="${CDEPEND}
 	selinux? ( sec-policy/selinux-accountsd )
 "
 
 PATCHES=(
-	"${FILESDIR}"/${PN}-0.6.35-gentoo-system-users.patch
-	"${FILESDIR}"/${PN}-0.6.55-meson-0.61-build.patch
+	"${FILESDIR}"/${PN}-22.04.62-gentoo-system-users.patch
+	"${FILESDIR}"/${PN}-22.08.8-check-for-wtmp.patch
+	"${FILESDIR}"/${PN}-22.08.8-fgetspent_r-musl.patch
 )
 
-src_prepare() {
-	default
-
-	if use elibc_musl ; then
-		eapply "${FILESDIR}/musl-fgetspent_r.patch"
-		eapply "${FILESDIR}/musl-wtmp.patch"
+python_check_deps() {
+	if use test; then
+		has_version "dev-python/python-dbusmock[${PYTHON_USEDEP}]"
 	fi
-
-	eapply_user
 }
 
 src_configure() {
@@ -62,11 +66,12 @@ src_configure() {
 		--localstatedir="${EPREFIX}/var"
 		-Dsystemdsystemunitdir="$(systemd_get_systemunitdir)"
 		-Dadmin_group="wheel"
-		$(meson_use systemd)
+		-Dcheck_wtmp="$(usex !elibc_musl true false)"
 		$(meson_use elogind)
 		$(meson_use introspection)
 		$(meson_use doc docbook)
 		$(meson_use gtk-doc gtk_doc)
+		-Dvapi=false
 	)
 	meson_src_configure
 }
