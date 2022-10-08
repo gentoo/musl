@@ -27,11 +27,23 @@ else
 	MY_PV="${MY_PV}-${CODENAME}"
 	MY_P="${PN}-${MY_PV}"
 	SRC_URI+=" https://github.com/xbmc/xbmc/archive/${MY_PV}.tar.gz -> ${MY_P}.tar.gz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~x86"
+	KEYWORDS="amd64 ~arm ~arm64 ~riscv ~x86"
 	S=${WORKDIR}/xbmc-${MY_PV}
 fi
 
-inherit autotools cmake desktop linux-info pax-utils python-single-r1 xdg
+inherit autotools cmake desktop libtool linux-info pax-utils python-single-r1 xdg
+
+PATCHES=(
+	"${FILESDIR}/${P}-fmt-9.patch"
+	"${FILESDIR}/${P}-atomic.patch"
+
+	# Musl Patches 
+	"${FILESDIR}/musl/19.0/0001-add-missing-stdint.h.patch"
+	"${FILESDIR}/musl/19.0/0002-fix-fileemu.patch"
+	"${FILESDIR}/musl/19.0/0003-Use-stdint.h-defined-types-uint8_t-uint16_t-uint32_t.patch"
+	"${FILESDIR}/musl/19.0/0004-Fix-ldt-for-musl.patch"
+	"${FILESDIR}/musl/19.0/0005-Fix-fortify-sources.patch"
+)
 
 DESCRIPTION="A free and open source media-player and entertainment hub"
 HOMEPAGE="https://kodi.tv/ https://kodi.wiki/"
@@ -132,7 +144,6 @@ COMMON_TARGET_DEPEND="${PYTHON_DEPS}
 	vaapi? (
 		x11-libs/libva:=
 		system-ffmpeg? ( media-video/ffmpeg[vaapi] )
-		vdpau? ( x11-libs/libva-vdpau-driver )
 		wayland? ( x11-libs/libva[wayland] )
 		X? ( x11-libs/libva[X] )
 	)
@@ -189,15 +200,6 @@ ERROR_IP_MULTICAST="
 In some cases Kodi needs to access multicast addresses.
 Please consider enabling IP_MULTICAST under Networking options.
 "
-
-PATCHES=(
-	"${FILESDIR}/${P}-fmt-9.patch"
-	"${FILESDIR}/musl/19.0/0001-add-missing-stdint.h.patch"
-	"${FILESDIR}/musl/19.0/0002-fix-fileemu.patch"
-	"${FILESDIR}/musl/19.0/0003-Use-stdint.h-defined-types-uint8_t-uint16_t-uint32_t.patch"
-	"${FILESDIR}/musl/19.0/0004-Fix-ldt-for-musl.patch"
-	"${FILESDIR}/musl/19.0/0005-Fix-fortify-sources.patch"
-)
 
 pkg_setup() {
 	check_extra_config
