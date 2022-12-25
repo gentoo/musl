@@ -34,8 +34,8 @@ fi
 inherit autotools cmake desktop libtool linux-info pax-utils python-single-r1 xdg
 
 PATCHES=(
-	"${FILESDIR}/${P}-fmt-9.patch"
-	"${FILESDIR}/${P}-atomic.patch"
+	"${FILESDIR}/${PN}-19.4-atomic.patch"
+	"${FILESDIR}/${PN}-19.4-dav1d-1.0.0.patch"
 
 	# Musl Patches 
 	"${FILESDIR}/musl/19.0/0001-add-missing-stdint.h.patch"
@@ -125,7 +125,7 @@ COMMON_TARGET_DEPEND="${PYTHON_DEPS}
 	)
 	!system-ffmpeg? (
 		app-arch/bzip2
-		dav1d? ( media-libs/dav1d )
+		dav1d? ( media-libs/dav1d:= )
 	)
 	mysql? ( dev-db/mysql-connector-c:= )
 	mariadb? ( dev-db/mariadb-connector-c:= )
@@ -142,10 +142,10 @@ COMMON_TARGET_DEPEND="${PYTHON_DEPS}
 	udf? ( >=dev-libs/libudfread-1.0.0 )
 	udev? ( virtual/udev )
 	vaapi? (
-		x11-libs/libva:=
+		media-libs/libva:=
 		system-ffmpeg? ( media-video/ffmpeg[vaapi] )
-		wayland? ( x11-libs/libva[wayland] )
-		X? ( x11-libs/libva[X] )
+		wayland? ( media-libs/libva[wayland] )
+		X? ( media-libs/libva[X] )
 	)
 	virtual/libiconv
 	vdpau? (
@@ -215,6 +215,11 @@ src_unpack() {
 }
 
 src_prepare() {
+	# https://bugs.gentoo.org/885419
+	if has_version ">=media-libs/mesa-22.3.0"; then
+		PATCHES+=( "${FILESDIR}/${PN}-19.4-fix-mesa-22.3.0-build.patch" )
+	fi
+
 	cmake_src_prepare
 
 	# avoid long delays when powerkit isn't running #348580
