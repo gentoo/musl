@@ -1,7 +1,7 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=6
+EAPI=7
 
 inherit autotools flag-o-matic usr-ldscript
 
@@ -15,42 +15,42 @@ SLOT="0"
 KEYWORDS="~alpha amd64 arm ~arm64 ~hppa ~ia64 ~mips ppc ppc64 ~riscv -sparc x86 ~amd64-linux ~x86-linux"
 IUSE="static-libs"
 
-BDEPEND="
-	elibc_musl? ( sys-libs/obstack-standalone )
-"
+# Needed for libuuid
+RDEPEND="sys-apps/util-linux"
+BDEPEND="elibc_musl? ( sys-libs/obstack-standalone )"
+DEPEND="${RDEPEND}"
 
 PATCHES=(
 	"${FILESDIR}/${PN}-3.6.25-no_acl.patch"
 	"${FILESDIR}/${PN}-3.6.27-loff_t.patch"
+	"${FILESDIR}/musl-__compar_fn_t.patch"
+	"${FILESDIR}/musl-loff_t.patch"
+	"${FILESDIR}/musl-long_long_min_max.patch"
+	"${FILESDIR}/musl-prints.patch"
 )
 
 src_prepare() {
 	default
-
-	if use elibc_musl ; then
-		eapply "${FILESDIR}/musl-__compar_fn_t.patch"
-		eapply "${FILESDIR}/musl-loff_t.patch"
-		eapply "${FILESDIR}/musl-long_long_min_max.patch"
-		eapply "${FILESDIR}/musl-prints.patch"
-	fi
-
 	eautoreconf
 }
 
 src_configure() {
 	append-flags -std=gnu89 #427300
-	use elibc_musl && append-ldflags -lobstack
+	append-ldflags -lobstack
+
 	local myeconfargs=(
 		--bindir="${EPREFIX}/bin"
 		--libdir="${EPREFIX}/$(get_libdir)"
 		--sbindir="${EPREFIX}/sbin"
 		$(use_enable static-libs static)
 	)
+
 	econf "${myeconfargs[@]}"
 }
 
 src_install() {
 	default
+
 	dodir /usr/$(get_libdir)
 	mv "${ED}"/$(get_libdir)/pkgconfig "${ED}"/usr/$(get_libdir) || die
 
@@ -58,6 +58,6 @@ src_install() {
 		mv "${ED}"/$(get_libdir)/*a "${ED}"/usr/$(get_libdir) || die
 		gen_usr_ldscript libreiserfscore.so
 	else
-		find "${ED}" -type f \( -name "*.a" -o -name "*.la" \) -delete
+		find "${ED}" -type f \( -name "*.a" -o -name "*.la" \) -delete || die
 	fi
 }
