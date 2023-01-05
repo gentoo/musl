@@ -77,7 +77,7 @@ DEPEND="${RDEPEND}"
 BDEPEND="
 	app-arch/xz-utils
 	sys-apps/texinfo
-	virtual/yacc
+	app-alternatives/yacc
 	nls? ( sys-devel/gettext )
 	test? ( dev-util/dejagnu )
 "
