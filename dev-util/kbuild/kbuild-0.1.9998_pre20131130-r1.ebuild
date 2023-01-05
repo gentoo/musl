@@ -20,7 +20,7 @@ IUSE=""
 DEPEND="sys-apps/texinfo
 	sys-devel/flex
 	sys-devel/gettext
-	virtual/yacc"
+	app-alternatives/yacc"
 RDEPEND=""
 
 S=${WORKDIR}/${MY_P/-src}
