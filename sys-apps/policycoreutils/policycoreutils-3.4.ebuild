@@ -1,22 +1,15 @@
-# Copyright 1999-2021 Gentoo Authors
+# Copyright 1999-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="7"
-PYTHON_COMPAT=( python{3_7,3_8} )
-PYTHON_REQ_USE="xml"
+EAPI=7
+PYTHON_COMPAT=( python3_{9..11} )
+PYTHON_REQ_USE="xml(+)"
 
 inherit multilib python-r1 toolchain-funcs bash-completion-r1
 
-MY_P="${P//_/-}"
-
-MY_RELEASEDATE="20200710"
+MY_PV="${PV//_/-}"
+MY_P="${PN}-${MY_PV}"
 EXTRAS_VER="1.37"
-SEMNG_VER="${PV}"
-SELNX_VER="${PV}"
-SEPOL_VER="${PV}"
-
-IUSE="audit dbus pam split-usr"
-REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
 DESCRIPTION="SELinux core utilities"
 HOMEPAGE="https://github.com/SELinuxProject/selinux/wiki"
@@ -25,13 +18,13 @@ if [[ ${PV} == 9999 ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/SELinuxProject/selinux.git"
 	SRC_URI="https://dev.gentoo.org/~perfinion/distfiles/policycoreutils-extra-${EXTRAS_VER}.tar.bz2"
-	S1="${WORKDIR}/${MY_P}/${PN}"
+	S1="${WORKDIR}/${P}/${PN}"
 	S2="${WORKDIR}/policycoreutils-extra"
 	S="${S1}"
 else
-	SRC_URI="https://github.com/SELinuxProject/selinux/releases/download/${MY_RELEASEDATE}/${MY_P}.tar.gz
+	SRC_URI="https://github.com/SELinuxProject/selinux/releases/download/${MY_PV}/${MY_P}.tar.gz
 		https://dev.gentoo.org/~perfinion/distfiles/policycoreutils-extra-${EXTRAS_VER}.tar.bz2"
-	KEYWORDS="amd64 ~arm64 ~mips x86"
+	KEYWORDS="~amd64 ~arm64 ~mips ~x86"
 	S1="${WORKDIR}/${MY_P}"
 	S2="${WORKDIR}/policycoreutils-extra"
 	S="${S1}"
@@ -39,19 +32,19 @@ fi
 
 LICENSE="GPL-2"
 SLOT="0"
+IUSE="audit dbus pam split-usr"
+REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
-DEPEND=">=sys-libs/libselinux-${SELNX_VER}:=[python,${PYTHON_USEDEP}]
-	>=sys-libs/libcap-1.10-r10:=
-	>=sys-libs/libsemanage-${SEMNG_VER}:=[python(+),${PYTHON_USEDEP}]
+DEPEND=">=sys-libs/libselinux-${PV}:=[python,${PYTHON_USEDEP}]
+	>=sys-libs/libsemanage-${PV}:=[python(+),${PYTHON_USEDEP}]
+	>=sys-libs/libsepol-${PV}:=
 	sys-libs/libcap-ng:=
-	>=sys-libs/libsepol-${SEPOL_VER}:=
 	>=app-admin/setools-4.2.0[${PYTHON_USEDEP}]
-	dev-python/IPy[${PYTHON_USEDEP}]
-	dbus? (
-		sys-apps/dbus
-		dev-libs/dbus-glib:=
-	)
 	audit? ( >=sys-process/audit-1.5.1[python,${PYTHON_USEDEP}] )
+	dbus? (
+		  sys-apps/dbus
+		  dev-libs/dbus-glib:=
+	)
 	pam? ( sys-libs/pam:= )
 	${PYTHON_DEPS}"
 
@@ -156,7 +149,12 @@ src_install() {
 	rm -fR "${D}/etc/rc.d" || die
 
 	# compatibility symlinks
-	use split-usr && dosym ../../sbin/setfiles /usr/sbin/setfiles
+	if use split-usr; then
+		dosym ../../sbin/setfiles /usr/sbin/setfiles
+	else
+		# remove sestatus symlink
+		rm -f "${D}"/usr/sbin/sestatus || die
+	fi
 
 	bashcomp_alias setsebool getsebool
 
