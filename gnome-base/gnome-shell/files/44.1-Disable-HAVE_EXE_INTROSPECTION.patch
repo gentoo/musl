@@ -1,0 +1,28 @@
+From a7a4882de3747ee4ff9ef53272e1063b3394fc0d Mon Sep 17 00:00:00 2001
+From: Mike Rostecki <vadorovsky@protonmail.com>
+Date: Mon, 12 Jun 2023 16:57:04 +0200
+Subject: [PATCH] Disable HAVE_EXE_INTROSPECTION
+
+The EXE introspection feature does not work on musl and it relies
+on the _DYNAMIC variable in link.h, which exists only in glibc.
+---
+ meson.build | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 7b08fe52d..5ec06d371 100644
+--- a/meson.build
++++ b/meson.build
+@@ -148,8 +148,7 @@ cdata.set('HAVE_FDWALK', cc.has_function('fdwalk'))
+ cdata.set('HAVE_MALLINFO', cc.has_function('mallinfo'))
+ cdata.set('HAVE_MALLINFO2', cc.has_function('mallinfo2'))
+ cdata.set('HAVE_SYS_RESOURCE_H', cc.has_header('sys/resource.h'))
+-cdata.set('HAVE_EXE_INTROSPECTION',
+-  cc.has_header('elf.h') and cc.has_header('link.h'))
++cdata.set('HAVE_EXE_INTROSPECTION', false)
+ cdata.set('HAVE__NL_TIME_FIRST_WEEKDAY',
+   cc.has_header_symbol('langinfo.h', '_NL_TIME_FIRST_WEEKDAY')
+ )
+-- 
+2.41.0
+
