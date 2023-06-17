@@ -1,0 +1,10 @@
+--- qtwebengine-5.15.8_p20230313-orig/src/3rdparty/chromium/build/config/compiler/BUILD.gn	2022-05-13 03:17:44.000000000 +1000
++++ qtwebengine-5.15.8_p20230313/src/3rdparty/chromium/build/config/compiler/BUILD.gn	2023-04-06 18:09:53.528885245 +1000
+@@ -318,6 +318,7 @@
+       "-Wno-parentheses-equality",
+       "-Wno-tautological-compare",
+       "-Wno-thread-safety-attributes",
++      "-Wno-enum-constexpr-conversion"
+     ]
+   }
+ 

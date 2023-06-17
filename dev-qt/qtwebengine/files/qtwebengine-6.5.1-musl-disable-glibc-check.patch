@@ -1,0 +1,21 @@
+https://git.alpinelinux.org/aports/tree/testing/qt6-qtwebengine/remove-glibc-check.patch
+
+Qt checks if glibc is available and if not disables large part of Qt6WebEngine and thus cripples functionality.
+However these parts work fine with Musl so there is no need to disable them. - Alpine
+
+Just remove the check so it builds again.
+
+--- a/configure.cmake
++++ b/configure.cmake
+@@ -403,11 +403,6 @@ add_check_for_support(
+    CONDITION NOT LINUX OR PkgConfig_FOUND
+    MESSAGE "A pkg-config support is required."
+ )
+-add_check_for_support(
+-   MODULES QtWebEngine QtPdf
+-   CONDITION NOT LINUX OR TEST_glibc
+-   MESSAGE "A suitable version >= 2.17 of glibc is required."
+-)
+ add_check_for_support(
+    MODULES QtWebEngine QtPdf
+    CONDITION NOT LINUX OR TEST_khr
