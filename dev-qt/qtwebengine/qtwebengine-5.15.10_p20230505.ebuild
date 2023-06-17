@@ -1,9 +1,9 @@
-# Copyright 1999-2022 Gentoo Authors
+# Copyright 1999-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
 
-PYTHON_COMPAT=( python3_{9,10} )
+PYTHON_COMPAT=( python3_{10..11} )
 PYTHON_REQ_USE="xml(+)"
 inherit check-reqs estack flag-o-matic multiprocessing python-any-r1 qt5-build toolchain-funcs
 
@@ -11,10 +11,10 @@ DESCRIPTION="Library for rendering dynamic web content in Qt5 C++ and QML applic
 HOMEPAGE="https://www.qt.io/"
 
 if [[ ${QT5_BUILD_TYPE} == release ]]; then
-	KEYWORDS="amd64 ~arm arm64 ~ppc64 x86"
+	KEYWORDS="~amd64 ~arm ~arm64 ~ppc64 ~x86"
 	if [[ ${PV} == ${QT5_PV}_p* ]]; then
-		SRC_URI="https://dev.gentoo.org/~asturm/distfiles/${P}.tar.xz"
-		S="${WORKDIR}/${P}"
+		SRC_URI="https://dev.gentoo.org/~asturm/distfiles/${P/10_p/9_p}.tar.xz"
+		S="${WORKDIR}/${P/10_p/9_p}"
 		QT5_BUILD_DIR="${S}_build"
 	fi
 else
@@ -27,11 +27,10 @@ else
 fi
 
 # ppc64 patchset based on https://github.com/chromium-ppc64le releases
-SRC_URI+=" https://dev.gentoo.org/~sam/distfiles/${CATEGORY}/${PN}/${PN}-5.15.2_p20211019-jumbo-build.patch.bz2
-	https://dev.gentoo.org/~asturm/distfiles/${PN}-5.15.3_p20220406-patchset.tar.xz
+SRC_URI+=" https://dev.gentoo.org/~asturm/distfiles/${PN}-5.15.8_p20230313-patchset.tar.xz
 	ppc64? ( https://dev.gentoo.org/~gyakovlev/distfiles/${PN}-5.15.2-r1-chromium87-ppc64le.tar.xz )"
 
-IUSE="alsa bindist designer geolocation +jumbo-build kerberos pulseaudio screencast +system-ffmpeg +system-icu widgets"
+IUSE="alsa bindist designer geolocation +jumbo-build kerberos pulseaudio screencast +system-icu widgets"
 REQUIRED_USE="designer? ( widgets )"
 
 RDEPEND="
@@ -80,9 +79,8 @@ RDEPEND="
 	designer? ( =dev-qt/designer-${QT5_PV}* )
 	geolocation? ( =dev-qt/qtpositioning-${QT5_PV}* )
 	kerberos? ( virtual/krb5 )
-	pulseaudio? ( media-sound/pulseaudio:= )
+	pulseaudio? ( media-libs/libpulse )
 	screencast? ( media-video/pipewire:= )
-	system-ffmpeg? ( media-video/ffmpeg:0= )
 	system-icu? ( >=dev-libs/icu-69.1:= )
 	widgets? (
 		=dev-qt/qtdeclarative-${QT5_PV}*[widgets]
@@ -99,23 +97,13 @@ BDEPEND="${PYTHON_DEPS}
 	net-libs/nodejs[ssl]
 	sys-devel/bison
 	sys-devel/flex
-	elibc_musl? ( sys-libs/queue-standalone )
 	ppc64? ( >=dev-util/gn-0.1807 )
 "
 
 PATCHES=(
-	"${FILESDIR}/${PN}-5.15.2-disable-fatal-warnings.patch" # downstream, bug 695446
-	"${FILESDIR}/${PN}-5.15.3_p20220505-extra-gn.patch" # downstream, bug 774186
-	"${FILESDIR}/${PN}-5.15.2_p20210224-chromium-87-v8-icu68.patch" # downstream, bug 757606
-	"${FILESDIR}/${PN}-5.15.2_p20210224-disable-git.patch" # downstream snapshot fix
-	"${FILESDIR}/${PN}-5.15.2_p20211015-pdfium-system-lcms2.patch" # by Debian, QTBUG-61746
-	"${FILESDIR}/${PN}-5.15.3_p20220329-clang14.patch" # by FreeBSD, bug 836604
-	"${FILESDIR}/${PN}-5.15.3_p20220406-gcc12-includes.patch" # by openSUSE, bug 840326
-	"${WORKDIR}/${PN}-5.15.2_p20211019-jumbo-build.patch" # bug 813957
-	"${WORKDIR}/${PN}-5.15.3_p20220406-patchset" # bug 698988 (py2--), pipewire-3
-	"${FILESDIR}/${P}-fixup-CVE-2022-0796.patch" # bug 853097
+	"${WORKDIR}/${PN}-5.15.8_p20230313-patchset"
 
-	# for musl libc
+	# Patches for musl support
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-qmake-remove-glibc-check.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-mallinfo.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-mojo-strncpy.patch
@@ -125,8 +113,13 @@ PATCHES=(
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-linux-stack_util-stackstart.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-remove-decls-usage.patch
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-msghdr-padding-initlist.patch
+	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-canonicalize-filename.patch
+	"${FILESDIR}"/${PN}-5.15.10_p20230505-musl-lfs64.patch
 	## runtime
 	"${FILESDIR}"/${PN}-5.15.5_p20220618-musl-sandbox.patch
+
+	# Patch for clang 16 fix
+	"${FILESDIR}"/${PN}-5.15.10_p20230505-clang-16.patch
 )
 
 qtwebengine_check-reqs() {
@@ -181,10 +174,9 @@ src_unpack() {
 }
 
 src_prepare() {
-	# Using a conditional patch here since QMake is deprecated
-	# by CMake in Qt6. A build system change would be prettier but
-	# this works just as well right now.
-	use elibc_musl && PATCHES+=( "${FILESDIR}"/${PN}-5.15.5_p20220618-musl-canonicalize-filename.patch )
+	# upstreamed, but not spinning new patchset just yet
+	rm "${WORKDIR}"/qtwebengine-5.15.8_p20230313-patchset/015-gcc13.patch || die
+
 	if [[ ${PV} == ${QT5_PV}_p* ]]; then
 		# This is made from git, and for some reason will fail w/o .git directories.
 		mkdir -p .git src/3rdparty/chromium/.git || die
@@ -218,12 +210,10 @@ src_prepare() {
 	fi
 
 	# src/3rdparty/gn fails with libc++ due to passing of `-static-libstdc++`
-	if tc-is-clang && has_version 'sys-devel/clang[default-libcxx]'; then
-		eapply "${FILESDIR}/${PN}-5.15.2_p20210521-clang-libc++.patch"
-	fi
-
-	if use system-ffmpeg && has_version '>=media-video/ffmpeg-5'; then
-		eapply "${FILESDIR}/${PN}-5.15.3_p20220406-ffmpeg5.patch" # by Archlinux, bug 831437
+	if tc-is-clang ; then
+		if has_version 'sys-devel/clang[default-libcxx(-)]' || has_version 'sys-devel/clang-common[default-libcxx(-)]' ; then
+			eapply "${FILESDIR}/${PN}-5.15.2_p20210521-clang-libc++.patch"
+		fi
 	fi
 
 	qt_use_disable_config alsa webengine-alsa src/buildtools/config/linux.pri
@@ -272,7 +262,7 @@ src_configure() {
 		$(qt_use kerberos webengine-kerberos)
 		$(qt_use pulseaudio)
 		$(usex screencast -webengine-webrtc-pipewire '')
-		$(usex system-ffmpeg -system-ffmpeg -qt-ffmpeg)
+		-qt-ffmpeg # bug 831487
 		$(qt_use system-icu webengine-icu)
 	)
 	qt5-build_src_configure

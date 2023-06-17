@@ -1,0 +1,122 @@
+diff -upr a/src/3rdparty/chromium/base/allocator/partition_allocator/shim/allocator_shim_internals.h b/src/3rdparty/chromium/base/allocator/partition_allocator/shim/allocator_shim_internals.h
+--- a/src/3rdparty/chromium/base/allocator/partition_allocator/shim/allocator_shim_internals.h	2023-06-17 02:09:34.375431959 +0000
++++ b/src/3rdparty/chromium/base/allocator/partition_allocator/shim/allocator_shim_internals.h	2023-06-17 02:40:16.075431600 +0000
+@@ -9,10 +9,6 @@
+ 
+ #if defined(__GNUC__)
+ 
+-#if BUILDFLAG(IS_POSIX)
+-#include <sys/cdefs.h>  // for __THROW
+-#endif
+-
+ #ifndef __THROW   // Not a glibc system
+ #ifdef _NOEXCEPT  // LLVM libc++ uses noexcept instead
+ #define __THROW _NOEXCEPT
+diff -upr a/src/3rdparty/chromium/base/mac/close_nocancel.cc b/src/3rdparty/chromium/base/mac/close_nocancel.cc
+--- a/src/3rdparty/chromium/base/mac/close_nocancel.cc	2023-06-17 02:09:34.382098624 +0000
++++ b/src/3rdparty/chromium/base/mac/close_nocancel.cc	2023-06-17 02:40:39.528764926 +0000
+@@ -34,7 +34,6 @@
+ // is resolved from libsyscall. By linking with this version of close prior to
+ // the libsyscall version, close's implementation is overridden.
+ 
+-#include <sys/cdefs.h>
+ #include <unistd.h>
+ 
+ // If the non-cancelable variants of all system calls have already been
+diff -upr a/src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h b/src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h
+--- a/src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h	2023-06-17 02:09:35.038765298 +0000
++++ b/src/3rdparty/chromium/third_party/apple_apsl/dnsinfo.h	2023-06-17 02:36:09.195431519 +0000
+@@ -28,7 +28,6 @@
+  * These routines provide access to the systems DNS configuration
+  */
+ 
+-#include <sys/cdefs.h>
+ #include <stdint.h>
+ #include <sys/types.h>
+ #include <sys/socket.h>
+@@ -91,7 +90,9 @@ typedef struct {
+ #pragma pack()
+ 
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*
+  * DNS configuration access APIs
+@@ -109,6 +110,8 @@ void
+ _dns_configuration_ack		(dns_config_t	*config,
+ 				 const char	*bundle_id);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif	/* __DNSINFO_H__ */
+diff -upr a/src/3rdparty/chromium/third_party/crashpad/crashpad/compat/linux/sys/ptrace.h b/src/3rdparty/chromium/third_party/crashpad/crashpad/compat/linux/sys/ptrace.h
+--- a/src/3rdparty/chromium/third_party/crashpad/crashpad/compat/linux/sys/ptrace.h	2023-06-17 02:09:35.308765297 +0000
++++ b/src/3rdparty/chromium/third_party/crashpad/crashpad/compat/linux/sys/ptrace.h	2023-06-17 02:40:53.098764952 +0000
+@@ -17,8 +17,6 @@
+ 
+ #include_next <sys/ptrace.h>
+ 
+-#include <sys/cdefs.h>
+-
+ // https://sourceware.org/bugzilla/show_bug.cgi?id=22433
+ #if !defined(PTRACE_GET_THREAD_AREA) && !defined(PT_GET_THREAD_AREA) && \
+     defined(__GLIBC__)
+diff -upr a/src/3rdparty/chromium/third_party/libsync/src/include/sync/sync.h b/src/3rdparty/chromium/third_party/libsync/src/include/sync/sync.h
+--- a/src/3rdparty/chromium/third_party/libsync/src/include/sync/sync.h	2023-06-17 02:09:35.815431964 +0000
++++ b/src/3rdparty/chromium/third_party/libsync/src/include/sync/sync.h	2023-06-17 02:35:08.408764861 +0000
+@@ -19,12 +19,13 @@
+ #ifndef __SYS_CORE_SYNC_H
+ #define __SYS_CORE_SYNC_H
+ 
+-#include <sys/cdefs.h>
+ #include <stdint.h>
+ 
+ #include <linux/types.h>
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ struct sync_legacy_merge_data {
+  int32_t fd2;
+@@ -158,6 +159,8 @@ struct sync_pt_info *sync_pt_info(struct
+                                   struct sync_pt_info *itr);
+ void sync_fence_info_free(struct sync_fence_info_data *info);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* __SYS_CORE_SYNC_H */
+diff -upr a/src/3rdparty/chromium/third_party/libsync/src/sw_sync.h b/src/3rdparty/chromium/third_party/libsync/src/sw_sync.h
+--- a/src/3rdparty/chromium/third_party/libsync/src/sw_sync.h	2023-06-17 02:09:35.815431964 +0000
++++ b/src/3rdparty/chromium/third_party/libsync/src/sw_sync.h	2023-06-17 02:36:58.752098226 +0000
+@@ -19,7 +19,9 @@
+ #ifndef __SYS_CORE_SW_SYNC_H
+ #define __SYS_CORE_SW_SYNC_H
+ 
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+ 
+ /*
+  * sw_sync is mainly intended for testing and should not be compiled into
+@@ -30,6 +32,8 @@ int sw_sync_timeline_create(void);
+ int sw_sync_timeline_inc(int fd, unsigned count);
+ int sw_sync_fence_create(int fd, const char *name, unsigned value);
+ 
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+ 
+ #endif /* __SYS_CORE_SW_SYNC_H */
