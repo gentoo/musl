@@ -1,8 +1,8 @@
-# Copyright 2011-2022 Gentoo Authors
+# Copyright 2011-2023 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=7
-PYTHON_COMPAT=( python3_{8..10} )
+EAPI=8
+PYTHON_COMPAT=( python3_{9..11} )
 inherit meson python-any-r1 systemd
 
 DESCRIPTION="D-Bus interfaces for querying and manipulating user account information"
@@ -29,6 +29,7 @@ DEPEND="${CDEPEND}"
 BDEPEND="
 	dev-libs/libxslt
 	dev-util/gdbus-codegen
+	dev-util/glib-utils
 	sys-devel/gettext
 	virtual/pkgconfig
 	doc? (
@@ -51,22 +52,27 @@ RDEPEND="${CDEPEND}
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-22.04.62-gentoo-system-users.patch
-	"${FILESDIR}"/${PN}-22.08.8-check-for-wtmp.patch
+	"${FILESDIR}"/${PN}-23.13.9-generate-version.patch #905770
 	"${FILESDIR}"/${PN}-22.08.8-fgetspent_r-musl.patch
+	"${FILESDIR}"/${PN}-23.19.9-wtmp-musl.patch
 )
 
 python_check_deps() {
 	if use test; then
-		has_version "dev-python/python-dbusmock[${PYTHON_USEDEP}]"
+		python_has_version "dev-python/python-dbusmock[${PYTHON_USEDEP}]"
 	fi
 }
 
 src_configure() {
+	# No option to disable tests
+	if ! use test; then
+		sed -e "/subdir('tests')/d" -i meson.build || die
+	fi
+
 	local emesonargs=(
 		--localstatedir="${EPREFIX}/var"
 		-Dsystemdsystemunitdir="$(systemd_get_systemunitdir)"
 		-Dadmin_group="wheel"
-		-Dcheck_wtmp="$(usex !elibc_musl true false)"
 		$(meson_use elogind)
 		$(meson_use introspection)
 		$(meson_use doc docbook)

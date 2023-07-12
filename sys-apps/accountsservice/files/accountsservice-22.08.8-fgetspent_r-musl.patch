@@ -1,23 +1,18 @@
 Define fgetspent_r if not already defined. (GNU extension, therefore not in musl).
 
 https://git.alpinelinux.org/aports/tree/community/accountsservice/musl-fgetspent_r.patch (copied the function from here).
-diff -u b/src/daemon.c b/src/daemon.c
---- b/src/daemon.c
+diff --git a/src/daemon.c b/src/daemon.c
+index 312394a..e7b3c58 100644
+--- a/src/daemon.c
 +++ b/src/daemon.c
-@@ -32,7 +32,7 @@
- #include <pwd.h>
- #ifdef HAVE_SHADOW_H
- #include <shadow.h>
--#endif
-+#endif // HAVE_SHADOW_H
- #include <unistd.h>
- #include <errno.h>
- #include <sys/types.h>
-@@ -51,6 +51,25 @@
- #include "user.h"
- #include "accounts-user-generated.h"
+@@ -140,6 +140,28 @@ error_get_type (void)
+ #define MAX_LOCAL_USERS 50
+ #endif
  
-+#ifndef HAVE_FGETSPENT_R
++#ifndef __GLIBC__
++ /* Musl libc does not support fgetspent_r(), write own
++  * wrapper
++  */
 +static int fgetspent_r(FILE *fp, struct spwd *spbuf, char *buf, size_t buflen, struct spwd **spbufp) {
 +       struct spwd *shadow_entry = fgetspent(fp);
 +       if(!shadow_entry)
@@ -34,13 +29,11 @@ diff -u b/src/daemon.c b/src/daemon.c
 +
 +       return 0;
 +}
-+#endif // HAVE_FGETSPENT_R
++#endif
 +
- #define PATH_PASSWD "/etc/passwd"
- #define PATH_SHADOW "/etc/shadow"
- #define PATH_GROUP "/etc/group"
-only in patch2:
-unchanged:
+ static struct passwd *
+ entry_generator_fgetpwent (Daemon       *daemon,
+                            GHashTable   *users,
 --- a/meson.build
 +++ b/meson.build
 @@ -71,6 +71,7 @@ check_functions = [
