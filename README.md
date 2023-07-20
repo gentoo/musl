@@ -2,7 +2,7 @@ This is the overlay for Gentoo build with musl.  musl is a new C Standard Librar
 which aims to be lightweight, fast, simple, free, and strives to be correct in the
 sense of standards-conformance and safety.
 
-http://www.musl-libc.org/
+[https://www.musl.libc.org/](https://musl.libc.org/)
 
 ### Maintainers
 * Anthony G. Basile <blueness@gentoo.org>
