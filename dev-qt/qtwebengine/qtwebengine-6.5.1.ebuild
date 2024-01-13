@@ -25,7 +25,7 @@ REQUIRED_USE="designer? ( widgets )"
 BDEPEND="
 	$(python_gen_any_dep 'dev-python/html5lib[${PYTHON_USEDEP}]')
 	dev-util/gperf
-	dev-util/ninja
+	dev-build/ninja
 	dev-util/re2c
 	net-libs/nodejs[ssl]
 	sys-devel/bison

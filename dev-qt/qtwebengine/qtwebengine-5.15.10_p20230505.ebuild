@@ -92,7 +92,7 @@ DEPEND="${RDEPEND}
 "
 BDEPEND="${PYTHON_DEPS}
 	dev-util/gperf
-	dev-util/ninja
+	dev-build/ninja
 	dev-util/re2c
 	net-libs/nodejs[ssl]
 	sys-devel/bison
