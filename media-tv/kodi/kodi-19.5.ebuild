@@ -186,7 +186,7 @@ DEPEND="${COMMON_DEPEND} ${COMMON_TARGET_DEPEND}
 "
 BDEPEND="${COMMON_DEPEND}
 	dev-lang/swig
-	dev-util/cmake
+	dev-build/cmake
 	media-libs/giflib
 	>=dev-libs/flatbuffers-1.11.0
 	>=media-libs/libjpeg-turbo-2.0.4:=
