@@ -17,7 +17,7 @@ IUSE="gsl pulseaudio qt5"
 
 BDEPEND="
 	dev-util/intltool
-	sys-devel/autoconf-archive
+	dev-build/autoconf-archive
 	sys-devel/gettext
 	virtual/pkgconfig
 "
