@@ -1,0 +1,27 @@
+diff --color -Naur nftables-1.1.1.old/src/xt.c nftables-1.1.1/src/xt.c
+--- nftables-1.1.1.old/src/xt.c
++++ nftables-1.1.1/src/xt.c
+@@ -10,6 +10,12 @@
+ #include <nft.h>
+ 
+ #include <time.h>
++
++#ifdef HAVE_LIBXTABLES
++/* include before net/if.h to prevent redefinition of ethhdr */
++#include <xtables.h>
++#endif
++
+ #include <net/if.h>
+ #include <getopt.h>
+ #include <ctype.h>	/* for isspace */
+@@ -26,9 +32,8 @@
+ #include <linux/netfilter_arp/arp_tables.h>
+ #include <linux/netfilter_bridge/ebtables.h>
+ 
+-#ifdef HAVE_LIBXTABLES
+-#include <xtables.h>
+ 
++#ifdef HAVE_LIBXTABLES
+ static void *xt_entry_alloc(const struct xt_stmt *xt, uint32_t af);
+ #endif
+ 
