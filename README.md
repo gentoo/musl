@@ -13,6 +13,3 @@ http://www.musl-libc.org/
 
 ## pkgcheck status
 ![pkgcheck](https://github.com/gentoo/musl/actions/workflows/main.yml/badge.svg)
-
-## RepoMan status
-![RepoMan](https://github.com/gentoo/musl/actions/workflows/repoman.yml/badge.svg)
